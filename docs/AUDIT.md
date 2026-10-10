@@ -73,3 +73,10 @@ Seul l'hôte simule. Toute mécanique qui ajoute des forces ou de l'énergie doi
 3. Power Grid Overhaul (v0.3.0 : batterie, disjoncteur, surveillance ; à valider en jeu)
 4. Advanced Construction (v0.3.0 : 8 pièces structurelles posées, sans état ; à valider en jeu)
 5. Docking (extension du natif), Landing Gear, Space Station
+
+## 9. Mondes (v0.4.0)
+
+- **Planètes** : le système 442 Otrera contient 5 planètes, mais le tracker de la démo n'en charge qu'une (`PlanetsTracker.LoadPlanets` filtre `Id == 4`). Les autres font partie du jeu complet et le mod ne les active pas. Une planète est un objet de scène (`Planet`, `PlanetPhysicalProperties`, `PlanetTerrain`, `PlanetDenseEnvironment`, `PlanetHotspotsEnvironment`…) dont toute la configuration est en données : graphe de bruit, cratères, matériaux du sol, atmosphère, flore, points d'intérêt. Les nouvelles planètes sont des copies de la planète de la démo, créées avant le `Awake` des trackers puis enregistrées comme le fait le jeu. Leur éclairage est calculé à l'exécution. Leur `NetworkObject` est retiré (FishNet désactive les objets réseau de scène qu'il n'a pas fait apparaître) : les objets détruits sur ces planètes ne se synchronisent pas entre joueurs.
+- **Points d'intérêt** : les hotspots du jeu (un site par chunk du niveau voulu, avec une probabilité) placent les épaves (pièces écrasées du jeu) et les ruines (prefab de rocher du jeu remodelé, sans minage).
+- **Gravité** : le jeu n'a de gravité que sur le sol des planètes (`EnvironmentProvider.GetGravityAtPosition`). Les orbites sont analytiques et l'espace profond est inertiel. Le trou noir ajoute son accélération par un patch de cette méthode, ce qui couvre les vaisseaux et les joueurs.
+- **Affichage lointain** : comme l'étoile, les objets lointains sont placés dans `ClientOrigin.LocalVisualSpace` à l'échelle 1/10 000 pour la caméra « Far Camera » (couche 10). Pas de shader de lentille gravitationnelle disponible : l'image est composée de surfaces.

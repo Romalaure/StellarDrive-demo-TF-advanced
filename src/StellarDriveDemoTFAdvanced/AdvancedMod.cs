@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.3.1", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.4.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -24,6 +24,8 @@ namespace StellarDriveDemoTFAdvanced
             Propulsion.EngineCatalog.LoadSettings();
             Power.PowerCatalog.LoadSettings();
             ApplyPatches();
+            Worlds.WorldDevSteps.Install();
+            Worlds.PlanetVisit.Install();
             Log.Msg("ready");
         }
 
@@ -94,14 +96,29 @@ namespace StellarDriveDemoTFAdvanced
             GameServices.Invalidate();
             TelemetryHub.Clear();
             Power.PowerGrid.Forget();
+            Worlds.BlackHole.Forget();
+            Worlds.BlackHoleVisuals.Destroy();
+            _inGame = sceneName == "MainGame";
+            DevHarness.OnSceneLoaded(sceneName);
             if (_partsRegistered)
                 ScheduleSelfTest();
         }
 
+        private static bool _inGame;
+
         public override void OnUpdate()
         {
+            DevHarness.Update();
+            if (_inGame && Worlds.BlackHole.EnsureAnchor())
+                Worlds.BlackHole.ServerUpdate();
             if (_partsRegistered && Settings.SelfTest.Value)
                 RunSelfTest();
+        }
+
+        public override void OnLateUpdate()
+        {
+            if (_inGame)
+                Worlds.BlackHoleVisuals.LateUpdate();
         }
 
         private static bool _partsRegistered;

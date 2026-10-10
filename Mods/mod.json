@@ -2,7 +2,7 @@
     "id": "StellarDriveDemoTFAdvanced",
     "name": "StellarDrive Demo TF Advanced",
     "author": "Romalaure",
-    "version": "0.3.1",
-    "description": "Mods avances du groupe TF, onglet de construction TF Avance. Ordinateur de bord a poser (ecran mural, console, 4 petits ecrans) : vitesse, altitude, assiette, trafic, propulseurs, energie et diagnostics en direct. Pack de propulsion : propulseur vectoriel et moteur de precision (poussee decentree qui fait tourner le vaisseau), moteur lourd 23 400 N, moteur econome. Reseau electrique : batterie qui stocke vraiment l'energie et disjoncteur commandable par signal. Construction : poutres 1/2/4 m, poutre renforcee, plaques, cadre, jonction. Necessite SDModKit. Tous les joueurs doivent avoir le mod.",
+    "version": "0.4.0",
+    "description": "Mods avances du groupe TF. 4 nouvelles planetes a visiter (desertique, rocheuse sans air, montagneuse, temperee) avec flore variee, ruines d'une ancienne civilisation et epaves de vaisseaux. Un trou noir pres de TF Petra : gravite, forces de maree, horizon des evenements, arret de distorsion, disque d'accretion. Onglet TF Avance : ordinateur de bord a poser, moteurs avances, batterie et disjoncteur, poutres, plaques et cadres. Necessite SDModKit. Tous les joueurs doivent avoir le mod.",
     "thumbnail": "thumbnail.png"
 }

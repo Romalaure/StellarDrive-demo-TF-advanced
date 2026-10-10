@@ -26,6 +26,10 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
         public float? SurfaceSpeed;
         public float? SpaceSpeed;
         public float? VerticalSpeed;
+        // The mod's black hole, when it is in range
+        public float? BlackHoleDistance;
+        public float BlackHoleGravity;
+        public float BlackHoleTimeDilation;
 
         // Attitude, in the flight frame (pilot seat) or the ship grid
         public string AttitudeFrame;
@@ -65,6 +69,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             SurfaceSpeed = null;
             SpaceSpeed = null;
             VerticalSpeed = null;
+            BlackHoleDistance = null;
             AttitudeFrame = null;
             Pitch = null;
             Roll = null;

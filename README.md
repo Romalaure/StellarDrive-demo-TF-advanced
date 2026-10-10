@@ -1,6 +1,6 @@
 # StellarDrive Demo — TF Advanced
 
-Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, structure., dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Les pièces sont dans l'onglet de construction **TF Avancé**.
+Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, structure, 4 nouvelles planètes avec ruines et épaves, trou noir., dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Les pièces sont dans l'onglet de construction **TF Avancé**.
 
 Rapport technique (moteur, systèmes du jeu, faisabilité de chaque projet) : [docs/AUDIT.md](docs/AUDIT.md).
 
@@ -106,6 +106,59 @@ La coque du jeu est une grille de voxels limitée à 4 formes codées en dur (pl
 - Ces pièces ne ferment pas les pièces étanches du jeu (les salles pressurisées) : seule la coque le fait.
 - Elles acceptent la peinture du mod TF.
 
+## Nouvelles planètes
+
+Quatre planètes rejoignent le système 442 Otrera, en orbite autour de la même étoile. Le jeu les génère, les éclaire, les sauvegarde et les simule comme sa propre planète (terrain, flore, objets, atmosphère). On les rejoint en vaisseau (carte stellaire et saut en distorsion).
+
+| Planète | Biome | Gravité | Atmosphère | Flore | Points d'intérêt |
+|---|---|---|---|---|---|
+| **TF Aridia** | désertique : dunes de sable orange, lacs salés | 0,9 g | respirable, ciel ambré, sans nuages | arbres morts, herbe sèche | épaves, ruines en grès |
+| **TF Petra** | rocheuse : roche grise couverte de cratères | 0,45 g | **aucune** (oxygène indispensable) | aucune | épaves, ruines en basalte |
+| **TF Altis** | montagneuse : reliefs jusqu'à 8 km, lacs glaciaires | 1,1 g | respirable, ciel bleu froid | forêts de pins denses, pins sombres | ruines en granit, épaves |
+| **TF Verdance** | tempérée, proche de la planète de départ, grands lacs | 0,95 g | respirable | forêts mêlées de bosquets d'automne et dorés, herbe dense | ruines moussues, épaves |
+
+- **Épaves** : sites de crash assemblés à partir des pièces écrasées du jeu (coque, propulseurs, sièges), recyclables comme sur la planète de départ.
+- **Ruines d'une ancienne civilisation** : porte monumentale (piliers, linteau, marches), piliers debout et brisés, blocs tombés, obélisques. Taillées dans la pierre du jeu et teintées selon la planète, elles ont leurs propres collisions et ne se minent pas.
+- Rochers, minerais (fer, cuivre) et cristaux de verre comme sur la planète de départ.
+
+Comment ça marche : chaque planète est une copie de la planète de la démo (442 Otrera b), créée avant que le jeu ne charge ses planètes, puis remodelée : bruit du terrain, cratères, matériaux du sol, atmosphère, configuration de la flore et des points d'intérêt. Les autres planètes présentes dans les fichiers de la démo appartiennent au jeu complet : le mod ne les touche pas.
+
+**Limites** :
+- **Multijoueur** : chaque joueur doit avoir le mod et le même réglage `NewPlanets`. Les objets minés ou détruits sur ces planètes (arbres, rochers) ne sont pas synchronisés entre joueurs : leur état réseau vient d'un objet FishNet que seule la scène du jeu peut créer.
+- **Sauvegardes** : ne désinstalle pas le mod (et ne coupe pas `NewPlanets`) pendant qu'un joueur ou un vaisseau se trouve sur l'une de ces planètes.
+- L'éclairage précalculé et les distances d'affichage sont ceux de la planète de départ.
+
+## Trou noir
+
+Un trou noir se trouve à environ 3 000 km de **TF Petra**. On le voit dans le ciel sans atmosphère de Petra.
+
+Il suit les relations de Schwarzschild dans les unités du jeu. Le jeu réduit les astres (1 g à 320 km de rayon), donc la vitesse de la lumière est réduite d'autant. Elle vaut ici 10 km/s : c'est la vitesse de libération à l'horizon.
+
+| Grandeur | Valeur |
+|---|---|
+| Horizon des événements r_s | 10 km |
+| Ombre (capture des photons) | 2,6 r_s = 26 km |
+| Disque d'accrétion | de 3 r_s (dernière orbite stable) à 40 r_s |
+| Gravité | GM/r², 0,5 m/s² à 1 000 km, 5 000 m/s² à l'horizon |
+| Dilatation du temps | √(1 − r_s/r), affichée par l'ordinateur de bord |
+
+Effets en jeu (sur l'hôte) :
+- **Attraction** : une vraie accélération en 1/r² pour les vaisseaux et les joueurs, en orbite comme dans l'espace profond. Le jeu, lui, n'a pas de gravité hors du sol des planètes.
+- **Forces de marée** (sous 5 r_s = 50 km) : le vaisseau perd des pièces, de plus en plus vite en approchant.
+- **Horizon** : un vaisseau qui le franchit est entièrement détruit, un joueur meurt.
+- **Distorsion** : un saut s'arrête à 600 km du trou noir, comme devant une étoile.
+- **Ordinateur de bord** : distance, attraction et dilatation du temps (FLIGHT), alertes de proximité et de marée (DIAGNOSTICS).
+
+Aspect :
+- une ombre noire ;
+- un disque d'accrétion procédural (bleu-blanc au bord intérieur, rouge à l'extérieur) qui tourne ;
+- un effet Doppler : le côté qui vient vers toi est plus brillant ;
+- un anneau de photons, une image courbée du disque autour de l'ombre et un halo.
+
+Une vraie déviation de la lumière (lentille gravitationnelle) demanderait un shader que le jeu n'inclut pas, et Unity ne compile pas de shader en cours de partie : l'image en reproduit donc l'apparence avec des surfaces.
+
+Réglage : `BlackHole` (section `[TFAdvanced]`), identique pour tous les joueurs.
+
 ## Configuration
 
 `UserData/MelonPreferences.cfg`, section `[TFAdvanced]` :
@@ -118,7 +171,10 @@ La coque du jeu est une grille de voxels limitée à 4 formes codées en dur (pl
 | `CollisionWarningSeconds` / `CollisionWarningDistance` | `12` / `30` | seuils d'alerte de rapprochement |
 | `DescentWarningSpeed` / `DescentWarningAltitude` | `20` / `400` | seuils d'alerte de descente |
 | `SpinWarningRate` | `60` | seuil d'alerte de rotation (°/s) |
-| `SelfTest` | `false` | développement : construit les pièces au menu et écrit leur description dans le log |
+| `NewPlanets` | `true` | les 4 nouvelles planètes |
+| `BlackHole` | `true` | le trou noir près de TF Petra |
+| `SelfTest` | `false` | développement : construit les pièces au menu, en écrit la description et des rendus PNG |
+| `DevWorld` / `DevQuitSeconds` / `DevVisitPlanets` / `DevVisitBlackHole` / `DevPlanetsNearby` | vides / `false` | développement : charge automatiquement une **copie** de monde, visite les planètes ou le trou noir, prend des captures dans `UserData/TFAdvanced/dev`, puis quitte |
 
 ## Compilation
 
@@ -152,6 +208,8 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | Écran hors vaisseau | ✅ canevas créé, police du jeu (Anta) et palette du jeu |
 | v0.3.1 : composant visuel de chaque pièce (vignettes, aperçu de pose, écran du build tool) | ✅ 20/20 (son absence sur la structure cassait le panneau du build tool en v0.3.0) |
 | v0.3.1 : rendu des pièces | ✅ rendus PNG hors champ : matériau `Custom/PlanetObject` du jeu, panneaux dessinés de l'atlas LogicGates, comparés au coffre du jeu |
+| v0.4.0 : planètes (monde chargé et visité automatiquement) | ✅ 4 planètes enregistrées par le jeu, rendues depuis l'espace et au sol. Biomes vérifiés sur captures : dunes orange d'Aridia, roche grise sans air de Petra, forêts de pins d'Altis, lacs et forêts de Verdance. Ruines (5 sites) et épaves (4 sites) chargées autour du joueur sur Aridia. Aucune exception. |
+| v0.4.0 : trou noir | ✅ visible depuis Petra (ombre, disque incliné, halo), aucune exception ; ⏳ attraction, marée, horizon et arrêt de distorsion **à tester en vol** |
 | Pose des pièces, écrans en vol, forces des moteurs, multijoueur | ⏳ **à faire en jeu** (procédure ci-dessous) |
 
 ### Procédure de test en jeu

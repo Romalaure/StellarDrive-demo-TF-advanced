@@ -71,6 +71,11 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                 Row("Rotation", Unavailable("mesure en cours"));
             }
             Row("Sol", Unavailable("non mesuré"));
+            if (snap.BlackHoleDistance.HasValue)
+            {
+                Row("Trou noir", $"{N(snap.BlackHoleDistance.Value / 1000f, "0.0")} km · {N(snap.BlackHoleGravity, "0.00")} m/s²");
+                Row("Temps local", $"{N(snap.BlackHoleTimeDilation * 100f, "0.00")} % <color={_dim}>du temps lointain</color>");
+            }
 
             _sb.Append('\n');
             Title("TRAFIC");

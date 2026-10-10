@@ -63,6 +63,14 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                 messages.Add(new DiagnosticMessage(Severity.Warning,
                     $"Descente rapide : {-snap.VerticalSpeed.Value:0} m/s à {snap.Altitude.Value:0} m (seuils {Settings.DescentWarningSpeed.Value:0} m/s, {Settings.DescentWarningAltitude.Value:0} m)."));
             }
+            if (snap.BlackHoleDistance.HasValue)
+            {
+                float distance = snap.BlackHoleDistance.Value;
+                if (distance < Worlds.BlackHole.TidalRadius)
+                    messages.Add(new DiagnosticMessage(Severity.Error, $"Forces de marée : le trou noir arrache des pièces ({distance / 1000f:0.0} km, horizon à {Worlds.BlackHole.Horizon / 1000f:0} km)."));
+                else if (distance < Worlds.BlackHole.TidalRadius * 4f)
+                    messages.Add(new DiagnosticMessage(Severity.Warning, $"Trou noir proche : {distance / 1000f:0} km, zone de marée à {Worlds.BlackHole.TidalRadius / 1000f:0} km. Attraction {snap.BlackHoleGravity:0.0} m/s²."));
+            }
             if (snap.AngularVelocity.HasValue && snap.AngularVelocity.Value.magnitude > Settings.SpinWarningRate.Value)
             {
                 messages.Add(new DiagnosticMessage(Severity.Warning,
