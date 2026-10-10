@@ -42,6 +42,8 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
         public readonly List<GeneratorReading> Generators = new List<GeneratorReading>();
         public readonly List<ConsumerReading> Consumers = new List<ConsumerReading>();
         public readonly List<PowerNetworkReading> Networks = new List<PowerNetworkReading>();
+        public readonly List<BatteryReading> Batteries = new List<BatteryReading>();
+        public readonly List<BreakerReading> Breakers = new List<BreakerReading>();
         public bool HostPowerDetails;
         public int DecorativeBatteries;
 
@@ -75,6 +77,8 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             Generators.Clear();
             Consumers.Clear();
             Networks.Clear();
+            Batteries.Clear();
+            Breakers.Clear();
             HostPowerDetails = false;
             DecorativeBatteries = 0;
             Traffic.Clear();
@@ -146,6 +150,27 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
         /// <summary>Power drawn, from the game's own formula for that machine; null when the game has no formula to read back.</summary>
         public float? Watts;
         public float Level;
+    }
+
+    internal struct BatteryReading
+    {
+        public ushort PartId;
+        /// <summary>Charge in percent, as synchronized by the host.</summary>
+        public float Percent;
+        /// <summary>Watts: positive while charging, negative while discharging.</summary>
+        public float Flow;
+        public bool Connected;
+    }
+
+    internal struct BreakerReading
+    {
+        public ushort PartId;
+        /// <summary>0 closed, 1 open (control signal), 2 tripped.</summary>
+        public float Status;
+        public float Flow;
+        public bool InputConnected;
+        public bool OutputConnected;
+        public bool ControlWired;
     }
 
     internal struct PowerNetworkReading

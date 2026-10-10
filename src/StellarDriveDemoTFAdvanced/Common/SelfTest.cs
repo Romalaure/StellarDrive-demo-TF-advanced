@@ -56,8 +56,9 @@ namespace StellarDriveDemoTFAdvanced.Common
                 GameObject prefab = settings.part;
                 var bounds = prefab.GetComponent<ShipPartBounds>();
                 int renderers = prefab.GetComponentsInChildren<MeshRenderer>(true).Length;
-                int sockets = prefab.GetComponentsInChildren<Ships.Interface.Model.Parts.Common.SocketObject>(true).Length;
-                report.Append($"\n  {id} '{settings.fullLabel}' {settings.GetType().Name} mass={settings.mass} bounds={bounds?.bounds} renderers={renderers} sockets={sockets}");
+                string sockets = string.Join(",", prefab.GetComponentsInChildren<Ships.Interface.Model.Parts.Common.SocketObject>(true)
+                    .Select(s => s.Id + ":" + s.Type).OrderBy(s => s));
+                report.Append($"\n  {id} '{settings.fullLabel}' {settings.GetType().Name} state={settings.internalStateClass} mass={settings.mass} bounds={bounds?.bounds} renderers={renderers} sockets=[{sockets}]");
                 if (prefab.GetComponentInChildren<DashboardVisuals>(true) != null)
                 {
                     Transform anchor = prefab.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name.StartsWith(DashboardVisuals.AnchorPrefix));

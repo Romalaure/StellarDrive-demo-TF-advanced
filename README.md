@@ -1,6 +1,6 @@
 # StellarDrive Demo — TF Advanced
 
-Mods avancés du groupe TF pour **StellarDrive Demo**, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Les pièces sont dans l'onglet de construction **TF Avancé**.
+Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, structure., dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Les pièces sont dans l'onglet de construction **TF Avancé**.
 
 Rapport technique (moteur, systèmes du jeu, faisabilité de chaque projet) : [docs/AUDIT.md](docs/AUDIT.md).
 
@@ -71,6 +71,41 @@ Fonctionnement :
 - **Équilibrage** : section `[TFAdvancedEngines]` de `MelonPreferences.cfg` (`HeavyThrust`, `HeavyFuel`, …). En multijoueur, ce sont les valeurs de l'hôte qui comptent.
 - **Non implémenté** : gestion thermique. Le jeu n'a pas de système thermique, et le cahier des charges demande d'abord des moteurs de base validés en jeu.
 
+## Réseau électrique (Power Grid Overhaul)
+
+Le jeu a un vrai réseau électrique : chaque groupe de câbles fait la somme des besoins et des capacités, puis partage la puissance. En revanche, il n'a aucun stockage (sa « Battery Bank » est décorative). Ces deux pièces s'insèrent dans ce calcul natif, côté hôte, sans réseau parallèle.
+
+| Id | Pièce | Rôle |
+|---|---|---|
+| 7321 | Batterie | Modèle de la Battery Bank du jeu, rendu fonctionnel. Se décharge quand son réseau manque de puissance. Se recharge avec la réserve des générateurs, qui brûlent alors réellement plus de bois. Prise signal 2 : charge en %. |
+| 7322 | Disjoncteur | Relie deux réseaux : prise 0 entrée (générateurs), prise 1 sortie (consommateurs). Fait passer la puissance manquante côté sortie, dans la limite de sa puissance nominale. Disjoncte en surcharge. Prise 3 : commande. Prise 2 : état (0 fermé, 1 ouvert, 2 disjoncté). |
+
+- **Énergie conservée** : la batterie ne stocke que ce qu'un générateur a vraiment produit, au rendement réglé, et ne rend que ce qu'elle contient.
+- **Commande du disjoncteur** : sans câble, il est fermé. Avec un câble, un signal > 0 le ferme et 0 l'ouvre. Pour le réarmer après un déclenchement : signal à 0 puis > 0. Sans câble, il se réarme seul après `BreakerAutoResetSeconds`.
+- **Journal** : chaque déclenchement est écrit dans le log. L'hôte voit les déclenchements des 5 dernières minutes dans DIAGNOSTICS.
+- **Persistance** : la charge et l'état sont sauvegardés avec le vaisseau et synchronisés à tous les joueurs. Le mod réutilise pour ça l'état de réservoir du jeu, sans fluide et sans masse ajoutée.
+- **Affichage** : la section POWER des écrans affiche le stockage total, chaque batterie (%, charge ou décharge en W) et chaque disjoncteur (état, W transmis).
+- **Pas encore fait** : priorités entre circuits et répartiteur multi-circuits. Les disjoncteurs posés en cascade donnent déjà un ordre de service fixe (ids croissants).
+
+Réglages : section `[TFAdvancedPower]` (`BatteryCapacityKJ` 1 200, soit 5 min de générateur ; `BatteryChargeWatts` 2 000 ; `BatteryDischargeWatts` 4 000 ; `BatteryEfficiency` 0,9 ; `BreakerRatingWatts` 4 000 ; `BreakerTripSeconds` 0,5 ; `BreakerAutoResetSeconds` 10).
+
+## Construction avancée (Advanced Construction, premier lot)
+
+La coque du jeu est une grille de voxels limitée à 4 formes codées en dur (plat, coin, pente, coin de pente). On ne peut pas y ajouter de nouvelles formes sans réécrire son générateur de maillage et de collisions (voir l'audit). Ces pièces sont donc des **pièces posées**, sans état et sans coût de simulation. Elles se placent comme toute pièce, sur n'importe quelle surface.
+
+| Id | Pièce | Taille | Masse |
+|---|---|---|---|
+| 7331-7333 | Poutre 1 / 2 / 4 m | caisson 12 cm, platines | 6 / 12 / 24 kg |
+| 7334 | Poutre renforcée 2 m | profilé en I 20 cm | 20 kg |
+| 7335 / 7336 | Plaque 1 × 1 / 2 × 1 | 4 cm, boulons | 10 / 20 kg |
+| 7337 | Cadre 1 × 1 | barres de 8 cm | 6 kg |
+| 7338 | Jonction | nœud 5 départs | 3 kg |
+
+- Une poutre sort perpendiculairement à sa surface de pose : verticale au sol, horizontale sur un mur.
+- La collision est la boîte de la pièce, comme pour toute pièce du jeu. Le vide du cadre est donc visuel seulement.
+- Ces pièces ne ferment pas les pièces étanches du jeu (les salles pressurisées) : seule la coque le fait.
+- Elles acceptent la peinture du mod TF.
+
 ## Configuration
 
 `UserData/MelonPreferences.cfg`, section `[TFAdvanced]` :
@@ -101,7 +136,8 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 
 ## Ajouter une pièce
 
-1. Choisir un id libre (7307-7310 pour les écrans, 7315+ pour les moteurs) et un donneur : `SignalDisplay` pour une pièce vierge, `Thruster` pour un moteur.
+1. Choisir un id libre (7307-7310 pour les écrans, 7315-7320 pour les moteurs, 7323-7330 pour l'énergie, 7339+ pour la structure) et un donneur : `SignalDisplay` pour une pièce vierge, `Thruster` pour un moteur.
+   Structure : ajouter une entrée à `StructureParts.All` avec sa fonction de maillage.
 2. Écrans : appeler `RegisterSmall` (ou copier `ConfigureWallScreen`) dans `ShipComputer/DashboardParts.cs`. Le contenu de l'écran est choisi par `layout`.
 3. Moteurs : ajouter une ligne à `EngineCatalog.All`. La poussée, la consommation, le couple et la montée en régime suivent automatiquement.
 4. Compiler, activer `SelfTest` et vérifier la pièce dans `MelonLoader/Latest.log`.
@@ -112,7 +148,7 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 |---|---|
 | Compilation Release | ✅ 0 erreur, 0 avertissement |
 | Chargement par MelonLoader | ✅ 6 patchs appliqués, aucune erreur |
-| Construction des 10 pièces par SDModKit (auto-test au menu) | ✅ ids, libellés, masses, tailles, prises (0 pour les écrans, 4 pour les moteurs), poussées attendues |
+| Construction des 20 pièces par SDModKit (auto-test au menu, v0.3.0) | ✅ ids, libellés, masses, tailles, états ; prises : écrans 0, moteurs 4 fluides, batterie 0-1 puissance + 2 signal, disjoncteur 0-1 puissance + 2-3 signal ; 8 patchs appliqués |
 | Écran hors vaisseau | ✅ canevas créé, police du jeu (Anta) et palette du jeu |
 | Pose des pièces, écrans en vol, forces des moteurs, multijoueur | ⏳ **à faire en jeu** (procédure ci-dessous) |
 
@@ -127,8 +163,11 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 7. Débrancher une conduite d'ergols : alerte dans DIAGNOSTICS et pastille dans l'en-tête.
 8. Sauvegarder, recharger : pièces, orientation et affichage conservés.
 9. Multijoueur : un client voit les mêmes écrans, l'hôte voit en plus la demande et la capacité des réseaux.
-10. `MelonLoader/Latest.log` : aucune erreur `ship computer` ni `engine`.
+10. **Batterie** : la brancher sur le réseau d'un générateur à bois. Avec un consommateur faible, le % monte et le générateur brûle plus vite. Générateur vide : la batterie prend le relais et le % baisse. Sauvegarder et recharger : le % est conservé.
+11. **Disjoncteur** : générateur sur l'entrée, gyroscope ou électrolyseur sur la sortie (réseau séparé). La sortie est alimentée. Mettre une constante 0 sur la commande : le disjoncteur s'ouvre et le voyant devient gris. Brancher plus de 4 000 W en sortie : il disjoncte et le voyant devient rouge.
+12. **Structure** : poser des poutres au sol et sur un mur, des plaques et un cadre. Marcher dessus, sauvegarder et recharger.
+13. `MelonLoader/Latest.log` : aucune erreur `ship computer`, `engine` ni `power grid`.
 
 ## Feuille de route
 
-Voir [docs/AUDIT.md](docs/AUDIT.md) §7–8 : Power Grid (batterie, disjoncteur), Advanced Construction (poutres, plaques, cadres), puis Docking, Landing Gear, Station.
+Voir [docs/AUDIT.md](docs/AUDIT.md) §7–8 : priorités du réseau, compléments de structure (poutres en L/T/X, plaques triangulaires), puis Docking, Landing Gear, Station.

@@ -2,7 +2,7 @@
     "id": "StellarDriveDemoTFAdvanced",
     "name": "StellarDrive Demo TF Advanced",
     "author": "Romalaure",
-    "version": "0.2.0",
-    "description": "Mods avances du groupe TF, onglet de construction TF Avance. Ordinateur de bord a poser dans le vaisseau (ecran mural, console au sol, 4 petits ecrans) : vitesse, altitude, assiette, rotation, trafic, propulseurs, gyroscopes, energie et diagnostics, lus en direct dans le jeu, sans touche ni prise. Pack de propulsion : propulseur vectoriel et moteur de precision (poussee decentree qui fait tourner le vaisseau), moteur lourd 23 400 N, moteur econome. Necessite SDModKit. Tous les joueurs doivent avoir le mod.",
+    "version": "0.3.0",
+    "description": "Mods avances du groupe TF, onglet de construction TF Avance. Ordinateur de bord a poser (ecran mural, console, 4 petits ecrans) : vitesse, altitude, assiette, trafic, propulseurs, energie et diagnostics en direct. Pack de propulsion : propulseur vectoriel et moteur de precision (poussee decentree qui fait tourner le vaisseau), moteur lourd 23 400 N, moteur econome. Reseau electrique : batterie qui stocke vraiment l'energie et disjoncteur commandable par signal. Construction : poutres 1/2/4 m, poutre renforcee, plaques, cadre, jonction. Necessite SDModKit. Tous les joueurs doivent avoir le mod.",
     "thumbnail": "thumbnail.png"
 }

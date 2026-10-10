@@ -9,7 +9,9 @@ namespace StellarDriveDemoTFAdvanced.Parts
         public const string Name = "TF Avancé";
 
         public const int ComputersRow = 0;
+        // Engines, battery and breaker share the second row (8 parts per row at most)
         public const int PropulsionRow = 1;
+        public const int ConstructionRow = 2;
 
         /// <summary>Only call when SDModKit is loaded.</summary>
         public static void Declare()

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using UnityEngine;
+using PowerCatalog = StellarDriveDemoTFAdvanced.Power.PowerCatalog;
 
 namespace StellarDriveDemoTFAdvanced.ShipComputer
 {
@@ -154,7 +155,45 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             foreach (GeneratorReading generator in snap.Generators)
                 produced += generator.Watts;
             Row("Production", $"{N(produced, "0")} W <color={_dim}>({snap.Generators.Count} générateur(s))</color>");
-            Row("Stockage", snap.DecorativeBatteries > 0 ? Unavailable("Battery Bank sans fonction") : Unavailable("aucun dans le jeu"));
+            if (snap.Batteries.Count > 0)
+            {
+                float percent = 0f, flow = 0f;
+                foreach (BatteryReading battery in snap.Batteries)
+                {
+                    percent += battery.Percent;
+                    flow += battery.Flow;
+                }
+                percent /= snap.Batteries.Count;
+                float stored = percent / 100f * PowerCatalog.BatteryCapacityKJ.Value * snap.Batteries.Count;
+                Row("Stockage", $"{N(percent, "0")} % · {N(stored, "0")} kJ · {FlowText(flow)}");
+            }
+            else
+            {
+                Row("Stockage", Unavailable(snap.DecorativeBatteries > 0 ? "Battery Bank du jeu sans fonction" : "aucune batterie"));
+            }
+
+            if (snap.Batteries.Count > 0)
+            {
+                _sb.Append('\n');
+                Title($"BATTERIES ({snap.Batteries.Count})");
+                foreach (BatteryReading battery in snap.Batteries)
+                {
+                    string plug = battery.Connected ? "" : " · " + Colored(ComputerStyle.Warning, "non branchée");
+                    Row($"Batterie #{battery.PartId}", $"{N(battery.Percent, "0")} % · {FlowText(battery.Flow)}{plug}");
+                }
+            }
+            if (snap.Breakers.Count > 0)
+            {
+                _sb.Append('\n');
+                Title($"DISJONCTEURS ({snap.Breakers.Count})");
+                foreach (BreakerReading breaker in snap.Breakers)
+                {
+                    string status = breaker.Status == PowerCatalog.BreakerTripped ? Colored(ComputerStyle.Error, "disjoncté")
+                        : breaker.Status == PowerCatalog.BreakerOpen ? $"<color={_dim}>ouvert</color>" : "fermé";
+                    string wiring = !breaker.InputConnected || !breaker.OutputConnected ? " · " + Colored(ComputerStyle.Warning, "entrée/sortie à brancher") : "";
+                    Row($"Disjoncteur #{breaker.PartId}", $"{status} · {N(breaker.Flow, "0")} W{wiring}");
+                }
+            }
 
             _sb.Append('\n');
             Title("GÉNÉRATEURS");
@@ -236,6 +275,15 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
         private string Speed(float? value)
         {
             return value.HasValue ? N(value.Value, "0.0") + " m/s" : Unavailable();
+        }
+
+        private static string FlowText(float watts)
+        {
+            if (watts > 1f)
+                return "charge " + N(watts, "0") + " W";
+            if (watts < -1f)
+                return "décharge " + N(-watts, "0") + " W";
+            return "repos";
         }
 
         private static string Colored(Color color, string text)

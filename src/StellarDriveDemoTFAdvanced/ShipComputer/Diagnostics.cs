@@ -49,7 +49,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             if (!snap.Altitude.HasValue)
                 messages.Add(new DiagnosticMessage(Severity.Info, "Altitude indisponible : aucune planète de référence."));
             if (snap.DecorativeBatteries > 0)
-                messages.Add(new DiagnosticMessage(Severity.Info, $"{snap.DecorativeBatteries} Battery Bank à bord : la démo ne leur donne aucune fonction (pas de stockage)."));
+                messages.Add(new DiagnosticMessage(Severity.Info, $"{snap.DecorativeBatteries} Battery Bank du jeu à bord : décorative dans la démo. La Batterie de l'onglet TF Avancé stocke réellement."));
             if (messages.Count == 0)
                 messages.Add(new DiagnosticMessage(Severity.Info, "Aucune anomalie détectée dans les données disponibles."));
         }
@@ -116,6 +116,34 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             {
                 if (consumer.Name != "Gyroscope" && !consumer.Connected)
                     messages.Add(new DiagnosticMessage(Severity.Info, $"{consumer.Name} #{consumer.PartId} non alimenté : prise électrique non branchée."));
+            }
+            foreach (BatteryReading battery in snap.Batteries)
+            {
+                if (!battery.Connected)
+                    messages.Add(new DiagnosticMessage(Severity.Info, $"Batterie #{battery.PartId} non branchée."));
+                else if (battery.Percent < 5f && battery.Flow < -1f)
+                    messages.Add(new DiagnosticMessage(Severity.Warning, $"Batterie #{battery.PartId} presque vide ({battery.Percent:0} %) et en décharge."));
+            }
+            foreach (BreakerReading breaker in snap.Breakers)
+            {
+                if (breaker.Status == Power.PowerCatalog.BreakerTripped)
+                    messages.Add(new DiagnosticMessage(Severity.Error, breaker.ControlWired
+                        ? $"Disjoncteur #{breaker.PartId} disjoncté (surcharge) : repasser sa commande à 0 puis > 0 pour le réarmer."
+                        : $"Disjoncteur #{breaker.PartId} disjoncté (surcharge) : réarmement automatique dans {Power.PowerCatalog.BreakerAutoResetSeconds.Value:0} s."));
+                else if (breaker.Status == Power.PowerCatalog.BreakerOpen)
+                    messages.Add(new DiagnosticMessage(Severity.Info, $"Disjoncteur #{breaker.PartId} ouvert par sa commande."));
+                if (!breaker.InputConnected || !breaker.OutputConnected)
+                    messages.Add(new DiagnosticMessage(Severity.Info, $"Disjoncteur #{breaker.PartId} : entrée et sortie doivent être branchées sur deux réseaux différents."));
+            }
+            if (snap.IsHost)
+            {
+                foreach (Power.PowerGrid.Trip trip in Power.PowerGrid.Journal)
+                {
+                    float ago = UnityEngine.Time.unscaledTime - trip.Time;
+                    if (ago > 300f)
+                        break;
+                    messages.Add(new DiagnosticMessage(Severity.Info, $"Journal : disjoncteur {trip.ShipId}:{trip.PartId} déclenché il y a {ago:0} s ({trip.DemandWatts:0} W demandés)."));
+                }
             }
             foreach (PowerNetworkReading network in snap.Networks)
             {

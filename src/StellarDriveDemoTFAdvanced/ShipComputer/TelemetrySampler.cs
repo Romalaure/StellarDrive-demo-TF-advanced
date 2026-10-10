@@ -381,6 +381,37 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                     });
                     TrackServerGroup(power, socket);
                 }
+                foreach (StatefulPart part in ship.GetAllStatefulParts<FluidTankState>())
+                {
+                    var tank = (FluidTankState)part.State;
+                    if (part.Settings.id == Power.PowerCatalog.BatteryId)
+                    {
+                        var socket = new EntityPartSocket(ship.Id, part.Id, Power.PowerCatalog.BatteryPowerA);
+                        var other = new EntityPartSocket(ship.Id, part.Id, Power.PowerCatalog.BatteryPowerB);
+                        snap.Batteries.Add(new BatteryReading
+                        {
+                            PartId = part.Id,
+                            Percent = tank.FluidQuantity,
+                            Flow = tank.FluidFlow,
+                            Connected = Plugged(connections, socket) || Plugged(connections, other)
+                        });
+                        TrackServerGroup(power, socket);
+                    }
+                    else if (part.Settings.id == Power.PowerCatalog.BreakerId)
+                    {
+                        snap.Breakers.Add(new BreakerReading
+                        {
+                            PartId = part.Id,
+                            Status = Mathf.Round(tank.FluidQuantity),
+                            Flow = tank.FluidFlow,
+                            InputConnected = Plugged(connections, new EntityPartSocket(ship.Id, part.Id, Power.PowerCatalog.BreakerInput)),
+                            OutputConnected = Plugged(connections, new EntityPartSocket(ship.Id, part.Id, Power.PowerCatalog.BreakerOutput)),
+                            ControlWired = Plugged(connections, new EntityPartSocket(ship.Id, part.Id, Power.PowerCatalog.BreakerControl))
+                        });
+                        TrackServerGroup(power, new EntityPartSocket(ship.Id, part.Id, Power.PowerCatalog.BreakerInput));
+                        TrackServerGroup(power, new EntityPartSocket(ship.Id, part.Id, Power.PowerCatalog.BreakerOutput));
+                    }
+                }
                 foreach (StatefulPart part in ship.StatefulParts)
                 {
                     // "Battery Bank" exists in the build menu but no game code reads or writes it

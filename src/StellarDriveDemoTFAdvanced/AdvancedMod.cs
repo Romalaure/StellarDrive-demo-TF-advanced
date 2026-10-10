@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.2.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.3.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -22,6 +22,7 @@ namespace StellarDriveDemoTFAdvanced
             Log = LoggerInstance;
             Settings.Load();
             Propulsion.EngineCatalog.LoadSettings();
+            Power.PowerCatalog.LoadSettings();
             ApplyPatches();
             Log.Msg("ready");
         }
@@ -70,6 +71,8 @@ namespace StellarDriveDemoTFAdvanced
             Try("the TF Avancé build tab", Parts.AdvancedTab.Declare);
             Try("the ship computer screens", DashboardParts.Register);
             Try("the engines", Propulsion.EngineParts.Register);
+            Try("the battery and the circuit breaker", Power.PowerParts.Register);
+            Try("the structural parts", Construction.StructureParts.Register);
             _partsRegistered = true;
             ScheduleSelfTest();
         }
@@ -90,6 +93,7 @@ namespace StellarDriveDemoTFAdvanced
         {
             GameServices.Invalidate();
             TelemetryHub.Clear();
+            Power.PowerGrid.Forget();
             if (_partsRegistered)
                 ScheduleSelfTest();
         }
