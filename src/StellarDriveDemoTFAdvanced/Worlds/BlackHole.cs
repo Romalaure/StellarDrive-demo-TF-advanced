@@ -252,7 +252,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 // (and spaces the game just removed, while an object moves between them)
                 if (_spaces == null || !_spaces.TryGetSpace(spaceId, out ISpace space) || space is ShipRelativeSpace)
                     return;
-                if (BlackHole.TryOffset(_transpose, spaceId, position, out Vector3 toHole))
+                if (BlackHole.TryOffset(_transpose, spaceId, position, out Vector3 toHole) && toHole.magnitude < BlackHole.InfluenceRadius
+                    && !AbandonedStations.IsSheltered(_transpose, spaceId, position))
                     __result += BlackHole.Acceleration(toHole);
             }
             catch (Exception e)

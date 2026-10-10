@@ -46,18 +46,24 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Id = 101, Name = "TF Aridia", Biome = "désertique", OrbitAngle = 55f, OrbitScale = 1.15f, Gravity = 0.9f, RotationHours = 1.4f,
                 Shape = p =>
                 {
-                    // Sand dunes under an amber sky, dry salt flats where the demo planet has water
-                    p.Material(PlanetShaper.Ground, PlanetShaper.Shore, new Color(0.93f, 0.68f, 0.42f));
-                    p.Material(PlanetShaper.Shore, PlanetShaper.Shore, new Color(0.8f, 0.55f, 0.35f));
+                    // Regions: sand dunes in the lowlands, red mesas above, dry salt flats where the demo planet has water
+                    p.Material(PlanetShaper.Ground, PlanetShaper.Shore, new Color(0.62f, 0.33f, 0.22f));
+                    p.Material(PlanetShaper.Shore, PlanetShaper.Shore, new Color(0.93f, 0.68f, 0.42f));
                     p.Material(PlanetShaper.Water, PlanetShaper.Shore, new Color(0.95f, 0.93f, 0.86f));
+                    p.Shoreline(240f, 64.2f);
                     p.Relief(0.55f, 1.6f, new Vector3(0.31f, 0.17f, -0.23f));
                     p.Sky(new Vector3(0.22f, 0.14f, 0.07f), 2.2f, 0.25f, 0.85f, clouds: false, breathable: true);
+                    GameObject acacia = p.Tree(TreeKind.Acacia);
                     GameObject dead = p.TreePrefab("FirTreeDead1");
                     p.Trees((dead, 100, 0f));
                     p.ForestDensity(0.2f);
+                    // Savanna: scattered acacias in their own regions
+                    p.AddForest(new Vector3(0.37f, -0.21f, 0.18f), 0.05f, 70f, (acacia, 100, 0f), (dead, 15, 0f));
                     p.Grass(PlanetShaper.Tinted(p.GrassPrefab, "dry", new Color(1f, 0.8f, 0.45f)));
                     PointsOfInterest.Wrecks(p, 0.7f);
                     PointsOfInterest.Ruins(p, RuinStyle.Sandstone, 0.6f);
+                    PointsOfInterest.Village(p, RuinStyle.Sandstone, 0.5f);
+                    PointsOfInterest.CargoWrecks(p, 0.5f);
                 }
             },
             new PlanetSpec
@@ -75,6 +81,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     p.FloraElevation(1e7f, 1e7f);
                     PointsOfInterest.Wrecks(p, 0.5f);
                     PointsOfInterest.Ruins(p, RuinStyle.Basalt, 0.5f);
+                    PointsOfInterest.Village(p, RuinStyle.Basalt, 0.35f);
+                    PointsOfInterest.CargoWrecks(p, 0.5f);
                 }
             },
             new PlanetSpec
@@ -82,9 +90,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Id = 103, Name = "TF Altis", Biome = "montagneuse", OrbitAngle = 150f, OrbitScale = 1.35f, Gravity = 1.1f, RotationHours = 1.2f,
                 Shape = p =>
                 {
-                    // Tall ranges, dark pine forests on the slopes, glacier lakes
-                    p.Material(PlanetShaper.Ground, PlanetShaper.Ground, new Color(0.45f, 0.55f, 0.42f));
-                    p.Material(PlanetShaper.Shore, PlanetShaper.Shore, new Color(0.62f, 0.62f, 0.6f));
+                    // Regions: green valleys, snow above 1 400 m, glacier lakes; pine forests and birch groves
+                    p.Material(PlanetShaper.Shore, PlanetShaper.Ground, new Color(0.45f, 0.55f, 0.42f));
+                    p.Material(PlanetShaper.Ground, PlanetShaper.Water, new Color(0.95f, 0.97f, 1f));
+                    p.Shoreline(1400f, 64.2f);
+                    GameObject birch = p.Tree(TreeKind.Birch);
+                    GameObject autumnBirch = p.Tree(TreeKind.AutumnBirch);
                     p.Relief(2.6f, 0.8f, new Vector3(0.12f, -0.36f, 0.29f));
                     p.Ceiling(8000f);
                     p.Sky(new Vector3(0.035f, 0.13f, 0.36f), 2.7f, 0.12f, 0.75f, clouds: true, breathable: true);
@@ -92,7 +103,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                         (PlanetShaper.Tinted(p.TreePrefab("FirTreeTall1"), "darkpine", new Color(0.55f, 0.7f, 0.6f)), 60, 0.6f),
                         (p.TreePrefab("FirTreeDead1"), 4, 0.6f));
                     p.ForestDensity(1.4f);
+                    p.AddForest(new Vector3(-0.44f, 0.13f, 0.29f), 0.1f, 70f, (birch, 100, 0.3f), (autumnBirch, 30, 0.3f));
                     PointsOfInterest.Ruins(p, RuinStyle.Granite, 0.5f);
+                    PointsOfInterest.Village(p, RuinStyle.Granite, 0.35f);
                     PointsOfInterest.Wrecks(p, 0.3f);
                 }
             },
@@ -101,16 +114,22 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Id = 104, Name = "TF Verdance", Biome = "tempérée (proche de la planète de départ)", OrbitAngle = -120f, OrbitScale = 0.95f, Gravity = 0.95f, RotationHours = 0.9f,
                 Shape = p =>
                 {
-                    // Like the demo planet, greener, with autumn groves and wide lakes
+                    // Like the demo planet, greener, with wide lakes; conifer forests and oak/birch woods in their own regions
                     p.Material(PlanetShaper.Ground, PlanetShaper.Ground, new Color(0.56f, 0.78f, 0.42f));
+                    GameObject oak = p.Tree(TreeKind.Oak), autumnOak = p.Tree(TreeKind.AutumnOak);
+                    GameObject birch = p.Tree(TreeKind.Birch), autumnBirch = p.Tree(TreeKind.AutumnBirch);
                     p.Relief(0.8f, 1.1f, new Vector3(0.53f, 0.08f, 0.44f));
                     p.Shoreline(140f, 128f);
                     p.Trees((p.TreePrefab("FirTreeTall1"), 80, 0.6f), (p.TreePrefab("FirTreeShort1"), 80, 0f),
                         (PlanetShaper.Tinted(p.TreePrefab("FirTreeTall1"), "autumn", new Color(1.25f, 0.7f, 0.35f)), 45, 0.6f),
                         (PlanetShaper.Tinted(p.TreePrefab("FirTreeShort1"), "gold", new Color(1.2f, 1f, 0.4f)), 35, 0f));
-                    p.ForestDensity(1.2f);
+                    p.ForestDensity(0.9f);
+                    p.AddForest(new Vector3(0.21f, 0.47f, -0.33f), 0.6f, 130f,
+                        (oak, 100, 0.4f), (autumnOak, 45, 0.4f), (birch, 60, 0f), (autumnBirch, 25, 0f));
                     p.Grass(PlanetShaper.Tinted(p.GrassPrefab, "lush", new Color(0.85f, 1.1f, 0.8f)));
                     PointsOfInterest.Ruins(p, RuinStyle.Mossy, 0.6f);
+                    PointsOfInterest.Village(p, RuinStyle.Mossy, 0.5f);
+                    PointsOfInterest.CargoWrecks(p, 0.4f);
                     PointsOfInterest.Wrecks(p, 0.4f);
                 }
             }

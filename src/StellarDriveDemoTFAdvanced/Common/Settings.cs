@@ -17,9 +17,12 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> SelfTest { get; private set; }
         public static MelonPreferences_Entry<bool> NewPlanets { get; private set; }
         public static MelonPreferences_Entry<bool> BlackHoleEnabled { get; private set; }
+        public static MelonPreferences_Entry<bool> AbandonedStations { get; private set; }
         public static MelonPreferences_Entry<bool> DevPlanetsNearby { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitPlanets { get; private set; }
+        public static MelonPreferences_Entry<int> DevVisitPlanetId { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitBlackHole { get; private set; }
+        public static MelonPreferences_Entry<bool> DevVisitStations { get; private set; }
         public static MelonPreferences_Entry<string> DevWorld { get; private set; }
         public static MelonPreferences_Entry<float> DevQuitSeconds { get; private set; }
 
@@ -48,12 +51,18 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "Add the mod's planets to the star system. In multiplayer every player needs the same setting.");
             BlackHoleEnabled = _category.CreateEntry("BlackHole", true,
                 description: "The black hole near TF Petra: gravity, tidal destruction, event horizon, warp stop. In multiplayer every player needs the same setting.");
+            AbandonedStations = _category.CreateEntry("AbandonedStations", true,
+                description: "Create the abandoned stations (with their beacons) in worlds that do not have them yet. The host decides.");
             DevPlanetsNearby = _category.CreateEntry("DevPlanetsNearby", false,
                 description: "For mod development: place the mod's planets a few thousand km from the starting planet, to see them from its surface.");
             DevVisitPlanets = _category.CreateEntry("DevVisitPlanets", false,
                 description: "For mod development: with DevWorld, move the player onto each mod planet and take screenshots there.");
+            DevVisitPlanetId = _category.CreateEntry("DevVisitPlanetId", 0,
+                description: "For mod development: with DevVisitPlanets, visit only this planet (0: all).");
             DevVisitBlackHole = _category.CreateEntry("DevVisitBlackHole", false,
                 description: "For mod development: with DevWorld, look for the black hole from TF Petra and take screenshots.");
+            DevVisitStations = _category.CreateEntry("DevVisitStations", false,
+                description: "For mod development: with DevWorld, list beacons and visit the abandoned stations, taking screenshots.");
             DevWorld = _category.CreateEntry("DevWorld", "",
                 description: "For mod development: full path of a world save (a copy) loaded in single player from the main menu, then probed and screenshotted. Empty: off.");
             DevQuitSeconds = _category.CreateEntry("DevQuitSeconds", 0f,

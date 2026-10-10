@@ -26,6 +26,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         public const int Water = 1;
         public const int Shore = 2;
 
+        private static readonly AccessTools.FieldRef<PlanetDensePlacementConfig, int[]> SpawnTable =
+            AccessTools.FieldRefAccess<PlanetDensePlacementConfig, int[]>("_spawnTable");
+        private static readonly AccessTools.FieldRef<PlanetDensePlacementConfig, ComputeBuffer> NoiseBuffer =
+            AccessTools.FieldRefAccess<PlanetDensePlacementConfig, ComputeBuffer>("_noiseConfigBuffer");
+        private static readonly System.Reflection.MethodInfo ShallowCopy = AccessTools.Method(typeof(object), "MemberwiseClone");
+
         private static readonly AccessTools.FieldRef<PlanetPhysicalProperties, bool> HasAtmosphere =
             AccessTools.FieldRefAccess<PlanetPhysicalProperties, bool>("hasAtmosphere");
 
@@ -158,6 +164,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             public void Trees(params (GameObject Prefab, int Weight, float Bias)[] trees)
             {
                 PlanetDensePlacementConfig config = Flora.configs[0];
+                SpawnTable(config) = null;
                 config.objectsSpawn = trees.Select(t => new PlanetDensePlacementConfig.DenseObjectPlacementType
                 {
                     prefab = t.Prefab,
@@ -171,8 +178,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             public void FloraElevation(float trees, float grass)
             {
                 Flora.configs[0].elevationMin = trees;
-                if (Flora.configs.Length > 1)
-                    Flora.configs[1].elevationMin = grass;
+                if (GrassConfig != null)
+                    GrassConfig.elevationMin = grass;
             }
 
             /// <summary>Forest patches: how much the density noise favors trees (higher offset, more ground covered).</summary>
@@ -181,15 +188,55 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Flora.configs[0].noiseOffset = noiseOffset;
             }
 
+            /// <summary>
+            /// A new forest type with its own density noise, so it grows in its own regions of the
+            /// planet (conifers here, broadleaf woods there, savanna elsewhere).
+            /// </summary>
+            public void AddForest(Vector3 noiseShift, float noiseOffset, float elevationMin, params (GameObject Prefab, int Weight, float Bias)[] trees)
+            {
+                trees = trees.Where(t => t.Prefab != null).ToArray();
+                if (trees.Length == 0)
+                    return;
+                PlanetDensePlacementConfig copy = (PlanetDensePlacementConfig)ShallowCopy.Invoke(Flora.configs[0], null);
+                // Its own spawn table and noise buffer (the copy would share the fir forest's)
+                SpawnTable(copy) = null;
+                NoiseBuffer(copy) = null;
+                // Only one forest can be baked into the planet's look from space: the first one
+                copy.isVisibleFromSpace = false;
+                var noise = copy.noiseConfig;
+                noise.center += noiseShift;
+                copy.noiseConfig = noise;
+                copy.noiseOffset = noiseOffset;
+                copy.elevationMin = elevationMin;
+                copy.objectsSpawn = trees.Select(t => new PlanetDensePlacementConfig.DenseObjectPlacementType
+                {
+                    prefab = t.Prefab,
+                    probability = t.Weight,
+                    densityBiasValue = t.Bias,
+                    densityBiasPower = 1f
+                }).ToArray();
+                // The game numbers the colliding configs in order among themselves: they must come first
+                int at = Flora.configs.TakeWhile(c => c.hasPhysics).Count();
+                var configs = Flora.configs.ToList();
+                configs.Insert(at, copy);
+                Flora.configs = configs.ToArray();
+            }
+
+            /// <summary>One of the mod's broadleaf trees, built from this planet's fir.</summary>
+            public GameObject Tree(TreeKind kind) => Worlds.Trees.Get(TreePrefab("FirTreeTall1"), kind);
+
             public void Grass(GameObject prefab)
             {
-                if (Flora.configs.Length > 1 && Flora.configs[1].objectsSpawn.Length > 0)
-                    Flora.configs[1].objectsSpawn[0].prefab = prefab;
+                if (GrassConfig != null && GrassConfig.objectsSpawn.Length > 0)
+                    GrassConfig.objectsSpawn[0].prefab = prefab;
             }
 
             public GameObject TreePrefab(string name) => Flora.configs[0].objectsSpawn.Select(o => o.prefab).FirstOrDefault(p => p != null && p.name == name);
 
-            public GameObject GrassPrefab => Flora.configs.Length > 1 ? Flora.configs[1].objectsSpawn.Select(o => o.prefab).FirstOrDefault() : null;
+            public GameObject GrassPrefab => GrassConfig?.objectsSpawn.Select(o => o.prefab).FirstOrDefault();
+
+            // The demo planet's grass: its only config without colliders
+            private PlanetDensePlacementConfig GrassConfig => Flora.configs.FirstOrDefault(c => !c.hasPhysics);
 
             // ---- Points of interest
 

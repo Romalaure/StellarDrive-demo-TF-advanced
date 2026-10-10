@@ -18,7 +18,8 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
     internal sealed class TelemetryFormatter
     {
         private const int MaxListedParts = 8;
-        private const string ValueColumn = "<pos=42%>";
+        // Values start at this column; wrapped lines stay in it (indent, not pos) so they never run under the labels
+        private const string ValueColumn = "<indent=34%>";
         // French style (1 234,5) with a plain space: the game font may lack the non-breaking ones fr-FR uses
         private static readonly NumberFormatInfo Fr = new NumberFormatInfo { NumberDecimalSeparator = ",", NumberGroupSeparator = " " };
 
@@ -46,56 +47,40 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             return _sb.ToString();
         }
 
+        // Compact: one fact per line, so the four-section screens stay readable
         private void Flight(TelemetrySnapshot snap)
         {
-            Row("Vaisseau", $"#{snap.ShipId} · {snap.ShipSource} · {snap.PartCount} pièces");
-            Row("Masse", N(snap.Mass, "0") + " kg" + (snap.ConnectedShipCount > 0 ? $" <color={_dim}>(+{snap.ConnectedShipCount} liés)</color>" : ""));
-            Row("Espace", snap.SpaceKind ?? Unavailable());
-            Row("Référence", snap.PlanetName ?? Unavailable());
+            string linked = snap.ConnectedShipCount > 0 ? $" (+{snap.ConnectedShipCount} liés)" : "";
+            Row("Vaisseau", $"#{snap.ShipId} · {snap.ShipSource} · {snap.PartCount} pièces · {N(snap.Mass, "0")} kg{linked}");
+            Row("Lieu", (snap.SpaceKind ?? Unavailable()) + (snap.PlanetName != null ? " · " + snap.PlanetName : ""));
             Row("Altitude", snap.Altitude.HasValue ? N(snap.Altitude.Value, "0") + $" m <color={_dim}>/ rayon moyen</color>" : Unavailable());
-            Row("Vit. surface", Speed(snap.SurfaceSpeed));
-            Row("Vit. verticale", snap.VerticalSpeed.HasValue ? Signed(snap.VerticalSpeed.Value, "0.0") + " m/s" : Unavailable());
-            Row("Vit. orbitale", Speed(snap.SpaceSpeed));
-            if (snap.Pitch.HasValue)
-                Row("Assiette", $"tangage {Signed(snap.Pitch.Value, "0.0")}°  roulis {Signed(snap.Roll ?? 0f, "0.0")}°");
-            else
-                Row("Assiette", Unavailable());
-            Row("Repère", snap.AttitudeFrame);
-            if (snap.AngularVelocity.HasValue)
-            {
-                Vector3 w = snap.AngularVelocity.Value;
-                Row("Rotation", N(w.magnitude, "0.0") + $" °/s <color={_dim}>(T {Signed(w.x, "0")} L {Signed(w.y, "0")} R {Signed(w.z, "0")})</color>");
-            }
-            else
-            {
-                Row("Rotation", Unavailable("mesure en cours"));
-            }
-            Row("Sol", Unavailable("non mesuré"));
+            string vertical = snap.VerticalSpeed.HasValue ? $" · vert. {Signed(snap.VerticalSpeed.Value, "0.0")}" : "";
+            string orbital = snap.SpaceSpeed.HasValue ? $" · orb. {N(snap.SpaceSpeed.Value, "0")}" : "";
+            Row("Vitesse", snap.SurfaceSpeed.HasValue || snap.SpaceSpeed.HasValue
+                ? $"surf. {(snap.SurfaceSpeed.HasValue ? N(snap.SurfaceSpeed.Value, "0.0") : "—")}{vertical}{orbital} m/s"
+                : Unavailable());
+            Row("Assiette", snap.Pitch.HasValue
+                ? $"tangage {Signed(snap.Pitch.Value, "0")}° · roulis {Signed(snap.Roll ?? 0f, "0")}° <color={_dim}>({snap.AttitudeFrame})</color>"
+                : Unavailable());
+            Row("Rotation", snap.AngularVelocity.HasValue ? N(snap.AngularVelocity.Value.magnitude, "0.0") + " °/s" : Unavailable("mesure en cours"));
             if (snap.BlackHoleDistance.HasValue)
-            {
-                Row("Trou noir", $"{N(snap.BlackHoleDistance.Value / 1000f, "0.0")} km · {N(snap.BlackHoleGravity, "0.00")} m/s²");
-                Row("Temps local", $"{N(snap.BlackHoleTimeDilation * 100f, "0.00")} % <color={_dim}>du temps lointain</color>");
-            }
+                Row("Trou noir", $"{N(snap.BlackHoleDistance.Value / 1000f, "0")} km · {N(snap.BlackHoleGravity, "0.00")} m/s² · temps {N(snap.BlackHoleTimeDilation * 100f, "0.0")} %");
 
-            _sb.Append('\n');
-            Title("TRAFIC");
             if (snap.Traffic.Count == 0)
             {
-                Dim("Aucun autre vaisseau suivi à portée.");
+                Row("Trafic", Unavailable("aucun vaisseau à portée"));
                 return;
             }
-            int shown = 0;
+            var contacts = new List<string>();
             foreach (TrafficContact contact in snap.Traffic)
             {
-                if (shown++ >= 4)
-                {
-                    Dim($"+{snap.Traffic.Count - 4} autres");
+                if (contacts.Count == 3)
                     break;
-                }
-                string closing = contact.ClosingSpeed > 0.05f ? $"approche {N(contact.ClosingSpeed, "0.0")} m/s"
-                    : contact.ClosingSpeed < -0.05f ? $"s'éloigne {N(-contact.ClosingSpeed, "0.0")} m/s" : "stable";
-                Row($"#{contact.ShipId}", $"{N(contact.Distance, "0")} m · {closing}");
+                string trend = contact.ClosingSpeed > 0.05f ? "↓" : contact.ClosingSpeed < -0.05f ? "↑" : "";
+                contacts.Add($"#{contact.ShipId} {N(contact.Distance, "0")} m{trend}");
             }
+            string more = snap.Traffic.Count > 3 ? $" <color={_dim}>+{snap.Traffic.Count - 3}</color>" : "";
+            Row("Trafic", string.Join(" · ", contacts) + more);
         }
 
         private void Propulsion(TelemetrySnapshot snap)
@@ -248,18 +233,16 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             foreach (DiagnosticMessage message in messages)
             {
                 string tag = message.Severity == Severity.Error ? "ERREUR" : message.Severity == Severity.Warning ? "ALERTE" : "INFO";
-                _sb.Append(Colored(ShipComputer.Diagnostics.ColorOf(message.Severity), tag)).Append("  ").Append(message.Text).Append('\n');
+                _sb.Append(Colored(ShipComputer.Diagnostics.ColorOf(message.Severity), tag)).Append("<indent=17%>").Append(message.Text).Append("</indent>\n");
             }
             _sb.Append('\n');
             Title("TECHNIQUE");
-            Row("Rôle", snap.IsHost ? "hôte (données serveur disponibles)" : "client");
-            Row("Lecture", $"{N(rate, "0.#")} /s · {N(sampleMs, "0.00")} ms");
-            Row("Palette", ComputerStyle.HasGamePalette ? "jeu" : Unavailable("secours"));
+            Row("Rôle", (snap.IsHost ? "hôte" : "client") + $" · {N(rate, "0.#")} lectures/s · {N(sampleMs, "0.00")} ms");
         }
 
         private void Row(string label, string value)
         {
-            _sb.Append(label).Append(ValueColumn).Append("<color=").Append(_strong).Append('>').Append(value).Append("</color>\n");
+            _sb.Append(label).Append(ValueColumn).Append("<color=").Append(_strong).Append('>').Append(value).Append("</color></indent>\n");
         }
 
         private void Title(string title)

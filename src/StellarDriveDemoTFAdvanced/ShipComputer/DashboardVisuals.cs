@@ -49,6 +49,9 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
         private uint _shownRoot;
         private bool _showingIdle;
 
+        /// <summary>Development renders: draw whatever the distance to the player camera.</summary>
+        internal bool IgnoreDistance;
+
         public static string AnchorName(string layout, float width, float height) =>
             string.Format(CultureInfo.InvariantCulture, "{0} layout={1} w={2} h={3}", AnchorPrefix, layout, width, height);
 
@@ -99,7 +102,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             }
             Camera camera = MainCamera.Get();
             float range = Mathf.Max(2f, Settings.ComputerViewDistance.Value);
-            if (camera == null || (camera.transform.position - _anchor.position).sqrMagnitude > range * range)
+            if (!IgnoreDistance && (camera == null || (camera.transform.position - _anchor.position).sqrMagnitude > range * range))
                 return;
             ShipsClientTracker ships = GameServices.ShipsClient;
             if (ships == null || !ships.TryGetTrackedRootShip(_shipId, out TrackedShipClient root))
@@ -209,9 +212,9 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                 float y = top + (grid ? (i / 2) * (cellHeight + Gap) : 0f);
                 _backgrounds[i] = NewImage(rect, layer);
                 Place(_backgrounds[i].rectTransform, x, y, cellWidth, cellHeight);
-                _panels[i] = NewText(rect, font, layer, grid ? 22f : 30f, grid ? 8f : 10f);
+                _panels[i] = NewText(rect, font, layer, grid ? 21f : 28f, grid ? 11f : 13f);
                 _panels[i].alignment = TextAlignmentOptions.TopLeft;
-                _panels[i].lineSpacing = 4f;
+                _panels[i].lineSpacing = 0f;
                 Place(_panels[i].rectTransform, x + 10f, y + 8f, cellWidth - 20f, cellHeight - 16f);
             }
             _built = true;

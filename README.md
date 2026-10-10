@@ -1,6 +1,6 @@
 # StellarDrive Demo — TF Advanced
 
-Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, structure, 4 nouvelles planètes avec ruines et épaves, trou noir., dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Les pièces sont dans l'onglet de construction **TF Avancé**.
+Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, structure, 4 nouvelles planètes avec régions, arbres variés, ruines, villages et épaves, 3 stations spatiales abandonnées, trou noir, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Les pièces sont dans l'onglet de construction **TF Avancé**.
 
 Rapport technique (moteur, systèmes du jeu, faisabilité de chaque projet) : [docs/AUDIT.md](docs/AUDIT.md).
 
@@ -112,13 +112,16 @@ Quatre planètes rejoignent le système 442 Otrera, en orbite autour de la même
 
 | Planète | Biome | Gravité | Atmosphère | Flore | Points d'intérêt |
 |---|---|---|---|---|---|
-| **TF Aridia** | désertique : dunes de sable orange, lacs salés | 0,9 g | respirable, ciel ambré, sans nuages | arbres morts, herbe sèche | épaves, ruines en grès |
-| **TF Petra** | rocheuse : roche grise couverte de cratères | 0,45 g | **aucune** (oxygène indispensable) | aucune | épaves, ruines en basalte |
-| **TF Altis** | montagneuse : reliefs jusqu'à 8 km, lacs glaciaires | 1,1 g | respirable, ciel bleu froid | forêts de pins denses, pins sombres | ruines en granit, épaves |
-| **TF Verdance** | tempérée, proche de la planète de départ, grands lacs | 0,95 g | respirable | forêts mêlées de bosquets d'automne et dorés, herbe dense | ruines moussues, épaves |
+| **TF Aridia** | désertique. Régions : dunes de sable dans les basses terres, mesas rouges en altitude, lacs salés | 0,9 g | respirable, ciel ambré, sans nuages | savanes d'**acacias**, arbres morts, herbe sèche | épaves, cargo écrasé, ruines et village en grès |
+| **TF Petra** | rocheuse : roche grise couverte de cratères | 0,45 g | **aucune** (oxygène indispensable) | aucune | épaves, cargo écrasé, ruines et village en basalte |
+| **TF Altis** | montagneuse : reliefs jusqu'à 8 km. Régions : vallées vertes, **neige au-dessus de 1 400 m**, lacs glaciaires | 1,1 g | respirable, ciel bleu froid | forêts de pins denses, bosquets de **bouleaux** (verts et d'automne) | ruines et village en granit, épaves |
+| **TF Verdance** | tempérée, proche de la planète de départ, grands lacs | 0,95 g | respirable | forêts de conifères et, dans d'autres régions, bois de **chênes** et de **bouleaux** (verts et d'automne), herbe dense | ruines et village moussus, épaves, cargo écrasé |
 
 - **Épaves** : sites de crash assemblés à partir des pièces écrasées du jeu (coque, propulseurs, sièges), recyclables comme sur la planète de départ.
 - **Ruines d'une ancienne civilisation** : porte monumentale (piliers, linteau, marches), piliers debout et brisés, blocs tombés, obélisques. Taillées dans la pierre du jeu et teintées selon la planète, elles ont leurs propres collisions et ne se minent pas.
+- **Villages abandonnés** : un temple à colonnes au toit effondré, des maisons sans toit (porte, fenêtres, murs écroulés) et une tour de guet crénelée.
+- **Cargos écrasés** : une grande épave d'environ 30 m (cockpit enfoui, soute tordue, moteurs arrachés, ailes, plaques de coque) entourée de propulseurs et de sièges, recyclable.
+- **Arbres** : chêne, acacia et bouleau (et leurs variantes d'automne) sont des copies du sapin du jeu avec un nouveau modèle (tronc et feuillage tirés de l'atlas de feuilles du jeu). On les abat et on les recycle comme les sapins. Chaque type de forêt a son propre bruit de densité : les essences poussent dans des régions différentes de la planète.
 - Rochers, minerais (fer, cuivre) et cristaux de verre comme sur la planète de départ.
 
 Comment ça marche : chaque planète est une copie de la planète de la démo (442 Otrera b), créée avant que le jeu ne charge ses planètes, puis remodelée : bruit du terrain, cratères, matériaux du sol, atmosphère, configuration de la flore et des points d'intérêt. Les autres planètes présentes dans les fichiers de la démo appartiennent au jeu complet : le mod ne les touche pas.
@@ -127,6 +130,21 @@ Comment ça marche : chaque planète est une copie de la planète de la démo (4
 - **Multijoueur** : chaque joueur doit avoir le mod et le même réglage `NewPlanets`. Les objets minés ou détruits sur ces planètes (arbres, rochers) ne sont pas synchronisés entre joueurs : leur état réseau vient d'un objet FishNet que seule la scène du jeu peut créer.
 - **Sauvegardes** : ne désinstalle pas le mod (et ne coupe pas `NewPlanets`) pendant qu'un joueur ou un vaisseau se trouve sur l'une de ces planètes.
 - L'éclairage précalculé et les distances d'affichage sont ceux de la planète de départ.
+
+## Stations spatiales abandonnées
+
+Trois stations abandonnées sont créées dans le monde quand l'hôte charge une partie (une seule fois par monde). Ce sont de vrais vaisseaux du jeu : on y entre, on les démonte, on récupère leurs pièces.
+
+| Station | Emplacement |
+|---|---|
+| **Station Kepler (abandonnée)** | en orbite lointaine de TF Verdance |
+| **Avant-poste Orion (abandonné)** | près de TF Aridia |
+| **Sonde Hadès (trou noir)** | à environ 930 km du trou noir |
+
+- **Localisation** : chaque station a une **balise** à son nom. Elle apparaît sur la carte stellaire comme destination de saut, comme les balises posées par les joueurs.
+- **Contenu** : modules reliés par des couloirs, sas d'entrée, hublots, coque percée par endroits, propulseurs morts, coffres avec du butin.
+- **Abri** : à moins de 3 km d'une station, la gravité du trou noir ne s'applique pas. On peut donc s'amarrer à la Sonde Hadès.
+- Réglage : `AbandonedStations` (section `[TFAdvanced]`).
 
 ## Trou noir
 
@@ -173,8 +191,9 @@ Réglage : `BlackHole` (section `[TFAdvanced]`), identique pour tous les joueurs
 | `SpinWarningRate` | `60` | seuil d'alerte de rotation (°/s) |
 | `NewPlanets` | `true` | les 4 nouvelles planètes |
 | `BlackHole` | `true` | le trou noir près de TF Petra |
+| `AbandonedStations` | `true` | crée les 3 stations abandonnées dans un monde qui ne les a pas encore |
 | `SelfTest` | `false` | développement : construit les pièces au menu, en écrit la description et des rendus PNG |
-| `DevWorld` / `DevQuitSeconds` / `DevVisitPlanets` / `DevVisitBlackHole` / `DevPlanetsNearby` | vides / `false` | développement : charge automatiquement une **copie** de monde, visite les planètes ou le trou noir, prend des captures dans `UserData/TFAdvanced/dev`, puis quitte |
+| `DevWorld` / `DevQuitSeconds` / `DevVisitPlanets` / `DevVisitPlanetId` / `DevVisitStations` / `DevVisitBlackHole` / `DevPlanetsNearby` | vides / `false` | développement : charge automatiquement une **copie** de monde, visite les planètes ou le trou noir, prend des captures dans `UserData/TFAdvanced/dev`, puis quitte |
 
 ## Compilation
 
@@ -210,6 +229,9 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.3.1 : rendu des pièces | ✅ rendus PNG hors champ : matériau `Custom/PlanetObject` du jeu, panneaux dessinés de l'atlas LogicGates, comparés au coffre du jeu |
 | v0.4.0 : planètes (monde chargé et visité automatiquement) | ✅ 4 planètes enregistrées par le jeu, rendues depuis l'espace et au sol. Biomes vérifiés sur captures : dunes orange d'Aridia, roche grise sans air de Petra, forêts de pins d'Altis, lacs et forêts de Verdance. Ruines (5 sites) et épaves (4 sites) chargées autour du joueur sur Aridia. Aucune exception. |
 | v0.4.0 : trou noir | ✅ visible depuis Petra (ombre, disque incliné, halo), aucune exception ; ⏳ attraction, marée, horizon et arrêt de distorsion **à tester en vol** |
+| v0.5.0 : écrans de l'ordinateur de bord (rendu hors champ, plus gros vaisseau du monde) | ✅ plus aucun texte superposé : colonne de valeurs alignée, FLIGHT compacté, taille minimale du texte relevée |
+| v0.5.0 : stations abandonnées | ✅ 3 stations créées (1 077, 670 et 84 pièces de coque), balises vues par le client, joueur placé dans chacune |
+| v0.5.0 : arbres, régions, villages, cargos | ✅ rendu des 5 arbres, des bâtiments et du cargo. En jeu, chaque planète visitée séparément : villages (temple, maisons, tour) et cargos chargés sur Aridia, Altis et Verdance, feuillus visibles dans les forêts de Verdance. Bug corrigé : le jeu numérote les configurations de flore à collisions parmi elles seules, la nouvelle forêt est donc placée avant l'herbe. ⚠️ Le téléport du test automatique déclenche un bug du jeu (`Space id … does not exist`), déjà connu et sans lien avec ces ajouts. ⏳ Régions du sol (mesas, neige) pas encore vues en capture |
 | Pose des pièces, écrans en vol, forces des moteurs, multijoueur | ⏳ **à faire en jeu** (procédure ci-dessous) |
 
 ### Procédure de test en jeu

@@ -42,6 +42,27 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             return result;
         }
 
+        private static readonly Dictionary<RuinStyle, GameObject[]> Villages = new Dictionary<RuinStyle, GameObject[]>();
+
+        /// <summary>An abandoned settlement: a columned temple first, then houses and a watchtower.</summary>
+        public static GameObject[] Village(PlanetShaper.Context planet, RuinStyle style)
+        {
+            if (Villages.TryGetValue(style, out GameObject[] cached) && cached != null && cached.Length > 0 && cached[0] != null)
+                return cached;
+            GameObject rock = planet.HotspotPrefab("RockLargeIron");
+            if (rock == null)
+                return null;
+            GameObject[] result =
+            {
+                Piece(rock, style, "Temple", Temple),
+                Piece(rock, style, "House", m => House(m, 7f, 6f, 3.6f, 0)),
+                Piece(rock, style, "HouseSmall", m => House(m, 5f, 4.5f, 3f, 1)),
+                Piece(rock, style, "Tower", Tower)
+            };
+            Villages[style] = result;
+            return result;
+        }
+
         private static GameObject Piece(GameObject rock, RuinStyle style, string name, Action<MeshBuilder> build)
         {
             if (_holder == null)
@@ -136,6 +157,57 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             m.Box(new Vector3(0f, 0.1f, 0f), new Vector3(3f, 1.2f, 3f));
             m.Cylinder(new Vector3(0f, 0.7f, 0f), new Vector3(0f, 11f, 0f), 1.1f, 0.65f, 4);
             m.Cylinder(new Vector3(0f, 11f, 0f), new Vector3(0f, 12.4f, 0f), 0.65f, 0f, 4, capB: false);
+        }
+
+        // A temple: stepped platform, two rows of columns, a broken roof slab
+        private static void Temple(MeshBuilder m)
+        {
+            m.Box(new Vector3(0f, -0.3f, 0f), new Vector3(16f, 1.2f, 11f));
+            m.Box(new Vector3(0f, 0.6f, 0f), new Vector3(14f, 0.6f, 9f));
+            foreach (float x in new[] { -5.6f, -2.8f, 0f, 2.8f, 5.6f })
+            {
+                foreach (float z in new[] { -3.4f, 3.4f })
+                {
+                    // One column of the back row has fallen
+                    if (x == 5.6f && z == 3.4f)
+                        continue;
+                    m.Cylinder(new Vector3(x, 0.9f, z), new Vector3(x, 7.4f, z), 0.6f, 0.5f, 8);
+                    m.Box(new Vector3(x, 7.7f, z), new Vector3(1.6f, 0.6f, 1.6f));
+                }
+            }
+            m.Box(new Vector3(-1.5f, 8.4f, 0f), new Vector3(11f, 0.9f, 8.6f));
+            m.Box(new Vector3(5.9f, 1.3f, 5.2f), new Vector3(6.2f, 1.1f, 1.1f), Quaternion.Euler(0f, 18f, 8f));
+        }
+
+        // Four walls with a doorway and windows, the roof long gone
+        private static void House(MeshBuilder m, float width, float depth, float height, int variant)
+        {
+            const float wall = 0.5f;
+            float hx = width * 0.5f, hz = depth * 0.5f;
+            m.Box(new Vector3(0f, -0.2f, 0f), new Vector3(width + 0.6f, 0.4f, depth + 0.6f));
+            // Back wall, with a window gap
+            m.Box(new Vector3(-hx * 0.55f, height * 0.5f, -hz), new Vector3(width * 0.45f, height, wall));
+            m.Box(new Vector3(hx * 0.55f, height * 0.5f, -hz), new Vector3(width * 0.45f, height, wall));
+            m.Box(new Vector3(0f, height * 0.85f, -hz), new Vector3(width * 0.12f, height * 0.3f, wall));
+            // Front wall around the doorway
+            m.Box(new Vector3(-hx * 0.6f, height * 0.5f, hz), new Vector3(width * 0.4f, height, wall));
+            m.Box(new Vector3(hx * 0.6f, height * 0.42f, hz), new Vector3(width * 0.4f, height * 0.84f, wall));
+            // Side walls, one partly collapsed
+            m.Box(new Vector3(-hx, height * 0.5f, 0f), new Vector3(wall, height, depth));
+            m.Box(new Vector3(hx, height * (variant == 0 ? 0.32f : 0.5f), -depth * 0.15f), new Vector3(wall, height * (variant == 0 ? 0.64f : 1f), depth * 0.7f));
+            m.Box(new Vector3(hx + 1.2f, 0.3f, depth * 0.3f), new Vector3(1.4f, 0.7f, 1f), Quaternion.Euler(0f, 25f, 12f));
+        }
+
+        // A square watchtower with crenellations
+        private static void Tower(MeshBuilder m)
+        {
+            m.Box(new Vector3(0f, 0f, 0f), new Vector3(5f, 1f, 5f));
+            m.Box(new Vector3(0f, 5.5f, 0f), new Vector3(4f, 10f, 4f));
+            m.Box(new Vector3(0f, 10.8f, 0f), new Vector3(4.8f, 0.6f, 4.8f));
+            foreach (Vector3 corner in new[] { new Vector3(1.9f, 0f, 1.9f), new Vector3(-1.9f, 0f, 1.9f), new Vector3(1.9f, 0f, -1.9f), new Vector3(-1.9f, 0f, -1.9f), new Vector3(0f, 0f, 1.9f), new Vector3(0f, 0f, -1.9f), new Vector3(1.9f, 0f, 0f) })
+                m.Box(corner + new Vector3(0f, 11.6f, 0f), new Vector3(0.9f, 1f, 0.9f));
+            // A doorway at the foot (a darker block suggests the opening)
+            m.Box(new Vector3(0f, 1.6f, 2.05f), new Vector3(1.2f, 2.2f, 0.2f));
         }
     }
 }

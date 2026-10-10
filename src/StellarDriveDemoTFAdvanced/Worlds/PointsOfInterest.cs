@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Planets.EnvironmentGeneration.Configs;
@@ -77,6 +78,57 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 distributionSteps = pieces.Select((piece, i) => i == 0
                     ? Step(piece, curve, 1, 1, 0f, 1f, 12f)
                     : Step(piece, curve, 2, 5, 10f + i * 6f, 22f + i * 10f, 6f)).ToArray()
+            });
+        }
+
+        /// <summary>An abandoned village: a temple in the middle, houses and a watchtower around it.</summary>
+        public static void Village(PlanetShaper.Context planet, RuinStyle style, float frequency)
+        {
+            GameObject[] pieces = Ruin.Village(planet, style);
+            AnimationCurve curve = TemplateCurve(planet);
+            if (pieces == null || curve == null)
+                return;
+            planet.AddHotspot(new PlanetHotspotsPlacementConfig
+            {
+                placementLevel = 4,
+                loadDistance = 2500f,
+                spawnProbability = Mathf.Clamp01(frequency * 0.3f),
+                avoidDenseEnvConstraint = style != RuinStyle.Mossy,
+                minElevationConstraint = true,
+                minElevation = 75f,
+                distributionSteps = new[]
+                {
+                    Step(pieces[0], curve, 1, 1, 0f, 1f, 16f),
+                    Step(pieces[1], curve, 2, 4, 20f, 42f, 12f),
+                    Step(pieces[2], curve, 1, 3, 18f, 45f, 9f),
+                    Step(pieces[3], curve, 1, 1, 30f, 48f, 10f)
+                }
+            });
+        }
+
+        /// <summary>A wrecked cargo ship with its debris thrown around.</summary>
+        public static void CargoWrecks(PlanetShaper.Context planet, float frequency)
+        {
+            GameObject cargo = Worlds.Wrecks.Cargo(planet);
+            GameObject thruster = planet.HotspotPrefab("CrashedThruster");
+            GameObject seat = planet.HotspotPrefab("CrashedSeat");
+            AnimationCurve curve = TemplateCurve(planet);
+            if (cargo == null || curve == null)
+                return;
+            var steps = new List<HotspotObjectsDistributionStep> { Step(cargo, curve, 1, 1, 0f, 1f, 20f) };
+            if (thruster != null)
+                steps.Add(Step(thruster, curve, 2, 4, 22f, 50f, 6f));
+            if (seat != null)
+                steps.Add(Step(seat, curve, 1, 2, 15f, 35f, 4f));
+            planet.AddHotspot(new PlanetHotspotsPlacementConfig
+            {
+                placementLevel = 4,
+                loadDistance = 2500f,
+                spawnProbability = Mathf.Clamp01(frequency * 0.25f),
+                avoidDenseEnvConstraint = true,
+                minElevationConstraint = true,
+                minElevation = 75f,
+                distributionSteps = steps.ToArray()
             });
         }
 

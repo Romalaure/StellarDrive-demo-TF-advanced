@@ -90,6 +90,21 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             AdvancedMod.Log.Msg($"dev: aimed at {target.name} ({point - far.transform.position})");
         }
 
+        private static void SaveTexture(Texture2D texture, string path)
+        {
+            var rt = RenderTexture.GetTemporary(Mathf.Min(texture.width, 1024), Mathf.Min(texture.height, 1024), 0, RenderTextureFormat.ARGB32);
+            Graphics.Blit(texture, rt);
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture.active = rt;
+            var copy = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);
+            copy.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+            copy.Apply();
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(rt);
+            File.WriteAllBytes(path, copy.EncodeToPNG());
+            Object.Destroy(copy);
+        }
+
         // Structure of the demo planet's hotspot and flora prefabs, to build new ones alike
         private static void PrefabProbe()
         {
@@ -115,6 +130,52 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 }
                 foreach (Collider collider in prefab.GetComponentsInChildren<Collider>(true))
                     text.AppendLine($"  collider {collider.name}: {collider.GetType().Name} layer={collider.gameObject.layer} trigger={collider.isTrigger}");
+                // Meshes and materials in detail, for building new plants alike
+                foreach (MeshRenderer renderer in prefab.GetComponentsInChildren<MeshRenderer>(true))
+                {
+                    Mesh mesh = renderer.GetComponent<MeshFilter>()?.sharedMesh;
+                    if (mesh == null)
+                        continue;
+                    text.AppendLine($"  mesh {mesh.name}: readable={mesh.isReadable} submeshes={mesh.subMeshCount} verts={mesh.vertexCount} bounds={mesh.bounds} colors={(mesh.isReadable ? mesh.colors.Length : -1)}");
+                    if (mesh.isReadable)
+                    {
+                        var uv = new List<Vector2>();
+                        for (int channel = 0; channel < 4; channel++)
+                        {
+                            mesh.GetUVs(channel, uv);
+                            if (uv.Count > 0)
+                                text.AppendLine($"    uv{channel}: x {uv.Min(u => u.x):0.###}..{uv.Max(u => u.x):0.###} y {uv.Min(u => u.y):0.###}..{uv.Max(u => u.y):0.###}");
+                        }
+                        if (mesh.colors.Length > 0)
+                            text.AppendLine("    colors sample: " + string.Join(" ", mesh.colors.Take(6).Select(c => $"({c.r:0.##},{c.g:0.##},{c.b:0.##},{c.a:0.##})")));
+                    }
+                    foreach (Material material in renderer.sharedMaterials)
+                    {
+                        if (material?.shader == null)
+                            continue;
+                        text.AppendLine($"    material {material.name} ({material.shader.name}) keywords=[{string.Join(" ", material.shaderKeywords)}]");
+                        for (int i = 0; i < material.shader.GetPropertyCount(); i++)
+                        {
+                            string property = material.shader.GetPropertyName(i);
+                            switch (material.shader.GetPropertyType(i))
+                            {
+                                case ShaderPropertyType.Texture:
+                                    Texture texture = material.GetTexture(property);
+                                    text.AppendLine($"      {property} = {texture?.name}");
+                                    if (texture is Texture2D t2 && prefab.name.StartsWith("FirTreeTall1"))
+                                        SaveTexture(t2, Path.Combine(DevHarness.Folder, $"tex_{material.name}_{property}.png"));
+                                    break;
+                                case ShaderPropertyType.Float:
+                                case ShaderPropertyType.Range:
+                                    text.AppendLine($"      {property} = {material.GetFloat(property):0.###}");
+                                    break;
+                                case ShaderPropertyType.Vector:
+                                    text.AppendLine($"      {property} = {material.GetVector(property)}");
+                                    break;
+                            }
+                        }
+                    }
+                }
             }
             File.WriteAllText(Path.Combine(DevHarness.Folder, "prefab_probe.txt"), text.ToString());
             AdvancedMod.Log.Msg("dev: prefab probe written");

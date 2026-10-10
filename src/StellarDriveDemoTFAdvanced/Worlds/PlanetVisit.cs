@@ -64,18 +64,31 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             foreach (Planet planet in new List<Planet>(PlanetFactory.Planets))
             {
+                if (Settings.DevVisitPlanetId.Value != 0 && planet.Id != (ulong)Settings.DevVisitPlanetId.Value)
+                    continue;
                 if (!TryFindLand(planet, out Vector3 up))
                     continue;
                 Place(planet, up, 0f);
                 AdvancedMod.Log.Msg($"dev: landed on {planet.name}, ground {Elevation(planet, up):0} m above the radius");
                 yield return Wait(18f);
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 3; i++)
                 {
-                    Place(planet, up, i * 150f);
+                    Place(planet, up, i * 120f);
                     yield return Wait(2f);
                     DevHarness.Screenshot($"visit_{planet.Id}_{i}");
                     yield return Wait(0.5f);
                 }
+
+                // From the air, looking down over the forests and regions (the player is falling)
+                for (int i = 0; i < 2; i++)
+                {
+                    Move(planet, up, Quaternion.Euler(38f, i * 180f, 0f), 160f);
+                    yield return Wait(1.2f);
+                    DevHarness.Screenshot($"visit_{planet.Id}_air{i}");
+                    yield return Wait(0.5f);
+                }
+                Place(planet, up, 0f);
+                yield return Wait(4f);
 
                 // The points of interest the game loaded around the player
                 GameObject hotspots = SceneManager.GetActiveScene().GetRootGameObjects().FirstOrDefault(r => r.name == planet.name + " hotspots visuals");
@@ -83,7 +96,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 AdvancedMod.Log.Msg($"dev: {planet.name} has {objects.Length} point-of-interest objects loaded");
                 AdvancedMod.Log.Msg($"dev: {planet.name} points of interest loaded: " + string.Join(", ", objects
                     .GroupBy(o => o.name.Replace("(Clone)", "")).Select(g => g.Key + " x" + g.Count())));
-                foreach (string kind in new[] { "TFA_Ruin", "Crashed" })
+                foreach (string kind in new[] { "TFA_RuinGate", "TFA_RuinTemple", "TFA_RuinHouse", "TFA_CargoWreck", "Crashed" })
                 {
                     // Objects unload when the player moves: skip destroyed ones
                     PlanetObjectVisuals site = objects.Where(o => o != null && o.name.StartsWith(kind))
@@ -101,8 +114,21 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     AdvancedMod.Log.Msg($"dev: walked to {site.name} on {planet.name}");
                     yield return Wait(4f);
                     DevHarness.Screenshot($"visit_{planet.Id}_{kind}");
+                    CheckSpaces(kind);
                     yield return Wait(0.5f);
                 }
+            }
+        }
+
+        // Active world objects left in a space that no longer exists
+        private static void CheckSpaces(string tag)
+        {
+            ISpacesServerProvider spaces = ServiceLocator.GetService<ISpacesServerProvider>();
+            var objects = ServiceLocator.GetService<WorldTracking.Services.IWorldObjectsServerProvider>();
+            foreach (var o in objects.GetActiveWorldObjects())
+            {
+                try { spaces.GetSpace(o.SpaceId); }
+                catch (System.Exception) { AdvancedMod.Log.Warning($"dev: after {tag}: {o.GetType().Name} {o.Id} is in missing space {o.SpaceId}"); }
             }
         }
 
@@ -153,7 +179,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             Move(planet, up, Quaternion.LookRotation(local.normalized, Vector3.up));
         }
 
-        private static void Move(Planet planet, Vector3 up, Quaternion look)
+        private static void Move(Planet planet, Vector3 up, Quaternion look, float height = 1.5f)
         {
             ISpacesServerProvider spaces = ServiceLocator.GetService<ISpacesServerProvider>();
             PlayersServerTracker players = ServiceLocator.GetService<PlayersServerTracker>();
@@ -168,7 +194,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             var spot = new PlanetSurfaceSpace
             {
                 PlanetId = planet.Id,
-                Center = (Vector3Double)up.normalized * (planet.Radius + Elevation(planet, up) + 1.5)
+                Center = (Vector3Double)up.normalized * (planet.Radius + Elevation(planet, up) + height)
             };
             spaces.MoveWorldObject(player, spot);
             player.SetRotation(look);
