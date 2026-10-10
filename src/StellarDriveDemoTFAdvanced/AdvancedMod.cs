@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using MelonLoader;
@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.7.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.7.1", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -77,7 +77,7 @@ namespace StellarDriveDemoTFAdvanced
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void RegisterParts()
         {
-            Try("the TF Avancé build tab", Parts.AdvancedTab.Declare);
+            Try("the TF AvancÃ© build tab", Parts.AdvancedTab.Declare);
             Try("the ship computer screens", DashboardParts.Register);
             Try("the engines", Propulsion.EngineParts.Register);
             Try("the battery and the circuit breaker", Power.PowerParts.Register);

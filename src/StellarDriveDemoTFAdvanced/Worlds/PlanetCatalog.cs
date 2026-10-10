@@ -74,9 +74,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             {
                 Ring = ring =>
                 {
-                    // A wide, dark rubble belt
-                    ring.ringConfig.innerWidth *= 0.9f;
-                    ring.ringConfig.outerWidth *= 1.25f;
+                    // A dark rubble belt (the demo ring's size: worlds saved inside it stay valid)
                     ring.ringConfig.AsteroidsTexLitColor = new Color(0.62f, 0.6f, 0.6f);
                     ring.ringConfig.ringAmbientColor *= 0.6f;
                 },
@@ -152,8 +150,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             {
                 Ring = ring =>
                 {
-                    // A thin, bright ring of ice and rock
-                    ring.ringConfig.outerWidth *= 0.85f;
+                    // A bright ring of ice and rock (the demo ring's size)
                     ring.ringConfig.AsteroidsTexLitColor = new Color(0.85f, 0.95f, 1.1f);
                     ring.ringConfig.ringDirectScatteringColor *= 1.4f;
                 },
