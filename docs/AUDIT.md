@@ -102,3 +102,12 @@ Seul l'hôte simule. Toute mécanique qui ajoute des forces ou de l'énergie doi
 - **Coffres** : un vaisseau d'une pièce (une caisse ouverte du jeu, `StorageState` à 10 emplacements), au format de sauvegarde des vaisseaux, posé dans l'espace de surface de la planète (mêmes axes que la planète) quand le serveur crée la collision du bâtiment.
 - **Carte stellaire** : l'hologramme (`PlanetsHologram`) contenait déjà toutes les planètes, en boules grises identiques ; noms (TextMeshPro), couleurs et marqueurs ajoutés après `Generate`.
 - **Terrain** : `ChunksGpuData` alloue des tableaux de textures de taille fixe (320 en qualité haute) ; agrandis d'un facteur réglable.
+
+## 13. Champ de force, machines et multijoueur des planètes (v0.8.0)
+
+- **Synchronisation des planètes du mod** : leur `PlanetNetworkedState` n'a pas d'objet FishNet, donc ses collections ne partent jamais aux clients. L'hôte recopie chaque destruction (arbre, rocher, objet) dans l'état de la planète de départ (id 4), avec un hash de chunk mélangé à l'id de planète et l'id de planète dans les bits hauts de l'id d'objet. Les clients lisent ces entrées marquées pour la planète du mod ; les événements de destruction suivent le même chemin.
+- **Champ de force** : `ConstantState` (une valeur sauvegardée, synchronisée, émise sur la prise 0), et non `FluidTankState` : le jeu aurait pris la pièce pour un réservoir sur sa prise de fluide. Les dégâts de choc (`ShipCollisionDestruction.ProcessCollisionContact`, impulsion / masse) et de marée sont retirés de la charge tant qu'elle suffit ; sinon le jeu applique ses dégâts normaux. Puissance et oxygène pris dans les groupes natifs (`PowerGroupServerState`, `FluidGroupServerState`).
+- **Condenseur** : ajoute l'oxygène dans le groupe de fluide de sa prise au prorata de la puissance reçue (`NormalizedConsumerRate`).
+- **Gyroscope quantique** : postfix de `ShipRotation.CalculateShipRotationForce`, couple supplémentaire `(facteur - 1) x 8 000 x RotationStrength`.
+- **Onglet de construction** : le panneau du jeu n'a pas de défilement (3 rangées x 8) ; un seul onglet du mod, mis à l'échelle si une rangée déborde.
+- **Carte stellaire** : les étiquettes tournaient vers la caméra sur tous les axes (et pouvaient être ajoutées deux fois) ; elles tournent désormais autour de l'axe de l'hologramme seulement.

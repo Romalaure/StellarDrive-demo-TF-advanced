@@ -39,7 +39,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Piece(rock, "Dome", Dome),
                 Piece(rock, "Pylon", Pylon),
                 Piece(rock, "Pad", Pad),
-                Piece(rock, "Arch", Arch)
+                Piece(rock, "Arch", Arch),
+                Piece(rock, "Lamp", StreetLamp),
+                Piece(rock, "Plaza", Plaza),
+                Piece(rock, "Hovercar", Hovercar),
+                Piece(rock, "Kiosk", Kiosk),
+                Piece(rock, "Barrier", Barrier)
             };
             return _built;
         }
@@ -116,6 +121,23 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             g.Box(new Vector3(0f, 1.12f, -2.98f), new Vector3(4.3f, 0.06f, 0.05f));
             m.Box(new Vector3(-5.5f, 0.25f, 1f), new Vector3(0.8f, 0.5f, 3f));
             m.Box(new Vector3(5.5f, 0.25f, 1f), new Vector3(0.8f, 0.5f, 3f));
+            // Planters with dead shrubs, wall screens still lit, a sofa corner and a lift door
+            foreach (Vector2 p in new[] { new Vector2(-6.6f, 5.6f), new Vector2(6.6f, 5.6f), new Vector2(-2.5f, 6.2f), new Vector2(2.5f, 6.2f) })
+            {
+                m.Box(new Vector3(p.x, 0.4f, p.y), new Vector3(1f, 0.8f, 1f));
+                m.Cylinder(new Vector3(p.x, 0.8f, p.y), new Vector3(p.x + 0.2f, 1.9f, p.y - 0.1f), 0.06f, 0.02f, 5);
+                m.Cylinder(new Vector3(p.x, 0.8f, p.y), new Vector3(p.x - 0.25f, 1.6f, p.y + 0.15f), 0.05f, 0.02f, 5);
+            }
+            foreach (float x in new[] { -4f, 0f, 4f })
+            {
+                m.Box(new Vector3(x, 2.6f, -7.7f), new Vector3(2.4f, 1.5f, 0.12f));
+                g.Box(new Vector3(x, 2.6f, -7.62f), new Vector3(2.1f, 1.2f, 0.03f));
+            }
+            m.Box(new Vector3(-6.2f, 0.3f, -2.2f), new Vector3(2.6f, 0.5f, 1f));
+            m.Box(new Vector3(-6.2f, 0.75f, -2.65f), new Vector3(2.6f, 0.6f, 0.15f));
+            m.Box(new Vector3(-4.4f, 0.25f, -2.2f), new Vector3(1f, 0.4f, 1f));
+            m.Box(new Vector3(0f, 1.6f, -7.7f + 0.1f), new Vector3(1.8f, 3.2f, 0.1f));
+            g.Box(new Vector3(0f, 3.35f, -7.55f), new Vector3(1.9f, 0.08f, 0.03f));
             // Entrance frame
             g.Box(new Vector3(-2.55f, lobby * 0.4f, half + 0.27f), new Vector3(0.12f, lobby * 0.8f, 0.05f));
             g.Box(new Vector3(2.55f, lobby * 0.4f, half + 0.27f), new Vector3(0.12f, lobby * 0.8f, 0.05f));
@@ -176,6 +198,18 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             m.Cylinder(new Vector3(0f, 0.1f, 0f), new Vector3(0f, 0.25f, 0f), 2.8f, 2.8f, 16);
             m.Cylinder(new Vector3(0f, 0.2f, 0f), new Vector3(0f, 2.4f, 0f), 0.35f, 0.2f, 8);
             g.Cylinder(new Vector3(0f, 2.4f, 0f), new Vector3(0f, 2.7f, 0f), 0.5f, 0.1f, 8);
+            // Benches and planters around the basin
+            foreach (float a in new[] { 20f, 110f, 250f, 340f })
+            {
+                Quaternion turn = Quaternion.Euler(0f, a, 0f);
+                Vector3 at = turn * new Vector3(0f, 0f, 5f);
+                m.Box(at + new Vector3(0f, 0.35f, 0f), new Vector3(2.2f, 0.12f, 0.6f), turn);
+                m.Box(at + turn * new Vector3(-0.9f, 0.17f, 0f), new Vector3(0.12f, 0.34f, 0.5f), turn);
+                m.Box(at + turn * new Vector3(0.9f, 0.17f, 0f), new Vector3(0.12f, 0.34f, 0.5f), turn);
+                Vector3 pot = turn * new Vector3(1.8f, 0f, 6.2f);
+                m.Cylinder(pot + new Vector3(0f, 0.1f, 0f), pot + new Vector3(0f, 0.8f, 0f), 0.5f, 0.6f, 8);
+                g.Cylinder(pot + new Vector3(0f, 0.8f, 0f), pot + new Vector3(0f, 0.85f, 0f), 0.52f, 0.52f, 8, capA: false, capB: true);
+            }
             foreach (float a in new[] { 60f, 150f, 210f, 300f })
             {
                 Quaternion turn = Quaternion.Euler(0f, a, 0f);
@@ -227,6 +261,73 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             g.Box(new Vector3(0f, 0.75f, 0f), new Vector3(4.4f, 0.1f, 0.6f));
             m.Box(new Vector3(13.5f, 1.6f, 0f), new Vector3(3f, 3.4f, 3.4f));
             g.Box(new Vector3(12.0f, 2.4f, 0f), new Vector3(0.1f, 0.8f, 2.6f));
+        }
+
+        // A street lamp: a bent mast with a light bar
+        private static void StreetLamp(MeshBuilder m, MeshBuilder g)
+        {
+            m.Box(new Vector3(0f, 0.15f, 0f), new Vector3(0.6f, 0.3f, 0.6f));
+            m.Cylinder(new Vector3(0f, 0.3f, 0f), new Vector3(0f, 6f, 0f), 0.14f, 0.1f, 8);
+            m.Box(new Vector3(0.8f, 6.1f, 0f), new Vector3(1.8f, 0.18f, 0.3f), Quaternion.Euler(0f, 0f, -6f));
+            g.Box(new Vector3(1.1f, 5.98f, 0f), new Vector3(1.1f, 0.06f, 0.22f), Quaternion.Euler(0f, 0f, -6f));
+            g.Box(new Vector3(0f, 1.5f, 0.12f), new Vector3(0.05f, 2f, 0.03f));
+        }
+
+        // A small square: paving, benches, planters with shrubs and a lit information pillar
+        private static void Plaza(MeshBuilder m, MeshBuilder g)
+        {
+            m.Box(new Vector3(0f, -0.2f, 0f), new Vector3(12f, 0.5f, 12f));
+            g.Box(new Vector3(0f, 0.06f, 5.9f), new Vector3(11.6f, 0.02f, 0.1f));
+            g.Box(new Vector3(0f, 0.06f, -5.9f), new Vector3(11.6f, 0.02f, 0.1f));
+            foreach (float x in new[] { -3.5f, 3.5f })
+            {
+                m.Box(new Vector3(x, 0.4f, 2.5f), new Vector3(2.4f, 0.12f, 0.6f));
+                m.Box(new Vector3(x, 0.2f, 2.5f), new Vector3(0.2f, 0.4f, 0.5f));
+                m.Box(new Vector3(x, 0.45f, -2.5f), new Vector3(1.6f, 0.9f, 1.6f));
+                m.Cylinder(new Vector3(x, 0.9f, -2.5f), new Vector3(x + 0.3f, 2.4f, -2.4f), 0.08f, 0.03f, 5);
+                m.Cylinder(new Vector3(x, 0.9f, -2.5f), new Vector3(x - 0.3f, 2.1f, -2.7f), 0.07f, 0.03f, 5);
+            }
+            m.Box(new Vector3(0f, 1.3f, 0f), new Vector3(0.6f, 2.6f, 0.6f));
+            g.Box(new Vector3(0f, 1.6f, 0.31f), new Vector3(0.45f, 1.4f, 0.02f));
+            g.Box(new Vector3(0f, 1.6f, -0.31f), new Vector3(0.45f, 1.4f, 0.02f));
+        }
+
+        // A crashed hover car, nose down, a wing torn off
+        private static void Hovercar(MeshBuilder m, MeshBuilder g)
+        {
+            Quaternion tilt = Quaternion.Euler(-12f, 20f, 8f);
+            m.Box(new Vector3(0f, 0.7f, 0f), new Vector3(2.2f, 0.8f, 4.6f), tilt);
+            m.Box(tilt * new Vector3(0f, 0.55f, -0.2f) + new Vector3(0f, 0.7f, 0f), new Vector3(1.8f, 0.5f, 2f), tilt);
+            m.Box(tilt * new Vector3(1.6f, 0f, -0.8f) + new Vector3(0f, 0.7f, 0f), new Vector3(1.2f, 0.12f, 1.6f), tilt * Quaternion.Euler(0f, 0f, -14f));
+            m.Box(new Vector3(-2.6f, 0.08f, 1.4f), new Vector3(1.2f, 0.12f, 1.6f), Quaternion.Euler(5f, 40f, 3f));
+            g.Box(tilt * new Vector3(0f, -0.4f, 0f) + new Vector3(0f, 0.7f, 0f), new Vector3(1.6f, 0.04f, 3.8f), tilt);
+            g.Box(tilt * new Vector3(0f, 0f, 2.31f) + new Vector3(0f, 0.7f, 0f), new Vector3(1.6f, 0.15f, 0.02f), tilt);
+        }
+
+        // A kiosk with a big screen still showing something
+        private static void Kiosk(MeshBuilder m, MeshBuilder g)
+        {
+            m.Box(new Vector3(0f, 0.1f, 0f), new Vector3(3.2f, 0.2f, 2.2f));
+            m.Box(new Vector3(0f, 1.3f, -0.6f), new Vector3(3f, 2.2f, 1f));
+            m.Box(new Vector3(0f, 2.6f, 0f), new Vector3(3.4f, 0.2f, 2.4f));
+            m.Box(new Vector3(1.5f, 1.35f, 0.9f), new Vector3(0.15f, 2.3f, 0.15f));
+            m.Box(new Vector3(-1.5f, 1.35f, 0.9f), new Vector3(0.15f, 2.3f, 0.15f));
+            m.Box(new Vector3(0f, 0.6f, 0.4f), new Vector3(2.6f, 1f, 0.5f));
+            m.Box(new Vector3(0f, 4.1f, -0.9f), new Vector3(3.6f, 2.4f, 0.25f));
+            g.Box(new Vector3(0f, 4.1f, -0.76f), new Vector3(3.3f, 2.1f, 0.02f));
+            g.Box(new Vector3(0f, 2.48f, 1.18f), new Vector3(3.2f, 0.06f, 0.03f));
+        }
+
+        // Road barriers and stacked containers
+        private static void Barrier(MeshBuilder m, MeshBuilder g)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                m.Box(new Vector3(i * 2.2f - 3.3f, 0.45f, 0f), new Vector3(2f, 0.9f, 0.5f), Quaternion.Euler(0f, i * 7f - 10f, 0f));
+                g.Box(new Vector3(i * 2.2f - 3.3f, 0.75f, 0.26f), new Vector3(1.6f, 0.08f, 0.02f), Quaternion.Euler(0f, i * 7f - 10f, 0f));
+            }
+            m.Box(new Vector3(5.5f, 0.8f, 1.5f), new Vector3(2.4f, 1.6f, 1.6f), Quaternion.Euler(0f, 25f, 0f));
+            m.Box(new Vector3(5.4f, 2.3f, 1.4f), new Vector3(2.2f, 1.4f, 1.5f), Quaternion.Euler(0f, 40f, 4f));
         }
 
         // A gateway arch over a road, lit underneath

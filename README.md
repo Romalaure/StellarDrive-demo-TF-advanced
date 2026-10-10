@@ -1,6 +1,8 @@
 # StellarDrive Demo — TF Advanced
 
-Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, structure, 7 nouvelles planètes (dont une glaciaire, une futuriste et une jungle) avec régions, arbres et plantes variés, ruines, villages et cité à visiter avec leurs coffres, épaves, nouveaux minerais et objets rares, pièces avancées (réacteur quantique, moteur exotique), 3 stations spatiales abandonnées, 2 trous noirs, champs d'astéroïdes, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Les pièces sont dans l'onglet de construction **TF Avancé**.
+Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, structure, 7 nouvelles planètes (dont une glaciaire, une futuriste et une jungle) avec régions, arbres et plantes variés, ruines, villages et cité à visiter avec leurs coffres, épaves, nouveaux minerais et objets rares, pièces avancées (réacteur quantique, champ de force, condenseur, gyroscope quantique, moteur exotique), 3 stations spatiales abandonnées, 2 trous noirs, champs d'astéroïdes, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Toutes les pièces sont dans un seul onglet de construction, **TF Avancé**.
+
+Guide des planètes (biomes, ressources, utilité, itinéraire) : [docs/PLANETES.md](docs/PLANETES.md).
 
 Rapport technique (moteur, systèmes du jeu, faisabilité de chaque projet) : [docs/AUDIT.md](docs/AUDIT.md).
 
@@ -108,6 +110,8 @@ La coque du jeu est une grille de voxels limitée à 4 formes codées en dur (pl
 
 ## Nouvelles planètes
 
+Guide joueur : [docs/PLANETES.md](docs/PLANETES.md).
+
 Sept planètes rejoignent le système 442 Otrera, en orbite autour de la même étoile. Le jeu les génère, les éclaire, les sauvegarde et les simule comme sa propre planète (terrain, flore, objets, atmosphère). On les rejoint en vaisseau (carte stellaire et saut en distorsion).
 
 | Planète | Biome | Gravité | Atmosphère | Flore | Points d'intérêt |
@@ -122,7 +126,7 @@ Sept planètes rejoignent le système 442 Otrera, en orbite autour de la même �
 
 - **Épaves** : sites de crash assemblés à partir des pièces écrasées du jeu (coque, propulseurs, sièges), recyclables comme sur la planète de départ.
 - **Ruines d'une ancienne civilisation** : porte monumentale (piliers, linteau, marches), piliers debout et brisés, blocs tombés, obélisques. Taillées dans la pierre du jeu et teintées selon la planète, elles ont leurs propres collisions et ne se minent pas.
-- **Cité abandonnée** (TF Nexora) : quartiers d'une civilisation avancée disparue, avec gratte-ciel à étages en retrait et antenne, tours, dômes, pylônes d'antenne, pistes d'atterrissage hexagonales et arches au-dessus de routes brisées. Les bandes lumineuses cyan brillent encore la nuit. Bâtiments avec collisions, au look des coques du jeu, non minables.
+- **Cité abandonnée** (TF Nexora) : quartiers d'une civilisation avancée disparue, moins nombreux mais bien plus denses (v0.8.0) : grand gratte-ciel, 3 à 6 tours, 2 à 3 dômes, pylônes d'antenne, pistes d'atterrissage hexagonales, arches au-dessus de routes brisées, lampadaires, places, voitures volantes écrasées, kiosques et barrières. Intérieurs meublés : bacs à plantes, écrans muraux, canapés, porte d'ascenseur dans les halls ; bancs et plantes dans les dômes. Les bandes lumineuses cyan brillent encore la nuit. Bâtiments avec collisions, au look des coques du jeu, non minables.
 - **Villages abandonnés** : un temple à colonnes au toit effondré, des maisons sans toit (porte, fenêtres, murs écroulés) et une tour de guet crénelée.
 - **Cargos écrasés** : une grande épave d'environ 30 m (cockpit enfoui, soute tordue, moteurs arrachés, ailes, plaques de coque) entourée de propulseurs et de sièges, recyclable.
 - **Arbres** : chêne, acacia et bouleau (et leurs variantes d'automne) sont des copies du sapin du jeu avec un nouveau modèle (tronc et feuillage tirés de l'atlas de feuilles du jeu). On les abat et on les recycle comme les sapins. Chaque type de forêt a son propre bruit de densité : les essences poussent dans des régions différentes de la planète.
@@ -147,20 +151,27 @@ Sept planètes rejoignent le système 442 Otrera, en orbite autour de la même �
 
 Ce sont de vrais objets du jeu : ils s'empilent, pèsent, vont dans l'inventaire et les coffres, tombent au sol, se sauvegardent, avec leur modèle 3D texturé (matériaux du jeu) et leur icône.
 
-### Pièces avancées (onglet **TF Artefacts**)
+### Pièces avancées (onglet **TF Avancé**, dernière rangée)
 
 | Pièce | Effet | Coût |
 |---|---|---|
 | **Réacteur quantique** | 12 000 W en continu, **sans carburant et sans fin** (trois générateurs à bois) | 2 noyaux quantiques, 6 alliages nexoriens, 8 titane, 2 fragments d'artefact, 10 cuivre |
 | **Batterie à cryonite** | 8 fois la capacité d'une batterie, charge et décharge 3 fois plus rapides | 8 cryonite, 4 titane, 8 cuivre, 4 aluminium |
 | **Moteur à matière exotique** | 78 000 N (dix propulseurs chimiques) pour 10 % de leurs ergols | 3 matière exotique, 1 noyau quantique, 12 titane, 6 alliages nexoriens |
+| **Générateur de champ de force** | protège **tout le vaisseau** (et les vaisseaux qui lui sont attachés) : absorbe 150 points de dégâts (chocs, forces de marée des trous noirs). Consomme 2 000 W et 0,02 oxygène/s. Se recharge de 0,5 point/s. Vide, il casse : **5 min** avant de redémarrer. Bulle translucide visible quand il est actif | 1 noyau quantique, 6 cryonite, 4 alliages nexoriens, 6 titane, 8 cuivre |
+| **Condenseur à cryonite** | fabrique 0,05 oxygène/s dans la conduite de sa prise de fluide (vide ou déjà d'oxygène), pour 1 500 W | 6 cryonite, 3 titane, 6 cuivre, 4 verre |
+| **Gyroscope quantique** | le couple de 5 gyroscopes, commandé comme le gyroscope du jeu | 1 noyau quantique, 4 alliages nexoriens, 4 titane, 4 cuivre |
+
+**Prises** du champ de force et du condenseur : 0 signal (charge en %, -1 éteint, négatif pendant le redémarrage ; production du condenseur en millièmes d'unité/s), 1 et 2 puissance (côtés), 3 fluide (arrière, oxygène). Le réacteur alimente ses deux prises (puissance partagée si elles vont à deux réseaux).
+
+**Design (v0.8.0)** : batterie, batterie à cryonite, réacteur, champ de force et condenseur ont un nouveau modèle : carter gris anguleux, bandes blanches sur les arêtes, grilles noires et **ouïes rouges lumineuses** (cyan pour la cryonite, violet pour le quantique). Les moteurs du mod reçoivent le même habillage autour de la tuyère, et leurs prises sont recalées sur le modèle.
 
 L'ordinateur de bord affiche les réacteurs (puissance, « sans carburant »).
 
 Comment ça marche : chaque planète est une copie de la planète de la démo (442 Otrera b), créée avant que le jeu ne charge ses planètes, puis remodelée : bruit du terrain, cratères, matériaux du sol, atmosphère, configuration de la flore et des points d'intérêt. Les autres planètes présentes dans les fichiers de la démo appartiennent au jeu complet : le mod ne les touche pas.
 
 **Limites** :
-- **Multijoueur** : chaque joueur doit avoir le mod et le même réglage `NewPlanets`. Les objets minés ou détruits sur ces planètes (arbres, rochers) ne sont pas synchronisés entre joueurs : leur état réseau vient d'un objet FishNet que seule la scène du jeu peut créer.
+- **Multijoueur** : chaque joueur doit avoir le mod et le même réglage `NewPlanets`. Les planètes du mod n'ont pas d'objet réseau FishNet (seule la scène du jeu peut en créer) : depuis la v0.8.0, les arbres coupés et rochers minés y sont écrits, marqués, dans l'état réseau de la planète de départ, que tous les clients reçoivent, puis relus par chaque client pour la bonne planète.
 - **Sauvegardes** : ne désinstalle pas le mod (et ne coupe pas `NewPlanets`) pendant qu'un joueur ou un vaisseau se trouve sur l'une de ces planètes.
 - L'éclairage précalculé et les distances d'affichage sont ceux de la planète de départ.
 
@@ -175,6 +186,7 @@ Trois stations abandonnées sont créées dans le monde quand l'hôte charge une
 | **Sonde Hadès (trou noir)** | à environ 930 km du trou noir |
 
 - **Localisation** : chaque station a une **balise** à son nom. Elle apparaît sur la carte stellaire comme destination de saut, comme les balises posées par les joueurs.
+- **Targeting Computer** : 4 filtres en haut de la liste des cibles : Tout, Planètes, Stations, Balises.
 - **Contenu** : modules reliés par des couloirs, sas d'entrée, hublots, coque percée par endroits, propulseurs morts, couchettes, réservoirs d'oxygène et d'éthanol, coffres et caisses de butin (dont des objets rares : noyaux quantiques, alliage, matière exotique dans la Sonde Hadès).
 - **Peinture** : coque claire avec une bande de couleur par station (orange Kepler, bleu Orion, rouge sur coque sombre pour Hadès), intérieur clair. Les stations déjà créées dans un monde gardent leur ancien aspect ; une station dont la balise a disparu est recréée.
 - **Abri** : à moins de 3 km d'une station, la gravité du trou noir ne s'applique pas. On peut donc s'amarrer à la Sonde Hadès.
@@ -235,6 +247,9 @@ Réglage : `BlackHole` (section `[TFAdvanced]`, les deux trous noirs), identique
 | `AbandonedStations` | `true` | crée les 3 stations abandonnées dans un monde qui ne les a pas encore |
 | `TerrainChunkBuffer` | `1.5` | place pour les chunks de terrain sur la carte graphique, fois celle du jeu ; au-dessus de 1, les hautes montagnes ne laissent plus de trous dans le sol (environ 38 Mo de mémoire vidéo par 0,1 et par planète proche) |
 | `ReactorWatts` (section `[TFAdvancedPower]`) | `12000` | puissance d'un réacteur quantique (W) |
+| `ShieldWatts` / `ShieldOxygenPerSecond` / `ShieldCapacity` / `ShieldRegenPerSecond` / `ShieldCooldownSeconds` (`[TFAdvancedPower]`) | `2000` / `0.02` / `150` / `0.5` / `300` | champ de force |
+| `CondenserWatts` / `CondenserOxygenPerSecond` (`[TFAdvancedPower]`) | `1500` / `0.05` | condenseur à cryonite |
+| `QuantumGyroFactor` (`[TFAdvancedPower]`) | `5` | couple du gyroscope quantique, en gyroscopes |
 | `SelfTest` | `false` | développement : construit les pièces au menu, en écrit la description et des rendus PNG |
 | `DevWorld` / `DevQuitSeconds` / `DevVisitPlanets` / `DevVisitPlanetId` / `DevVisitStations` / `DevVisitBlackHole` / `DevPlanetsNearby` | vides / `false` | développement : charge automatiquement une **copie** de monde, visite les planètes ou le trou noir, prend des captures dans `UserData/TFAdvanced/dev`, puis quitte |
 
@@ -282,6 +297,12 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.7.0 : pièces avancées | ✅ réacteur, batterie à cryonite et moteur exotique construits (auto-test : prises, état, 78 000 N) ; ⏳ production réelle du réacteur **à tester en jeu** |
 | v0.7.0 : jungle, stations, astéroïdes | ✅ Sylvara : arbres et plantes rendus, 81 FPS ; stations recréées avec peinture et équipements ; anneaux de Petra et Glacia enregistrés et visibles depuis Petra ; ⏳ minage dans les nouveaux anneaux **à tester** |
 | v0.7.0 : performance (tour des 7 planètes) | ✅ 50 à 110 FPS. Corrigé en route : des couches d'arbres séparées se chevauchaient et se renversaient en chaîne (3 FPS) ; chaque planète a maintenant une seule couche d'arbres mêlant les essences |
+| v0.7.1 : monde bloqué au chargement | ✅ un vaisseau au bord extérieur d'un anneau d'astéroïdes faisait lire la densité de l'anneau hors de son tableau ; lecture bornée, largeurs d'anneau du jeu rétablies ; le monde se recharge |
+| v0.8.0 : champ de force, réacteur, condenseur (vaisseau de test câblé lâché de 40 m) | ✅ réacteur 12 000 W sur ses deux prises ; le champ encaisse le crash (charge 100 → 82 %, 30 pièces sur 30 gardées), se recharge à 0,5/s, consomme 0,02 O₂/s ; le condenseur remplit un réservoir vide à 0,05/s. ⏳ Rupture et redémarrage après 5 min, bulle visible **à voir en jeu** |
+| v0.8.0 : arbres en multijoueur | ✅ sur l'hôte, l'état d'une planète du mod est porté par celui de la planète de départ (aller-retour du marquage vérifié). ⏳ **Pas testé avec un vrai client** |
+| v0.8.0 : cité de Nexora | ✅ 8 grands gratte-ciel, 14 tours, 8 dômes, 28 lampadaires, places, voitures, kiosques, coffres posés ; 81,8 FPS |
+| v0.8.0 : Avant-poste Orion | ✅ collisions présentes (sondes dans Orion et Kepler). Le décor traversé et les coffres inutilisables venaient très probablement de la physique de l'hôte bloquée par le bug d'anneau (corrigé en v0.7.1) |
+| v0.8.0 : onglet unique, filtres du Targeting Computer, carte stellaire, gyroscope quantique | ✅ compilés et chargés sans erreur. ⏳ Rendu de l'onglet fusionné, filtres et couple du gyroscope **à vérifier en jeu**. Les noms de la carte stellaire tournent maintenant seulement autour de l'axe de l'hologramme et ne sont plus dupliqués ; le bug « planètes dans tous les sens » n'a pas pu être reproduit |
 | Pose des pièces, écrans en vol, forces des moteurs, multijoueur | ⏳ **à faire en jeu** (procédure ci-dessous) |
 
 ### Procédure de test en jeu

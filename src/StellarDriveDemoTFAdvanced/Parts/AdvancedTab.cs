@@ -3,7 +3,11 @@ using UnityEngine;
 
 namespace StellarDriveDemoTFAdvanced.Parts
 {
-    /// <summary>The "TF Avancé" build menu tab, one row per family (the menu has no scrolling: 3 rows max).</summary>
+    /// <summary>
+    /// The "TF Avancé" build menu tab, one row per family: ship computers, propulsion and power,
+    /// structure, artifacts. The game's menu does not scroll; a tab with more rows or longer rows
+    /// than its panel holds is scaled down to fit (<see cref="BuildMenuFitPatch"/>).
+    /// </summary>
     internal static class AdvancedTab
     {
         public const string Name = "TF Avancé";
@@ -14,15 +18,15 @@ namespace StellarDriveDemoTFAdvanced.Parts
         public const int ConstructionRow = 2;
 
         /// <summary>Only call when SDModKit is loaded.</summary>
-        /// <summary>Parts built from the rare finds of ruins, the abandoned city and the stations.</summary>
-        public const string ArtifactsName = "TF Artefacts";
-        public const int ArtifactsPowerRow = 0;
-        public const int ArtifactsPropulsionRow = 1;
+        /// <summary>Parts built from the rare finds of ruins, the abandoned city and the stations: their own row of the same tab.</summary>
+        public const string ArtifactsName = Name;
+        public const int ArtifactsRow = 3;
+        public const int ArtifactsPowerRow = ArtifactsRow;
+        public const int ArtifactsPropulsionRow = ArtifactsRow;
 
         public static void Declare()
         {
             BuildTabs.Declare(Name, 52, Icon());
-            BuildTabs.Declare(ArtifactsName, 53, CrystalIcon());
         }
 
         // A violet crystal cluster

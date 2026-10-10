@@ -22,6 +22,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> DevPlanetsNearby { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitPlanets { get; private set; }
         public static MelonPreferences_Entry<int> DevVisitPlanetId { get; private set; }
+        public static MelonPreferences_Entry<bool> DevMachineTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitBlackHole { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitStations { get; private set; }
         public static MelonPreferences_Entry<string> DevWorld { get; private set; }
@@ -60,6 +61,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: place the mod's planets a few thousand km from the starting planet, to see them from its surface.");
             DevVisitPlanets = _category.CreateEntry("DevVisitPlanets", false,
                 description: "For mod development: with DevWorld, move the player onto each mod planet and take screenshots there.");
+            DevMachineTest = _category.CreateEntry("DevMachineTest", false,
+                description: "For mod development: with DevWorld, drop a wired test ship with a reactor, a force field and a condenser above the player.");
             DevVisitPlanetId = _category.CreateEntry("DevVisitPlanetId", 0,
                 description: "For mod development: with DevVisitPlanets, visit only this planet (0: all).");
             DevVisitBlackHole = _category.CreateEntry("DevVisitBlackHole", false,

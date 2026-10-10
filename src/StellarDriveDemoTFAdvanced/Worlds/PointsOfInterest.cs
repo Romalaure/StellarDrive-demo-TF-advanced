@@ -118,19 +118,26 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             planet.AddHotspot(new PlanetHotspotsPlacementConfig
             {
                 placementLevel = 4,
-                loadDistance = 3000f,
-                spawnProbability = Mathf.Clamp01(frequency * 0.35f),
+                loadDistance = 3500f,
+                // Fewer cities than before, but each a real district
+                spawnProbability = Mathf.Clamp01(frequency * 0.14f),
                 avoidDenseEnvConstraint = true,
                 minElevationConstraint = true,
                 minElevation = 75f,
                 distributionSteps = new[]
                 {
                     Step(pieces[0], curve, 1, 1, 0f, 1f, 24f),
-                    Step(pieces[1], curve, 1, 3, 26f, 60f, 20f),
-                    Step(pieces[2], curve, 1, 2, 30f, 70f, 28f),
-                    Step(pieces[3], curve, 1, 3, 20f, 75f, 10f),
-                    Step(pieces[4], curve, 0, 1, 45f, 80f, 26f),
-                    Step(pieces[5], curve, 0, 1, 35f, 70f, 24f)
+                    Step(pieces[0], curve, 1, 2, 45f, 90f, 30f),
+                    Step(pieces[1], curve, 3, 6, 26f, 110f, 20f),
+                    Step(pieces[2], curve, 2, 3, 35f, 110f, 28f),
+                    Step(pieces[3], curve, 2, 5, 20f, 120f, 12f),
+                    Step(pieces[4], curve, 1, 2, 50f, 120f, 26f),
+                    Step(pieces[5], curve, 1, 3, 30f, 100f, 24f),
+                    Step(pieces[6], curve, 6, 12, 12f, 110f, 9f),
+                    Step(pieces[7], curve, 2, 4, 18f, 100f, 16f),
+                    Step(pieces[8], curve, 2, 5, 15f, 110f, 8f),
+                    Step(pieces[9], curve, 2, 4, 15f, 100f, 9f),
+                    Step(pieces[10], curve, 2, 4, 15f, 110f, 10f)
                 }
             });
         }

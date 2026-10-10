@@ -247,6 +247,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             }
             foreach (var part in parts.OrderBy(_ => Random.value).Take(count))
             {
+                // A force field takes the tides first (2 points a part)
+                if (Power.ForceField.TryAbsorb(ships, root.Id, 2f))
+                    continue;
                 if (part.Part.HasValue)
                     part.Ship.DestroyStatefulPart(part.Part.Value);
                 else

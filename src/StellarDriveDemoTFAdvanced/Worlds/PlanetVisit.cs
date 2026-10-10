@@ -119,6 +119,13 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     Vector3 standUp = (target + side * 30f).normalized;
                     PlaceLooking(planet, standUp, target);
                     AdvancedMod.Log.Msg($"dev: walked to {site.name} on {planet.name}");
+                    foreach (var physics in Resources.FindObjectsOfTypeAll<Planets.EnvironmentGeneration.Tracking.PlanetObjectPhysics>()
+                        .Where(p => p.gameObject.scene.name != null && p.name.StartsWith("TFA_Ruin")).Take(6))
+                    {
+                        var colliders = physics.GetComponents<Collider>();
+                        AdvancedMod.Log.Msg($"dev:   collider {physics.name} scene {physics.gameObject.scene.name} active {physics.gameObject.activeInHierarchy} layer {physics.gameObject.layer} pos {physics.transform.position} " +
+                            string.Join("; ", colliders.Select(c => $"{c.GetType().Name} enabled {c.enabled} {(c is MeshCollider m ? "convex " + m.convex + " mesh " + (m.sharedMesh != null ? m.sharedMesh.name + " " + m.sharedMesh.vertexCount : "null") : "")} bounds {c.bounds.size}")));
+                    }
                     yield return Wait(4f);
                     DevHarness.Screenshot($"visit_{planet.Id}_{kind}");
                     CheckSpaces(kind);
@@ -156,7 +163,11 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             var state = planet.GetComponent<Planets.Network.PlanetNetworkedState>();
             bool server = state.IsDenseObjectDestroyed(id.PlacedObjectId, true);
             bool client = state.IsDenseObjectDestroyed(id.PlacedObjectId, false);
-            AdvancedMod.Log.Msg($"dev: cut a tree on {planet.name}: destroyed for the server {server}, for the client {client}, collider gone {tree == null}");
+            var demo = ModPlanetState.Demo;
+            var tagged = ModPlanetState.Tag(planet.Id, id.PlacedObjectId);
+            bool carried = demo != null && demo.IsDenseObjectDestroyed(tagged, true) && demo.IsDenseObjectDestroyed(tagged, false);
+            bool roundTrip = ModPlanetState.TryUntag(tagged, out ulong owner, out var back) && owner == planet.Id && back.Equals(id.PlacedObjectId);
+            AdvancedMod.Log.Msg($"dev: cut a tree on {planet.name}: destroyed for the server {server}, for the client {client}, collider gone {tree == null}, carried by the demo planet's synced state {carried}, tag round trip {roundTrip}");
         }
 
         private static IEnumerator Wait(float seconds)

@@ -42,6 +42,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private static void Decorate(PlanetsHologram map)
         {
             int layer = map.gameObject.layer;
+            // Generated again (ship context changes): one set of labels and markers only
+            foreach (Transform child in map.transform.Cast<Transform>().Where(c => c.name.StartsWith("TFA_Map")).ToList())
+                Object.Destroy(child.gameObject);
             Material line = map.GetComponentsInChildren<LineRenderer>(true).Select(l => l.sharedMaterial).FirstOrDefault(m => m != null);
             foreach (PlanetHologram hologram in map.Holograms.Values)
             {
@@ -169,15 +172,22 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         }
     }
 
-    /// <summary>Keeps a star map label turned toward the player's camera.</summary>
+    /// <summary>
+    /// Keeps a star map label upright on the map and turned toward the player, around the map's
+    /// vertical axis only: the text never tilts or spins with the camera.
+    /// </summary>
     internal sealed class FaceCamera : MonoBehaviour
     {
         private void LateUpdate()
         {
             Camera camera = MainCamera.Get();
-            if (camera == null)
+            if (camera == null || transform.parent == null)
                 return;
-            transform.rotation = Quaternion.LookRotation(transform.position - camera.transform.position, camera.transform.up);
+            Vector3 up = transform.parent.up;
+            Vector3 away = Vector3.ProjectOnPlane(transform.position - camera.transform.position, up);
+            if (away.sqrMagnitude < 1e-6f)
+                return;
+            transform.rotation = Quaternion.LookRotation(away.normalized, up);
         }
     }
 }

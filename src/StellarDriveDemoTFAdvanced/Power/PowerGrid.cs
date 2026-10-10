@@ -82,6 +82,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             Batteries.Clear();
             Reactors.Clear();
             Journal.Clear();
+            ForceField.Forget();
+            Condenser.Forget();
             _ships = null;
             _connections = null;
         }
@@ -104,6 +106,8 @@ namespace StellarDriveDemoTFAdvanced.Power
                 PrepareBattery(power, battery, deltaTime);
             foreach (Entry reactor in Reactors)
                 PrepareReactor(power, reactor, deltaTime);
+            ForceField.BeforeTransfers(power, _ships, _connections, deltaTime);
+            Condenser.BeforeTransfers(power, _ships, _connections, deltaTime);
         }
 
         public static void AfterTransfers(float deltaTime)
@@ -117,12 +121,16 @@ namespace StellarDriveDemoTFAdvanced.Power
                 rt.Flow = rt.PendingTransfer / deltaTime;
                 Write(breaker, rt.Status, rt.Flow, now);
             }
+            ForceField.AfterTransfers(deltaTime);
+            Condenser.AfterTransfers(deltaTime);
             float efficiency = Mathf.Clamp(PowerCatalog.BatteryEfficiency.Value, 0.5f, 1f);
             foreach (Entry reactor in Reactors)
             {
                 Runtime rt = reactor.Runtime;
                 // What the network really drew from it
                 float delivered = rt.Group != null ? rt.PendingDischarge * rt.Group.NormalizedGeneratorRate : 0f;
+                if (rt.Output != null)
+                    delivered += rt.PendingTransfer * rt.Output.NormalizedGeneratorRate;
                 rt.Flow = -delivered / deltaTime;
                 Write(reactor, rt.Group != null ? 100f : 0f, rt.Flow, now);
             }
@@ -269,12 +277,25 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             Runtime rt = entry.Runtime;
             rt.Initialized = true;
-            if (!power.TryGetGroupFromSocket(new EntityPartSocket(entry.Ship.Id, entry.Part.Id, PowerCatalog.BatteryPowerA), out PowerGroupServerState group)
-                && !power.TryGetGroupFromSocket(new EntityPartSocket(entry.Ship.Id, entry.Part.Id, PowerCatalog.BatteryPowerB), out group))
+            power.TryGetGroupFromSocket(new EntityPartSocket(entry.Ship.Id, entry.Part.Id, PowerCatalog.BatteryPowerA), out PowerGroupServerState a);
+            power.TryGetGroupFromSocket(new EntityPartSocket(entry.Ship.Id, entry.Part.Id, PowerCatalog.BatteryPowerB), out PowerGroupServerState b);
+            if (a == null && b == null)
                 return;
-            rt.Group = group;
             float output = Mathf.Max(0f, PowerCatalog.ReactorWatts.Value) * deltaTime;
+            if (a != null && b != null && a != b)
+            {
+                // Two separate networks share its output
+                a.TotalPowerProductionCapacity += output * 0.5f;
+                b.TotalPowerProductionCapacity += output * 0.5f;
+                rt.Group = a;
+                rt.Output = b;
+                rt.PendingDischarge = output * 0.5f;
+                rt.PendingTransfer = output * 0.5f;
+                return;
+            }
+            PowerGroupServerState group = a ?? b;
             group.TotalPowerProductionCapacity += output;
+            rt.Group = group;
             rt.PendingDischarge = output;
         }
 
@@ -366,7 +387,7 @@ namespace StellarDriveDemoTFAdvanced.Power
     {
         private static void Prefix(StatefulPart part, ref IStatefulPartState state)
         {
-            if (part?.Settings != null && PowerCatalog.IsPowerPart(part.Settings.id) && state is FluidTankState tank && tank.FluidQuantity != 0f)
+            if (part?.Settings != null && PowerCatalog.HoldsNoFluid(part.Settings.id) && state is FluidTankState tank && tank.FluidQuantity != 0f)
                 state = tank with { FluidQuantity = 0f };
         }
     }
