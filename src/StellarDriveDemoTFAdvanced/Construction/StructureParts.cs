@@ -84,14 +84,11 @@ namespace StellarDriveDemoTFAdvanced.Construction
             settings.internalStateClass = null;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, spec.Size.y * 0.5f, 0f), spec.Size);
 
-            var mesh = new MeshBuilder();
+            // Long parts take the tall drawn panel, flat ones the wide one
+            var mesh = new MeshBuilder { Panel = spec.Size.y > 0.5f ? GameSkin.TallPanel : GameSkin.PlainPanel };
             spec.Build(mesh);
-            var child = new GameObject("TFA_Structure") { layer = visuals.gameObject.layer };
-            child.transform.SetParent(visuals, false);
-            child.AddComponent<MeshFilter>().sharedMesh = mesh.Build("TFA_Structure" + spec.Id);
-            var renderer = child.AddComponent<MeshRenderer>();
-            renderer.sharedMaterial = LitMaterials.Get("TFA_StructureSteel", new Color(0.58f, 0.6f, 0.63f), 0.7f, 0.4f);
-            renderer.shadowCastingMode = ShadowCastingMode.On;
+            GameSkin.AddMesh(visuals, visuals.gameObject.layer, "TFA_Structure" + spec.Id, mesh,
+                LitMaterials.Get("TFA_StructureSteel", new Color(0.58f, 0.6f, 0.63f), 0.7f, 0.4f), ShadowCastingMode.On);
         }
 
         private static Spec Beam(ushort id, string label, float length, float mass, int iron)

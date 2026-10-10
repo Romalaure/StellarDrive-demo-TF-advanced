@@ -209,7 +209,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                 float y = top + (grid ? (i / 2) * (cellHeight + Gap) : 0f);
                 _backgrounds[i] = NewImage(rect, layer);
                 Place(_backgrounds[i].rectTransform, x, y, cellWidth, cellHeight);
-                _panels[i] = NewText(rect, font, layer, grid ? 17f : 24f, grid ? 7f : 9f);
+                _panels[i] = NewText(rect, font, layer, grid ? 22f : 30f, grid ? 8f : 10f);
                 _panels[i].alignment = TextAlignmentOptions.TopLeft;
                 _panels[i].lineSpacing = 4f;
                 Place(_panels[i].rectTransform, x + 10f, y + 8f, cellWidth - 20f, cellHeight - 16f);

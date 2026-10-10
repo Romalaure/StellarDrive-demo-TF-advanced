@@ -8,6 +8,8 @@ using SDModKit.Game;
 using Ships.Interface.Model.Parts;
 using Ships.Interface.Model.Parts.Common;
 using Ships.Interface.Settings;
+using Ships.Parts.Common;
+using Ships.Parts.Common.Model.Reactions;
 using Ships.Parts.SignalDisplay;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -37,8 +39,24 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 Donor = donor,
                 BuildTab = AdvancedTab.Name,
                 BuildRow = row,
-                Configure = configure
+                Configure = (settings, prefab) =>
+                {
+                    configure(settings, prefab);
+                    EnsureVisual(prefab);
+                }
             });
+        }
+
+        /// <summary>
+        /// The build menu thumbnail, the placement preview and the build tool screen all copy the
+        /// part's IShipPartVisual object: a part without one throws and breaks the build tool.
+        /// </summary>
+        private static void EnsureVisual(GameObject prefab)
+        {
+            if (prefab.GetComponentInChildren<IShipPartVisual>(true) != null)
+                return;
+            Transform visuals = prefab.transform.Find("Visuals") ?? prefab.transform.Find("Visual") ?? prefab.transform;
+            visuals.gameObject.AddComponent<DefaultShipPartVisuals>();
         }
 
         public static void Describe(PartSettings settings, string label, string description, float mass, (uint Item, int Count)[] cost)
@@ -57,6 +75,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
         public static Transform BlankFromSignalDisplay(GameObject prefab, Vector3 boundsCenter, Vector3 boundsSize)
         {
             Transform visuals = prefab.transform.Find("Visuals");
+            GameSkin.Capture(prefab);
             Object.DestroyImmediate(visuals.GetComponent<SignalDisplayVisuals>());
             foreach (Transform child in visuals.Cast<Transform>().ToList())
                 Object.DestroyImmediate(child.gameObject);

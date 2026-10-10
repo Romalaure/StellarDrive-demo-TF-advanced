@@ -50,7 +50,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             var size = new Vector3(1.04f, 0.07f, 0.66f);
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, size.y * 0.5f, 0f), size);
 
-            var frame = new MeshBuilder();
+            var frame = new MeshBuilder { Panel = GameSkin.PlainPanel };
             frame.Box(new Vector3(0f, 0.03f, 0f), new Vector3(1.04f, 0.06f, 0.66f));
             // Raised bezel around the glass
             frame.Box(new Vector3(0f, 0.064f, 0.31f), new Vector3(1.04f, 0.008f, 0.04f));
@@ -75,7 +75,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             Vector3 screenUp = new Vector3(0f, normal.z, -normal.y);
             Vector3 center = new Vector3(0f, 1.06f, 0.1f);
 
-            var frame = new MeshBuilder();
+            var frame = new MeshBuilder { Panel = GameSkin.PlainPanel };
             frame.Box(new Vector3(0f, 0.02f, 0f), new Vector3(0.9f, 0.04f, 0.6f));
             frame.Box(new Vector3(0f, 0.48f, -0.06f), new Vector3(0.7f, 0.9f, 0.34f));
             // Neck between the pedestal and the screen housing
@@ -94,7 +94,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                 PartFactory.Describe(settings, label, description + " Aucune prise ni touche.", 3f, SmallCost);
                 var size = new Vector3(0.56f, 0.06f, 0.38f);
                 Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, size.y * 0.5f, 0f), size);
-                var frame = new MeshBuilder();
+                var frame = new MeshBuilder { Panel = GameSkin.PlainPanel };
                 frame.Box(new Vector3(0f, 0.025f, 0f), new Vector3(0.56f, 0.05f, 0.38f));
                 var glass = new MeshBuilder();
                 glass.Box(new Vector3(0f, 0.051f, 0f), new Vector3(0.52f, 0.002f, 0.34f));
@@ -107,7 +107,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             string layout, float width, float height)
         {
             int layer = visuals.gameObject.layer;
-            AddMesh(visuals, layer, "TFA_Frame", frame, LitMaterials.Get("TFA_Frame", new Color(0.26f, 0.28f, 0.31f), 0.55f, 0.45f), ShadowCastingMode.On);
+            GameSkin.AddMesh(visuals, layer, "TFA_Frame", frame, LitMaterials.Get("TFA_Frame", new Color(0.26f, 0.28f, 0.31f), 0.55f, 0.45f), ShadowCastingMode.On);
             // "TF_NoPaint" keeps the TF paint tool off the glass
             AddMesh(visuals, layer, "TF_NoPaint_ScreenGlass", glass,
                 LitMaterials.Get("TFA_ScreenGlass", new Color(0.02f, 0.03f, 0.04f), 0f, 0.92f, new Color(0.01f, 0.018f, 0.025f)), ShadowCastingMode.Off);

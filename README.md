@@ -150,6 +150,8 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | Chargement par MelonLoader | ✅ 6 patchs appliqués, aucune erreur |
 | Construction des 20 pièces par SDModKit (auto-test au menu, v0.3.0) | ✅ ids, libellés, masses, tailles, états ; prises : écrans 0, moteurs 4 fluides, batterie 0-1 puissance + 2 signal, disjoncteur 0-1 puissance + 2-3 signal ; 8 patchs appliqués |
 | Écran hors vaisseau | ✅ canevas créé, police du jeu (Anta) et palette du jeu |
+| v0.3.1 : composant visuel de chaque pièce (vignettes, aperçu de pose, écran du build tool) | ✅ 20/20 (son absence sur la structure cassait le panneau du build tool en v0.3.0) |
+| v0.3.1 : rendu des pièces | ✅ rendus PNG hors champ : matériau `Custom/PlanetObject` du jeu, panneaux dessinés de l'atlas LogicGates, comparés au coffre du jeu |
 | Pose des pièces, écrans en vol, forces des moteurs, multijoueur | ⏳ **à faire en jeu** (procédure ci-dessous) |
 
 ### Procédure de test en jeu

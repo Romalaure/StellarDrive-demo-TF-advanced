@@ -61,19 +61,19 @@ namespace StellarDriveDemoTFAdvanced.Power
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, size.y * 0.5f, 0f), size);
             int layer = visuals.gameObject.layer;
 
-            var housing = new MeshBuilder();
+            var housing = new MeshBuilder { Panel = GameSkin.PlainPanel };
             housing.Box(new Vector3(0f, 0.055f, 0f), new Vector3(0.4f, 0.11f, 0.36f));
             housing.Box(new Vector3(0f, 0.115f, -0.08f), new Vector3(0.14f, 0.01f, 0.1f));
-            var lever = new MeshBuilder();
+            var lever = new MeshBuilder { Panel = GameSkin.PlainPanel };
             lever.Box(new Vector3(0f, 0.035f, 0f), new Vector3(0.05f, 0.07f, 0.03f));
             var led = new MeshBuilder();
             led.Box(new Vector3(0.13f, 0.112f, -0.08f), new Vector3(0.03f, 0.006f, 0.03f));
 
-            AddMesh(visuals, layer, "TFA_BreakerHousing", housing, LitMaterials.Get("TFA_BreakerHousing", new Color(0.78f, 0.79f, 0.8f), 0.2f, 0.5f));
+            GameSkin.AddMesh(visuals, layer, "TFA_BreakerHousing", housing, LitMaterials.Get("TFA_BreakerHousing", new Color(0.78f, 0.79f, 0.8f), 0.2f, 0.5f));
             var leverPivot = new GameObject(BreakerVisuals.LeverName) { layer = layer };
             leverPivot.transform.SetParent(visuals, false);
             leverPivot.transform.localPosition = new Vector3(0f, 0.12f, -0.08f);
-            AddMesh(leverPivot.transform, layer, "TF_NoPaint_BreakerLever", lever, LitMaterials.Get("TFA_BreakerLever", new Color(0.1f, 0.1f, 0.11f), 0.1f, 0.6f));
+            GameSkin.AddMesh(leverPivot.transform, layer, "TF_NoPaint_BreakerLever", lever, LitMaterials.Get("TFA_BreakerLever", new Color(0.1f, 0.1f, 0.11f), 0.1f, 0.6f));
             AddMesh(visuals, layer, BreakerVisuals.LedName, led, LitMaterials.Get("TFA_BreakerLed", Color.white, 0f, 0.8f, Color.white));
             visuals.gameObject.AddComponent<BreakerVisuals>();
 

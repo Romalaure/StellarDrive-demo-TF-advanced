@@ -58,7 +58,9 @@ namespace StellarDriveDemoTFAdvanced.Common
                 int renderers = prefab.GetComponentsInChildren<MeshRenderer>(true).Length;
                 string sockets = string.Join(",", prefab.GetComponentsInChildren<Ships.Interface.Model.Parts.Common.SocketObject>(true)
                     .Select(s => s.Id + ":" + s.Type).OrderBy(s => s));
-                report.Append($"\n  {id} '{settings.fullLabel}' {settings.GetType().Name} state={settings.internalStateClass} mass={settings.mass} bounds={bounds?.bounds} renderers={renderers} sockets=[{sockets}]");
+                // The build menu thumbnail and the placement preview copy this component: a part without it breaks the build tool
+                bool hasVisual = prefab.GetComponentInChildren<Ships.Parts.Common.Model.Reactions.IShipPartVisual>() != null;
+                report.Append($"\n  {id} visual={(hasVisual ? "ok" : "MISSING")} '{settings.fullLabel}' {settings.GetType().Name} state={settings.internalStateClass} mass={settings.mass} bounds={bounds?.bounds} renderers={renderers} sockets=[{sockets}]");
                 if (prefab.GetComponentInChildren<DashboardVisuals>(true) != null)
                 {
                     Transform anchor = prefab.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name.StartsWith(DashboardVisuals.AnchorPrefix));
@@ -69,6 +71,8 @@ namespace StellarDriveDemoTFAdvanced.Common
             }
             AdvancedMod.Log.Msg(report.ToString());
             TestCanvas();
+            MaterialProbe.Run();
+            PartSnapshots.Run();
         }
 
         // A screen outside any ship: shows its idle text, and proves the canvas and font work here

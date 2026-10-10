@@ -6,18 +6,35 @@ namespace StellarDriveDemoTFAdvanced.Common
     /// <summary>
     /// Builds simple low-poly meshes from boxes, slanted blocks and cylinders/cones.
     /// Triangles are wound automatically so they face away from the shape they belong to.
+    /// Texture coordinates follow the game's part style: every box face shows one whole hand-drawn
+    /// panel of a texture atlas (<see cref="Panel"/>), outline included; cylinders wrap it once.
     /// </summary>
     internal sealed class MeshBuilder
     {
         private readonly List<Vector3> _vertices = new List<Vector3>();
         private readonly List<Vector3> _normals = new List<Vector3>();
+        private readonly List<Vector2> _uvs = new List<Vector2>();
         private readonly List<int> _triangles = new List<int>();
 
-        public Mesh Build(string name)
+        /// <summary>Atlas rectangle (0-1) the next shapes map their faces to.</summary>
+        public Rect Panel = new Rect(0f, 0f, 1f, 1f);
+
+        public Mesh Build(string name) => Build(name, null);
+
+        /// <summary>Builds the mesh; <paramref name="paletteUv"/> fills UV1, which the game's part shader reads its ship palette color from.</summary>
+        public Mesh Build(string name, Vector2? paletteUv)
         {
             var mesh = new Mesh { name = name };
             mesh.SetVertices(_vertices);
             mesh.SetNormals(_normals);
+            mesh.SetUVs(0, _uvs);
+            if (paletteUv.HasValue)
+            {
+                var palette = new List<Vector2>(_vertices.Count);
+                for (int i = 0; i < _vertices.Count; i++)
+                    palette.Add(paletteUv.Value);
+                mesh.SetUVs(1, palette);
+            }
             mesh.SetTriangles(_triangles, 0);
             mesh.RecalculateBounds();
             mesh.RecalculateTangents();
@@ -31,6 +48,7 @@ namespace StellarDriveDemoTFAdvanced.Common
             foreach (Vector3 v in other._vertices)
                 _vertices.Add(v + offset);
             _normals.AddRange(other._normals);
+            _uvs.AddRange(other._uvs);
             foreach (int index in other._triangles)
                 _triangles.Add(start + index);
         }
@@ -141,8 +159,9 @@ namespace StellarDriveDemoTFAdvanced.Common
                 int j = (i + 1) % sides;
                 Vector3 ni = (radial[i] + axis * slope).normalized;
                 Vector3 nj = (radial[j] + axis * slope).normalized;
-                Triangle(ringA[i], ringA[j], ringB[j], ni, nj, nj, ni + nj);
-                Triangle(ringA[i], ringB[j], ringB[i], ni, nj, ni, ni + nj);
+                float ui = (float)i / sides, uj = (float)(i + 1) / sides;
+                Triangle(ringA[i], ringA[j], ringB[j], ni, nj, nj, ni + nj, At(ui, 0f), At(uj, 0f), At(uj, 1f));
+                Triangle(ringA[i], ringB[j], ringB[i], ni, nj, ni, ni + nj, At(ui, 0f), At(uj, 1f), At(ui, 1f));
             }
 
             if (capA && ra > 0f)
@@ -153,8 +172,13 @@ namespace StellarDriveDemoTFAdvanced.Common
 
         private void Disc(Vector3 center, Vector3[] ring, Vector3 normal)
         {
-            for (int i = 0; i < ring.Length; i++)
-                Triangle(center, ring[i], ring[(i + 1) % ring.Length], normal, normal, normal, normal);
+            int count = ring.Length;
+            for (int i = 0; i < count; i++)
+            {
+                float ai = i * Mathf.PI * 2f / count, aj = (i + 1) * Mathf.PI * 2f / count;
+                Triangle(center, ring[i], ring[(i + 1) % count], normal, normal, normal, normal,
+                    At(0.5f, 0.5f), At(0.5f + 0.5f * Mathf.Cos(ai), 0.5f + 0.5f * Mathf.Sin(ai)), At(0.5f + 0.5f * Mathf.Cos(aj), 0.5f + 0.5f * Mathf.Sin(aj)));
+            }
         }
 
         private void Quad(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 outward)
@@ -164,17 +188,24 @@ namespace StellarDriveDemoTFAdvanced.Common
             if (Vector3.Dot(n, outward) < 0f)
                 n = -n;
             n.Normalize();
-            Triangle(p0, p1, p2, n, n, n, n);
-            Triangle(p0, p2, p3, n, n, n, n);
+            // The panel's long side follows the face's long side, so long beams are not squashed
+            bool turn = (p1 - p0).sqrMagnitude > (p3 - p0).sqrMagnitude != Panel.width > Panel.height;
+            Vector2 uv0 = At(0f, 0f), uv1 = turn ? At(0f, 1f) : At(1f, 0f), uv2 = At(1f, 1f), uv3 = turn ? At(1f, 0f) : At(0f, 1f);
+            Triangle(p0, p1, p2, n, n, n, n, uv0, uv1, uv2);
+            Triangle(p0, p2, p3, n, n, n, n, uv0, uv2, uv3);
         }
 
-        private void Triangle(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 n0, Vector3 n1, Vector3 n2, Vector3 outward)
+        // A point of the current atlas panel
+        private Vector2 At(float u, float v) => new Vector2(Panel.xMin + u * Panel.width, Panel.yMin + v * Panel.height);
+
+        private void Triangle(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 n0, Vector3 n1, Vector3 n2, Vector3 outward, Vector2 t0, Vector2 t1, Vector2 t2)
         {
             // Unity front faces: Cross(p1 - p0, p2 - p0) points out of the surface
             if (Vector3.Dot(Vector3.Cross(p1 - p0, p2 - p0), outward) < 0f)
             {
                 (p1, p2) = (p2, p1);
                 (n1, n2) = (n2, n1);
+                (t1, t2) = (t2, t1);
             }
             int start = _vertices.Count;
             _vertices.Add(p0);
@@ -183,6 +214,9 @@ namespace StellarDriveDemoTFAdvanced.Common
             _normals.Add(n0);
             _normals.Add(n1);
             _normals.Add(n2);
+            _uvs.Add(t0);
+            _uvs.Add(t1);
+            _uvs.Add(t2);
             _triangles.Add(start);
             _triangles.Add(start + 1);
             _triangles.Add(start + 2);
