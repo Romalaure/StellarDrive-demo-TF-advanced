@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <!-- Game install folder. Override per machine in Directory.Build.props.user or with -p:GamePath=... -->
+    <GamePath Condition="'$(GamePath)' == ''">G:\SteamLibrary\steamapps\common\StellarDrive Demo</GamePath>
+    <ManagedPath>$(GamePath)\StellarDrive_Data\Managed</ManagedPath>
+    <MelonLoaderPath>$(GamePath)\MelonLoader\net35</MelonLoaderPath>
+  </PropertyGroup>
+  <Import Project="Directory.Build.props.user" Condition="Exists('$(MSBuildThisFileDirectory)Directory.Build.props.user')" />
+</Project>

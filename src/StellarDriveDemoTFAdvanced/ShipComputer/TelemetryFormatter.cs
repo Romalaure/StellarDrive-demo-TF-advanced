@@ -1,0 +1,272 @@
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
+using UnityEngine;
+
+namespace StellarDriveDemoTFAdvanced.ShipComputer
+{
+    internal enum ComputerSection
+    {
+        Flight,
+        Propulsion,
+        Power,
+        Diagnostics
+    }
+
+    /// <summary>Writes the panel text of each section (TextMeshPro rich text, label / value columns).</summary>
+    internal sealed class TelemetryFormatter
+    {
+        private const int MaxListedParts = 8;
+        private const string ValueColumn = "<pos=42%>";
+        // French style (1 234,5) with a plain space: the game font may lack the non-breaking ones fr-FR uses
+        private static readonly NumberFormatInfo Fr = new NumberFormatInfo { NumberDecimalSeparator = ",", NumberGroupSeparator = " " };
+
+        private readonly StringBuilder _sb = new StringBuilder(2048);
+        private string _dim;
+        private string _strong;
+
+        public string Write(ComputerSection section, TelemetrySnapshot snap, List<DiagnosticMessage> messages, float sampleMs, float rate)
+        {
+            _sb.Clear();
+            _dim = ComputerStyle.Hex(ComputerStyle.TextDim);
+            _strong = ComputerStyle.Hex(ComputerStyle.TextStrong);
+            if (!snap.HasShip && section != ComputerSection.Diagnostics)
+            {
+                Dim(snap.NoShipReason ?? "Aucun vaisseau actif.");
+                return _sb.ToString();
+            }
+            switch (section)
+            {
+                case ComputerSection.Flight: Flight(snap); break;
+                case ComputerSection.Propulsion: Propulsion(snap); break;
+                case ComputerSection.Power: Power(snap); break;
+                default: Diagnostics(snap, messages, sampleMs, rate); break;
+            }
+            return _sb.ToString();
+        }
+
+        private void Flight(TelemetrySnapshot snap)
+        {
+            Row("Vaisseau", $"#{snap.ShipId} · {snap.ShipSource} · {snap.PartCount} pièces");
+            Row("Masse", N(snap.Mass, "0") + " kg" + (snap.ConnectedShipCount > 0 ? $" <color={_dim}>(+{snap.ConnectedShipCount} liés)</color>" : ""));
+            Row("Espace", snap.SpaceKind ?? Unavailable());
+            Row("Référence", snap.PlanetName ?? Unavailable());
+            Row("Altitude", snap.Altitude.HasValue ? N(snap.Altitude.Value, "0") + $" m <color={_dim}>/ rayon moyen</color>" : Unavailable());
+            Row("Vit. surface", Speed(snap.SurfaceSpeed));
+            Row("Vit. verticale", snap.VerticalSpeed.HasValue ? Signed(snap.VerticalSpeed.Value, "0.0") + " m/s" : Unavailable());
+            Row("Vit. orbitale", Speed(snap.SpaceSpeed));
+            if (snap.Pitch.HasValue)
+                Row("Assiette", $"tangage {Signed(snap.Pitch.Value, "0.0")}°  roulis {Signed(snap.Roll ?? 0f, "0.0")}°");
+            else
+                Row("Assiette", Unavailable());
+            Row("Repère", snap.AttitudeFrame);
+            if (snap.AngularVelocity.HasValue)
+            {
+                Vector3 w = snap.AngularVelocity.Value;
+                Row("Rotation", N(w.magnitude, "0.0") + $" °/s <color={_dim}>(T {Signed(w.x, "0")} L {Signed(w.y, "0")} R {Signed(w.z, "0")})</color>");
+            }
+            else
+            {
+                Row("Rotation", Unavailable("mesure en cours"));
+            }
+            Row("Sol", Unavailable("non mesuré"));
+
+            _sb.Append('\n');
+            Title("TRAFIC");
+            if (snap.Traffic.Count == 0)
+            {
+                Dim("Aucun autre vaisseau suivi à portée.");
+                return;
+            }
+            int shown = 0;
+            foreach (TrafficContact contact in snap.Traffic)
+            {
+                if (shown++ >= 4)
+                {
+                    Dim($"+{snap.Traffic.Count - 4} autres");
+                    break;
+                }
+                string closing = contact.ClosingSpeed > 0.05f ? $"approche {N(contact.ClosingSpeed, "0.0")} m/s"
+                    : contact.ClosingSpeed < -0.05f ? $"s'éloigne {N(-contact.ClosingSpeed, "0.0")} m/s" : "stable";
+                Row($"#{contact.ShipId}", $"{N(contact.Distance, "0")} m · {closing}");
+            }
+        }
+
+        private void Propulsion(TelemetrySnapshot snap)
+        {
+            float thrust = snap.NetThrust.magnitude;
+            Row("Poussée nette", $"{N(thrust, "0")} N <color={_dim}>/ {N(snap.MaxThrust, "0")} N max</color>");
+            Row("Accélération", snap.Mass > 0f ? N(thrust / snap.Mass, "0.00") + " m/s²" : Unavailable());
+
+            _sb.Append('\n');
+            Title($"PROPULSEURS ({snap.Thrusters.Count})");
+            if (snap.Thrusters.Count == 0)
+                Dim("Aucun propulseur détecté.");
+            int shown = 0;
+            foreach (ThrusterReading thruster in snap.Thrusters)
+            {
+                if (shown++ >= MaxListedParts)
+                {
+                    Dim($"+{snap.Thrusters.Count - MaxListedParts} autres");
+                    break;
+                }
+                string label = thruster.Name + $" #{thruster.PartId}";
+                string detail = thruster.Kind == ThrusterKind.Chemical
+                    ? $"{Pct(thruster.Level)} · {N(thruster.Thrust, "0")} N · {N(thruster.PropellantFlow, "0.000")} u/s"
+                    : $"{Pct(thruster.Level)} · {N(thruster.Thrust, "0")} N · bois {N(thruster.Wood, "0.0")}";
+                Row(label, detail + $" <color={_dim}>{Axis(thruster.Direction)}</color>");
+            }
+
+            _sb.Append('\n');
+            Title("CONTRÔLE D'ATTITUDE");
+            if (snap.Gyros.Count == 0)
+                Dim("Aucun gyroscope ni siège pilote.");
+            shown = 0;
+            foreach (GyroReading gyro in snap.Gyros)
+            {
+                if (shown++ >= MaxListedParts)
+                {
+                    Dim($"+{snap.Gyros.Count - MaxListedParts} autres");
+                    break;
+                }
+                if (gyro.IsSeat)
+                {
+                    Row($"Siège #{gyro.PartId}", $"{Pct(gyro.Strength)} <color={_dim}>{(gyro.SeatInUse ? "occupé" : "libre")}</color>");
+                    continue;
+                }
+                string power = !gyro.PowerConnected ? Colored(ComputerStyle.Warning, "non branché")
+                    : gyro.PowerSatisfaction.HasValue ? "alim. " + Pct(gyro.PowerSatisfaction.Value) : $"<color={_dim}>branché</color>";
+                Row($"Gyroscope #{gyro.PartId}", $"{Pct(gyro.Strength)} · {power}");
+            }
+
+            if (snap.WarpDrives.Count > 0)
+            {
+                _sb.Append('\n');
+                Title("CŒUR STELLAIRE");
+                foreach (WarpReading warp in snap.WarpDrives)
+                    Row($"#{warp.PartId}", warp.State);
+            }
+        }
+
+        private void Power(TelemetrySnapshot snap)
+        {
+            float produced = 0f;
+            foreach (GeneratorReading generator in snap.Generators)
+                produced += generator.Watts;
+            Row("Production", $"{N(produced, "0")} W <color={_dim}>({snap.Generators.Count} générateur(s))</color>");
+            Row("Stockage", snap.DecorativeBatteries > 0 ? Unavailable("Battery Bank sans fonction") : Unavailable("aucun dans le jeu"));
+
+            _sb.Append('\n');
+            Title("GÉNÉRATEURS");
+            if (snap.Generators.Count == 0)
+                Dim("Aucun générateur.");
+            foreach (GeneratorReading generator in snap.Generators)
+            {
+                string output = generator.Connected ? "" : " · " + Colored(ComputerStyle.Warning, "non branché");
+                Row($"Bois #{generator.PartId}", $"{Pct(generator.Level)} · {N(generator.Watts, "0")} W · bois {N(generator.Wood, "0.0")}{output}");
+            }
+
+            _sb.Append('\n');
+            Title("CONSOMMATEURS");
+            if (snap.Consumers.Count == 0)
+                Dim("Aucun consommateur électrique.");
+            int shown = 0;
+            foreach (ConsumerReading consumer in snap.Consumers)
+            {
+                if (shown++ >= MaxListedParts)
+                {
+                    Dim($"+{snap.Consumers.Count - MaxListedParts} autres");
+                    break;
+                }
+                string watts = consumer.Watts.HasValue ? N(consumer.Watts.Value, "0") + " W" : $"<color={_dim}>W non publié</color>";
+                string plug = consumer.Connected ? "" : " · " + Colored(ComputerStyle.Warning, "non branché");
+                Row($"{consumer.Name} #{consumer.PartId}", $"{Pct(consumer.Level)} · {watts}{plug}");
+            }
+
+            _sb.Append('\n');
+            Title(snap.HostPowerDetails ? "RÉSEAUX (mesure serveur)" : "RÉSEAUX (câbles)");
+            if (snap.Networks.Count == 0)
+                Dim("Aucun réseau électrique câblé.");
+            int index = 1;
+            foreach (PowerNetworkReading network in snap.Networks)
+            {
+                string detail = $"{N(network.Watts, "0")} W transmis";
+                if (network.Demand.HasValue)
+                    detail += $" · dem. {N(network.Demand.Value, "0")} · cap. {N(network.Capacity ?? 0f, "0")}";
+                if (network.Satisfaction.HasValue)
+                    detail += " · " + Pct(network.Satisfaction.Value);
+                Row($"Réseau {index++}", detail + $" <color={_dim}>({network.Cables} câbles)</color>");
+            }
+        }
+
+        private void Diagnostics(TelemetrySnapshot snap, List<DiagnosticMessage> messages, float sampleMs, float rate)
+        {
+            foreach (DiagnosticMessage message in messages)
+            {
+                string tag = message.Severity == Severity.Error ? "ERREUR" : message.Severity == Severity.Warning ? "ALERTE" : "INFO";
+                _sb.Append(Colored(ShipComputer.Diagnostics.ColorOf(message.Severity), tag)).Append("  ").Append(message.Text).Append('\n');
+            }
+            _sb.Append('\n');
+            Title("TECHNIQUE");
+            Row("Rôle", snap.IsHost ? "hôte (données serveur disponibles)" : "client");
+            Row("Lecture", $"{N(rate, "0.#")} /s · {N(sampleMs, "0.00")} ms");
+            Row("Palette", ComputerStyle.HasGamePalette ? "jeu" : Unavailable("secours"));
+        }
+
+        private void Row(string label, string value)
+        {
+            _sb.Append(label).Append(ValueColumn).Append("<color=").Append(_strong).Append('>').Append(value).Append("</color>\n");
+        }
+
+        private void Title(string title)
+        {
+            _sb.Append("<color=").Append(ComputerStyle.Hex(ComputerStyle.Line)).Append("><b>").Append(title).Append("</b></color>\n");
+        }
+
+        private void Dim(string text)
+        {
+            _sb.Append("<color=").Append(_dim).Append('>').Append(text).Append("</color>\n");
+        }
+
+        private string Unavailable(string why = "indisponible")
+        {
+            return $"<color={_dim}>{why}</color>";
+        }
+
+        private string Speed(float? value)
+        {
+            return value.HasValue ? N(value.Value, "0.0") + " m/s" : Unavailable();
+        }
+
+        private static string Colored(Color color, string text)
+        {
+            return $"<color={ComputerStyle.Hex(color)}>{text}</color>";
+        }
+
+        private static string N(float value, string format)
+        {
+            return value.ToString(format, Fr);
+        }
+
+        private static string Signed(float value, string format)
+        {
+            return (value >= 0f ? "+" : "") + value.ToString(format, Fr);
+        }
+
+        private static string Pct(float value)
+        {
+            return Mathf.RoundToInt(Mathf.Clamp01(value) * 100f) + " %";
+        }
+
+        // Which way a thruster pushes the ship, in the ship grid
+        private static string Axis(Vector3 direction)
+        {
+            Vector3 a = new Vector3(Mathf.Abs(direction.x), Mathf.Abs(direction.y), Mathf.Abs(direction.z));
+            if (a.x >= a.y && a.x >= a.z)
+                return direction.x > 0f ? "→ +X" : "→ −X";
+            if (a.y >= a.z)
+                return direction.y > 0f ? "→ +Y" : "→ −Y";
+            return direction.z > 0f ? "→ +Z" : "→ −Z";
+        }
+    }
+}

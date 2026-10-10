@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>StellarDriveDemoTFAdvanced</AssemblyName>
+    <RootNamespace>StellarDriveDemoTFAdvanced</RootNamespace>
+    <Version>0.2.0</Version>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Game assemblies reference netstandard facades; silence the resulting version-conflict noise -->
+    <ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch>true</ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch>
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3277;MSB3243</MSBuildWarningsAsMessages>
+    <!-- Copy the built DLL into the game's Mods folder after each build -->
+    <DeployToGame Condition="'$(DeployToGame)' == ''">true</DeployToGame>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- MelonLoader -->
+  <ItemGroup>
+    <Reference Include="MelonLoader" HintPath="$(MelonLoaderPath)\MelonLoader.dll" Private="false" />
+    <Reference Include="0Harmony" HintPath="$(MelonLoaderPath)\0Harmony.dll" Private="false" />
+  </ItemGroup>
+
+  <!-- SDModKit (needed at runtime for the new parts): install it in the game with StellarModManager -->
+  <ItemGroup>
+    <Reference Include="SDModKit" HintPath="$(GamePath)\Mods\SDModKit.dll" Private="false" />
+  </ItemGroup>
+
+  <!-- Every game and Unity assembly from the local install (BCL facades excluded), never copied -->
+  <ItemGroup>
+    <GameAssembly Include="$(ManagedPath)\*.dll"
+                  Exclude="$(ManagedPath)\mscorlib.dll;$(ManagedPath)\netstandard.dll;$(ManagedPath)\System*.dll;$(ManagedPath)\Mono.*.dll;$(ManagedPath)\Microsoft.*.dll" />
+  </ItemGroup>
+
+  <Target Name="AddGameReferences" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Include="%(GameAssembly.Filename)">
+        <HintPath>%(GameAssembly.FullPath)</HintPath>
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <Reference Include="System.Core" />
+  </ItemGroup>
+
+  <Target Name="DeployToGameMods" AfterTargets="Build" Condition="'$(DeployToGame)' == 'true' And Exists('$(GamePath)\Mods')">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GamePath)\Mods" />
+    <Message Importance="high" Text="Deployed $(TargetFileName) -> $(GamePath)\Mods" />
+  </Target>
+
+</Project>
