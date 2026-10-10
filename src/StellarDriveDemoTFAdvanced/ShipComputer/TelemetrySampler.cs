@@ -135,13 +135,14 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             }
             snap.SurfaceSpeed = surfaceVelocity?.magnitude;
 
-            // The mod's black hole: distance, its pull, and the clock rate there
-            if (Worlds.BlackHole.TryOffset(GameServices.Transpose, physics.SpaceId, physics.Position, out Vector3 toHole)
-                && toHole.magnitude < Worlds.BlackHole.InfluenceRadius)
+            // The nearest of the mod's black holes: distance, its pull, and the clock rate there
+            if (Worlds.BlackHole.TryNearest(GameServices.Transpose, physics.SpaceId, physics.Position, out Worlds.Hole hole, out Vector3 toHole)
+                && toHole.magnitude < hole.InfluenceRadius)
             {
+                snap.BlackHole = hole;
                 snap.BlackHoleDistance = toHole.magnitude;
-                snap.BlackHoleGravity = Worlds.BlackHole.Acceleration(toHole).magnitude;
-                snap.BlackHoleTimeDilation = Worlds.BlackHole.TimeDilation(toHole.magnitude);
+                snap.BlackHoleGravity = hole.Acceleration(toHole).magnitude;
+                snap.BlackHoleTimeDilation = hole.TimeDilation(toHole.magnitude);
             }
 
             if (!TryPlanetUp(space, physics.Position, out IPlanetProperties planet, out Vector3 up, out double distance, out bool nearest))

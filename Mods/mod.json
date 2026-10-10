@@ -2,7 +2,7 @@
     "id": "StellarDriveDemoTFAdvanced",
     "name": "StellarDrive Demo TF Advanced",
     "author": "Romalaure",
-    "version": "0.5.0",
-    "description": "Mods avances du groupe TF. 4 nouvelles planetes a visiter (desertique, rocheuse sans air, montagneuse, temperee) avec regions, arbres varies (chene, acacia, bouleau), ruines, villages abandonnes, epaves et cargos ecrases. 3 stations spatiales abandonnees reperables par balise. Un trou noir pres de TF Petra : gravite, forces de maree, horizon des evenements, arret de distorsion, disque d'accretion. Onglet TF Avance : ordinateur de bord a poser, moteurs avances, batterie et disjoncteur, poutres, plaques et cadres. Necessite SDModKit. Tous les joueurs doivent avoir le mod.",
+    "version": "0.6.0",
+    "description": "Mods avances du groupe TF. 6 nouvelles planetes a visiter (desertique, rocheuse sans air, montagneuse, temperee, glaciaire, futuriste avec une cite abandonnee) avec regions, arbres varies (chene, acacia, bouleau), ruines, villages abandonnes, epaves et cargos ecrases. 3 stations spatiales abandonnees reperables par balise. 2 trous noirs (pres de TF Petra et de TF Glacia) : gravite, forces de maree, horizon des evenements, arret de distorsion, disque d'accretion. Onglet TF Avance : ordinateur de bord a poser, moteurs avances, batterie et disjoncteur, poutres, plaques et cadres. Necessite SDModKit. Tous les joueurs doivent avoir le mod.",
     "thumbnail": "thumbnail.png"
 }

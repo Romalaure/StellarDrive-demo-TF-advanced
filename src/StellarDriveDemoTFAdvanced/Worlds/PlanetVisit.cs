@@ -53,7 +53,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             {
                 Place(petra, spots[i], 0f);
                 yield return Wait(6f);
-                GameObject hole = Object.FindObjectsOfType<Transform>().Where(t => t.parent == null && t.name == "TFA Black Hole (far)").Select(t => t.gameObject).FirstOrDefault();
+                GameObject hole = Object.FindObjectsOfType<Transform>().Where(t => t.parent == null && t.name.StartsWith("TFA Black Hole (far)")).Select(t => t.gameObject).FirstOrDefault();
                 IEnumerator shot = WorldDevSteps.ShootAt(hole, "blackhole_petra_" + i);
                 while (shot.MoveNext())
                     yield return shot.Current;
@@ -96,7 +96,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 AdvancedMod.Log.Msg($"dev: {planet.name} has {objects.Length} point-of-interest objects loaded");
                 AdvancedMod.Log.Msg($"dev: {planet.name} points of interest loaded: " + string.Join(", ", objects
                     .GroupBy(o => o.name.Replace("(Clone)", "")).Select(g => g.Key + " x" + g.Count())));
-                foreach (string kind in new[] { "TFA_RuinGate", "TFA_RuinTemple", "TFA_RuinHouse", "TFA_CargoWreck", "Crashed" })
+                foreach (string kind in new[] { "TFA_RuinGate", "TFA_RuinTemple", "TFA_RuinHouse", "TFA_CityTowerTall", "TFA_CityDome", "TFA_CargoWreck", "Crashed" })
                 {
                     // Objects unload when the player moves: skip destroyed ones
                     PlanetObjectVisuals site = objects.Where(o => o != null && o.name.StartsWith(kind))

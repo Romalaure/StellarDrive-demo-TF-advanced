@@ -1,6 +1,6 @@
 # StellarDrive Demo — TF Advanced
 
-Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, structure, 4 nouvelles planètes avec régions, arbres variés, ruines, villages et épaves, 3 stations spatiales abandonnées, trou noir, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Les pièces sont dans l'onglet de construction **TF Avancé**.
+Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, structure, 6 nouvelles planètes (dont une glaciaire et une futuriste) avec régions, arbres variés, ruines, villages, cité abandonnée et épaves, 3 stations spatiales abandonnées, 2 trous noirs, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Les pièces sont dans l'onglet de construction **TF Avancé**.
 
 Rapport technique (moteur, systèmes du jeu, faisabilité de chaque projet) : [docs/AUDIT.md](docs/AUDIT.md).
 
@@ -108,17 +108,20 @@ La coque du jeu est une grille de voxels limitée à 4 formes codées en dur (pl
 
 ## Nouvelles planètes
 
-Quatre planètes rejoignent le système 442 Otrera, en orbite autour de la même étoile. Le jeu les génère, les éclaire, les sauvegarde et les simule comme sa propre planète (terrain, flore, objets, atmosphère). On les rejoint en vaisseau (carte stellaire et saut en distorsion).
+Six planètes rejoignent le système 442 Otrera, en orbite autour de la même étoile. Le jeu les génère, les éclaire, les sauvegarde et les simule comme sa propre planète (terrain, flore, objets, atmosphère). On les rejoint en vaisseau (carte stellaire et saut en distorsion).
 
 | Planète | Biome | Gravité | Atmosphère | Flore | Points d'intérêt |
 |---|---|---|---|---|---|
 | **TF Aridia** | désertique. Régions : dunes de sable dans les basses terres, mesas rouges en altitude, lacs salés | 0,9 g | respirable, ciel ambré, sans nuages | savanes d'**acacias**, arbres morts, herbe sèche | épaves, cargo écrasé, ruines et village en grès |
 | **TF Petra** | rocheuse : roche grise couverte de cratères | 0,45 g | **aucune** (oxygène indispensable) | aucune | épaves, cargo écrasé, ruines et village en basalte |
 | **TF Altis** | montagneuse : reliefs jusqu'à 8 km. Régions : vallées vertes, **neige au-dessus de 1 400 m**, lacs glaciaires | 1,1 g | respirable, ciel bleu froid | forêts de pins denses, bosquets de **bouleaux** (verts et d'automne) | ruines et village en granit, épaves |
+| **TF Glacia** | glaciaire : calottes de glace, montagnes enneigées jusqu'à 9 km, lacs gelés | 1 g | respirable, ciel bleu pâle, nuages | sapins givrés et arbres morts dans les vallées, pas d'herbe | ruines et village pris dans la glace, épaves, cargo écrasé |
+| **TF Nexora** | futuriste : plaines sombres et lacs turquoise sous un ciel violet | 0,85 g | respirable | arbres cyan cultivés, herbe turquoise | **cité abandonnée**, épaves, cargo écrasé |
 | **TF Verdance** | tempérée, proche de la planète de départ, grands lacs | 0,95 g | respirable | forêts de conifères et, dans d'autres régions, bois de **chênes** et de **bouleaux** (verts et d'automne), herbe dense | ruines et village moussus, épaves, cargo écrasé |
 
 - **Épaves** : sites de crash assemblés à partir des pièces écrasées du jeu (coque, propulseurs, sièges), recyclables comme sur la planète de départ.
 - **Ruines d'une ancienne civilisation** : porte monumentale (piliers, linteau, marches), piliers debout et brisés, blocs tombés, obélisques. Taillées dans la pierre du jeu et teintées selon la planète, elles ont leurs propres collisions et ne se minent pas.
+- **Cité abandonnée** (TF Nexora) : quartiers d'une civilisation avancée disparue, avec gratte-ciel à étages en retrait et antenne, tours, dômes, pylônes d'antenne, pistes d'atterrissage hexagonales et arches au-dessus de routes brisées. Les bandes lumineuses cyan brillent encore la nuit. Bâtiments avec collisions, au look des coques du jeu, non minables.
 - **Villages abandonnés** : un temple à colonnes au toit effondré, des maisons sans toit (porte, fenêtres, murs écroulés) et une tour de guet crénelée.
 - **Cargos écrasés** : une grande épave d'environ 30 m (cockpit enfoui, soute tordue, moteurs arrachés, ailes, plaques de coque) entourée de propulseurs et de sièges, recyclable.
 - **Arbres** : chêne, acacia et bouleau (et leurs variantes d'automne) sont des copies du sapin du jeu avec un nouveau modèle (tronc et feuillage tirés de l'atlas de feuilles du jeu). On les abat et on les recycle comme les sapins. Chaque type de forêt a son propre bruit de densité : les essences poussent dans des régions différentes de la planète.
@@ -146,26 +149,33 @@ Trois stations abandonnées sont créées dans le monde quand l'hôte charge une
 - **Abri** : à moins de 3 km d'une station, la gravité du trou noir ne s'applique pas. On peut donc s'amarrer à la Sonde Hadès.
 - Réglage : `AbandonedStations` (section `[TFAdvanced]`).
 
-## Trou noir
+## Trous noirs
 
-Un trou noir se trouve à environ 3 000 km de **TF Petra**. On le voit dans le ciel sans atmosphère de Petra.
+Deux trous noirs :
+- le **trou noir de Petra**, à environ 3 000 km de **TF Petra**, visible dans le ciel sans atmosphère de Petra ;
+- le **trou noir de Glacia**, deux fois et demie plus massif, à environ 4 100 km de **TF Glacia**.
 
-Il suit les relations de Schwarzschild dans les unités du jeu. Le jeu réduit les astres (1 g à 320 km de rayon), donc la vitesse de la lumière est réduite d'autant. Elle vaut ici 10 km/s : c'est la vitesse de libération à l'horizon.
+Ils suivent les relations de Schwarzschild dans les unités du jeu. Le jeu réduit les astres (1 g à 320 km de rayon), donc la vitesse de la lumière est réduite d'autant. Elle vaut ici 10 km/s : c'est la vitesse de libération à l'horizon.
 
-| Grandeur | Valeur |
-|---|---|
-| Horizon des événements r_s | 10 km |
-| Ombre (capture des photons) | 2,6 r_s = 26 km |
-| Disque d'accrétion | de 3 r_s (dernière orbite stable) à 40 r_s |
-| Gravité | GM/r², 0,5 m/s² à 1 000 km, 5 000 m/s² à l'horizon |
-| Dilatation du temps | √(1 − r_s/r), affichée par l'ordinateur de bord |
+| Grandeur | Petra | Glacia |
+|---|---|---|
+| Horizon des événements r_s | 10 km | 25 km |
+| Ombre (capture des photons, 2,6 r_s) | 26 km | 65 km |
+| Disque d'accrétion | 3 à 40 r_s | 3 à 40 r_s |
+| Gravité GM/r² à 1 000 km | 0,5 m/s² | 1,25 m/s² |
+| Gravité à l'horizon | 5 000 m/s² | 2 000 m/s² |
+| Zone de marée | sous 50 km | sous 68 km |
+| Arrêt de distorsion | 600 km | 1 500 km |
+| Dilatation du temps | √(1 − r_s/r) | √(1 − r_s/r) |
+
+Comme en vrai, les forces de marée croissent avec la masse moins vite que l'horizon (la limite varie comme la racine cubique de la masse). Le trou noir le plus massif est donc plus doux à son horizon.
 
 Effets en jeu (sur l'hôte) :
 - **Attraction** : une vraie accélération en 1/r² pour les vaisseaux et les joueurs, en orbite comme dans l'espace profond. Le jeu, lui, n'a pas de gravité hors du sol des planètes.
-- **Forces de marée** (sous 5 r_s = 50 km) : le vaisseau perd des pièces, de plus en plus vite en approchant.
+- **Forces de marée** (zone du tableau) : le vaisseau perd des pièces, de plus en plus vite en approchant.
 - **Horizon** : un vaisseau qui le franchit est entièrement détruit, un joueur meurt.
-- **Distorsion** : un saut s'arrête à 600 km du trou noir, comme devant une étoile.
-- **Ordinateur de bord** : distance, attraction et dilatation du temps (FLIGHT), alertes de proximité et de marée (DIAGNOSTICS).
+- **Distorsion** : un saut s'arrête avant le trou noir (distance du tableau), comme devant une étoile.
+- **Ordinateur de bord** : distance, attraction et dilatation du temps du trou noir le plus proche (FLIGHT), alertes de proximité et de marée (DIAGNOSTICS).
 
 Aspect :
 - une ombre noire ;
@@ -175,7 +185,7 @@ Aspect :
 
 Une vraie déviation de la lumière (lentille gravitationnelle) demanderait un shader que le jeu n'inclut pas, et Unity ne compile pas de shader en cours de partie : l'image en reproduit donc l'apparence avec des surfaces.
 
-Réglage : `BlackHole` (section `[TFAdvanced]`), identique pour tous les joueurs.
+Réglage : `BlackHole` (section `[TFAdvanced]`, les deux trous noirs), identique pour tous les joueurs.
 
 ## Configuration
 
@@ -189,8 +199,8 @@ Réglage : `BlackHole` (section `[TFAdvanced]`), identique pour tous les joueurs
 | `CollisionWarningSeconds` / `CollisionWarningDistance` | `12` / `30` | seuils d'alerte de rapprochement |
 | `DescentWarningSpeed` / `DescentWarningAltitude` | `20` / `400` | seuils d'alerte de descente |
 | `SpinWarningRate` | `60` | seuil d'alerte de rotation (°/s) |
-| `NewPlanets` | `true` | les 4 nouvelles planètes |
-| `BlackHole` | `true` | le trou noir près de TF Petra |
+| `NewPlanets` | `true` | les 6 nouvelles planètes |
+| `BlackHole` | `true` | les trous noirs près de TF Petra et de TF Glacia |
 | `AbandonedStations` | `true` | crée les 3 stations abandonnées dans un monde qui ne les a pas encore |
 | `SelfTest` | `false` | développement : construit les pièces au menu, en écrit la description et des rendus PNG |
 | `DevWorld` / `DevQuitSeconds` / `DevVisitPlanets` / `DevVisitPlanetId` / `DevVisitStations` / `DevVisitBlackHole` / `DevPlanetsNearby` | vides / `false` | développement : charge automatiquement une **copie** de monde, visite les planètes ou le trou noir, prend des captures dans `UserData/TFAdvanced/dev`, puis quitte |
@@ -232,6 +242,7 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.5.0 : écrans de l'ordinateur de bord (rendu hors champ, plus gros vaisseau du monde) | ✅ plus aucun texte superposé : colonne de valeurs alignée, FLIGHT compacté, taille minimale du texte relevée |
 | v0.5.0 : stations abandonnées | ✅ 3 stations créées (1 077, 670 et 84 pièces de coque), balises vues par le client, joueur placé dans chacune |
 | v0.5.0 : arbres, régions, villages, cargos | ✅ rendu des 5 arbres, des bâtiments et du cargo. En jeu, chaque planète visitée séparément : villages (temple, maisons, tour) et cargos chargés sur Aridia, Altis et Verdance, feuillus visibles dans les forêts de Verdance. Bug corrigé : le jeu numérote les configurations de flore à collisions parmi elles seules, la nouvelle forêt est donc placée avant l'herbe. ⚠️ Le téléport du test automatique déclenche un bug du jeu (`Space id … does not exist`), déjà connu et sans lien avec ces ajouts. ⏳ Régions du sol (mesas, neige) pas encore vues en capture |
+| v0.6.0 : TF Glacia, TF Nexora, 2e trou noir | ✅ 6 planètes et 2 trous noirs créés, aucune erreur du mod. Rendu des bâtiments de la cité (gratte-ciel, dôme, pylône, piste, arche). En jeu : sol de glace et ruines de glace sur Glacia, cité chargée sur Nexora (2 gratte-ciel, 4 tours, 3 dômes, pylônes, piste, arche) avec bandes lumineuses visibles de nuit. ⏳ Les deux trous noirs ne sont pas encore vus en capture (la caméra de test était mal orientée). Attraction, marée et arrêt de distorsion du 2e trou noir **à tester en vol** |
 | Pose des pièces, écrans en vol, forces des moteurs, multijoueur | ⏳ **à faire en jeu** (procédure ci-dessous) |
 
 ### Procédure de test en jeu

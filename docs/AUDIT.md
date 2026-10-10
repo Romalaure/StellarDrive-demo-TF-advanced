@@ -87,3 +87,8 @@ Seul l'hôte simule. Toute mécanique qui ajoute des forces ou de l'énergie doi
 - **Flore** : `PlanetDenseEnvironment.configs` est une liste de configurations (sapins, herbe). Une forêt de plus est une copie de la configuration des sapins, avec son propre bruit, et sa table d'apparition et son buffer GPU remis à zéro. Le jeu numérote les configurations à collisions parmi elles seules (`Where(hasPhysics).Select((c, id) => ...)`) : les nouvelles forêts doivent donc précéder l'herbe. Une seule configuration peut être `isVisibleFromSpace`.
 - **Arbres** : copies du prefab `FirTreeTall1` (visuel, physique, abattage, recyclage) avec un nouveau maillage LOD0 en deux sous-maillages (écorce, feuilles de l'atlas `FirTreeBranches`), sans imposteur.
 - **Régions du sol** : les seuils `ColorElevationStep` choisissent le matériau du terrain selon l'altitude (rivage et eau en dessous, sol au-dessus). En changeant textures et seuils, on obtient des dunes sous des mesas (Aridia) ou des vallées vertes sous la neige (Altis).
+
+## 11. Second trou noir, planètes glaciaire et futuriste (v0.6.0)
+
+- **Trous noirs** : une classe `Hole` par trou noir. GM = c²·r_s/2 avec c = 10 km/s pour les deux. La zone de marée est la distance où l'étirement 2GM·L/r³ égale celui du premier trou noir à 5 r_s ; elle varie donc comme la racine cubique de la masse. La gravité additionne tous les trous noirs ; l'ordinateur de bord et les dégâts utilisent le plus proche.
+- **Cité** : bâtiments sur la base du prefab de rocher (placement, collision et chargement du jeu), avec un maillage de coque au matériau des pièces du jeu, plus une couche lumineuse URP Lit émissive.

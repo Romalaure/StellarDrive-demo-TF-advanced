@@ -132,6 +132,52 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     PointsOfInterest.CargoWrecks(p, 0.4f);
                     PointsOfInterest.Wrecks(p, 0.4f);
                 }
+            },
+            new PlanetSpec
+            {
+                Id = 105, Name = "TF Glacia", Biome = "glaciaire", OrbitAngle = 95f, OrbitScale = 1.6f, Gravity = 1f, RotationHours = 1.6f,
+                Shape = p =>
+                {
+                    // Frozen world: ice sheets, snowy mountains up to 9 km, frozen lakes
+                    p.Material(PlanetShaper.Shore, PlanetShaper.Water, new Color(0.72f, 0.86f, 0.98f));
+                    p.Material(PlanetShaper.Ground, PlanetShaper.Water, new Color(1f, 1f, 1f));
+                    p.Material(PlanetShaper.Water, PlanetShaper.Water, new Color(0.55f, 0.75f, 0.95f));
+                    p.Shoreline(600f, 64.2f);
+                    p.Relief(2.4f, 0.9f, new Vector3(-0.27f, 0.41f, -0.15f));
+                    p.Ceiling(9000f);
+                    p.Sky(new Vector3(0.05f, 0.12f, 0.3f), 2.4f, 0.35f, 0.9f, clouds: true, breathable: true);
+                    // A few frosted firs in the valleys, no grass
+                    GameObject frosted = PlanetShaper.Tinted(p.TreePrefab("FirTreeTall1"), "frosted", new Color(0.8f, 0.92f, 1.05f));
+                    GameObject frostedShort = PlanetShaper.Tinted(p.TreePrefab("FirTreeShort1"), "frosted", new Color(0.8f, 0.92f, 1.05f));
+                    p.Trees((frosted, 60, 0.4f), (frostedShort, 60, 0f), (p.TreePrefab("FirTreeDead1"), 30, 0f));
+                    p.ForestDensity(-0.15f);
+                    p.FloraElevation(80f, 1e7f);
+                    PointsOfInterest.Ruins(p, RuinStyle.Ice, 0.5f);
+                    PointsOfInterest.Village(p, RuinStyle.Ice, 0.3f);
+                    PointsOfInterest.Wrecks(p, 0.4f);
+                    PointsOfInterest.CargoWrecks(p, 0.35f);
+                }
+            },
+            new PlanetSpec
+            {
+                Id = 106, Name = "TF Nexora", Biome = "futuriste (cité abandonnée)", OrbitAngle = -170f, OrbitScale = 1.05f, Gravity = 0.85f, RotationHours = 0.8f,
+                Shape = p =>
+                {
+                    // Flat dark plains under a violet sky, the ruins of a high-tech city everywhere
+                    p.Material(PlanetShaper.Ground, PlanetShaper.Shore, new Color(0.32f, 0.33f, 0.38f));
+                    p.Material(PlanetShaper.Shore, PlanetShaper.Shore, new Color(0.24f, 0.25f, 0.3f));
+                    p.Material(PlanetShaper.Water, PlanetShaper.Water, new Color(0.2f, 0.85f, 0.9f));
+                    p.Relief(0.35f, 0.8f, new Vector3(0.19f, -0.33f, 0.47f));
+                    p.Sky(new Vector3(0.16f, 0.05f, 0.3f), 2.6f, 0.2f, 0.8f, clouds: false, breathable: true);
+                    // Engineered trees: cyan-leaved birches in the parks, teal grass
+                    GameObject neon = PlanetShaper.Tinted(p.Tree(TreeKind.Birch), "neon", new Color(0.15f, 1.1f, 1.7f));
+                    p.Trees((neon, 100, 0f));
+                    p.ForestDensity(-0.25f);
+                    p.Grass(PlanetShaper.Tinted(p.GrassPrefab, "teal", new Color(0.5f, 1f, 1f)));
+                    PointsOfInterest.City(p, 1f);
+                    PointsOfInterest.CargoWrecks(p, 0.5f);
+                    PointsOfInterest.Wrecks(p, 0.4f);
+                }
             }
         };
     }

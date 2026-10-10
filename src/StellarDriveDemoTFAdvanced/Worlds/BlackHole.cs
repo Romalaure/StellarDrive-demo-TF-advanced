@@ -29,82 +29,49 @@ using Random = UnityEngine.Random;
 namespace StellarDriveDemoTFAdvanced.Worlds
 {
     /// <summary>
-    /// A black hole near TF Petra, in the game's own units. The game's planets are scaled down
-    /// (1 g at 320 km), so is the hole: it follows Schwarzschild's relations with the speed of
-    /// light scaled like the rest of the world. The event horizon is where the escape velocity
-    /// reaches that scaled light speed: r_s = 2GM / c².
+    /// One of the mod's black holes, in the game's own units. The game's planets are scaled down
+    /// (1 g at 320 km), so are the holes: they follow Schwarzschild's relations with the speed of
+    /// light scaled like the rest of the world (10 km/s). The event horizon is where the escape
+    /// velocity reaches that scaled light speed: r_s = 2GM / c².
     ///  - Gravity GM/r² for ships and players everywhere outside planet ground (the game itself
     ///    has none in orbit or deep space).
     ///  - Tidal zone (below <see cref="TidalRadius"/>): ships lose parts, faster and faster.
     ///  - Event horizon: ships are destroyed and players die.
     ///  - Warp jumps stop before entering its sphere of influence, like they stop before a star.
     /// </summary>
-    internal static class BlackHole
+    internal sealed class Hole
     {
+        /// <summary>Light speed in the game's scale: escape velocity at the horizon of every hole.</summary>
+        public const double LightSpeed = 10000.0;
+
+        public string Name;
+        /// <summary>Planet it sits next to (the demo planet when the mod planets are off).</summary>
+        public ulong AnchorPlanet;
+        public Vector3 OffsetFromAnchor;
         /// <summary>Event horizon radius r_s (m).</summary>
-        public const float Horizon = 10000f;
-        /// <summary>GM (m³/s²): 0.5 m/s² at 1 000 km.</summary>
-        public const double GravitationalParameter = 5e11;
-        /// <summary>Light speed in the game's scale: escape velocity at the horizon, sqrt(2GM / r_s) = 10 km/s.</summary>
-        public static readonly double LightSpeed = Math.Sqrt(2.0 * GravitationalParameter / Horizon);
+        public float Horizon;
+        /// <summary>Tilt of its accretion disk.</summary>
+        public Quaternion DiskTilt;
+
+        /// <summary>GM (m³/s²) = c² r_s / 2.</summary>
+        public double GravitationalParameter => LightSpeed * LightSpeed * Horizon / 2.0;
         /// <summary>Visible shadow (photon capture) radius, 3√3/2 r_s.</summary>
-        public const float Shadow = Horizon * 2.598f;
-        public const float TidalRadius = Horizon * 5f;
+        public float Shadow => Horizon * 2.598f;
+        /// <summary>
+        /// Where tides tear ships apart: where the tidal stretch 2GM·L/r³ equals the first hole's
+        /// at 5 r_s. It grows only as the cube root of the mass, so a heavier hole is gentler at its horizon.
+        /// </summary>
+        public float TidalRadius => (float)(50000.0 * Math.Pow(GravitationalParameter / 5e11, 1.0 / 3.0));
         /// <summary>Warp jumps end at this distance.</summary>
-        public const float WarpStopRadius = 600000f;
+        public float WarpStopRadius => Horizon * 60f;
         /// <summary>Beyond this its pull is ignored (0.0005 m/s²).</summary>
-        public const float InfluenceRadius = 3.2e7f;
-        /// <summary>Where it sits: from TF Petra (or the demo planet without the mod planets).</summary>
-        private static readonly Vector3 OffsetFromAnchor = new Vector3(1.9e6f, 0.9e6f, -2.1e6f);
+        public float InfluenceRadius => (float)Math.Sqrt(GravitationalParameter / 0.0005);
 
-        private static WorldCell _anchorCell;
-        private static bool _hasAnchor;
-        private static FixedWorldSpace _space;
+        /// <summary>Its position as a space the game's coordinate transposition understands.</summary>
+        public FixedWorldSpace Space { get; internal set; }
+        public string AnchorName { get; internal set; }
 
-        public static bool Active => _hasAnchor && Settings.BlackHoleEnabled.Value;
-
-        /// <summary>The hole's position as a space the game's coordinate transposition understands.</summary>
-        public static FixedWorldSpace Space => _space;
-
-        public static string AnchorName { get; private set; }
-
-        /// <summary>Finds the anchor planet once its tracker is up (client or server).</summary>
-        public static bool EnsureAnchor()
-        {
-            if (_hasAnchor)
-                return true;
-            IPlanetsProvider planets = ServiceLocator.GetService<IPlanetsClientProvider>() as IPlanetsProvider ?? ServiceLocator.GetService<IPlanetsServerProvider>();
-            if (planets == null)
-                return false;
-            IPlanetProperties anchor = planets.Planets.FirstOrDefault(p => p.Id == 102) ?? planets.Planets.FirstOrDefault(p => p.Id == PlanetFactory.TemplateId);
-            if (anchor == null)
-                return false;
-            _anchorCell = anchor.WorldCell;
-            _space = new FixedWorldSpace { Position = new PreciseWorldPosition(_anchorCell, Vector3.zero) + (Vector3Double)OffsetFromAnchor };
-            AnchorName = anchor.Name;
-            _hasAnchor = true;
-            AdvancedMod.Log.Msg($"black hole: {OffsetFromAnchor.magnitude / 1000f:0} km from {anchor.Name}, horizon {Horizon / 1000f:0} km, light speed (game scale) {LightSpeed / 1000.0:0.0} km/s");
-            return true;
-        }
-
-        public static void Forget()
-        {
-            _hasAnchor = false;
-            _space = null;
-        }
-
-        /// <summary>Vector from <paramref name="position"/> (in <paramref name="spaceId"/>) to the hole, in that space.</summary>
-        public static bool TryOffset(IWorldTranspose transpose, uint spaceId, Vector3 position, out Vector3 toHole)
-        {
-            toHole = Vector3.zero;
-            if (!Active || transpose == null)
-                return false;
-            Vector3Double center = transpose.Position(_space, spaceId, Vector3Double.Zero);
-            toHole = (Vector3)(center - (Vector3Double)position);
-            return true;
-        }
-
-        public static Vector3 Acceleration(Vector3 toHole)
+        public Vector3 Acceleration(Vector3 toHole)
         {
             float distance = toHole.magnitude;
             if (distance < 1f || distance > InfluenceRadius)
@@ -115,7 +82,84 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         }
 
         /// <summary>Gravitational time dilation of a static observer, sqrt(1 - r_s/r).</summary>
-        public static float TimeDilation(float distance) => distance <= Horizon ? 0f : Mathf.Sqrt(1f - Horizon / distance);
+        public float TimeDilation(float distance) => distance <= Horizon ? 0f : Mathf.Sqrt(1f - Horizon / distance);
+
+        /// <summary>Vector from <paramref name="position"/> (in <paramref name="spaceId"/>) to the hole, in that space.</summary>
+        public Vector3 Offset(IWorldTranspose transpose, uint spaceId, Vector3 position)
+        {
+            Vector3Double center = transpose.Position(Space, spaceId, Vector3Double.Zero);
+            return (Vector3)(center - (Vector3Double)position);
+        }
+    }
+
+    internal static class BlackHole
+    {
+        public static readonly Hole[] All =
+        {
+            // Horizon 10 km, 0.5 m/s² at 1 000 km
+            new Hole { Name = "Trou noir de Petra", AnchorPlanet = 102, OffsetFromAnchor = new Vector3(1.9e6f, 0.9e6f, -2.1e6f), Horizon = 10000f, DiskTilt = Quaternion.Euler(48f, 35f, -12f) },
+            // Two and a half times heavier, near the ice planet
+            new Hole { Name = "Trou noir de Glacia", AnchorPlanet = 105, OffsetFromAnchor = new Vector3(-2.4e6f, -1.3e6f, 3.1e6f), Horizon = 25000f, DiskTilt = Quaternion.Euler(-22f, 110f, 30f) }
+        };
+
+        private static bool _hasAnchors;
+
+        public static bool Active => _hasAnchors && Settings.BlackHoleEnabled.Value;
+
+        /// <summary>The holes placed in the world.</summary>
+        public static IEnumerable<Hole> Placed => Active ? All.Where(h => h.Space != null) : Enumerable.Empty<Hole>();
+
+        /// <summary>Finds the anchor planets once their tracker is up (client or server).</summary>
+        public static bool EnsureAnchor()
+        {
+            if (_hasAnchors)
+                return true;
+            IPlanetsProvider planets = ServiceLocator.GetService<IPlanetsClientProvider>() as IPlanetsProvider ?? ServiceLocator.GetService<IPlanetsServerProvider>();
+            if (planets == null)
+                return false;
+            IPlanetProperties template = planets.Planets.FirstOrDefault(p => p.Id == PlanetFactory.TemplateId);
+            if (template == null)
+                return false;
+            for (int i = 0; i < All.Length; i++)
+            {
+                Hole hole = All[i];
+                IPlanetProperties anchor = planets.Planets.FirstOrDefault(p => p.Id == hole.AnchorPlanet);
+                // Without the mod planets the holes sit around the demo planet, apart from each other
+                Vector3 offset = anchor != null ? hole.OffsetFromAnchor : hole.OffsetFromAnchor * (1f + i);
+                anchor = anchor ?? template;
+                hole.Space = new FixedWorldSpace { Position = new PreciseWorldPosition(anchor.WorldCell, Vector3.zero) + (Vector3Double)offset };
+                hole.AnchorName = anchor.Name;
+                AdvancedMod.Log.Msg($"black hole: {hole.Name}, {offset.magnitude / 1000f:0} km from {anchor.Name}, horizon {hole.Horizon / 1000f:0} km, tides below {hole.TidalRadius / 1000f:0} km");
+            }
+            _hasAnchors = true;
+            return true;
+        }
+
+        public static void Forget()
+        {
+            _hasAnchors = false;
+            foreach (Hole hole in All)
+                hole.Space = null;
+        }
+
+        /// <summary>The hole nearest to <paramref name="position"/> (in <paramref name="spaceId"/>) and the vector to it.</summary>
+        public static bool TryNearest(IWorldTranspose transpose, uint spaceId, Vector3 position, out Hole nearest, out Vector3 toHole)
+        {
+            nearest = null;
+            toHole = Vector3.zero;
+            if (transpose == null)
+                return false;
+            foreach (Hole hole in Placed)
+            {
+                Vector3 offset = hole.Offset(transpose, spaceId, position);
+                if (nearest == null || offset.sqrMagnitude < toHole.sqrMagnitude)
+                {
+                    nearest = hole;
+                    toHole = offset;
+                }
+            }
+            return nearest != null;
+        }
 
         // ---- Host: tidal destruction and the event horizon
 
@@ -138,18 +182,18 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 {
                     foreach (TrackedShipServer ship in ships.LoadedRootShips.ToList())
                     {
-                        if (!TryOffset(transpose, ship.SpaceId, ship.Position, out Vector3 toHole))
+                        if (!TryNearest(transpose, ship.SpaceId, ship.Position, out Hole hole, out Vector3 toHole))
                             continue;
                         float distance = toHole.magnitude;
-                        if (distance < TidalRadius)
-                            Tear(ships, ship, distance, Interval);
+                        if (distance < hole.TidalRadius)
+                            Tear(ships, ship, hole, distance, Interval);
                     }
                 }
                 if (players != null)
                 {
                     foreach (TrackedPlayerServer player in players.ActivePlayers)
                     {
-                        if (TryOffset(transpose, player.SpaceId, player.Position, out Vector3 toHole) && toHole.magnitude < Horizon)
+                        if (TryNearest(transpose, player.SpaceId, player.Position, out Hole hole, out Vector3 toHole) && toHole.magnitude < hole.Horizon)
                             Kill(player);
                     }
                 }
@@ -161,7 +205,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         }
 
         // Tidal forces rip parts off, from a few per second at the edge of the zone to the whole ship at the horizon
-        private static void Tear(ShipsServerTracker ships, TrackedShipServer root, float distance, float interval)
+        private static void Tear(ShipsServerTracker ships, TrackedShipServer root, Hole hole, float distance, float interval)
         {
             var parts = new List<(IShipStateWrite Ship, HullPartPosition? Hull, ushort? Part)>();
             foreach (RootRelativeShipData data in ships.GetRootConnectedShips(root.Id))
@@ -189,15 +233,15 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             if (parts.Count == 0)
                 return;
             int count;
-            if (distance <= Horizon)
+            if (distance <= hole.Horizon)
             {
                 count = parts.Count;
-                AdvancedMod.Log.Msg($"black hole: ship {root.Id} crossed the event horizon");
+                AdvancedMod.Log.Msg($"black hole: ship {root.Id} crossed the event horizon of {hole.Name}");
             }
             else
             {
                 // 0 at the edge of the tidal zone, 1 at the horizon
-                float depth = 1f - (distance - Horizon) / (TidalRadius - Horizon);
+                float depth = 1f - (distance - hole.Horizon) / (hole.TidalRadius - hole.Horizon);
                 float perSecond = 2f + depth * depth * 60f;
                 count = Mathf.Max(Random.value < perSecond * interval % 1f ? 1 : 0, Mathf.FloorToInt(perSecond * interval));
             }
@@ -231,7 +275,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         }
     }
 
-    /// <summary>Its pull, added to the game's gravity (which is zero off planet ground) for ships and players.</summary>
+    /// <summary>The holes' pull, added to the game's gravity (which is zero off planet ground) for ships and players.</summary>
     [HarmonyPatch(typeof(EnvironmentProvider), nameof(EnvironmentProvider.GetGravityAtPosition))]
     internal static class BlackHoleGravityPatch
     {
@@ -252,9 +296,14 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 // (and spaces the game just removed, while an object moves between them)
                 if (_spaces == null || !_spaces.TryGetSpace(spaceId, out ISpace space) || space is ShipRelativeSpace)
                     return;
-                if (BlackHole.TryOffset(_transpose, spaceId, position, out Vector3 toHole) && toHole.magnitude < BlackHole.InfluenceRadius
-                    && !AbandonedStations.IsSheltered(_transpose, spaceId, position))
-                    __result += BlackHole.Acceleration(toHole);
+                if (_transpose == null || AbandonedStations.IsSheltered(_transpose, spaceId, position))
+                    return;
+                foreach (Hole hole in BlackHole.Placed)
+                {
+                    Vector3 toHole = hole.Offset(_transpose, spaceId, position);
+                    if (toHole.magnitude < hole.InfluenceRadius)
+                        __result += hole.Acceleration(toHole);
+                }
             }
             catch (Exception e)
             {
@@ -263,7 +312,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         }
     }
 
-    /// <summary>Warp jumps end before its sphere of influence, as they end before a star.</summary>
+    /// <summary>Warp jumps end before a hole's sphere of influence, as they end before a star.</summary>
     [HarmonyPatch(typeof(EnvironmentProvider), nameof(EnvironmentProvider.CheckWarpCollision))]
     internal static class BlackHoleWarpPatch
     {
@@ -279,15 +328,17 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 return;
             try
             {
-                FixedWorldSpace hole = BlackHole.Space;
-                Vector3 start = (Vector3)Relative(position, hole.Position);
-                Vector3? hit = MathUtils.LineSphereShortestIntersection(start, velocity, Vector3.zero, BlackHole.WarpStopRadius);
-                if (!hit.HasValue)
-                    return;
-                PreciseWorldPosition stop = hole.Position + hit.Value;
-                if (__result.HasValue && Relative(__result.Value, position).Magnitude < Relative(stop, position).Magnitude)
-                    return;
-                __result = stop;
+                foreach (Hole hole in BlackHole.Placed)
+                {
+                    Vector3 start = (Vector3)Relative(position, hole.Space.Position);
+                    Vector3? hit = MathUtils.LineSphereShortestIntersection(start, velocity, Vector3.zero, hole.WarpStopRadius);
+                    if (!hit.HasValue)
+                        continue;
+                    PreciseWorldPosition stop = hole.Space.Position + hit.Value;
+                    if (__result.HasValue && Relative(__result.Value, position).Magnitude < Relative(stop, position).Magnitude)
+                        continue;
+                    __result = stop;
+                }
             }
             catch (Exception e)
             {

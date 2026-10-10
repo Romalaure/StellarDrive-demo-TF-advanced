@@ -27,6 +27,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
         public float? SpaceSpeed;
         public float? VerticalSpeed;
         // The mod's black hole, when it is in range
+        public Worlds.Hole BlackHole;
         public float? BlackHoleDistance;
         public float BlackHoleGravity;
         public float BlackHoleTimeDilation;

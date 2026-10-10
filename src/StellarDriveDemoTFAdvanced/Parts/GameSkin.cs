@@ -23,6 +23,8 @@ namespace StellarDriveDemoTFAdvanced.Parts
         private static Vector2 _palette;
 
         public static bool Ready => _material != null;
+        public static Material Material => _material;
+        public static Vector2 Palette => _palette;
 
         /// <summary>Remembers the donor's part material and palette color (first call only).</summary>
         public static void Capture(GameObject donor)

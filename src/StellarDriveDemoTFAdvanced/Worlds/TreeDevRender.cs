@@ -23,8 +23,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             var origin = new Vector3(0f, -40000f, 0f);
             var shown = new List<GameObject>();
             var prefabs = Trees.AllBuilt.Concat(Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None)
-                .Where(t => t.parent != null && (t.parent.name == "TFA_RuinPrefabs" || t.parent.name == "TFA_WreckPrefabs")
-                    && (t.name.Contains("Temple_Mossy") || t.name.Contains("House_Mossy") || t.name.Contains("Tower_Mossy") || t.name.Contains("Cargo")))
+                .Where(t => t.parent != null && (t.parent.name == "TFA_CityPrefabs" || t.parent.name == "TFA_RuinPrefabs" && t.name.Contains("Gate_Ice")))
                 .Select(t => t.gameObject)).ToList();
             float x = 0f;
             foreach (GameObject prefab in prefabs)
@@ -40,6 +39,13 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 copy.AddComponent<MeshFilter>().sharedMesh = mesh;
                 copy.AddComponent<MeshRenderer>().sharedMaterials = source.sharedMaterials;
                 shown.Add(copy);
+                foreach (MeshRenderer extra in prefab.GetComponentsInChildren<MeshRenderer>(true).Skip(1))
+                {
+                    var part = new GameObject("TFA_DevModelPart");
+                    part.transform.SetParent(copy.transform, false);
+                    part.AddComponent<MeshFilter>().sharedMesh = extra.GetComponent<MeshFilter>().sharedMesh;
+                    part.AddComponent<MeshRenderer>().sharedMaterials = extra.sharedMaterials;
+                }
                 x += width * 0.5f + 2f;
                 AdvancedMod.Log.Msg($"dev: model {prefab.name}: {mesh.vertexCount} vertices, {mesh.bounds.size}");
             }
@@ -59,7 +65,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             camera.nearClipPlane = 0.5f;
             camera.farClipPlane = 2000f;
             float distance = x * 0.5f / Mathf.Tan(20f * Mathf.Deg2Rad) * 0.62f;
-            camera.transform.position = origin + new Vector3(x * 0.5f, 14f, -distance);
+            camera.transform.position = origin + new Vector3(x * 0.5f, 24f, -distance);
             camera.transform.rotation = Quaternion.Euler(8f, 0f, 0f);
             var target = RenderTexture.GetTemporary(2400, 1000, 24, RenderTextureFormat.ARGB32);
             camera.targetTexture = target;

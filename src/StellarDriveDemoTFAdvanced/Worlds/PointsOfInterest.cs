@@ -11,7 +11,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         Sandstone,
         Basalt,
         Granite,
-        Mossy
+        Mossy,
+        Ice
     }
 
     /// <summary>
@@ -102,6 +103,33 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     Step(pieces[1], curve, 2, 4, 20f, 42f, 12f),
                     Step(pieces[2], curve, 1, 3, 18f, 45f, 9f),
                     Step(pieces[3], curve, 1, 1, 30f, 48f, 10f)
+                }
+            });
+        }
+
+        /// <summary>A district of the abandoned city: a skyscraper in the middle, towers, domes, pylons, a landing pad and an arch.</summary>
+        public static void City(PlanetShaper.Context planet, float frequency)
+        {
+            GameObject[] pieces = FutureCity.Prefabs(planet);
+            AnimationCurve curve = TemplateCurve(planet);
+            if (pieces == null || curve == null)
+                return;
+            planet.AddHotspot(new PlanetHotspotsPlacementConfig
+            {
+                placementLevel = 4,
+                loadDistance = 3000f,
+                spawnProbability = Mathf.Clamp01(frequency * 0.35f),
+                avoidDenseEnvConstraint = true,
+                minElevationConstraint = true,
+                minElevation = 75f,
+                distributionSteps = new[]
+                {
+                    Step(pieces[0], curve, 1, 1, 0f, 1f, 24f),
+                    Step(pieces[1], curve, 1, 3, 26f, 60f, 20f),
+                    Step(pieces[2], curve, 1, 2, 30f, 70f, 28f),
+                    Step(pieces[3], curve, 1, 3, 20f, 75f, 10f),
+                    Step(pieces[4], curve, 0, 1, 45f, 80f, 26f),
+                    Step(pieces[5], curve, 0, 1, 35f, 70f, 24f)
                 }
             });
         }

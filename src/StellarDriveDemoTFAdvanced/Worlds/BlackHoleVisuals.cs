@@ -11,7 +11,7 @@ using WorldTracking.Interface.Values;
 namespace StellarDriveDemoTFAdvanced.Worlds
 {
     /// <summary>
-    /// What the black hole looks like, drawn like the game draws its star from afar: in the
+    /// What the black holes look like, drawn like the game draws its star from afar: in the
     /// visual origin's frame, scaled by 1/10 000 for the game's far camera. A real black hole is
     /// seen through its light bending, which needs a lensing shader the game does not ship (and
     /// shaders cannot be compiled at runtime), so the classic image is built from its parts:
@@ -28,32 +28,43 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private const float DiskOuter = 40f;
         private const int Segments = 160;
 
-        private static GameObject _root;
-        private static Transform _diskTransform;
-        private static Transform _billboards;
-        private static Mesh _diskMesh;
-        private static Color[] _diskBaseColors;
-        private static Vector3[] _diskTangents;
-        private static Color[] _diskColors;
+        private sealed class View
+        {
+            public Hole Hole;
+            public GameObject Root;
+            public Transform DiskTransform;
+            public Transform Billboards;
+            public Mesh DiskMesh;
+            public Color[] DiskBaseColors;
+            public Vector3[] DiskTangents;
+            public Color[] DiskColors;
+            public float NextDoppler;
+            public bool LoggedCamera;
+        }
+
+        private static readonly List<View> Views = new List<View>();
         private static Material _diskMaterial;
-        private static float _nextDoppler;
-        private static bool _loggedCamera;
-        private static readonly Quaternion DiskTilt = Quaternion.Euler(48f, 35f, -12f);
 
         public static void Destroy()
         {
-            if (_root != null)
-                Object.Destroy(_root);
-            _root = null;
-            _loggedCamera = false;
+            foreach (View view in Views)
+            {
+                if (view.Root != null)
+                    Object.Destroy(view.Root);
+            }
+            Views.Clear();
         }
 
         public static void LateUpdate()
         {
-            if (!BlackHole.Active || SceneManager.GetActiveScene().name != "MainGame")
+            bool show = BlackHole.Active && SceneManager.GetActiveScene().name == "MainGame";
+            if (!show)
             {
-                if (_root != null)
-                    _root.SetActive(false);
+                foreach (View view in Views)
+                {
+                    if (view.Root != null)
+                        view.Root.SetActive(false);
+                }
                 return;
             }
             try
@@ -62,29 +73,20 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Camera far = Camera.allCameras.FirstOrDefault(c => c.transform.root.name.Contains("Distant"));
                 if (transpose == null || far == null || ClientOrigin.LocalVisualSpace == null)
                     return;
-                if (_root == null && !Build(far))
-                    return;
-                _root.SetActive(true);
-                Vector3 position = transpose.Position((ISpace)BlackHole.Space, ClientOrigin.LocalVisualSpace, Vector3.zero);
-                _root.transform.position = position * WorldScale;
-                _root.transform.localScale = Vector3.one * (BlackHole.Horizon * WorldScale);
-
-                // Rings face the viewer; the disk keeps its own plane and turns
-                Vector3 toCamera = far.transform.position - _root.transform.position;
-                if (toCamera.sqrMagnitude > 1e-6f)
-                    _billboards.rotation = Quaternion.LookRotation(-toCamera.normalized, far.transform.up);
-                _diskTransform.localRotation = DiskTilt;
-                _diskMaterial.SetTextureOffset("_BaseMap", new Vector2(Time.time * 0.004f, 0f));
-                if (Time.unscaledTime >= _nextDoppler)
+                if (Views.Count == 0)
                 {
-                    _nextDoppler = Time.unscaledTime + 0.1f;
-                    Doppler(toCamera.normalized);
+                    foreach (Hole hole in BlackHole.Placed)
+                    {
+                        View built = Build(far, hole);
+                        if (built == null)
+                            return;
+                        Views.Add(built);
+                    }
                 }
-                if (!_loggedCamera)
-                {
-                    _loggedCamera = true;
-                    AdvancedMod.Log.Msg($"black hole visuals: far camera {far.name} clip {far.nearClipPlane}..{far.farClipPlane}, layer {_root.layer}, at {position.magnitude / 1000f:0} km");
-                }
+                if (_diskMaterial != null)
+                    _diskMaterial.SetTextureOffset("_BaseMap", new Vector2(Time.time * 0.004f, 0f));
+                foreach (View view in Views)
+                    Place(view, transpose, far);
             }
             catch (System.Exception e)
             {
@@ -92,57 +94,88 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             }
         }
 
-        // Approaching material is blueshifted and beamed: brighter on the side turning toward the viewer
-        private static void Doppler(Vector3 toCamera)
+        private static void Place(View view, IWorldTransposeClient transpose, Camera far)
         {
-            Vector3 view = Quaternion.Inverse(_diskTransform.rotation) * toCamera;
-            for (int i = 0; i < _diskColors.Length; i++)
+            if (view.Root == null || view.Hole.Space == null)
+                return;
+            view.Root.SetActive(true);
+            Vector3 position = transpose.Position((ISpace)view.Hole.Space, ClientOrigin.LocalVisualSpace, Vector3.zero);
+            view.Root.transform.position = position * WorldScale;
+            view.Root.transform.localScale = Vector3.one * (view.Hole.Horizon * WorldScale);
+
+            // Rings face the viewer; the disk keeps its own plane and turns
+            Vector3 toCamera = far.transform.position - view.Root.transform.position;
+            if (toCamera.sqrMagnitude > 1e-6f)
+                view.Billboards.rotation = Quaternion.LookRotation(-toCamera.normalized, far.transform.up);
+            view.DiskTransform.localRotation = view.Hole.DiskTilt;
+            if (Time.unscaledTime >= view.NextDoppler)
             {
-                float approach = Vector3.Dot(_diskTangents[i], view);
-                float beaming = Mathf.Clamp(1f + approach * 0.75f, 0.25f, 1.9f);
-                Color c = _diskBaseColors[i] * beaming;
-                c.a = _diskBaseColors[i].a;
-                _diskColors[i] = c;
+                view.NextDoppler = Time.unscaledTime + 0.1f;
+                Doppler(view, toCamera.normalized);
             }
-            _diskMesh.colors = _diskColors;
+            if (!view.LoggedCamera)
+            {
+                view.LoggedCamera = true;
+                AdvancedMod.Log.Msg($"black hole visuals: {view.Hole.Name}, far camera {far.name} clip {far.nearClipPlane}..{far.farClipPlane}, layer {view.Root.layer}, at {position.magnitude / 1000f:0} km");
+            }
         }
 
-        private static bool Build(Camera far)
+        // Approaching material is blueshifted and beamed: brighter on the side turning toward the viewer
+        private static void Doppler(View view, Vector3 toCamera)
+        {
+            Vector3 local = Quaternion.Inverse(view.DiskTransform.rotation) * toCamera;
+            for (int i = 0; i < view.DiskColors.Length; i++)
+            {
+                float approach = Vector3.Dot(view.DiskTangents[i], local);
+                float beaming = Mathf.Clamp(1f + approach * 0.75f, 0.25f, 1.9f);
+                Color c = view.DiskBaseColors[i] * beaming;
+                c.a = view.DiskBaseColors[i].a;
+                view.DiskColors[i] = c;
+            }
+            view.DiskMesh.colors = view.DiskColors;
+        }
+
+        private static Material _shadow, _lensed, _photon, _halo;
+
+        private static View Build(Camera far, Hole hole)
         {
             Material glowTemplate = Resources.FindObjectsOfTypeAll<Material>()
                 .FirstOrDefault(m => m != null && m.shader != null && m.shader.name == "Universal Render Pipeline/Particles/Unlit");
             if (glowTemplate == null)
             {
                 ErrorLog.Report("black hole visuals", new System.Exception("no particle material to copy"));
-                return false;
+                return null;
             }
             int layer = FarLayer(far);
-            _root = new GameObject("TFA Black Hole (far)") { layer = layer };
-            Object.DontDestroyOnLoad(_root);
-
-            Texture2D diskTexture = DiskTexture();
-            Texture2D ringTexture = RingTexture();
-            Material shadow = Opaque(glowTemplate, Color.black);
-            _diskMaterial = Glow(glowTemplate, diskTexture, Color.white, "TFA_BlackHoleDisk");
-            Material lensed = Glow(glowTemplate, diskTexture, new Color(1f, 0.85f, 0.7f, 0.85f), "TFA_BlackHoleLensed");
-            Material photon = Glow(glowTemplate, ringTexture, new Color(1f, 0.92f, 0.8f, 1f), "TFA_BlackHolePhoton");
-            Material halo = Glow(glowTemplate, ringTexture, new Color(1f, 0.5f, 0.25f, 0.18f), "TFA_BlackHoleHalo");
+            if (_diskMaterial == null)
+            {
+                Texture2D diskTexture = DiskTexture();
+                Texture2D ringTexture = RingTexture();
+                _shadow = Opaque(glowTemplate, Color.black);
+                _diskMaterial = Glow(glowTemplate, diskTexture, Color.white, "TFA_BlackHoleDisk");
+                _lensed = Glow(glowTemplate, diskTexture, new Color(1f, 0.85f, 0.7f, 0.85f), "TFA_BlackHoleLensed");
+                _photon = Glow(glowTemplate, ringTexture, new Color(1f, 0.92f, 0.8f, 1f), "TFA_BlackHolePhoton");
+                _halo = Glow(glowTemplate, ringTexture, new Color(1f, 0.5f, 0.25f, 0.18f), "TFA_BlackHoleHalo");
+            }
+            var view = new View { Hole = hole };
+            view.Root = new GameObject($"TFA Black Hole (far) {hole.Name}") { layer = layer };
+            Object.DontDestroyOnLoad(view.Root);
 
             // Units: 1 = event horizon radius
-            _billboards = Child("Billboards", _root.transform, layer).transform;
-            Mesh(Child("Shadow", _billboards, layer), Disc(BlackHole.Shadow / BlackHole.Horizon, 96), shadow);
-            Mesh(Child("PhotonRing", _billboards, layer), Annulus(2.58f, 2.75f, 128, 1f, true), photon);
-            Mesh(Child("LensedDisk", _billboards, layer), Annulus(2.6f, 4.6f, 128, 2f, true), lensed);
-            Mesh(Child("Halo", _billboards, layer), Annulus(2.6f, 60f, 64, 1f, true), halo);
+            view.Billboards = Child("Billboards", view.Root.transform, layer).transform;
+            Mesh(Child("Shadow", view.Billboards, layer), Disc(hole.Shadow / hole.Horizon, 96), _shadow);
+            Mesh(Child("PhotonRing", view.Billboards, layer), Annulus(2.58f, 2.75f, 128, 1f, true), _photon);
+            Mesh(Child("LensedDisk", view.Billboards, layer), Annulus(2.6f, 4.6f, 128, 2f, true), _lensed);
+            Mesh(Child("Halo", view.Billboards, layer), Annulus(2.6f, 60f, 64, 1f, true), _halo);
 
-            GameObject disk = Child("Disk", _root.transform, layer);
-            _diskTransform = disk.transform;
-            _diskMesh = Annulus(DiskInner, DiskOuter, Segments, 3f, false);
-            _diskBaseColors = DiskColors(_diskMesh);
-            _diskColors = (Color[])_diskBaseColors.Clone();
-            _diskTangents = _diskMesh.vertices.Select(v => new Vector3(-v.z, 0f, v.x).normalized).ToArray();
-            Mesh(disk, _diskMesh, _diskMaterial);
-            return true;
+            GameObject disk = Child("Disk", view.Root.transform, layer);
+            view.DiskTransform = disk.transform;
+            view.DiskMesh = Annulus(DiskInner, DiskOuter, Segments, 3f, false);
+            view.DiskBaseColors = DiskColors(view.DiskMesh);
+            view.DiskColors = (Color[])view.DiskBaseColors.Clone();
+            view.DiskTangents = view.DiskMesh.vertices.Select(v => new Vector3(-v.z, 0f, v.x).normalized).ToArray();
+            Mesh(disk, view.DiskMesh, _diskMaterial);
+            return view;
         }
 
         // The layer the game draws its far star on, so the far camera sees the hole too

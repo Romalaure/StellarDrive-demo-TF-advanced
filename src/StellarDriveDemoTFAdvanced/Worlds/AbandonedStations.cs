@@ -162,9 +162,10 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             position = default;
             if (spec.NearBlackHole)
             {
-                if (!BlackHole.Active)
+                Hole hole = BlackHole.Placed.FirstOrDefault();
+                if (hole == null)
                     return false;
-                position = BlackHole.Space.Position + (Vector3Double)spec.Offset;
+                position = hole.Space.Position + (Vector3Double)spec.Offset;
                 return true;
             }
             IPlanetsProvider planets = ServiceLocator.GetService<IPlanetsServerProvider>() as IPlanetsProvider ?? ServiceLocator.GetService<IPlanetsClientProvider>();

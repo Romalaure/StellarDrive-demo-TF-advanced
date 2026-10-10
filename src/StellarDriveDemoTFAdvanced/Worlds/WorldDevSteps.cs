@@ -59,8 +59,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     .FirstOrDefault(r => r.activeInHierarchy && r.name.StartsWith(prefix))));
             }
             targets.AddRange(Targets);
-            targets.Add(("blackhole", () => SceneManager.GetActiveScene().GetRootGameObjects().Concat(Object.FindObjectsOfType<Transform>().Where(t => t.parent == null).Select(t => t.gameObject))
-                .FirstOrDefault(r => r.name == "TFA Black Hole (far)")));
+            for (int i = 0; i < BlackHole.All.Length; i++)
+            {
+                string holeName = "TFA Black Hole (far) " + BlackHole.All[i].Name;
+                targets.Add(("blackhole_" + i, () => Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).Where(t => t.parent == null)
+                    .Select(t => t.gameObject).FirstOrDefault(r => r.name == holeName)));
+            }
             foreach ((string name, System.Func<GameObject> find) in targets)
             {
                 IEnumerator shot = ShootAt(find(), name);

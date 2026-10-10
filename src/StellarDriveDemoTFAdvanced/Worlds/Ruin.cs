@@ -107,6 +107,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 case RuinStyle.Sandstone: tint = new Color(1.15f, 0.88f, 0.62f); break;
                 case RuinStyle.Basalt: tint = new Color(0.42f, 0.42f, 0.47f); break;
                 case RuinStyle.Mossy: tint = new Color(0.72f, 0.88f, 0.6f); break;
+                case RuinStyle.Ice: tint = new Color(0.82f, 0.95f, 1.15f); break;
                 default: tint = new Color(0.9f, 0.88f, 0.86f); break;
             }
             var material = new Material(rock) { name = rock.name + "_" + style };
