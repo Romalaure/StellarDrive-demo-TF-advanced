@@ -13,7 +13,22 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         AutumnOak,
         Acacia,
         Birch,
-        AutumnBirch
+        AutumnBirch,
+        /// <summary>Jungle giant: a 30 m kapok with buttress roots and a wide umbrella crown.</summary>
+        Kapok,
+        Palm,
+        /// <summary>Jungle canopy tree, dark and dense.</summary>
+        Jungle
+    }
+
+    internal enum PlantKind
+    {
+        Fern,
+        Bush,
+        RedFlowers,
+        YellowFlowers,
+        VioletFlowers,
+        WhiteFlowers
     }
 
     /// <summary>
@@ -84,7 +99,104 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 group.SetLODs(new[] { new LOD(0.01f, new Renderer[] { lod0 }) });
                 group.RecalculateBounds();
             }
+            // The giant's trunk is much thicker and taller than the fir's
+            if (kind == TreeKind.Kapok)
+            {
+                foreach (Collider collider in copy.GetComponentsInChildren<Collider>(true))
+                {
+                    if (collider.GetComponentInParent<PlanetObjectVisuals>() == null)
+                        collider.transform.localScale = Vector3.Scale(collider.transform.localScale, new Vector3(2.2f, 1.5f, 2.2f));
+                }
+            }
             return copy;
+        }
+
+        // ---- Undergrowth: ferns, bushes and flowers on the planets' grass layer
+
+        private static readonly Dictionary<PlantKind, GameObject> Plants = new Dictionary<PlantKind, GameObject>();
+
+        public static IEnumerable<GameObject> AllPlants => Plants.Values.Where(p => p != null);
+
+        /// <summary>
+        /// A plant built like the grass (a copy of the game's grass prefab, instanced the same way,
+        /// no collision) with a new model in the fir's foliage material: fern fronds, a leafy bush
+        /// or a clump of flowers.
+        /// </summary>
+        public static GameObject Plant(GameObject grass, GameObject fir, PlantKind kind)
+        {
+            if (Plants.TryGetValue(kind, out GameObject cached) && cached != null)
+                return cached;
+            if (grass == null || fir == null)
+                return null;
+            if (_holder == null)
+            {
+                _holder = new GameObject("TFA_TreePrefabs");
+                _holder.SetActive(false);
+                Object.DontDestroyOnLoad(_holder);
+            }
+            MeshRenderer firLod = fir.GetComponentsInChildren<MeshRenderer>(true).FirstOrDefault(r => r.name.Contains("LOD0"));
+            if (firLod == null || firLod.sharedMaterials.Length < 2)
+                return null;
+            GameObject copy = Object.Instantiate(grass, _holder.transform);
+            copy.name = "TFA_Plant_" + kind;
+            PlanetObjectVisuals visuals = copy.GetComponentInChildren<PlanetObjectVisuals>(true);
+            if (visuals != null)
+                visuals.id = copy.name;
+            bool flowers = kind != PlantKind.Fern && kind != PlantKind.Bush;
+            // Flowers: green leaves (the leaf atlas) first, petals second; others: stems, then leaves
+            Material first = flowers ? Tinted(firLod.sharedMaterials[1], "FlowerLeaves", new Color(0.4f, 0.72f, 0.3f)) : Tinted(firLod.sharedMaterials[0], "PlantStem", new Color(0.35f, 0.5f, 0.2f));
+            Material[] materials = { first, PlantLeaves(firLod.sharedMaterials[1], kind) };
+            int variant = 0;
+            foreach (MeshRenderer renderer in copy.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                renderer.GetComponent<MeshFilter>().sharedMesh = PlantModel(kind, variant++);
+                renderer.sharedMaterials = materials;
+            }
+            Plants[kind] = copy;
+            return copy;
+        }
+
+        private static Material PlantLeaves(Material fir, PlantKind kind)
+        {
+            switch (kind)
+            {
+                case PlantKind.Fern: return Tinted(fir, "FernLeaves", new Color(0.4f, 0.75f, 0.28f));
+                case PlantKind.Bush: return Tinted(fir, "BushLeaves", new Color(0.3f, 0.55f, 0.22f));
+                // The leaf atlas is green: strong tints give bright petals
+                case PlantKind.RedFlowers: return Tinted(fir, "RedFlowers", new Color(3.2f, 0.45f, 0.55f));
+                case PlantKind.YellowFlowers: return Tinted(fir, "YellowFlowers", new Color(2.6f, 1.5f, 0.3f));
+                case PlantKind.VioletFlowers: return Tinted(fir, "VioletFlowers", new Color(1.9f, 0.6f, 3.2f));
+                default: return Tinted(fir, "WhiteFlowers", new Color(2.6f, 1.9f, 2.6f));
+            }
+        }
+
+        private static Mesh PlantModel(PlantKind kind, int variant)
+        {
+            var mesh = new TreeMesh(((int)kind + 1) * 131 + variant * 17);
+            float scale = 0.85f + 0.12f * variant;
+            switch (kind)
+            {
+                case PlantKind.Fern:
+                    mesh.Rosette(Vector3.zero, 7 + variant, 1.3f * scale, 0.75f, BigBranch);
+                    break;
+                case PlantKind.Bush:
+                    mesh.Crown(new Vector3(0f, 0.55f * scale, 0f), new Vector3(0.9f, 0.55f, 0.9f) * scale, 10, 0.9f * scale, RoundCluster, 0.3f);
+                    break;
+                default:
+                    // A clump of green leaves and stems (first material), small flower heads on top (second)
+                    mesh.CardsInFirstMaterial = true;
+                    mesh.Rosette(Vector3.zero, 5, 0.5f * scale, 0.35f, SmallCluster);
+                    mesh.CardsInFirstMaterial = false;
+                    for (int i = 0; i < 4 + variant; i++)
+                    {
+                        float a = i * 2.4f + variant;
+                        Vector3 tip = new Vector3(Mathf.Cos(a) * 0.22f, 0.45f + 0.12f * (i % 3), Mathf.Sin(a) * 0.22f) * scale;
+                        mesh.Trunk(Vector3.zero, tip, 0.012f, 0.008f);
+                        mesh.Blossom(tip, 0.15f * scale, RoundCluster);
+                    }
+                    break;
+            }
+            return mesh.Build("TFA_Plant_" + kind + "_" + variant);
         }
 
         private static readonly Dictionary<string, Material> Materials = new Dictionary<string, Material>();
@@ -92,6 +204,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private static Material Bark(Material fir, TreeKind kind)
         {
             bool birch = kind == TreeKind.Birch || kind == TreeKind.AutumnBirch;
+            switch (kind)
+            {
+                case TreeKind.Kapok: return Tinted(fir, "KapokBark", new Color(0.62f, 0.58f, 0.5f));
+                case TreeKind.Palm: return Tinted(fir, "PalmBark", new Color(0.66f, 0.55f, 0.38f));
+                case TreeKind.Jungle: return Tinted(fir, "JungleBark", new Color(0.4f, 0.34f, 0.26f));
+            }
             Color color = birch ? new Color(0.95f, 0.93f, 0.88f) : kind == TreeKind.Acacia ? new Color(0.5f, 0.38f, 0.3f) : new Color(0.45f, 0.36f, 0.28f);
             return Tinted(fir, (birch ? "Birch" : kind == TreeKind.Acacia ? "Acacia" : "Oak") + "Bark", color);
         }
@@ -104,6 +222,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 case TreeKind.AutumnOak: return Tinted(fir, "AutumnOakLeaves", new Color(0.85f, 0.42f, 0.14f));
                 case TreeKind.Acacia: return Tinted(fir, "AcaciaLeaves", new Color(0.56f, 0.62f, 0.26f));
                 case TreeKind.Birch: return Tinted(fir, "BirchLeaves", new Color(0.55f, 0.78f, 0.3f));
+                case TreeKind.Kapok: return Tinted(fir, "KapokLeaves", new Color(0.26f, 0.52f, 0.2f));
+                case TreeKind.Palm: return Tinted(fir, "PalmLeaves", new Color(0.42f, 0.66f, 0.22f));
+                case TreeKind.Jungle: return Tinted(fir, "JungleLeaves", new Color(0.18f, 0.42f, 0.2f));
                 default: return Tinted(fir, "AutumnBirchLeaves", new Color(0.95f, 0.78f, 0.22f));
             }
         }
@@ -134,6 +255,44 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     mesh.Trunk(new Vector3(0.2f, 5.0f, 0f), new Vector3(0.4f, 9.4f, 2.2f), 0.28f, 0.15f);
                     mesh.Crown(new Vector3(0.1f, 9.4f, 0f), new Vector3(6.4f, 4.6f, 6.4f), 34, 4.6f, RoundCluster, 0.25f);
                     break;
+                case TreeKind.Kapok:
+                    mesh.Trunk(new Vector3(0f, -0.5f, 0f), new Vector3(0.2f, 24f, 0.1f), 1.5f, 0.75f);
+                    // Buttress roots fanning out at the foot
+                    for (int i = 0; i < 6; i++)
+                    {
+                        float a = i * 60f * Mathf.Deg2Rad + 0.3f;
+                        var out1 = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                        mesh.Trunk(out1 * 3.8f + Vector3.down * 0.3f, out1 * 0.8f + Vector3.up * 4.5f, 0.35f, 0.5f);
+                    }
+                    // Big limbs carrying a wide, layered umbrella
+                    for (int i = 0; i < 5; i++)
+                    {
+                        float a = i * 72f * Mathf.Deg2Rad;
+                        var out1 = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                        mesh.Trunk(new Vector3(0.2f, 21f, 0.1f), out1 * 8f + Vector3.up * 27.5f, 0.55f, 0.25f);
+                    }
+                    mesh.Crown(new Vector3(0f, 29f, 0f), new Vector3(13f, 3.2f, 13f), 64, 6f, RoundCluster, 0.7f);
+                    mesh.Crown(new Vector3(0f, 31.5f, 0f), new Vector3(8f, 2.2f, 8f), 28, 5f, RoundCluster, 0.6f);
+                    break;
+                case TreeKind.Palm:
+                {
+                    // A trunk curving up in five segments, a crown of drooping fronds
+                    Vector3 p = Vector3.zero;
+                    for (int i = 0; i < 5; i++)
+                    {
+                        Vector3 next = p + new Vector3(0.45f + i * 0.12f, 2.8f, 0.1f);
+                        mesh.Trunk(p, next, 0.42f - i * 0.04f, 0.38f - i * 0.04f);
+                        p = next;
+                    }
+                    mesh.Fronds(p, 11, 6.5f, BigBranch);
+                    break;
+                }
+                case TreeKind.Jungle:
+                    mesh.Trunk(Vector3.zero, new Vector3(0.3f, 15f, 0.1f), 0.75f, 0.38f);
+                    mesh.Trunk(new Vector3(0.3f, 11f, 0.1f), new Vector3(4f, 16f, 1.6f), 0.32f, 0.16f);
+                    mesh.Trunk(new Vector3(0.3f, 12f, 0.1f), new Vector3(-3.4f, 16.5f, -1.8f), 0.32f, 0.16f);
+                    mesh.Crown(new Vector3(0.2f, 17f, 0f), new Vector3(7.5f, 4.2f, 7.5f), 44, 4.6f, RoundCluster, 0.35f);
+                    break;
                 case TreeKind.Acacia:
                     mesh.Trunk(Vector3.zero, new Vector3(0.8f, 5.6f, 0.2f), 0.36f, 0.24f);
                     mesh.Trunk(new Vector3(0.8f, 5.4f, 0.2f), new Vector3(3.6f, 8.6f, 1.0f), 0.2f, 0.12f);
@@ -157,6 +316,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             private readonly List<int> _bark = new List<int>();
             private readonly List<int> _leaves = new List<int>();
             private readonly System.Random _random;
+            /// <summary>Leaf cards go in the first submesh (flowers: green leaves there, petals in the second).</summary>
+            public bool CardsInFirstMaterial;
 
             public TreeMesh(int seed)
             {
@@ -213,6 +374,44 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 }
             }
 
+            /// <summary>Leaf cards rising from one point in a ring, leaning out (ferns, flower leaves).</summary>
+            public void Rosette(Vector3 center, int count, float length, float lean, Rect atlas)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    float a = (i * 360f / count + 23f * (i % 2)) * Mathf.Deg2Rad;
+                    var outward = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                    Vector3 along = (outward * lean + Vector3.up).normalized;
+                    Vector3 facing = Vector3.Cross(along, Vector3.Cross(Vector3.up, outward)).normalized;
+                    Card(center, along, facing, length * (0.8f + 0.2f * (i % 3) / 2f), atlas, center + Vector3.down * 0.5f);
+                }
+            }
+
+            /// <summary>A small flower head: three crossed cards.</summary>
+            public void Blossom(Vector3 center, float size, Rect atlas)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    float a = i * 60f * Mathf.Deg2Rad;
+                    var facing = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                    Card(center - Vector3.up * size * 0.5f, Vector3.up, facing, size, atlas, center + Vector3.down * size);
+                }
+            }
+
+            /// <summary>Palm fronds: long leaf cards leaving the top in a ring, arching out and down.</summary>
+            public void Fronds(Vector3 top, int count, float length, Rect atlas)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    float a = (i * 360f / count + 13f * (i % 3)) * Mathf.Deg2Rad;
+                    var outward = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                    float droop = 0.15f + 0.35f * (i % 3) / 2f;
+                    Vector3 along = (outward - Vector3.up * droop).normalized;
+                    Vector3 facing = Vector3.Cross(along, Vector3.Cross(Vector3.up, outward)).normalized;
+                    Card(top, along, facing, length * (0.85f + 0.15f * (i % 2)), atlas, top + Vector3.down * 2f);
+                }
+            }
+
             // A double-sided leaf card standing along `up`, facing `facing`
             private void Card(Vector3 basePoint, Vector3 up, Vector3 facing, float size, Rect atlas, Vector3 crownCenter)
             {
@@ -240,7 +439,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     _normals.Add((corners[i] - crownCenter).normalized);
                     _uvs.Add(uv[i]);
                 }
-                _leaves.AddRange(new[] { start, start + 1, start + 2, start, start + 2, start + 3 });
+                (CardsInFirstMaterial ? _bark : _leaves).AddRange(new[] { start, start + 1, start + 2, start, start + 2, start + 3 });
             }
 
             public Mesh Build(string name)

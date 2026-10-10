@@ -29,7 +29,10 @@ namespace StellarDriveDemoTFAdvanced.Parts
         private static readonly AccessTools.FieldRef<PartSettings, List<ItemInstance>> BuildingCost =
             AccessTools.FieldRefAccess<PartSettings, List<ItemInstance>>("buildingCost");
 
-        public static void Register(ushort id, string donor, int row, Action<PartSettings, GameObject> configure)
+        public static void Register(ushort id, string donor, int row, Action<PartSettings, GameObject> configure) =>
+            Register(id, donor, AdvancedTab.Name, row, configure);
+
+        public static void Register(ushort id, string donor, string tab, int row, Action<PartSettings, GameObject> configure)
         {
             Ids.Add(id);
             CustomParts.Register(new CustomPartDefinition
@@ -37,7 +40,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 Id = id,
                 Name = "TFA_" + id,
                 Donor = donor,
-                BuildTab = AdvancedTab.Name,
+                BuildTab = tab,
                 BuildRow = row,
                 Configure = (settings, prefab) =>
                 {

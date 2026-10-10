@@ -1,0 +1,325 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using Core.Services;
+using Core.Values;
+using HarmonyLib;
+using Managers.Client.Utils;
+using Managers.Interface;
+using Planets.EnvironmentGeneration;
+using Planets.EnvironmentGeneration.ToSpawn;
+using Saving.Services;
+using Saving.Services.Converters;
+using Saving.Services.Model.State;
+using Ships;
+using Ships.Services;
+using StellarDriveDemoTFAdvanced.Common;
+using StellarDriveDemoTFAdvanced.Items;
+using UnityEngine;
+using WorldObjects.Services;
+using WorldTracking.Interface.Model;
+using WorldTracking.Interface.Model.Spaces;
+using WorldTracking.Interface.Model.Spaces.Common;
+using WorldTracking.Services;
+using WorldTracking.Interface.Services;
+using WorldTracking.Spaces;
+
+namespace StellarDriveDemoTFAdvanced.Worlds
+{
+    /// <summary>
+    /// Chests inside the mod's buildings (village houses, halls, towers and temples, the city's
+    /// lobbies and domes), filled with what that place and planet has: local ores, materials, and
+    /// sometimes the rare finds the advanced parts are built from. A chest is a one-part ship, like
+    /// any part set down on the ground: the game saves it, synchronizes it and lets players open,
+    /// empty or recycle it. The host places it the first time a building's collider is loaded
+    /// near a player; the sites already given a chest are kept next to the world save
+    /// (tfa_sites.txt), written when the game saves, so a chest is never placed twice.
+    /// </summary>
+    internal static class LootCaches
+    {
+        private const string SitesFile = "tfa_sites.txt";
+        // The game's opened loot cases: 400 + 10 x color (gray, green, blue, purple, gold) + finish
+        // (standard, metallic, timber, rusted, crystal, icy, alloy)
+        private const int Gray = 0, Green = 1, Blue = 2, Purple = 3, Gold = 4;
+        private const int Standard = 0, Metallic = 1, Timber = 2, Rusted = 3, Crystal = 4, Icy = 5, Alloy = 6;
+
+        private static int CasePart(Kind kind, string prefix, ulong planetId)
+        {
+            int color, finish;
+            switch (kind)
+            {
+                case Kind.Temple: color = Gold; finish = Timber; break;
+                case Kind.CityCore: color = Gold; finish = Alloy; break;
+                case Kind.City: color = Purple; finish = Alloy; break;
+                default:
+                    color = prefix.Contains("Hall") ? Blue : prefix.Contains("Tower") ? Gray : Green;
+                    finish = prefix.Contains("Tower") ? Rusted : Timber;
+                    break;
+            }
+            if (planetId == 105 && kind != Kind.City && kind != Kind.CityCore)
+                finish = Icy;
+            else if (planetId == 101 && finish == Timber)
+                finish = Crystal;
+            return 400 + color * 10 + finish;
+        }
+
+        private enum Kind { Village, Temple, City, CityCore }
+
+        private sealed class Site
+        {
+            public string Prefix;
+            public Kind Kind;
+            public Vector3[] Spots;
+        }
+
+        // Chest spots in each building's own frame (meters, on the inside floor)
+        private static readonly Site[] Sites =
+        {
+            new Site { Prefix = "TFA_RuinHouseSmall_", Kind = Kind.Village, Spots = new[] { new Vector3(1.8f, 0.12f, -1.5f) } },
+            new Site { Prefix = "TFA_RuinHouse_", Kind = Kind.Village, Spots = new[] { new Vector3(2.5f, 0.12f, -2.1f) } },
+            new Site { Prefix = "TFA_RuinTower_", Kind = Kind.Village, Spots = new[] { new Vector3(-1.2f, 0.22f, -1.2f) } },
+            new Site { Prefix = "TFA_RuinHall_", Kind = Kind.Village, Spots = new[] { new Vector3(2.6f, 0.12f, -5.4f), new Vector3(2.6f, 0.12f, 5.2f) } },
+            new Site { Prefix = "TFA_RuinTemple_", Kind = Kind.Temple, Spots = new[] { new Vector3(0f, 0.92f, 0.6f) } },
+            new Site { Prefix = "TFA_CityTowerTall", Kind = Kind.CityCore, Spots = new[] { new Vector3(-5.6f, 0.07f, -6.6f) } },
+            new Site { Prefix = "TFA_CityTower", Kind = Kind.City, Spots = new[] { new Vector3(-5.6f, 0.07f, -6.6f) } },
+            new Site { Prefix = "TFA_CityDome", Kind = Kind.City, Spots = new[] { new Vector3(6f, 0.12f, -5f) } }
+        };
+
+        private static readonly HashSet<string> Known = new HashSet<string>();
+        private static readonly Queue<(string Key, ulong PlanetId, Vector3 Position, Quaternion Rotation, Site Site, int Spot)> Pending = new Queue<(string, ulong, Vector3, Quaternion, Site, int)>();
+        private static string _loadedFor;
+
+        public static void OnSceneLoaded(bool inGame)
+        {
+            Known.Clear();
+            Pending.Clear();
+            _loadedFor = null;
+            if (inGame)
+                LoadSites();
+        }
+
+        private static string SitesPath()
+        {
+            string save = MainGameSceneLoadData.SaveFileFullName;
+            if (string.IsNullOrEmpty(save))
+                return null;
+            string directory = Path.GetDirectoryName(save);
+            return string.IsNullOrEmpty(directory) ? null : Path.Combine(directory, SitesFile);
+        }
+
+        private static void LoadSites()
+        {
+            string path = SitesPath();
+            _loadedFor = path;
+            if (path == null || !File.Exists(path))
+                return;
+            foreach (string line in File.ReadAllLines(path))
+            {
+                if (!string.IsNullOrWhiteSpace(line))
+                    Known.Add(line.Trim());
+            }
+            AdvancedMod.Log.Msg($"caches: {Known.Count} building(s) already given a chest in this world");
+        }
+
+        /// <summary>Called after the game wrote its save: the sites list goes next to it.</summary>
+        public static void SaveSites(string worldDirectory)
+        {
+            if (string.IsNullOrEmpty(worldDirectory) || Known.Count == 0)
+                return;
+            File.WriteAllLines(Path.Combine(worldDirectory, SitesFile), Known.OrderBy(k => k));
+        }
+
+        /// <summary>Host: a building's collider was just made near a player.</summary>
+        public static void OnHotspotCollider(HotspotObjectToSpawn toSpawn)
+        {
+            if (!GameServices.IsServer || toSpawn?.Prefab == null)
+                return;
+            string name = toSpawn.Prefab.name;
+            Site site = Sites.FirstOrDefault(s => name.StartsWith(s.Prefix, StringComparison.Ordinal));
+            if (site == null)
+                return;
+            ulong planetId = toSpawn.ObjectId.PlanetId;
+            var placed = toSpawn.ObjectId.PlacedObjectId;
+            for (int i = 0; i < site.Spots.Length; i++)
+            {
+                string key = $"{planetId}:{placed.ChunkHash}:{placed.IdWithinChunk}:{i}";
+                if (!Known.Add(key))
+                    continue;
+                Pending.Enqueue((key, planetId, toSpawn.Transform.Position, toSpawn.Transform.Rotation, site, i));
+            }
+        }
+
+        private static readonly List<uint> Placed = new List<uint>();
+        private static float _nextReport;
+
+        /// <summary>Host: places the chests found during the last physics tick.</summary>
+        public static void Update()
+        {
+            if (DevHarness.Active && Placed.Count > 0 && Time.unscaledTime > _nextReport)
+            {
+                _nextReport = Time.unscaledTime + 5f;
+                ShipsServerTracker tracker = ServiceLocator.GetService<ShipsServerTracker>();
+                AdvancedMod.Log.Msg("dev: chests " + string.Join(", ", Placed.Take(4).Select(id => tracker.TryGetRootShip(id, out var ship) ? $"{id} space {ship.SpaceId} pos {ship.Position} " + string.Join(";", ship.GetAllStatefulParts<Ships.Interface.Model.Parts.State.StorageState>().Select(p => p.Settings.name + " " + Enumerable.Range(0, 10).Count(i => ((Ships.Interface.Model.Parts.State.StorageState)p.State).GetSlot((byte)i).HasItem) + " of 10 slots filled")) : id + " gone")));
+            }
+            while (Pending.Count > 0)
+            {
+                var item = Pending.Dequeue();
+                try
+                {
+                    Place(item.Key, item.PlanetId, item.Position, item.Rotation, item.Site, item.Spot);
+                }
+                catch (Exception e)
+                {
+                    ErrorLog.Report("loot caches", e);
+                }
+            }
+        }
+
+        private static void Place(string key, ulong planetId, Vector3 position, Quaternion rotation, Site site, int spot)
+        {
+            ShipsServerTracker ships = ServiceLocator.GetService<ShipsServerTracker>();
+            SpacesServer spaces = ServiceLocator.GetService<SpacesServer>();
+            IWorldTranspose transpose = ServiceLocator.GetService<IWorldTransposeServer>();
+            var ids = ServiceLocator.GetService<WorldObjectsIdsServerTracker>();
+            if (ships == null || spaces == null || transpose == null || ids == null)
+                return;
+            var random = new System.Random(key.GetHashCode());
+
+            // Surface spaces of one planet share the planet's axes: the building's rotation applies as is
+            Vector3 up = rotation * Vector3.up;
+            Vector3 point = position + rotation * site.Spots[spot] + up * 0.06f;
+            var probe = new PlanetSurfaceSpace { PlanetId = planetId, Center = (Vector3Double)point };
+            (uint spaceId, ISpace _) = spaces.GetOrCreateSpaceForPosition(probe);
+
+            string json = ChestShipJson(CasePart(site.Kind, site.Prefix, planetId), LootFor(site.Kind, planetId, random));
+            var data = JsonUtility.FromJson<ShipImportExportUtils.ShipImportExportData>(json);
+            SavedShipState state = new ShipsConverter().ConvertToState(data.ships).States.Cast<SavedShipState>().Single();
+            state.Id = ids.CreateUniqueIdForObject();
+            state.SpaceId = spaceId;
+            state.Position = (Vector3)transpose.Position(probe, spaceId, Vector3Double.Zero);
+            state.Velocity = Vector3.zero;
+            state.Rotation = rotation * Quaternion.Euler(0f, random.Next(0, 4) * 90f + 180f, 0f);
+            state.RelativeSpaceId = spaces.GetOrCreateShipRelativeSpace(state.Id);
+            ships.LoadShip(state);
+            Placed.Add(state.Id);
+            AdvancedMod.Log.Msg($"caches: chest {state.Id} placed in {site.Prefix.TrimEnd('_')} on planet {planetId}");
+        }
+
+        // ---- Loot
+
+        private struct Drop
+        {
+            public uint Item;
+            public int Min, Max;
+            public double Chance;
+            public Drop(uint item, int min, int max, double chance) { Item = item; Min = min; Max = max; Chance = chance; }
+        }
+
+        private static IEnumerable<Drop> LootTable(Kind kind, ulong planetId)
+        {
+            if (kind == Kind.City || kind == Kind.CityCore)
+            {
+                yield return new Drop(ModItems.NexoranAlloy, 2, 6, 0.85);
+                yield return new Drop(ModItems.QuantumCore, 1, 1, kind == Kind.CityCore ? 0.6 : 0.3);
+                yield return new Drop(ModItems.Aluminum, 4, 12, 0.6);
+                yield return new Drop(ModItems.Glass, 4, 12, 0.5);
+                yield return new Drop(ModItems.Copper, 3, 10, 0.4);
+                yield return new Drop(ModItems.Quartz, 2, 6, 0.4);
+                yield return new Drop(ModItems.StellarShard, 1, 3, 0.3);
+                yield break;
+            }
+            yield return new Drop(ModItems.Artifact, 1, kind == Kind.Temple ? 2 : 1, kind == Kind.Temple ? 0.8 : 0.35);
+            yield return new Drop(ModItems.Wood, 4, 12, 0.55);
+            yield return new Drop(ModItems.Iron, 3, 10, 0.5);
+            yield return new Drop(ModItems.Copper, 2, 8, 0.4);
+            yield return new Drop(ModItems.Glass, 2, 6, 0.3);
+            yield return new Drop(ModItems.Key, 1, 1, 0.12);
+            yield return new Drop(ModItems.GoldBar, 1, 2, kind == Kind.Temple ? 0.35 : 0.08);
+            // What this planet's ground holds
+            switch (planetId)
+            {
+                case 101: yield return new Drop(ModItems.Quartz, 3, 8, 0.6); break;
+                case 102: yield return new Drop(ModItems.Titanium, 3, 8, 0.65); break;
+                case 103: yield return new Drop(ModItems.Titanium, 2, 6, 0.5); break;
+                case 104: yield return new Drop(ModItems.Amber, 2, 5, 0.5); break;
+                case 105: yield return new Drop(ModItems.Cryonite, 2, 6, 0.6); yield return new Drop(ModItems.Titanium, 2, 5, 0.35); break;
+                case 106: yield return new Drop(ModItems.NexoranAlloy, 1, 4, 0.5); break;
+                case 107: yield return new Drop(ModItems.Amber, 3, 8, 0.7); break;
+            }
+        }
+
+        private static List<(uint Item, int Quantity)> LootFor(Kind kind, ulong planetId, System.Random random)
+        {
+            var loot = new List<(uint, int)>();
+            foreach (Drop drop in LootTable(kind, planetId))
+            {
+                if (loot.Count < 10 && random.NextDouble() < drop.Chance)
+                    loot.Add((drop.Item, random.Next(drop.Min, drop.Max + 1)));
+            }
+            if (loot.Count == 0)
+                loot.Add((ModItems.Iron, random.Next(2, 6)));
+            return loot;
+        }
+
+        // The game's ship save format: one chest, no hull
+        private static string ChestShipJson(int casePart, List<(uint Item, int Quantity)> loot)
+        {
+            var slots = loot.Select(l => $"{{\"hasItem\":true,\"itemId\":{l.Item},\"quantity\":{l.Quantity}}}").ToList();
+            while (slots.Count < 10)
+                slots.Add("{\"hasItem\":false,\"itemId\":0,\"quantity\":0}");
+            var sb = new StringBuilder();
+            sb.Append("{\"rootShipId\":1,\"cables\":[],\"ships\":[{");
+            sb.Append("\"id\":1,\"relativeSpaceId\":0,\"spaceId\":0,");
+            sb.Append("\"position\":{\"x\":0,\"y\":0,\"z\":0},\"velocity\":{\"x\":0,\"y\":0,\"z\":0},\"rotation\":{\"x\":0,\"y\":0,\"z\":0,\"w\":1},");
+            sb.Append("\"rooms\":[],\"hullParts\":[],");
+            sb.Append(string.Format(CultureInfo.InvariantCulture,
+                "\"statefulFloatingParts\":[{{\"id\":1,\"settingsId\":{0},\"coord\":{{\"x\":0,\"y\":0,\"z\":0}},\"forwardOrientationId\":2,\"upOrientationId\":4}}],", casePart));
+            sb.Append("\"statefulHullParts\":[],\"thrustersStates\":[],");
+            sb.Append("\"storageStates\":[{\"partId\":1,\"slots\":[").Append(string.Join(",", slots)).Append("]}],");
+            foreach (string empty in new[] { "beaconStates", "leverStates", "warpDriveStates", "fluidTankStates", "dockingDoorStates", "targeterStates", "mathGateStates",
+                         "unaryMathGateStates", "memoryRegisterStates", "constantStates", "transmitterStates", "rotorStates", "electrolyzerStates",
+                         "woodThrusterStates", "woodGeneratorStates", "ethanolDistillerStates" })
+                sb.Append('"').Append(empty).Append("\":[],");
+            sb.Length--;
+            sb.Append("}]}");
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>Host: building colliders are made near players; that is when their chests are placed.</summary>
+    [HarmonyPatch(typeof(PlanetHotspotsEnvironmentPhysics), nameof(PlanetHotspotsEnvironmentPhysics.SpawnCollider))]
+    internal static class LootCachesColliderPatch
+    {
+        private static void Postfix(HotspotObjectToSpawn toSpawn)
+        {
+            try
+            {
+                LootCaches.OnHotspotCollider(toSpawn);
+            }
+            catch (Exception e)
+            {
+                ErrorLog.Report("loot caches", e);
+            }
+        }
+    }
+
+    /// <summary>The list of buildings given a chest is saved with the world.</summary>
+    [HarmonyPatch(typeof(GameSaver), "SaveGame", typeof(string))]
+    internal static class LootCachesSavePatch
+    {
+        private static void Postfix(string worldDirectoryFullName)
+        {
+            try
+            {
+                LootCaches.SaveSites(worldDirectoryFullName);
+            }
+            catch (Exception e)
+            {
+                ErrorLog.Report("loot caches save", e);
+            }
+        }
+    }
+}

@@ -192,7 +192,10 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             foreach (GeneratorReading generator in snap.Generators)
             {
                 string output = generator.Connected ? "" : " · " + Colored(ComputerStyle.Warning, "non branché");
-                Row($"Bois #{generator.PartId}", $"{Pct(generator.Level)} · {N(generator.Watts, "0")} W · bois {N(generator.Wood, "0.0")}{output}");
+                if (generator.Quantum)
+                    Row($"Réacteur #{generator.PartId}", $"{Pct(generator.Level)} · {N(generator.Watts, "0")} W · sans carburant{output}");
+                else
+                    Row($"Bois #{generator.PartId}", $"{Pct(generator.Level)} · {N(generator.Watts, "0")} W · bois {N(generator.Wood, "0.0")}{output}");
             }
 
             _sb.Append('\n');
@@ -233,16 +236,25 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             foreach (DiagnosticMessage message in messages)
             {
                 string tag = message.Severity == Severity.Error ? "ERREUR" : message.Severity == Severity.Warning ? "ALERTE" : "INFO";
-                _sb.Append(Colored(ShipComputer.Diagnostics.ColorOf(message.Severity), tag)).Append("<indent=17%>").Append(message.Text).Append("</indent>\n");
+                // No indent here: a tag wider than the indent would be drawn over by the message
+                _sb.Append(Colored(ShipComputer.Diagnostics.ColorOf(message.Severity), "<b>" + tag + "</b>")).Append("  ").Append(message.Text).Append('\n');
             }
             _sb.Append('\n');
             Title("TECHNIQUE");
             Row("Rôle", (snap.IsHost ? "hôte" : "client") + $" · {N(rate, "0.#")} lectures/s · {N(sampleMs, "0.00")} ms");
         }
 
+        // Longest label that always fits left of the value column, at the largest text size
+        private const int LabelFit = 10;
+
         private void Row(string label, string value)
         {
-            _sb.Append(label).Append(ValueColumn).Append("<color=").Append(_strong).Append('>').Append(value).Append("</color></indent>\n");
+            // <indent> moves the caret back to the column: a wider label would be drawn over by its
+            // value, so a long label gets its own line
+            _sb.Append(label);
+            if (label.Length > LabelFit)
+                _sb.Append('\n');
+            _sb.Append(ValueColumn).Append("<color=").Append(_strong).Append('>').Append(value).Append("</color></indent>\n");
         }
 
         private void Title(string title)

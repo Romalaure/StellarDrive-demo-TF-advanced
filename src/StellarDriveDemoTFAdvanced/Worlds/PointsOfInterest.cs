@@ -102,7 +102,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     Step(pieces[0], curve, 1, 1, 0f, 1f, 16f),
                     Step(pieces[1], curve, 2, 4, 20f, 42f, 12f),
                     Step(pieces[2], curve, 1, 3, 18f, 45f, 9f),
-                    Step(pieces[3], curve, 1, 1, 30f, 48f, 10f)
+                    Step(pieces[3], curve, 1, 1, 30f, 48f, 10f),
+                    Step(pieces[4], curve, 0, 1, 26f, 50f, 18f)
                 }
             });
         }
@@ -130,6 +131,29 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     Step(pieces[3], curve, 1, 3, 20f, 75f, 10f),
                     Step(pieces[4], curve, 0, 1, 45f, 80f, 26f),
                     Step(pieces[5], curve, 0, 1, 35f, 70f, 24f)
+                }
+            });
+        }
+
+        /// <summary>A field of the mod's ore deposits: a few big ones and smaller ones around.</summary>
+        public static void Deposits(PlanetShaper.Context planet, OreKind kind, float frequency)
+        {
+            GameObject deposit = Ores.Prefab(planet, kind);
+            AnimationCurve curve = TemplateCurve(planet);
+            if (deposit == null || curve == null)
+                return;
+            planet.AddHotspot(new PlanetHotspotsPlacementConfig
+            {
+                placementLevel = 4,
+                loadDistance = 2000f,
+                spawnProbability = Mathf.Clamp01(frequency * 0.4f),
+                avoidDenseEnvConstraint = false,
+                minElevationConstraint = true,
+                minElevation = 70f,
+                distributionSteps = new[]
+                {
+                    Step(deposit, curve, 1, 2, 0f, 6f, 6f),
+                    Step(deposit, curve, 2, 5, 8f, 30f, 5f)
                 }
             });
         }

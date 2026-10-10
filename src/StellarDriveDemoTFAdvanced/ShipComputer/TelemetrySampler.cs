@@ -394,7 +394,23 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                 foreach (StatefulPart part in ship.GetAllStatefulParts<FluidTankState>())
                 {
                     var tank = (FluidTankState)part.State;
-                    if (part.Settings.id == Power.PowerCatalog.BatteryId)
+                    if (part.Settings.id == Power.PowerCatalog.ReactorId)
+                    {
+                        var socket = new EntityPartSocket(ship.Id, part.Id, Power.PowerCatalog.BatteryPowerA);
+                        var other = new EntityPartSocket(ship.Id, part.Id, Power.PowerCatalog.BatteryPowerB);
+                        float watts = Mathf.Abs(tank.FluidFlow);
+                        float rated = Mathf.Max(1f, Power.PowerCatalog.ReactorWatts.Value);
+                        snap.Generators.Add(new GeneratorReading
+                        {
+                            PartId = part.Id,
+                            Quantum = true,
+                            Level = Mathf.Clamp01(watts / rated),
+                            Watts = watts,
+                            Connected = Plugged(connections, socket) || Plugged(connections, other)
+                        });
+                        TrackServerGroup(power, socket);
+                    }
+                    else if (Power.PowerCatalog.IsBattery(part.Settings.id))
                     {
                         var socket = new EntityPartSocket(ship.Id, part.Id, Power.PowerCatalog.BatteryPowerA);
                         var other = new EntityPartSocket(ship.Id, part.Id, Power.PowerCatalog.BatteryPowerB);

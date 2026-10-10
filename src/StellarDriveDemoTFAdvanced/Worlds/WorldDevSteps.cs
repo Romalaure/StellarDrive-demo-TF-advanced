@@ -113,7 +113,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private static void PrefabProbe()
         {
             var text = new StringBuilder();
-            string[] names = { "CrashedShipNoSmoke", "CrashedThruster", "RockLargeIron", "CrystallSmallGlass", "FirTreeTall1", "Grass1" };
+            string[] names = { "RockLargeIron", "CrystallSmallGlass", "Grass1", "FirTreeHuge", "MediumIce", "RockLargeAluminum", "AsteroidNear", "StellarShard", "FirTreeTall1Cut" };
             foreach (GameObject prefab in Resources.FindObjectsOfTypeAll<GameObject>().Where(g => names.Contains(g.name) && g.scene.name == null).GroupBy(g => g.name).Select(g => g.First()))
             {
                 text.AppendLine("=== prefab " + prefab.name);

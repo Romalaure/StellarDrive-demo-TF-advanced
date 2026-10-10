@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.6.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.7.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -21,6 +21,7 @@ namespace StellarDriveDemoTFAdvanced
         {
             Log = LoggerInstance;
             Settings.Load();
+            Items.ModItems.Create();
             Propulsion.EngineCatalog.LoadSettings();
             Power.PowerCatalog.LoadSettings();
             ApplyPatches();
@@ -29,6 +30,9 @@ namespace StellarDriveDemoTFAdvanced
             Worlds.StationVisit.Install();
             ShipComputer.DashboardDevRender.Install();
             Worlds.TreeDevRender.Install();
+            Worlds.StarMapProbe.Install();
+            Items.ItemProbe.Install();
+            Common.FpsProbe.Install();
             Log.Msg("ready");
         }
 
@@ -100,9 +104,11 @@ namespace StellarDriveDemoTFAdvanced
             TelemetryHub.Clear();
             Power.PowerGrid.Forget();
             Worlds.BlackHole.Forget();
+            Worlds.ModPlanetState.Forget();
             Worlds.BlackHoleVisuals.Destroy();
             _inGame = sceneName == "MainGame";
             Worlds.AbandonedStations.OnSceneLoaded(_inGame);
+            Worlds.LootCaches.OnSceneLoaded(_inGame);
             DevHarness.OnSceneLoaded(sceneName);
             if (_partsRegistered)
                 ScheduleSelfTest();
@@ -117,6 +123,8 @@ namespace StellarDriveDemoTFAdvanced
                 Worlds.BlackHole.ServerUpdate();
             if (_inGame)
                 Worlds.AbandonedStations.Update();
+            if (_inGame)
+                Worlds.LootCaches.Update();
             if (_partsRegistered && Settings.SelfTest.Value)
                 RunSelfTest();
         }

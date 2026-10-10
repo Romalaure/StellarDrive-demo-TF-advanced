@@ -231,6 +231,27 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     GrassConfig.objectsSpawn[0].prefab = prefab;
             }
 
+            /// <summary>One of the mod's undergrowth plants, built from this planet's grass and fir.</summary>
+            public GameObject Plant(PlantKind kind) => Worlds.Trees.Plant(GrassPrefab, TreePrefab("FirTreeTall1"), kind);
+
+            /// <summary>The grass layer's mix: each entry is a plant and its weight (grass, ferns, flowers...).</summary>
+            public void Undergrowth(float density, params (GameObject Prefab, int Weight)[] plants)
+            {
+                PlanetDensePlacementConfig grass = GrassConfig;
+                plants = plants.Where(p => p.Prefab != null).ToArray();
+                if (grass == null || plants.Length == 0)
+                    return;
+                SpawnTable(grass) = null;
+                grass.objectsSpawn = plants.Select(p => new PlanetDensePlacementConfig.DenseObjectPlacementType
+                {
+                    prefab = p.Prefab,
+                    probability = p.Weight,
+                    densityBiasValue = 0f,
+                    densityBiasPower = 1f
+                }).ToArray();
+                grass.noiseOffset = density;
+            }
+
             public GameObject TreePrefab(string name) => Flora.configs[0].objectsSpawn.Select(o => o.prefab).FirstOrDefault(p => p != null && p.name == name);
 
             public GameObject GrassPrefab => GrassConfig?.objectsSpawn.Select(o => o.prefab).FirstOrDefault();

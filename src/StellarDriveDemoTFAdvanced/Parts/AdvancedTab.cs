@@ -14,9 +14,50 @@ namespace StellarDriveDemoTFAdvanced.Parts
         public const int ConstructionRow = 2;
 
         /// <summary>Only call when SDModKit is loaded.</summary>
+        /// <summary>Parts built from the rare finds of ruins, the abandoned city and the stations.</summary>
+        public const string ArtifactsName = "TF Artefacts";
+        public const int ArtifactsPowerRow = 0;
+        public const int ArtifactsPropulsionRow = 1;
+
         public static void Declare()
         {
             BuildTabs.Declare(Name, 52, Icon());
+            BuildTabs.Declare(ArtifactsName, 53, CrystalIcon());
+        }
+
+        // A violet crystal cluster
+        private static Texture2D CrystalIcon()
+        {
+            const int size = 64;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { name = "TFA_ArtifactsTabIcon", hideFlags = HideFlags.HideAndDontSave };
+            var clear = new Color(1f, 1f, 1f, 0f);
+            var light = new Color(0.85f, 0.7f, 1f, 1f);
+            var dark = new Color(0.5f, 0.3f, 0.85f, 1f);
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    Color c = clear;
+                    // Three crystals: center tall, two leaning shorter ones
+                    if (Crystal(x, y, 32, 8, 54, 8))
+                        c = x < 32 ? light : dark;
+                    else if (Crystal(x - (y - 8) / 4, y, 18, 8, 36, 6) || Crystal(x + (y - 8) / 4, y, 46, 8, 38, 6))
+                        c = (x + y) % 9 < 5 ? light : dark;
+                    texture.SetPixel(x, y, c);
+                }
+            }
+            texture.Apply();
+            return texture;
+        }
+
+        // A pointed prism from y0 up to y1, half width w, centered on cx
+        private static bool Crystal(int x, int y, int cx, int y0, int y1, int w)
+        {
+            if (y < y0 || y > y1)
+                return false;
+            int tip = y1 - w * 2;
+            int half = y <= tip ? w : w * (y1 - y) / (y1 - tip);
+            return x >= cx - half && x <= cx + half;
         }
 
         // A small screen with three text lines, drawn in code

@@ -118,7 +118,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             {
                 if (!generator.Connected)
                     messages.Add(new DiagnosticMessage(Severity.Info, $"Générateur #{generator.PartId} : sortie électrique non branchée."));
-                else if (generator.Wood <= 0f)
+                else if (!generator.Quantum && generator.Wood <= 0f)
                     messages.Add(new DiagnosticMessage(Severity.Warning, $"Générateur #{generator.PartId} : plus de bois."));
             }
             foreach (ConsumerReading consumer in snap.Consumers)

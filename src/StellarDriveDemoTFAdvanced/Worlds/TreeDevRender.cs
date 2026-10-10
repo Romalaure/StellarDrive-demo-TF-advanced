@@ -22,9 +22,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             var origin = new Vector3(0f, -40000f, 0f);
             var shown = new List<GameObject>();
-            var prefabs = Trees.AllBuilt.Concat(Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None)
-                .Where(t => t.parent != null && (t.parent.name == "TFA_CityPrefabs" || t.parent.name == "TFA_RuinPrefabs" && t.name.Contains("Gate_Ice")))
+            var prefabs = Trees.AllBuilt.Where(t => t.name.Contains("Kapok") || t.name.Contains("Palm") || t.name.Contains("Jungle")).Concat(Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+                .Where(t => t.parent != null && (t.parent.name == "TFA_CityPrefabs" && (t.name.Contains("Dome") || t.name.EndsWith("Tower")) || t.parent.name == "TFA_OrePrefabs"
+                    || t.parent.name == "TFA_RuinPrefabs" && t.name.EndsWith("_Mossy") && (t.name.Contains("Hall") || t.name.Contains("House_") || t.name.Contains("Tower") || t.name.Contains("Temple"))))
                 .Select(t => t.gameObject)).ToList();
+            prefabs.AddRange(Trees.AllPlants);
+
             float x = 0f;
             foreach (GameObject prefab in prefabs)
             {
@@ -32,10 +35,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 if (source == null)
                     continue;
                 Mesh mesh = source.GetComponent<MeshFilter>().sharedMesh;
-                float width = Mathf.Max(mesh.bounds.size.x, mesh.bounds.size.z);
+                float width = Mathf.Max(mesh.bounds.size.x, mesh.bounds.size.z) * (prefab.name.StartsWith("TFA_Item") ? 8f : 1f);
                 x += width * 0.5f + 2f;
                 var copy = new GameObject("TFA_DevModel_" + prefab.name);
                 copy.transform.position = origin + new Vector3(x, 0f, 0f);
+                if (prefab.name.StartsWith("TFA_Item"))
+                    copy.transform.localScale = Vector3.one * 8f;
                 copy.AddComponent<MeshFilter>().sharedMesh = mesh;
                 copy.AddComponent<MeshRenderer>().sharedMaterials = source.sharedMaterials;
                 shown.Add(copy);
@@ -64,12 +69,27 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             camera.fieldOfView = 40f;
             camera.nearClipPlane = 0.5f;
             camera.farClipPlane = 2000f;
-            float distance = x * 0.5f / Mathf.Tan(20f * Mathf.Deg2Rad) * 0.62f;
-            camera.transform.position = origin + new Vector3(x * 0.5f, 24f, -distance);
-            camera.transform.rotation = Quaternion.Euler(8f, 0f, 0f);
-            var target = RenderTexture.GetTemporary(2400, 1000, 24, RenderTextureFormat.ARGB32);
+            // One framed tile per model: 6 columns
+            const int columns = 6, tile = 400;
+            int rows = (shown.Count + columns - 1) / columns;
+            var target = RenderTexture.GetTemporary(columns * tile, rows * tile, 24, RenderTextureFormat.ARGB32);
             camera.targetTexture = target;
-            camera.Render();
+            Vector3 view = new Vector3(0.45f, 0.5f, -1f).normalized;
+            for (int i = 0; i < shown.Count; i++)
+            {
+                Bounds bounds = new Bounds(shown[i].transform.position, Vector3.zero);
+                foreach (Renderer r in shown[i].GetComponentsInChildren<Renderer>())
+                    bounds.Encapsulate(r.bounds);
+                float size = bounds.extents.magnitude;
+                camera.rect = new Rect((float)(i % columns) / columns, 1f - (float)(i / columns + 1) / rows, 1f / columns, 1f / rows);
+                camera.transform.position = bounds.center + view * (size / Mathf.Tan(20f * Mathf.Deg2Rad) * 1.05f);
+                camera.transform.LookAt(bounds.center);
+                camera.nearClipPlane = Mathf.Max(0.01f, size * 0.05f);
+                // Other models out of the frame
+                foreach (GameObject other in shown)
+                    other.SetActive(other == shown[i]);
+                camera.Render();
+            }
             RenderTexture.active = target;
             var image = new Texture2D(target.width, target.height, TextureFormat.RGB24, false);
             image.ReadPixels(new Rect(0, 0, target.width, target.height), 0, 0);

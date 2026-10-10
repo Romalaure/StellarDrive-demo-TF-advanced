@@ -92,3 +92,13 @@ Seul l'hôte simule. Toute mécanique qui ajoute des forces ou de l'énergie doi
 
 - **Trous noirs** : une classe `Hole` par trou noir. GM = c²·r_s/2 avec c = 10 km/s pour les deux. La zone de marée est la distance où l'étirement 2GM·L/r³ égale celui du premier trou noir à 5 r_s ; elle varie donc comme la racine cubique de la masse. La gravité additionne tous les trous noirs ; l'ordinateur de bord et les dégâts utilisent le plus proche.
 - **Cité** : bâtiments sur la base du prefab de rocher (placement, collision et chargement du jeu), avec un maillage de coque au matériau des pièces du jeu, plus une couche lumineuse URP Lit émissive.
+
+## 12. Monde vivant, objets et artefacts (v0.7.0)
+
+- **État des planètes du mod** : arbres coupés, rochers minés et objets cassés sont enregistrés dans `PlanetNetworkedState` (collections FishNet). Les planètes du mod n'ont pas d'objet réseau : le côté client n'était jamais rempli. Sur l'hôte, le côté client d'une planète du mod lit désormais les collections du serveur et reçoit les événements de destruction.
+- **Espaces actifs** : StellarUnlock ajoute ses espaces à `ActiveSpacesServerTracker` ; un espace supprimé entre-temps faisait échouer tout le tick physique de l'hôte (cache des aimants d'amarrage), à chaque tick. Les espaces inexistants sont retirés de la liste après tous les ajouts.
+- **Flore** : deux configurations d'arbres à collisions placent leurs objets indépendamment, donc se chevauchent ; les collisions se repoussent, les articulations cassent et les arbres tombent en chaîne (débris par centaines). Une seule configuration d'arbres par planète, les essences réparties par le biais de densité (`densityBiasValue`) comme le fait le jeu.
+- **Objets** : `ItemSettings` créés au démarrage et ajoutés au tableau de `ItemSettingsList` avant toute recherche. Le shader des objets (`Custom/PlanetObject`) lit sa couleur dans la palette via l'UV1 : les modèles du mod reprennent l'UV1 de l'objet du jeu dont ils portent le matériau.
+- **Coffres** : un vaisseau d'une pièce (une caisse ouverte du jeu, `StorageState` à 10 emplacements), au format de sauvegarde des vaisseaux, posé dans l'espace de surface de la planète (mêmes axes que la planète) quand le serveur crée la collision du bâtiment.
+- **Carte stellaire** : l'hologramme (`PlanetsHologram`) contenait déjà toutes les planètes, en boules grises identiques ; noms (TextMeshPro), couleurs et marqueurs ajoutés après `Generate`.
+- **Terrain** : `ChunksGpuData` alloue des tableaux de textures de taille fixe (320 en qualité haute) ; agrandis d'un facteur réglable.

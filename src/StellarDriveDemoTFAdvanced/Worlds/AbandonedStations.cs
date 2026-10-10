@@ -42,6 +42,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             public bool NearBlackHole;
             public int Seed;
             public Action<Blueprint> Build;
+            /// <summary>Hull paint: outside, the band around the modules, inside.</summary>
+            public Color32 Outside = new Color32(205, 208, 212, 255);
+            public Color32 Band = new Color32(225, 120, 40, 255);
+            public Color32 Inside = new Color32(176, 172, 164, 255);
+            /// <summary>Rare finds in its chests: (item, chance).</summary>
+            public (uint Item, int Min, int Max, double Chance)[] Rare = new (uint, int, int, double)[0];
         }
 
         public static readonly StationSpec[] All =
@@ -49,6 +55,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             new StationSpec
             {
                 Name = "Station Kepler (abandonnée)", AnchorPlanet = 104, Offset = new Vector3(1.6e7f, 3e6f, -9e6f), Seed = 7,
+                Band = new Color32(225, 120, 40, 255),
+                Rare = new[] { (Items.ModItems.QuantumCore, 1, 1, 0.2), (Items.ModItems.NexoranAlloy, 2, 5, 0.35), (Items.ModItems.Titanium, 3, 8, 0.4), (Items.ModItems.Cryonite, 2, 4, 0.2) },
                 Build = b =>
                 {
                     b.Module(-3, 0, -3, 3, 3, 3);          // core
@@ -67,6 +75,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             new StationSpec
             {
                 Name = "Avant-poste Orion (abandonné)", AnchorPlanet = 101, Offset = new Vector3(-1.2e7f, 5e6f, 1.3e7f), Seed = 23,
+                Band = new Color32(50, 120, 220, 255), Outside = new Color32(215, 205, 185, 255),
+                Rare = new[] { (Items.ModItems.QuantumCore, 1, 1, 0.25), (Items.ModItems.NexoranAlloy, 2, 5, 0.3), (Items.ModItems.Quartz, 3, 8, 0.45), (Items.ModItems.Artifact, 1, 1, 0.2) },
                 Build = b =>
                 {
                     b.Module(-2, 0, -4, 2, 3, 4);
@@ -80,6 +90,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             new StationSpec
             {
                 Name = "Sonde Hadès (trou noir)", NearBlackHole = true, Offset = new Vector3(0f, 2.4e5f, 9.0e5f), Seed = 61,
+                Band = new Color32(200, 40, 40, 255), Outside = new Color32(70, 72, 78, 255), Inside = new Color32(120, 118, 125, 255),
+                Rare = new[] { (Items.ModItems.ExoticMatter, 1, 3, 0.8), (Items.ModItems.QuantumCore, 1, 1, 0.35) },
                 Build = b =>
                 {
                     b.Module(-1, 0, -2, 1, 2, 2);
@@ -183,7 +195,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 AdvancedMod.Log.Warning($"stations: no anchor for {spec.Name}");
                 return;
             }
-            var blueprint = new Blueprint(spec.Seed);
+            var blueprint = new Blueprint(spec.Seed) { Spec = spec };
             spec.Build(blueprint);
             string json = blueprint.ToJson(spec.Name);
             var data = JsonUtility.FromJson<ShipImportExportUtils.ShipImportExportData>(json);
@@ -207,7 +219,10 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             // Game part ids: iron floor and wall, glass wall and floor, beacon, chest, chemical thruster
             private const int IronFloor = 1, IronWall = 2, GlassWall = 7, GlassFloor = 36;
-            private const int Beacon = 38, Chest = 30, Thruster = 19;
+            private const int Beacon = 38, Chest = 30, Thruster = 19, Bed = 43, FluidTank = 23;
+            private const uint Oxygen = 108, Ethanol = 111;
+
+            public StationSpec Spec;
 
             private readonly HashSet<Vector3Int> _inside = new HashSet<Vector3Int>();
             private readonly HashSet<Vector3Int> _openings = new HashSet<Vector3Int>();
@@ -274,10 +289,28 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     for (int i = 0; i < count; i++)
                     {
                         int x = _random.Next(m.x0, m.x1 + 1), z = _random.Next(m.z0, m.z1 + 1);
-                        floating.Add(Floating(nextPart, Chest, new Vector3(x, m.y0 - 0.5f + 0.04f, z), 2, 4));
+                        // A loot case now and then instead of a plain chest (opened: no key needed)
+                        int container = _random.NextDouble() < 0.4 ? 400 + _random.Next(0, 5) * 10 + _random.Next(0, 7) : Chest;
+                        floating.Add(Floating(nextPart, container, new Vector3(x, m.y0 - 0.5f + 0.04f, z), 2, 4));
                         storages.Add($"{{\"partId\":{nextPart},\"slots\":[{Loot()}]}}");
                         nextPart++;
                     }
+                }
+
+                // Crew quarters and supplies: bunks in the end modules, oxygen and ethanol tanks in the core
+                var tanks = new List<string>();
+                foreach (var m in _modules.Skip(1).Where(m => (m.x1 - m.x0 + 1) * (m.z1 - m.z0 + 1) >= 12 && m.y0 == 0))
+                {
+                    floating.Add(Floating(nextPart++, Bed, new Vector3(m.x1, m.y0 - 0.5f + 0.04f, m.z0), 2, 4));
+                    if (_random.NextDouble() < 0.5)
+                        floating.Add(Floating(nextPart++, Bed, new Vector3(m.x0, m.y0 - 0.5f + 0.04f, m.z0), 2, 4));
+                }
+                foreach (uint fluid in new[] { Oxygen, Ethanol })
+                {
+                    int x = fluid == Oxygen ? core.x0 : core.x1;
+                    floating.Add(Floating(nextPart, FluidTank, new Vector3(x, core.y0 - 0.5f + 0.04f, core.z1), 2, 4));
+                    tanks.Add(string.Format(CultureInfo.InvariantCulture, "{{\"partId\":{0},\"fluidItemId\":{1},\"fluidQuantity\":{2:0.0}}}", nextPart, fluid, 10 + _random.Next(0, 40)));
+                    nextPart++;
                 }
 
                 // Dead thrusters on the underside of the big modules
@@ -299,7 +332,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 sb.Append("\"thrustersStates\":[").Append(string.Join(",", thrusters)).Append("],");
                 sb.Append("\"storageStates\":[").Append(string.Join(",", storages)).Append("],");
                 sb.Append("\"beaconStates\":[{\"partId\":").Append(beaconId).Append(",\"name\":\"").Append(beaconName.Replace("\"", "'")).Append("\"}],");
-                foreach (string empty in new[] { "leverStates", "warpDriveStates", "fluidTankStates", "dockingDoorStates", "targeterStates", "mathGateStates",
+                sb.Append("\"fluidTankStates\":[").Append(string.Join(",", tanks)).Append("],");
+                foreach (string empty in new[] { "leverStates", "warpDriveStates", "dockingDoorStates", "targeterStates", "mathGateStates",
                     "unaryMathGateStates", "memoryRegisterStates", "constantStates", "transmitterStates", "rotorStates", "electrolyzerStates",
                     "woodThrusterStates", "woodGeneratorStates", "ethanolDistillerStates" })
                     sb.Append('"').Append(empty).Append("\":[],");
@@ -338,12 +372,19 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 }
                 if (partId == GlassFloor && type != 0)
                     partId = IronWall;
-                // Weathered paint: grey outside, darker, rust-tinged inside
-                int grey = 150 + _random.Next(-25, 15);
-                string front = $"{{\"x\":{grey},\"y\":{grey - 4},\"z\":{grey - 10}}}";
-                string back = $"{{\"x\":{70 + _random.Next(0, 25)},\"y\":{62 + _random.Next(0, 15)},\"z\":{58}}}";
+                // The station's paint, a little weathered: light hull with a colored band around the
+                // modules' middle row, light inside
+                Color32 outside = Spec != null ? Spec.Outside : new Color32(150, 146, 140, 255);
+                Color32 inside = Spec != null ? Spec.Inside : new Color32(80, 70, 58, 255);
+                if (Spec != null && type != 0 && v.y % 4 == 2)
+                    outside = Spec.Band;
+                int wear = _random.Next(-14, 6);
+                string front = $"{{\"x\":{Clamp(outside.r + wear)},\"y\":{Clamp(outside.g + wear)},\"z\":{Clamp(outside.b + wear)}}}";
+                string back = $"{{\"x\":{Clamp(inside.r + wear / 2)},\"y\":{Clamp(inside.g + wear / 2)},\"z\":{Clamp(inside.b + wear / 2)}}}";
                 return $"{{\"partId\":{partId},\"x\":{at.x},\"y\":{at.y},\"z\":{at.z},\"forwardOrientationId\":{forward},\"upOrientationId\":{up},\"voxelPartTypeId\":{type},\"FrontColor\":{front},\"BackColor\":{back}}}";
             }
+
+            private static int Clamp(int value) => Math.Max(0, Math.Min(255, value));
 
             private static string Floating(int id, int settings, Vector3 coord, int forward, int up)
             {
@@ -361,6 +402,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     (110, 6, 20, 0.4), (103, 1, 4, 0.25), (158, 1, 2, 0.1), (151, 1, 1, 0.15)
                 };
                 var slots = new List<string>();
+                if (Spec != null)
+                    table = table.Concat(Spec.Rare.Select(r => ((int)r.Item, r.Min, r.Max, r.Chance))).ToArray();
                 foreach (var entry in table)
                 {
                     if (slots.Count < 10 && _random.NextDouble() < entry.chance)

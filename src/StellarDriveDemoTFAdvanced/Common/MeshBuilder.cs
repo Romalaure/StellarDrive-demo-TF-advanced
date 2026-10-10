@@ -19,6 +19,28 @@ namespace StellarDriveDemoTFAdvanced.Common
         /// <summary>Atlas rectangle (0-1) the next shapes map their faces to.</summary>
         public Rect Panel = new Rect(0f, 0f, 1f, 1f);
 
+        public bool HasGeometry => _triangles.Count > 0;
+
+        /// <summary>The part of a texture atlas a game mesh uses (its UV bounds), to map new shapes onto the same texture area.</summary>
+        public static Rect UvArea(Mesh mesh)
+        {
+            if (mesh == null || !mesh.isReadable)
+                return new Rect(0f, 0f, 1f, 1f);
+            var uvs = new List<Vector2>();
+            mesh.GetUVs(0, uvs);
+            if (uvs.Count == 0)
+                return new Rect(0f, 0f, 1f, 1f);
+            Vector2 min = uvs[0], max = uvs[0];
+            foreach (Vector2 uv in uvs)
+            {
+                min = Vector2.Min(min, uv);
+                max = Vector2.Max(max, uv);
+            }
+            // A margin inside, away from the area's edges
+            Vector2 size = max - min;
+            return new Rect(min + size * 0.15f, size * 0.7f);
+        }
+
         public Mesh Build(string name) => Build(name, null);
 
         /// <summary>Builds the mesh; <paramref name="paletteUv"/> fills UV1, which the game's part shader reads its ship palette color from.</summary>

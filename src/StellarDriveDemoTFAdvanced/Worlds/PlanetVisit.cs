@@ -71,6 +71,13 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Place(planet, up, 0f);
                 AdvancedMod.Log.Msg($"dev: landed on {planet.name}, ground {Elevation(planet, up):0} m above the radius");
                 yield return Wait(18f);
+                int frames = Time.frameCount;
+                float start = Time.unscaledTime;
+                yield return Wait(6f);
+                AdvancedMod.Log.Msg($"dev: fps on {planet.name}: {(Time.frameCount - frames) / (Time.unscaledTime - start):0.0}");
+                IEnumerator cut = CutTree(planet);
+                while (cut.MoveNext())
+                    yield return cut.Current;
                 for (int i = 0; i < 3; i++)
                 {
                     Place(planet, up, i * 120f);
@@ -96,7 +103,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 AdvancedMod.Log.Msg($"dev: {planet.name} has {objects.Length} point-of-interest objects loaded");
                 AdvancedMod.Log.Msg($"dev: {planet.name} points of interest loaded: " + string.Join(", ", objects
                     .GroupBy(o => o.name.Replace("(Clone)", "")).Select(g => g.Key + " x" + g.Count())));
-                foreach (string kind in new[] { "TFA_RuinGate", "TFA_RuinTemple", "TFA_RuinHouse", "TFA_CityTowerTall", "TFA_CityDome", "TFA_CargoWreck", "Crashed" })
+                foreach (string kind in new[] { "TFA_RuinHall", "TFA_RuinHouse", "TFA_RuinTower", "TFA_RuinTemple", "TFA_Ore", "TFA_CityTowerTall", "TFA_CityDome" })
                 {
                     // Objects unload when the player moves: skip destroyed ones
                     PlanetObjectVisuals site = objects.Where(o => o != null && o.name.StartsWith(kind))
@@ -130,6 +137,26 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 try { spaces.GetSpace(o.SpaceId); }
                 catch (System.Exception) { AdvancedMod.Log.Warning($"dev: after {tag}: {o.GetType().Name} {o.Id} is in missing space {o.SpaceId}"); }
             }
+        }
+
+        // Mines the nearest tree through the game's own request, then checks the client sees it gone
+        private static IEnumerator CutTree(Planet planet)
+        {
+            PlanetObjectReference tree = Object.FindObjectsByType<PlanetObjectReference>(FindObjectsSortMode.None)
+                .FirstOrDefault(r => r.Id is Planets.Objects.Common.Model.DenseObjectId dense && dense.PlanetId == planet.Id
+                    && r.GetComponentInParent<Planets.Objects.MinablePlanetObject>() != null);
+            if (tree == null)
+            {
+                AdvancedMod.Log.Msg($"dev: no tree collider near the player on {planet.name}");
+                yield break;
+            }
+            var id = (Planets.Objects.Common.Model.DenseObjectId)tree.Id;
+            ServiceLocator.GetService<Managers.Interface.Services.IPlanetInteractionNetworkService>().MinePlanetObject(id);
+            yield return Wait(1.5f);
+            var state = planet.GetComponent<Planets.Network.PlanetNetworkedState>();
+            bool server = state.IsDenseObjectDestroyed(id.PlacedObjectId, true);
+            bool client = state.IsDenseObjectDestroyed(id.PlacedObjectId, false);
+            AdvancedMod.Log.Msg($"dev: cut a tree on {planet.name}: destroyed for the server {server}, for the client {client}, collider gone {tree == null}");
         }
 
         private static IEnumerator Wait(float seconds)
@@ -197,6 +224,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Center = (Vector3Double)up.normalized * (planet.Radius + Elevation(planet, up) + height)
             };
             spaces.MoveWorldObject(player, spot);
+            // Surface spaces have the planet's axes: the spot's own frame has y along its up
+            look = Quaternion.FromToRotation(Vector3.up, up.normalized) * look;
             player.SetRotation(look);
             var space = (PlanetSurfaceSpace)spaces.GetSpace(player.SpaceId);
             NotifyAtSurface.Invoke(respawn, new object[] { connection, space, player.PhysicsState, look, FishNet.Transporting.Channel.Reliable });

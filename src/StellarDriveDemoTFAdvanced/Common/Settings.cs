@@ -18,6 +18,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> NewPlanets { get; private set; }
         public static MelonPreferences_Entry<bool> BlackHoleEnabled { get; private set; }
         public static MelonPreferences_Entry<bool> AbandonedStations { get; private set; }
+        public static MelonPreferences_Entry<float> TerrainChunkBuffer { get; private set; }
         public static MelonPreferences_Entry<bool> DevPlanetsNearby { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitPlanets { get; private set; }
         public static MelonPreferences_Entry<int> DevVisitPlanetId { get; private set; }
@@ -51,6 +52,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "Add the mod's planets to the star system. In multiplayer every player needs the same setting.");
             BlackHoleEnabled = _category.CreateEntry("BlackHole", true,
                 description: "The black hole near TF Petra: gravity, tidal destruction, event horizon, warp stop. In multiplayer every player needs the same setting.");
+            TerrainChunkBuffer = _category.CreateEntry("TerrainChunkBuffer", 1.5f,
+                description: "Room for terrain chunks on the GPU, times the game's (320 in High quality). Above 1, high mountains no longer leave holes in the ground (each extra 0.1 costs about 38 MB of video memory per nearby planet). 1 = the game's own.");
             AbandonedStations = _category.CreateEntry("AbandonedStations", true,
                 description: "Create the abandoned stations (with their beacons) in worlds that do not have them yet. The host decides.");
             DevPlanetsNearby = _category.CreateEntry("DevPlanetsNearby", false,

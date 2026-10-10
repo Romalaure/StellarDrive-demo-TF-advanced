@@ -12,7 +12,7 @@ namespace StellarDriveDemoTFAdvanced.Common
     /// </summary>
     internal static class PartSnapshots
     {
-        private static readonly ushort[] Ids = { 17, 30, 7301, 7302, 7303, 7311, 7312, 7321, 7322, 7331, 7334, 7335, 7337, 7338 };
+        private static readonly ushort[] Ids = { 7315, 7321, 7323, 7324 };
 
         public static void Run()
         {

@@ -1,6 +1,6 @@
 # StellarDrive Demo — TF Advanced
 
-Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, structure, 6 nouvelles planètes (dont une glaciaire et une futuriste) avec régions, arbres variés, ruines, villages, cité abandonnée et épaves, 3 stations spatiales abandonnées, 2 trous noirs, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Les pièces sont dans l'onglet de construction **TF Avancé**.
+Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, structure, 7 nouvelles planètes (dont une glaciaire, une futuriste et une jungle) avec régions, arbres et plantes variés, ruines, villages et cité à visiter avec leurs coffres, épaves, nouveaux minerais et objets rares, pièces avancées (réacteur quantique, moteur exotique), 3 stations spatiales abandonnées, 2 trous noirs, champs d'astéroïdes, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Les pièces sont dans l'onglet de construction **TF Avancé**.
 
 Rapport technique (moteur, systèmes du jeu, faisabilité de chaque projet) : [docs/AUDIT.md](docs/AUDIT.md).
 
@@ -108,7 +108,7 @@ La coque du jeu est une grille de voxels limitée à 4 formes codées en dur (pl
 
 ## Nouvelles planètes
 
-Six planètes rejoignent le système 442 Otrera, en orbite autour de la même étoile. Le jeu les génère, les éclaire, les sauvegarde et les simule comme sa propre planète (terrain, flore, objets, atmosphère). On les rejoint en vaisseau (carte stellaire et saut en distorsion).
+Sept planètes rejoignent le système 442 Otrera, en orbite autour de la même étoile. Le jeu les génère, les éclaire, les sauvegarde et les simule comme sa propre planète (terrain, flore, objets, atmosphère). On les rejoint en vaisseau (carte stellaire et saut en distorsion).
 
 | Planète | Biome | Gravité | Atmosphère | Flore | Points d'intérêt |
 |---|---|---|---|---|---|
@@ -117,6 +117,7 @@ Six planètes rejoignent le système 442 Otrera, en orbite autour de la même é
 | **TF Altis** | montagneuse : reliefs jusqu'à 8 km. Régions : vallées vertes, **neige au-dessus de 1 400 m**, lacs glaciaires | 1,1 g | respirable, ciel bleu froid | forêts de pins denses, bosquets de **bouleaux** (verts et d'automne) | ruines et village en granit, épaves |
 | **TF Glacia** | glaciaire : calottes de glace, montagnes enneigées jusqu'à 9 km, lacs gelés | 1 g | respirable, ciel bleu pâle, nuages | sapins givrés et arbres morts dans les vallées, pas d'herbe | ruines et village pris dans la glace, épaves, cargo écrasé |
 | **TF Nexora** | futuriste : plaines sombres et lacs turquoise sous un ciel violet | 0,85 g | respirable | arbres cyan cultivés, herbe turquoise | **cité abandonnée**, épaves, cargo écrasé |
+| **TF Sylvara** | jungle : collines humides, berges boueuses, rivières et lacs tièdes | 1,05 g | respirable, ciel brumeux | **kapokiers géants** (30 m, contreforts), arbres de canopée, palmiers ; sous-bois de **fougères**, buissons et **fleurs** rouges, jaunes, violettes et blanches | temples et villages moussus, épaves, ambre |
 | **TF Verdance** | tempérée, proche de la planète de départ, grands lacs | 0,95 g | respirable | forêts de conifères et, dans d'autres régions, bois de **chênes** et de **bouleaux** (verts et d'automne), herbe dense | ruines et village moussus, épaves, cargo écrasé |
 
 - **Épaves** : sites de crash assemblés à partir des pièces écrasées du jeu (coque, propulseurs, sièges), recyclables comme sur la planète de départ.
@@ -125,7 +126,36 @@ Six planètes rejoignent le système 442 Otrera, en orbite autour de la même é
 - **Villages abandonnés** : un temple à colonnes au toit effondré, des maisons sans toit (porte, fenêtres, murs écroulés) et une tour de guet crénelée.
 - **Cargos écrasés** : une grande épave d'environ 30 m (cockpit enfoui, soute tordue, moteurs arrachés, ailes, plaques de coque) entourée de propulseurs et de sièges, recyclable.
 - **Arbres** : chêne, acacia et bouleau (et leurs variantes d'automne) sont des copies du sapin du jeu avec un nouveau modèle (tronc et feuillage tirés de l'atlas de feuilles du jeu). On les abat et on les recycle comme les sapins. Chaque type de forêt a son propre bruit de densité : les essences poussent dans des régions différentes de la planète.
+- **Bâtiments visitables** : les maisons, la grande halle, la tour de guet, le temple, le hall des gratte-ciel et les dômes de la cité sont creux. On y entre par leurs portes : murs avec fenêtres, poutres de toit en bois, tables, bancs, étagères, foyer, échelle de la tour, comptoir et terminaux de la cité.
+- **Coffres** : chaque bâtiment visitable contient un coffre (une caisse de butin du jeu, en bois, glace, cristal, alliage ou or selon le lieu), rempli de ce que le lieu et la planète offrent : minerais locaux, matériaux, clés, lingots, et parfois les **objets rares** des pièces avancées. Un bâtiment ne reçoit son coffre qu'une fois (la liste est gardée avec la sauvegarde, `tfa_sites.txt`).
+- **Gisements** des nouveaux minerais, à miner au laser comme les rochers du jeu.
+- **Champs d'astéroïdes** : TF Petra (large ceinture sombre) et TF Glacia (anneau clair) ont un anneau d'astéroïdes comme la planète de départ, avec ses ressources à miner.
 - Rochers, minerais (fer, cuivre) et cristaux de verre comme sur la planète de départ.
+
+### Nouveaux objets
+
+| Objet | Où le trouver |
+|---|---|
+| **Minerai de titane** | gisements de TF Petra, TF Altis, TF Glacia |
+| **Cristal de quartz** | gisements de TF Aridia et TF Nexora |
+| **Cryonite** (cristal lumineux) | gisements de TF Glacia |
+| **Ambre fossile** | gisements de TF Verdance et TF Sylvara |
+| **Fragment d'artefact ancien** (rare) | coffres des temples, villages et halles |
+| **Noyau quantique** (rare) | coffres des gratte-ciel et dômes de TF Nexora, stations Kepler et Orion |
+| **Alliage nexorien** | coffres de la cité de TF Nexora, stations |
+| **Matière exotique** (rare) | coffres de la Sonde Hadès, près du trou noir |
+
+Ce sont de vrais objets du jeu : ils s'empilent, pèsent, vont dans l'inventaire et les coffres, tombent au sol, se sauvegardent, avec leur modèle 3D texturé (matériaux du jeu) et leur icône.
+
+### Pièces avancées (onglet **TF Artefacts**)
+
+| Pièce | Effet | Coût |
+|---|---|---|
+| **Réacteur quantique** | 12 000 W en continu, **sans carburant et sans fin** (trois générateurs à bois) | 2 noyaux quantiques, 6 alliages nexoriens, 8 titane, 2 fragments d'artefact, 10 cuivre |
+| **Batterie à cryonite** | 8 fois la capacité d'une batterie, charge et décharge 3 fois plus rapides | 8 cryonite, 4 titane, 8 cuivre, 4 aluminium |
+| **Moteur à matière exotique** | 78 000 N (dix propulseurs chimiques) pour 10 % de leurs ergols | 3 matière exotique, 1 noyau quantique, 12 titane, 6 alliages nexoriens |
+
+L'ordinateur de bord affiche les réacteurs (puissance, « sans carburant »).
 
 Comment ça marche : chaque planète est une copie de la planète de la démo (442 Otrera b), créée avant que le jeu ne charge ses planètes, puis remodelée : bruit du terrain, cratères, matériaux du sol, atmosphère, configuration de la flore et des points d'intérêt. Les autres planètes présentes dans les fichiers de la démo appartiennent au jeu complet : le mod ne les touche pas.
 
@@ -145,7 +175,8 @@ Trois stations abandonnées sont créées dans le monde quand l'hôte charge une
 | **Sonde Hadès (trou noir)** | à environ 930 km du trou noir |
 
 - **Localisation** : chaque station a une **balise** à son nom. Elle apparaît sur la carte stellaire comme destination de saut, comme les balises posées par les joueurs.
-- **Contenu** : modules reliés par des couloirs, sas d'entrée, hublots, coque percée par endroits, propulseurs morts, coffres avec du butin.
+- **Contenu** : modules reliés par des couloirs, sas d'entrée, hublots, coque percée par endroits, propulseurs morts, couchettes, réservoirs d'oxygène et d'éthanol, coffres et caisses de butin (dont des objets rares : noyaux quantiques, alliage, matière exotique dans la Sonde Hadès).
+- **Peinture** : coque claire avec une bande de couleur par station (orange Kepler, bleu Orion, rouge sur coque sombre pour Hadès), intérieur clair. Les stations déjà créées dans un monde gardent leur ancien aspect ; une station dont la balise a disparu est recréée.
 - **Abri** : à moins de 3 km d'une station, la gravité du trou noir ne s'applique pas. On peut donc s'amarrer à la Sonde Hadès.
 - Réglage : `AbandonedStations` (section `[TFAdvanced]`).
 
@@ -202,6 +233,8 @@ Réglage : `BlackHole` (section `[TFAdvanced]`, les deux trous noirs), identique
 | `NewPlanets` | `true` | les 6 nouvelles planètes |
 | `BlackHole` | `true` | les trous noirs près de TF Petra et de TF Glacia |
 | `AbandonedStations` | `true` | crée les 3 stations abandonnées dans un monde qui ne les a pas encore |
+| `TerrainChunkBuffer` | `1.5` | place pour les chunks de terrain sur la carte graphique, fois celle du jeu ; au-dessus de 1, les hautes montagnes ne laissent plus de trous dans le sol (environ 38 Mo de mémoire vidéo par 0,1 et par planète proche) |
+| `ReactorWatts` (section `[TFAdvancedPower]`) | `12000` | puissance d'un réacteur quantique (W) |
 | `SelfTest` | `false` | développement : construit les pièces au menu, en écrit la description et des rendus PNG |
 | `DevWorld` / `DevQuitSeconds` / `DevVisitPlanets` / `DevVisitPlanetId` / `DevVisitStations` / `DevVisitBlackHole` / `DevPlanetsNearby` | vides / `false` | développement : charge automatiquement une **copie** de monde, visite les planètes ou le trou noir, prend des captures dans `UserData/TFAdvanced/dev`, puis quitte |
 
@@ -243,6 +276,12 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.5.0 : stations abandonnées | ✅ 3 stations créées (1 077, 670 et 84 pièces de coque), balises vues par le client, joueur placé dans chacune |
 | v0.5.0 : arbres, régions, villages, cargos | ✅ rendu des 5 arbres, des bâtiments et du cargo. En jeu, chaque planète visitée séparément : villages (temple, maisons, tour) et cargos chargés sur Aridia, Altis et Verdance, feuillus visibles dans les forêts de Verdance. Bug corrigé : le jeu numérote les configurations de flore à collisions parmi elles seules, la nouvelle forêt est donc placée avant l'herbe. ⚠️ Le téléport du test automatique déclenche un bug du jeu (`Space id … does not exist`), déjà connu et sans lien avec ces ajouts. ⏳ Régions du sol (mesas, neige) pas encore vues en capture |
 | v0.6.0 : TF Glacia, TF Nexora, 2e trou noir | ✅ 6 planètes et 2 trous noirs créés, aucune erreur du mod. Rendu des bâtiments de la cité (gratte-ciel, dôme, pylône, piste, arche). En jeu : sol de glace et ruines de glace sur Glacia, cité chargée sur Nexora (2 gratte-ciel, 4 tours, 3 dômes, pylônes, piste, arche) avec bandes lumineuses visibles de nuit. ⏳ Les deux trous noirs ne sont pas encore vus en capture (la caméra de test était mal orientée). Attraction, marée et arrêt de distorsion du 2e trou noir **à tester en vol** |
+| v0.7.0 : corrections | ✅ arbres coupés : ils disparaissent (serveur et client) ; physique de l'hôte : plus aucun blocage « Space id … does not exist » sur un tour des 7 planètes ; textes des écrans : un libellé long passe à la ligne au lieu d'être recouvert par sa valeur ; tampon de terrain agrandi (480 chunks) |
+| v0.7.0 : carte stellaire | ✅ les 7 planètes nommées et colorées, trous noirs et stations marqués (rendu de l'hologramme du jeu) |
+| v0.7.0 : objets, gisements, coffres | ✅ 8 objets ajoutés à la liste du jeu, modèles texturés ; gisements chargés ; 9 coffres posés dans un village de Verdance et de Sylvara, remplis (2 à 4 objets), stables au sol |
+| v0.7.0 : pièces avancées | ✅ réacteur, batterie à cryonite et moteur exotique construits (auto-test : prises, état, 78 000 N) ; ⏳ production réelle du réacteur **à tester en jeu** |
+| v0.7.0 : jungle, stations, astéroïdes | ✅ Sylvara : arbres et plantes rendus, 81 FPS ; stations recréées avec peinture et équipements ; anneaux de Petra et Glacia enregistrés et visibles depuis Petra ; ⏳ minage dans les nouveaux anneaux **à tester** |
+| v0.7.0 : performance (tour des 7 planètes) | ✅ 50 à 110 FPS. Corrigé en route : des couches d'arbres séparées se chevauchaient et se renversaient en chaîne (3 FPS) ; chaque planète a maintenant une seule couche d'arbres mêlant les essences |
 | Pose des pièces, écrans en vol, forces des moteurs, multijoueur | ⏳ **à faire en jeu** (procédure ci-dessous) |
 
 ### Procédure de test en jeu

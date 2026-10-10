@@ -26,7 +26,9 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             PartFactory.Register(PowerCatalog.BatteryId, "Battery", AdvancedTab.PropulsionRow, ConfigureBattery);
             PartFactory.Register(PowerCatalog.BreakerId, "SignalDisplay", AdvancedTab.PropulsionRow, ConfigureBreaker);
-            AdvancedMod.Log.Msg("registered the battery and the circuit breaker");
+            PartFactory.Register(PowerCatalog.ReactorId, "Battery", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureReactor);
+            PartFactory.Register(PowerCatalog.CryoBatteryId, "Battery", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureCryoBattery);
+            AdvancedMod.Log.Msg("registered the battery, the circuit breaker, the quantum reactor and the cryonite battery");
         }
 
         private static void ConfigureBattery(PartSettings settings, GameObject prefab)
@@ -48,6 +50,76 @@ namespace StellarDriveDemoTFAdvanced.Power
             Vector3 outward = -prefab.transform.InverseTransformDirection(power.transform.forward).normalized;
             Vector3 side = Vector3.Cross(outward, Mathf.Abs(outward.y) > 0.9f ? Vector3.forward : Vector3.up).normalized;
             GraftSeated(prefab, bounds, PowerCatalog.StatusSignal, CableType.Signal, position + side * 0.3f, outward);
+        }
+
+        private static void ConfigureReactor(PartSettings settings, GameObject prefab)
+        {
+            ConfigureBattery(settings, prefab);
+            PartFactory.Describe(settings, "Réacteur quantique",
+                $"Un noyau quantique tenu dans une cage d'alliage nexorien : fournit {PowerCatalog.ReactorWatts.Value:0} W en continu au réseau branché sur ses prises, sans carburant et sans fin (trois générateurs à bois). Sa prise signal vaut 100 quand il alimente un réseau. Fabriqué avec les trouvailles rares de la cité abandonnée de TF Nexora et des ruines.",
+                180f, new[] { (Items.ModItems.QuantumCore, 2), (Items.ModItems.NexoranAlloy, 6), (Items.ModItems.Titanium, 8), (Items.ModItems.Artifact, 2), (112u, 10) });
+            Tint(prefab, "Reactor", new Color(0.55f, 0.42f, 0.8f), new Color(0.12f, 0.04f, 0.25f));
+            // A glowing core on top
+            Transform visual = prefab.transform.Find("Visual") ?? prefab.transform.Find("Visuals");
+            var bounds = prefab.GetComponent<ShipPartBounds>();
+            if (visual != null && bounds != null)
+            {
+                Vector3 top = bounds.center + Vector3.up * (bounds.bounds.y * 0.5f);
+                var core = new MeshBuilder();
+                core.Cylinder(top, top + Vector3.up * 0.18f, 0.16f, 0.22f, 10);
+                core.Cylinder(top + Vector3.up * 0.18f, top + Vector3.up * 0.32f, 0.22f, 0.08f, 10);
+                var cage = new MeshBuilder { Panel = GameSkin.PlainPanel };
+                foreach (float a in new[] { 0f, 120f, 240f })
+                    cage.Box(top + Quaternion.Euler(0f, a, 0f) * new Vector3(0.26f, 0.16f, 0f), new Vector3(0.04f, 0.34f, 0.04f));
+                cage.Cylinder(top + Vector3.up * 0.32f, top + Vector3.up * 0.36f, 0.3f, 0.3f, 10);
+                int layer = visual.gameObject.layer;
+                AddMesh(visual, layer, "TF_NoPaint_ReactorCore", core, LitMaterials.Get("TFA_ReactorCore", new Color(0.8f, 0.55f, 1f), 0f, 0.9f, new Color(1.2f, 0.5f, 2.4f)));
+                GameSkin.AddMesh(visual, layer, "TFA_ReactorCage", cage, LitMaterials.Get("TFA_ReactorCage", new Color(0.55f, 0.85f, 0.9f), 0.7f, 0.5f));
+            }
+        }
+
+        private static void ConfigureCryoBattery(PartSettings settings, GameObject prefab)
+        {
+            ConfigureBattery(settings, prefab);
+            float capacity = PowerCatalog.BatteryCapacityKJ.Value * PowerCatalog.CryoBatteryScale;
+            PartFactory.Describe(settings, "Batterie à cryonite",
+                $"Les cristaux de cryonite de TF Glacia gardent l'énergie presque sans perte : {capacity:0} kJ (huit batteries), charge {PowerCatalog.BatteryChargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W, décharge {PowerCatalog.BatteryDischargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W. Branchement et prise signal comme la batterie.",
+                160f, new[] { (Items.ModItems.Cryonite, 8), (Items.ModItems.Titanium, 4), (112u, 8), (104u, 4) });
+            Tint(prefab, "CryoBattery", new Color(0.62f, 0.85f, 1.05f), new Color(0.02f, 0.12f, 0.2f));
+        }
+
+        private static readonly int ColorId = Shader.PropertyToID("_Color");
+        private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
+
+        // The donor's body in another color, a faint glow; plugs keep their look
+        private static void Tint(GameObject prefab, string name, Color color, Color glow)
+        {
+            var copies = new System.Collections.Generic.Dictionary<Material, Material>();
+            foreach (MeshRenderer renderer in prefab.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                if (renderer.GetComponentInParent<SocketObject>() != null)
+                    continue;
+                Material[] materials = renderer.sharedMaterials;
+                for (int i = 0; i < materials.Length; i++)
+                {
+                    Material original = materials[i];
+                    if (original == null || original.name.StartsWith("Plugs") || !original.HasProperty(ColorId))
+                        continue;
+                    if (!copies.TryGetValue(original, out Material copy))
+                    {
+                        copy = new Material(original) { name = original.name + "_" + name };
+                        copy.SetColor(ColorId, original.GetColor(ColorId) * color);
+                        if (copy.HasProperty(EmissionColorId))
+                        {
+                            copy.EnableKeyword("_EMISSION");
+                            copy.SetColor(EmissionColorId, glow);
+                        }
+                        copies[original] = copy;
+                    }
+                    materials[i] = copy;
+                }
+                renderer.sharedMaterials = materials;
+            }
         }
 
         private static void ConfigureBreaker(PartSettings settings, GameObject prefab)

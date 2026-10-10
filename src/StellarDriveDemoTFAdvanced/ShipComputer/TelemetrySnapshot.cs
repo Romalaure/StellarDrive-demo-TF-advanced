@@ -142,6 +142,8 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
     internal struct GeneratorReading
     {
         public ushort PartId;
+        /// <summary>A quantum reactor (artifacts): no fuel.</summary>
+        public bool Quantum;
         public float Watts;
         public float Level;
         public float Wood;

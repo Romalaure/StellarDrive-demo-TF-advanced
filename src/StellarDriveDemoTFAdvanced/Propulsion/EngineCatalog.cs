@@ -25,7 +25,12 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
         /// <summary>Seconds to go from idle to full thrust (0 = immediate, like the game's thruster).</summary>
         public float SpoolSeconds;
         public Color Tint;
+        /// <summary>Glow of the engine body (black: none).</summary>
+        public Color Glow = Color.black;
         public (uint Item, int Count)[] Cost;
+        /// <summary>Build menu tab and row (default: TF Avancé, propulsion row).</summary>
+        public string Tab = Parts.AdvancedTab.Name;
+        public int Row = Parts.AdvancedTab.PropulsionRow;
 
         public MelonPreferences_Entry<float> ThrustSetting;
         public MelonPreferences_Entry<float> FuelSetting;
@@ -69,6 +74,15 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                 Description = "Privilégie l'autonomie : 4 680 N pour seulement 35 % des ergols du propulseur chimique (environ 1,7 fois plus de poussée par unité). Montée en régime lente : 4 s.",
                 DefaultThrust = 0.6f, DefaultFuel = 0.35f, Mass = 28f, Scale = 1.1f, SpoolSeconds = 4f,
                 Tint = new Color(0.72f, 0.92f, 0.74f), Cost = new[] { (101u, 4), (104u, 2), (112u, 3) }
+            },
+            new EngineSpec
+            {
+                Id = 7315, Key = "Exotic", Label = "Moteur à matière exotique",
+                Description = "La matière exotique ramassée près des trous noirs, brûlée dans un champ quantique : 78 000 N (dix propulseurs chimiques) pour à peine 10 % de leurs ergols. Montée en régime : 3 s. Ergols et commande comme le propulseur chimique (vannes).",
+                DefaultThrust = 10f, DefaultFuel = 0.1f, Mass = 140f, Scale = 1.9f, SpoolSeconds = 3f,
+                Tint = new Color(0.42f, 0.3f, 0.62f), Glow = new Color(0.18f, 0.05f, 0.35f),
+                Cost = new[] { (Items.ModItems.ExoticMatter, 3), (Items.ModItems.QuantumCore, 1), (Items.ModItems.Titanium, 12), (Items.ModItems.NexoranAlloy, 6) },
+                Tab = Parts.AdvancedTab.ArtifactsName, Row = Parts.AdvancedTab.ArtifactsPropulsionRow
             }
         };
 

@@ -14,6 +14,12 @@ namespace StellarDriveDemoTFAdvanced.Power
     {
         public const ushort BatteryId = 7321;
         public const ushort BreakerId = 7322;
+        /// <summary>Artifacts: endless power from a quantum core.</summary>
+        public const ushort ReactorId = 7323;
+        /// <summary>Artifacts: a battery eight times bigger, charged and drained faster.</summary>
+        public const ushort CryoBatteryId = 7324;
+        public const float CryoBatteryScale = 8f;
+        public const float CryoBatteryRateScale = 3f;
 
         // Socket ids
         public const byte BatteryPowerA = 0;
@@ -36,7 +42,16 @@ namespace StellarDriveDemoTFAdvanced.Power
         public static MelonPreferences_Entry<float> BreakerTripSeconds { get; private set; }
         public static MelonPreferences_Entry<float> BreakerAutoResetSeconds { get; private set; }
 
-        public static bool IsPowerPart(ushort partSettingsId) => partSettingsId == BatteryId || partSettingsId == BreakerId;
+        public static MelonPreferences_Entry<float> ReactorWatts { get; private set; }
+
+        public static bool IsPowerPart(ushort partSettingsId) =>
+            partSettingsId == BatteryId || partSettingsId == BreakerId || partSettingsId == ReactorId || partSettingsId == CryoBatteryId;
+
+        public static bool IsBattery(ushort partSettingsId) => partSettingsId == BatteryId || partSettingsId == CryoBatteryId;
+
+        public static float CapacityJoules(ushort partSettingsId) => BatteryCapacityJoules * (partSettingsId == CryoBatteryId ? CryoBatteryScale : 1f);
+
+        public static float RateScale(ushort partSettingsId) => partSettingsId == CryoBatteryId ? CryoBatteryRateScale : 1f;
 
         public static float BatteryCapacityJoules => Mathf.Max(1f, BatteryCapacityKJ.Value) * 1000f;
 
@@ -56,6 +71,8 @@ namespace StellarDriveDemoTFAdvanced.Power
                 description: "Power a circuit breaker carries from its input network to its output network (W).");
             BreakerTripSeconds = category.CreateEntry("BreakerTripSeconds", 0.5f,
                 description: "A breaker trips when its output network asks for more than its rating for this long (s).");
+            ReactorWatts = category.CreateEntry("ReactorWatts", 12000f,
+                description: "Power a quantum reactor gives its network, without fuel, without end (W). Three wood generators: 12 000 W.");
             BreakerAutoResetSeconds = category.CreateEntry("BreakerAutoResetSeconds", 10f,
                 description: "A tripped breaker with no control cable closes again after this long (s). 0: only a control signal resets it.");
         }

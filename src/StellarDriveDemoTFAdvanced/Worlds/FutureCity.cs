@@ -78,7 +78,10 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             // Collision follows the hull; no mining
             Transform physics = copy.transform.Find("Physics");
             foreach (MeshCollider collider in physics.GetComponents<MeshCollider>())
+            {
+                collider.convex = false;
                 collider.sharedMesh = mesh;
+            }
             foreach (MinablePlanetObject minable in physics.GetComponents<MinablePlanetObject>())
                 Object.DestroyImmediate(minable);
             return copy;
@@ -86,13 +89,40 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
         // ---- Shapes (meters, y up from the ground, a little sunk so they sit on slopes)
 
-        // A podium, then three setbacks, light strips up the corners and around each setback, an antenna
+        // A lobby you can walk into (glass doors gone, reception desk, pillars), then three setbacks,
+        // light strips up the corners and around each setback, an antenna
         private static void Tower(MeshBuilder m, MeshBuilder g, float height)
         {
-            m.Box(new Vector3(0f, 1f, 0f), new Vector3(16f, 4f, 16f));
+            const float lobby = 4.6f, wall = 0.5f, half = 8f;
+            m.Box(new Vector3(0f, -0.4f, 0f), new Vector3(17f, 0.9f, 17f));
+            // Walls: an entrance 5 m wide on the front, windows bands on the sides
+            m.Box(new Vector3(-5.25f, lobby * 0.5f, half), new Vector3(5.5f, lobby, wall));
+            m.Box(new Vector3(5.25f, lobby * 0.5f, half), new Vector3(5.5f, lobby, wall));
+            m.Box(new Vector3(0f, lobby - 0.5f, half), new Vector3(5f, 1f, wall));
+            m.Box(new Vector3(0f, lobby * 0.5f, -half), new Vector3(2f * half, lobby, wall));
+            foreach (float x in new[] { -half, half })
+            {
+                m.Box(new Vector3(x, 0.6f, 0f), new Vector3(wall, 1.2f, 2f * half));
+                m.Box(new Vector3(x, lobby - 0.6f, 0f), new Vector3(wall, 1.2f, 2f * half));
+                foreach (float z in new[] { -6f, 0f, 6f })
+                    m.Box(new Vector3(x, lobby * 0.5f, z), new Vector3(wall, lobby, 1.2f));
+                g.Box(new Vector3(x + Mathf.Sign(x) * 0.27f, 1.25f, 0f), new Vector3(0.05f, 0.12f, 2f * half - 1f));
+            }
+            m.Box(new Vector3(0f, lobby + 0.25f, 0f), new Vector3(2f * half, 0.5f, 2f * half));
+            // Inside: pillars carrying the shaft, a reception desk, benches
+            foreach (Vector2 p in new[] { new Vector2(-4f, -4f), new Vector2(4f, -4f), new Vector2(-4f, 3f), new Vector2(4f, 3f) })
+                m.Box(new Vector3(p.x, lobby * 0.5f, p.y), new Vector3(0.9f, lobby, 0.9f));
+            m.Box(new Vector3(0f, 0.55f, -3.5f), new Vector3(4.5f, 1.1f, 1f));
+            g.Box(new Vector3(0f, 1.12f, -2.98f), new Vector3(4.3f, 0.06f, 0.05f));
+            m.Box(new Vector3(-5.5f, 0.25f, 1f), new Vector3(0.8f, 0.5f, 3f));
+            m.Box(new Vector3(5.5f, 0.25f, 1f), new Vector3(0.8f, 0.5f, 3f));
+            // Entrance frame
+            g.Box(new Vector3(-2.55f, lobby * 0.4f, half + 0.27f), new Vector3(0.12f, lobby * 0.8f, 0.05f));
+            g.Box(new Vector3(2.55f, lobby * 0.4f, half + 0.27f), new Vector3(0.12f, lobby * 0.8f, 0.05f));
+            g.Box(new Vector3(0f, lobby - 1.05f, half + 0.27f), new Vector3(5.2f, 0.1f, 0.05f));
             float[] widths = { 11f, 8.5f, 5.5f };
             float[] shares = { 0.5f, 0.3f, 0.2f };
-            float y = 3f;
+            float y = lobby + 0.5f;
             for (int i = 0; i < widths.Length; i++)
             {
                 float w = widths[i], h = height * shares[i];
@@ -108,17 +138,62 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             g.Cylinder(new Vector3(0f, y + height * 0.18f - 0.6f, 0f), new Vector3(0f, y + height * 0.18f + 0.4f, 0f), 0.45f, 0.45f, 6);
         }
 
-        // A low dome on a ring wall, a lit ring at its foot and an entrance
+        // A dome of panels you can walk into through an airlock arch: a ring wall, four bands of
+        // panels up to a skylight, a lit ring at its foot, a fountain basin and terminals inside
         private static void Dome(MeshBuilder m, MeshBuilder g)
         {
-            m.Cylinder(new Vector3(0f, -0.5f, 0f), new Vector3(0f, 2.5f, 0f), 12.5f, 12.5f, 24);
-            float[] heights = { 2.5f, 6f, 9f, 11f, 12.2f };
-            float[] radii = { 12f, 11f, 8.5f, 5f, 0f };
-            for (int i = 0; i < heights.Length - 1; i++)
-                m.Cylinder(new Vector3(0f, heights[i], 0f), new Vector3(0f, heights[i + 1], 0f), radii[i], radii[i + 1], 24, capA: false, capB: radii[i + 1] > 0f);
-            g.Cylinder(new Vector3(0f, 2.4f, 0f), new Vector3(0f, 2.8f, 0f), 12.15f, 12.15f, 24);
-            m.Box(new Vector3(0f, 1.8f, 12.6f), new Vector3(4.5f, 4f, 3f));
-            g.Box(new Vector3(0f, 1.6f, 14.12f), new Vector3(2.4f, 3f, 0.1f));
+            const int segments = 20;
+            const float thickness = 0.35f;
+            m.Cylinder(new Vector3(0f, -0.6f, 0f), new Vector3(0f, 0.1f, 0f), 12.8f, 12.8f, segments);
+            float[] heights = { 0.1f, 3.2f, 6.4f, 9.2f, 11.2f };
+            float[] radii = { 12f, 12f, 10.4f, 7.6f, 3.8f };
+            for (int band = 0; band < heights.Length - 1; band++)
+            {
+                for (int i = 0; i < segments; i++)
+                {
+                    // The door: the front segment of the lowest band is left open
+                    if (band == 0 && i == 0)
+                        continue;
+                    float a0 = (i - 0.5f) * Mathf.PI * 2f / segments, a1 = (i + 0.5f) * Mathf.PI * 2f / segments;
+                    Vector3 bottom0 = new Vector3(Mathf.Sin(a0) * radii[band], heights[band], Mathf.Cos(a0) * radii[band]);
+                    Vector3 bottom1 = new Vector3(Mathf.Sin(a1) * radii[band], heights[band], Mathf.Cos(a1) * radii[band]);
+                    Vector3 top0 = new Vector3(Mathf.Sin(a0) * radii[band + 1], heights[band + 1], Mathf.Cos(a0) * radii[band + 1]);
+                    Vector3 top1 = new Vector3(Mathf.Sin(a1) * radii[band + 1], heights[band + 1], Mathf.Cos(a1) * radii[band + 1]);
+                    Panel(m, bottom0, bottom1, top0, top1, thickness);
+                }
+            }
+            // Skylight ring and its glow
+            m.Cylinder(new Vector3(0f, 11.2f, 0f), new Vector3(0f, 11.6f, 0f), 4f, 3.4f, segments, capA: false, capB: false);
+            g.Cylinder(new Vector3(0f, 11.55f, 0f), new Vector3(0f, 11.65f, 0f), 3.3f, 3.3f, segments, capA: false, capB: true);
+            g.Cylinder(new Vector3(0f, 0.12f, 0f), new Vector3(0f, 0.35f, 0f), 12.25f, 12.25f, segments, capA: false, capB: false);
+            // Airlock arch in front of the opening
+            m.Box(new Vector3(-2.2f, 1.7f, 12.4f), new Vector3(0.6f, 3.4f, 2f));
+            m.Box(new Vector3(2.2f, 1.7f, 12.4f), new Vector3(0.6f, 3.4f, 2f));
+            m.Box(new Vector3(0f, 3.6f, 12.4f), new Vector3(5f, 0.6f, 2f));
+            g.Box(new Vector3(0f, 3.25f, 13.42f), new Vector3(3.6f, 0.1f, 0.05f));
+            // Inside: a dry fountain basin, terminals and planters
+            m.Cylinder(new Vector3(0f, 0.1f, 0f), new Vector3(0f, 0.7f, 0f), 3f, 3f, 16, capA: false, capB: false);
+            m.Cylinder(new Vector3(0f, 0.1f, 0f), new Vector3(0f, 0.25f, 0f), 2.8f, 2.8f, 16);
+            m.Cylinder(new Vector3(0f, 0.2f, 0f), new Vector3(0f, 2.4f, 0f), 0.35f, 0.2f, 8);
+            g.Cylinder(new Vector3(0f, 2.4f, 0f), new Vector3(0f, 2.7f, 0f), 0.5f, 0.1f, 8);
+            foreach (float a in new[] { 60f, 150f, 210f, 300f })
+            {
+                Quaternion turn = Quaternion.Euler(0f, a, 0f);
+                Vector3 at = turn * new Vector3(0f, 0f, 8.5f);
+                m.Box(at + new Vector3(0f, 0.7f, 0f), new Vector3(1.2f, 1.4f, 0.5f), turn);
+                g.Box(at + turn * new Vector3(0f, 1.15f, -0.26f), new Vector3(0.9f, 0.45f, 0.03f), turn);
+            }
+        }
+
+        // A thick quad panel between four corners, pushed inward by its thickness
+        private static void Panel(MeshBuilder m, Vector3 b0, Vector3 b1, Vector3 t0, Vector3 t1, float thickness)
+        {
+            Vector3 normal = Vector3.Cross(t0 - b0, b1 - b0).normalized;
+            if (Vector3.Dot(normal, (b0 + b1 + t0 + t1) * 0.25f) < 0f)
+                normal = -normal;
+            Vector3 inward = -normal * thickness;
+            // Corner order of MeshBuilder.Block: bit 0 along the band, bit 1 up, bit 2 inward
+            m.Block(new[] { b0, b1, t0, t1, b0 + inward, b1 + inward, t0 + inward, t1 + inward });
         }
 
         // A tall tapered mast with platforms and a beacon

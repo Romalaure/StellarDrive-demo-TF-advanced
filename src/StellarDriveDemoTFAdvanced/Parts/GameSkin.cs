@@ -60,7 +60,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
             return renderer;
         }
 
-        private static Vector2 MostUsedUv1(Mesh mesh)
+        public static Vector2 MostUsedUv1(Mesh mesh)
         {
             var uvs = new List<Vector2>();
             if (mesh.isReadable)

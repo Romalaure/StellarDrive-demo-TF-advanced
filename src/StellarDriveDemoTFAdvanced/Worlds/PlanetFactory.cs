@@ -67,10 +67,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                             Object.DestroyImmediate(observer);
                         foreach (FishNet.Object.NetworkObject networkObject in clone.GetComponents<FishNet.Object.NetworkObject>())
                             Object.DestroyImmediate(networkObject);
-                        // The demo planet's asteroid ring stays unique
+                        // Asteroid fields: the demo planet's ring, kept (own copy of its settings) on the planets that have one
                         PlanetRing ring = clone.GetComponent<PlanetRing>();
-                        if (ring != null)
+                        if (ring != null && spec.Ring == null)
                             Object.DestroyImmediate(ring);
+                        else if (ring != null)
+                            spec.Ring(ring);
                         PlanetShaper.Apply(clone, spec);
                         clone.transform.SetParent(template.transform.parent, false);
                         Clones.Add(clone);

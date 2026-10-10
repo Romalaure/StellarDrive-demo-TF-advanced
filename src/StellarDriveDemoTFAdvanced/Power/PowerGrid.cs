@@ -68,6 +68,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static readonly Dictionary<(uint, ushort), Runtime> Runtimes = new Dictionary<(uint, ushort), Runtime>();
         private static readonly List<Entry> Breakers = new List<Entry>();
         private static readonly List<Entry> Batteries = new List<Entry>();
+        private static readonly List<Entry> Reactors = new List<Entry>();
         private static ShipsServerTracker _ships;
         private static ConnectionsServerTracker _connections;
 
@@ -79,6 +80,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             Runtimes.Clear();
             Breakers.Clear();
             Batteries.Clear();
+            Reactors.Clear();
             Journal.Clear();
             _ships = null;
             _connections = null;
@@ -100,6 +102,8 @@ namespace StellarDriveDemoTFAdvanced.Power
                 PrepareBreaker(power, breaker, deltaTime);
             foreach (Entry battery in Batteries)
                 PrepareBattery(power, battery, deltaTime);
+            foreach (Entry reactor in Reactors)
+                PrepareReactor(power, reactor, deltaTime);
         }
 
         public static void AfterTransfers(float deltaTime)
@@ -113,10 +117,18 @@ namespace StellarDriveDemoTFAdvanced.Power
                 rt.Flow = rt.PendingTransfer / deltaTime;
                 Write(breaker, rt.Status, rt.Flow, now);
             }
-            float capacity = PowerCatalog.BatteryCapacityJoules;
             float efficiency = Mathf.Clamp(PowerCatalog.BatteryEfficiency.Value, 0.5f, 1f);
+            foreach (Entry reactor in Reactors)
+            {
+                Runtime rt = reactor.Runtime;
+                // What the network really drew from it
+                float delivered = rt.Group != null ? rt.PendingDischarge * rt.Group.NormalizedGeneratorRate : 0f;
+                rt.Flow = -delivered / deltaTime;
+                Write(reactor, rt.Group != null ? 100f : 0f, rt.Flow, now);
+            }
             foreach (Entry battery in Batteries)
             {
+                float capacity = PowerCatalog.CapacityJoules(battery.Part.Settings.id);
                 Runtime rt = battery.Runtime;
                 float charged = 0f, discharged = 0f;
                 if (rt.Group != null)
@@ -130,11 +142,12 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
         }
 
-        // Batteries and breakers of every ship the game simulates, in a fixed order
+        // Batteries, breakers and reactors of every ship the game simulates, in a fixed order
         private static void Collect()
         {
             Breakers.Clear();
             Batteries.Clear();
+            Reactors.Clear();
             foreach (TrackedShipServer ship in _ships.LoadedShipsWithChildren)
             {
                 foreach (StatefulPart part in ship.GetAllStatefulParts<FluidTankState>())
@@ -151,14 +164,17 @@ namespace StellarDriveDemoTFAdvanced.Power
                     rt.Output = null;
                     rt.PendingCharge = rt.PendingDischarge = rt.PendingTransfer = 0f;
                     var entry = new Entry { Ship = ship, Part = part, Runtime = rt };
-                    if (settingsId == PowerCatalog.BatteryId)
+                    if (PowerCatalog.IsBattery(settingsId))
                         Batteries.Add(entry);
+                    else if (settingsId == PowerCatalog.ReactorId)
+                        Reactors.Add(entry);
                     else
                         Breakers.Add(entry);
                 }
             }
             Breakers.Sort(Compare);
             Batteries.Sort(Compare);
+            Reactors.Sort(Compare);
         }
 
         private static int Compare(Entry a, Entry b)
@@ -246,10 +262,28 @@ namespace StellarDriveDemoTFAdvanced.Power
             AdvancedMod.Log.Msg($"breaker {entry.Ship.Id}:{entry.Part.Id} tripped: output asked {demandWatts:0} W, rating {PowerCatalog.BreakerRatingWatts.Value:0} W");
         }
 
+        // A quantum reactor adds its output to its network's production capacity every tick, without
+        // burning anything: unlike a battery, this energy is created (the reactor is the endless source
+        // the artifacts it is built from promise)
+        private static void PrepareReactor(PowerServerTracker power, Entry entry, float deltaTime)
+        {
+            Runtime rt = entry.Runtime;
+            rt.Initialized = true;
+            if (!power.TryGetGroupFromSocket(new EntityPartSocket(entry.Ship.Id, entry.Part.Id, PowerCatalog.BatteryPowerA), out PowerGroupServerState group)
+                && !power.TryGetGroupFromSocket(new EntityPartSocket(entry.Ship.Id, entry.Part.Id, PowerCatalog.BatteryPowerB), out group))
+                return;
+            rt.Group = group;
+            float output = Mathf.Max(0f, PowerCatalog.ReactorWatts.Value) * deltaTime;
+            group.TotalPowerProductionCapacity += output;
+            rt.PendingDischarge = output;
+        }
+
         private static void PrepareBattery(PowerServerTracker power, Entry entry, float deltaTime)
         {
             Runtime rt = entry.Runtime;
-            float capacity = PowerCatalog.BatteryCapacityJoules;
+            ushort settingsId = entry.Part.Settings.id;
+            float capacity = PowerCatalog.CapacityJoules(settingsId);
+            float rates = PowerCatalog.RateScale(settingsId);
             if (!rt.Initialized)
             {
                 rt.Initialized = true;
@@ -263,7 +297,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             float shortfall = group.TotalPowerNeeded - group.TotalPowerProductionCapacity;
             if (shortfall > 0f)
             {
-                float discharge = Mathf.Min(shortfall, Mathf.Max(0f, PowerCatalog.BatteryDischargeWatts.Value) * deltaTime, rt.Stored);
+                float discharge = Mathf.Min(shortfall, Mathf.Max(0f, PowerCatalog.BatteryDischargeWatts.Value) * rates * deltaTime, rt.Stored);
                 if (discharge > 0f)
                 {
                     group.TotalPowerProductionCapacity += discharge;
@@ -273,7 +307,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
             float efficiency = Mathf.Clamp(PowerCatalog.BatteryEfficiency.Value, 0.5f, 1f);
             float room = (capacity - rt.Stored) / efficiency;
-            float charge = Mathf.Min(-shortfall, Mathf.Max(0f, PowerCatalog.BatteryChargeWatts.Value) * deltaTime, room);
+            float charge = Mathf.Min(-shortfall, Mathf.Max(0f, PowerCatalog.BatteryChargeWatts.Value) * rates * deltaTime, room);
             if (charge > 0f)
             {
                 group.TotalPowerNeeded += charge;

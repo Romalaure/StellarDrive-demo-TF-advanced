@@ -23,7 +23,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             foreach (EngineSpec engine in EngineCatalog.All)
             {
                 EngineSpec spec = engine;
-                PartFactory.Register(spec.Id, Donor, AdvancedTab.PropulsionRow, (settings, prefab) => Configure(spec, settings, prefab));
+                PartFactory.Register(spec.Id, Donor, spec.Tab, spec.Row, (settings, prefab) => Configure(spec, settings, prefab));
             }
             AdvancedMod.Log.Msg($"registered {EngineCatalog.All.Length} engines");
         }
@@ -86,6 +86,11 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                 return existing;
             var copy = new Material(original) { name = name };
             copy.SetColor(ColorId, original.GetColor(ColorId) * spec.Tint);
+            if (spec.Glow != Color.black && copy.HasProperty("_EmissionColor"))
+            {
+                copy.EnableKeyword("_EMISSION");
+                copy.SetColor("_EmissionColor", spec.Glow);
+            }
             Tinted[name] = copy;
             return copy;
         }
