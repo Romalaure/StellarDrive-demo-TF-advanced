@@ -94,6 +94,8 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 }
                 yield return PhotographFrom(state.Id, "showcase_inside", inside);
             }
+            if (Settings.DevInteractTest.Value)
+                yield return InteractTest(state.Id);
             AdvancedMod.Log.Msg($"dev: showcase done, ship has {ship.PartCount} parts");
         }
 
@@ -112,6 +114,59 @@ namespace StellarDriveDemoTFAdvanced.Parts
             object k = System.Activator.CreateInstance(key, ship, part);
             object d = System.Activator.CreateInstance(data, color, System.Activator.CreateInstance(finish), material);
             HarmonyLib.AccessTools.Method(net, "ServerSet").Invoke(null, new[] { k, d });
+        }
+
+        // The modules' interactions on this client: count them, use the light switches and a respawn bunk
+        private static IEnumerator InteractTest(uint shipId)
+        {
+            var interactions = Object.FindObjectsByType<Ships.Parts.Common.PartInteraction>(FindObjectsSortMode.None)
+                .Where(i => i.transform.root.name.StartsWith("ship " + shipId + " ")).ToList();
+            AdvancedMod.Log.Msg("dev: interactions: " + string.Join(", ", interactions.GroupBy(i => i.GetType().Name).Select(g => g.Key + " x" + g.Count())));
+            foreach (var light in interactions.OfType<Construction.LightSwitchInteraction>())
+            {
+                bool done = light.Interact(Players.Interface.Model.InteractionType.Interact);
+                AdvancedMod.Log.Msg($"dev: light switch {light.transform.parent?.parent?.name}: used {done}");
+            }
+            yield return Worlds.StationVisit.Wait(0.5f);
+            var dark = Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None).Count(r => r.transform.root.name.StartsWith("ship " + shipId + " ") && r.name.EndsWith("Light") && !r.enabled);
+            AdvancedMod.Log.Msg($"dev: lights off after the switches: {dark}");
+            var respawn = interactions.FirstOrDefault(i => i.name == "Respawn");
+            if (respawn != null)
+            {
+                bool done = respawn.Interact(Players.Interface.Model.InteractionType.Interact);
+                yield return Worlds.StationVisit.Wait(1.5f);
+                var point = ServiceLocator.GetService<Players.Interface.Services.ILocalPLayerRespawnPointProvider>()?.LocalPlayerRespawnPoint;
+                AdvancedMod.Log.Msg($"dev: respawn bunk used {done}: respawn point default {point?.UseDefaultSpawn} ship {point?.ShipId} part {point?.PartId}");
+            }
+            // A module placed on its own, through the build tool's own call (as when aiming at nothing)
+            var tool = Object.FindObjectsByType<Tools.Build.BuildToolLocalClient>(FindObjectsInactive.Include, FindObjectsSortMode.None).FirstOrDefault();
+            var players = ServiceLocator.GetService<Players.Services.PlayersServerTracker>();
+            var player = players?.ActivePlayers.FirstOrDefault();
+            var ships = ServiceLocator.GetService<ShipsServerTracker>();
+            Ships.Interface.Settings.PartSettings hub = SDModKit.Game.CustomParts.Get(Construction.StationModules.HubId);
+            Camera eye = Camera.main;
+            var network = ServiceLocator.GetService<Managers.Interface.Services.IShipInteractionNetworkService>();
+            if (network != null && hub != null && eye != null && ships != null)
+            {
+                int before = ships.LoadedShipsWithChildren.Count();
+                Construction.FreeModules.DevFree = true;
+                Vector3 at = eye.transform.position + eye.transform.forward * 25f;
+                Quaternion turn = Quaternion.LookRotation(eye.transform.forward, eye.transform.up);
+                // The request the build tool sends for a module aimed at nothing (see FreeModules)
+                network.CreateShip(new Managers.Interface.Model.CreateShipNetworkRequest
+                {
+                    PartId = hub.id,
+                    WorldTransform = new WorldTracking.Interface.Model.WorldTransform { SpaceId = WorldTracking.Interface.Values.ClientOrigin.LocalPhysicsSpaceId, Position = at - turn * Construction.FreeModules.ModuleCoord, Rotation = turn }
+                });
+                yield return Worlds.StationVisit.Wait(2f);
+                var created = ships.LoadedShipsWithChildren.OrderByDescending(sh => sh.Id).FirstOrDefault();
+                AdvancedMod.Log.Msg($"dev: free module: ships {before} -> {ships.LoadedShipsWithChildren.Count()}, newest {created?.Id} with {created?.PartCount} parts: " +
+                    string.Join(", ", created?.StatefulParts.Select(sp => sp.Settings.id.ToString()) ?? new string[0]));
+                if (created != null)
+                    yield return Photograph(created.Id, "freemodule");
+            }
+            else
+                AdvancedMod.Log.Warning($"dev: free module: network {network != null}, hub {hub != null}, camera {eye != null}");
         }
 
         /// <summary>Loads a ship from export JSON beside the player (<paramref name="side"/> meters to their right); returns its id.</summary>

@@ -207,6 +207,8 @@ Les pièces du mod se débloquent à la **table de recherche** : une branche de 
 | Dôme d'habitation | salle ronde de 6 m sous une coupole |
 | Siège de commande à leviers | le poste de pilotage avancé du jeu avec six leviers d'accoudoir qui suivent ses six signaux |
 
+- **Pose libre** : un module se pose seul dans l'espace (ou au sol), en visant le vide : il devient une nouvelle station (sur une dalle de coque cachée sous son plancher), au même coût.
+- **Interactions** : interrupteur de lumière dans chaque module, couchette de réapparition dans l'habitation, lits médicaux dans l'infirmerie, consoles (wiki) dans le hub, le dôme, le support vital et le laboratoire.
 - **Assemblage** : un module posé contre le mur d'un autre se met en face de la porte de ce mur la plus proche du viseur, à la hauteur de son étage, tourné pour qu'une de ses portes y fasse face.
 - **Habitation utilisable** : la couchette du bas est le lit du jeu (dormir), les casiers sont un rangement de 10 emplacements, la console ouvre le wiki du mod (comme celle du hub).
 - **Murs** : un objet du jeu se fixe sur le mur d'un module comme sur la coque ; les constructions du mod s'y adossent debout.
@@ -364,6 +366,9 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.9.0 : pièces posées sur des pièces posées | ✅ test en jeu par l'outil d'accrochage du jeu : couloir, habitation et stockage contre un hub (portes alignées, photo), cloison contre cloison, plancher sur plancher, vitre contre une cloison, panneaux solaires sur le toit du hub, coffre du jeu sur le sol du hub ; ⏳ geste du joueur avec l'outil de construction **à refaire en jeu** |
 | v0.9.0 : nouveaux modules | ✅ laboratoire, infirmerie, support vital et observatoire construits et photographiés de l'intérieur (table de recherche, capsule de clonage et carte stellaire du jeu en place, hologramme de la carte actif) ; ⏳ ouvrir la recherche, choisir la capsule comme point de réapparition et l'oxygène du support vital **à vérifier en jeu** |
 | v0.10.0 : accrochage des modules | ✅ test en jeu par l'outil d'accrochage du jeu : couloir à la porte du haut d'une cage d'escalier (à 3 m, centré sur la porte), coude contre un hub, écran du jeu fixé sur le mur d'un hub, plus les cas de la v0.9.0 |
+| v0.10.1 : interactions des modules | ✅ en jeu : 3 interrupteurs (pièces éteintes), 3 lits, 2 consoles, 2 points de réapparition trouvés ; la couchette du haut a fait de l'habitation le point de réapparition |
+| v0.10.1 : module posé seul | ✅ en jeu : la requête de création envoyée pour un hub crée une nouvelle station (dalle + hub, photo) ; ⏳ le geste avec l'outil de construction **à faire en jeu** |
+| v0.10.1 : levier du sas | ✅ dans le repère de la pièce (le jeu y lit le geste), contre le mur du fond ; ⏳ le manier **à faire en jeu** |
 | v0.10.0 : escalier | ✅ rayons le long de l'escalier en jeu : surface continue du sol (0,15 m) au palier (3,15 m), 0,24 m de montée tous les 0,4 m ; 1,45 m pour y accéder depuis la porte du bas ; ⏳ monter à pied **à faire en jeu** |
 | v0.10.0 : matériaux | ✅ dôme et coude peints par le code du mod TF : extérieur en bois, intérieur en blanc teinté (photos) |
 | v0.10.0 : dôme, tube, siège à leviers | ✅ construits et photographiés (intérieurs du dôme et du tube) ; ⏳ leviers qui bougent en pilotant **à voir en jeu** |

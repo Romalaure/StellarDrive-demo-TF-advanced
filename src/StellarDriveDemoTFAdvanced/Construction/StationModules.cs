@@ -113,7 +113,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 Id = HabitationId, Label = "Module d'habitation", Mass = 900f, Size = new Vector3(4f, 3f, 6f), Openings = Side.Front | Side.Back, Windows = true,
                 Donor = "StorageChest", StateClass = "StorageState", AirSocket = 0,
                 Cost = new[] { (Iron, 40), (Glass, 12), (Aluminum, 10), (Copper, 6) },
-                Description = "Une pièce de station de 4 × 6 m, 3 m sous plafond, avec hublots et portes aux deux bouts. Tout y sert : la couchette du bas est un vrai lit (dormir pour passer le temps, comme le lit du jeu), l'armoire à casiers est un rangement de dix emplacements, et la console murale ouvre le wiki du mod. Pressurisée si un module de la station est relié à une conduite d'oxygène (prise de fluide sous le plancher, à l'arrière).",
+                Description = "Une pièce de station de 4 × 6 m, 3 m sous plafond, avec hublots et portes aux deux bouts. Tout y sert : la couchette du bas est un vrai lit (dormir pour passer le temps, comme le lit du jeu), la couchette du haut fait de la pièce votre point de réapparition, l'armoire à casiers est un rangement de dix emplacements, la console murale ouvre le wiki du mod et l'interrupteur près de la porte allume ou éteint la pièce. Pressurisée si un module de la station est relié à une conduite d'oxygène (prise de fluide sous le plancher, à l'arrière).",
                 Interior = Habitation
             },
             new Spec
@@ -184,7 +184,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             new Spec
             {
                 Id = AirlockId, Label = "Sas de dépressurisation", Mass = 600f, Size = new Vector3(3f, 2.6f, 3f), Openings = Side.Back | Side.Front, Row = 2,
-                Donor = "Lever", KeepDonor = true, DonorAt = new Vector3(1.05f, 1.05f, -0.75f), DonorTurn = -90f, AirSocket = 1,
+                Donor = "Lever", KeepDonor = true, DonorAt = new Vector3(1.08f, 1.05f, -1.05f), DonorTurn = 0f, AirSocket = 1,
                 Cost = new[] { (Iron, 26), (Glass, 4), (Aluminum, 8), (Copper, 8) },
                 Description = "L'entrée de la base : deux portes étanches commandées par le levier du sas. Levier en bas : la porte intérieure (arrière) est ouverte, l'extérieure fermée et le sas est pressurisé ; levier en haut : la porte intérieure se ferme, l'extérieure (avant) s'ouvre et le sas se vide de son air. Jamais les deux ouvertes. La prise signal du levier donne l'état du sas.",
                 Interior = Airlock
@@ -284,12 +284,24 @@ namespace StellarDriveDemoTFAdvanced.Construction
             // Furniture takes the interior color of the module's paint
             shell.Inside = true;
             spec.Interior?.Invoke(shell);
+            if (spec.Id != AirlockId && spec.Id != DockingId)
+                Usable.SwitchPlate(spec, shell);
             shell.Attach(visuals, "Module" + spec.Id, spec.Offset);
             shell.AttachColliders(prefab, spec.Offset);
             if (spec.Id == HabitationId)
                 Usable.Habitation(spec, prefab);
             if (spec.Id == HubId)
                 Usable.Console(prefab, spec.Offset + new Vector3(0f, 1.05f, 0f), new Vector3(1.2f, 0.4f, 1.2f));
+            if (spec.Id == InfirmaryId)
+                Usable.MedicalBeds(spec, prefab);
+            if (spec.Id == LifeSupportId)
+                Usable.Console(prefab, spec.Offset + new Vector3(size.x * 0.5f - Wall - 0.2f, 1.35f, -0.9f), new Vector3(0.3f, 0.9f, 0.75f));
+            if (spec.Id == DomeId)
+                Usable.Console(prefab, spec.Offset + new Vector3(0f, 0.85f, 0f), new Vector3(1.8f, 0.3f, 1.8f));
+            if (spec.Id == LaboratoryId)
+                Usable.Console(prefab, spec.Offset + new Vector3(-(size.x * 0.5f - Wall - 0.35f), 1.1f, -0.3f), new Vector3(0.65f, 0.4f, 2f));
+            if (spec.Id != AirlockId && spec.Id != DockingId)
+                Usable.LightSwitch(spec, prefab, shell);
             if (spec.Id == AirlockId)
                 prefab.transform.Find("TFA_ModuleColliders")?.gameObject.AddComponent<AirlockColliders>();
             if (spec.Id == StorageId)
@@ -570,10 +582,12 @@ namespace StellarDriveDemoTFAdvanced.Construction
         private static void Airlock(Shell s)
         {
             float x = s.Size.x * 0.5f - Wall;
-            // The lever's control box on the right wall, warning stripes, a red and a green lamp
-            s.Armor.Box(new Vector3(x - 0.25f, 0.6f, -0.75f), new Vector3(0.5f, 0.9f, 0.6f));
-            s.Solid(new Vector3(x - 0.25f, 0.6f, -0.75f), new Vector3(0.5f, 0.9f, 0.6f));
-            s.Text(new Vector3(x - 0.51f, 0.85f, -0.75f), Quaternion.LookRotation(Vector3.right, Vector3.up), "SAS\n<size=60%>levier bas : intérieur\nlevier haut : extérieur</size>", 0.07f);
+            // The lever's control box against the back wall, right of the inner door: the lever moves
+            // toward and away from the player facing it, warning stripes, a red and a green lamp
+            float back = -(s.Size.z * 0.5f - Wall);
+            s.Armor.Box(new Vector3(1.08f, 0.6f, back + 0.3f), new Vector3(0.45f, 0.9f, 0.6f));
+            s.Solid(new Vector3(1.08f, 0.6f, back + 0.3f), new Vector3(0.45f, 0.9f, 0.6f));
+            s.Text(new Vector3(1.08f, 0.8f, back + 0.61f), Quaternion.LookRotation(Vector3.back, Vector3.up), "SAS\n<size=60%>levier vers soi : intérieur\nlevier vers le mur : extérieur</size>", 0.055f);
             for (int i = 0; i < 8; i++)
             {
                 MeshBuilder stripe = i % 2 == 0 ? s.Amber : s.Dark;

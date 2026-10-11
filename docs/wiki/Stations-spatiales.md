@@ -1,10 +1,10 @@
 # Stations spatiales
 
-Onglet **TF Station**. Posez un premier module sur une plateforme de coque (en orbite ou au sol), puis **visez le mur d'un module avec le suivant** : il s'accroche contre lui, **porte contre porte**. Il se met en face de la porte du mur visé la plus proche du viseur, à la hauteur de son étage, et se tourne pour qu'une de ses portes y fasse face. Visez un mur sans porte : il se centre sur ce mur. Les portes font 1,6 × 2,2 m. Le support de panneaux solaires se pose sur le toit d'un module.
+Onglet **TF Station**. Un module se pose **seul, directement dans l'espace ou au sol** : visez le vide, il apparaît devant vous et devient une nouvelle station. Il se pose aussi sur une plateforme de coque. Ensuite, **visez le mur d'un module avec le suivant** : il s'accroche contre lui, **porte contre porte**. Il se met en face de la porte du mur visé la plus proche du viseur, à la hauteur de son étage, et se tourne pour qu'une de ses portes y fasse face. Visez un mur sans porte : il se centre sur ce mur. Les portes font 1,6 × 2,2 m. Le support de panneaux solaires se pose sur le toit d'un module.
 
 | Module | Taille | Contenu |
 |---|---|---|
-| Module d'habitation | 4 × 6 m, 3 m sous plafond | **lit** (la couchette du bas : dormir pour passer le temps, comme le lit du jeu), **armoire** à casiers (rangement de 10 emplacements), **console** (ouvre ce wiki), table et tabourets, hublots ; portes aux deux bouts |
+| Module d'habitation | 4 × 6 m, 3 m sous plafond | **lit** (la couchette du bas : dormir pour passer le temps, comme le lit du jeu), **couchette du haut** (en fait votre point de réapparition), **armoire** à casiers (rangement de 10 emplacements), **console** (ouvre ce wiki), table et tabourets, hublots ; portes aux deux bouts |
 | Couloir pressurisé | 2,4 × 4 m | mains courantes, caillebotis, éclairage |
 | Couloir long | 2,4 × 8 m | vitré sur les côtés |
 | Couloir d'angle | 4,4 × 4,4 m | coude à 90° : une porte à l'arrière, une à droite (tournez-le pour aller à gauche) ; assez grand pour que les deux modules reliés ne se touchent pas |
@@ -24,6 +24,19 @@ Onglet **TF Station**. Posez un premier module sur une plateforme de coque (en o
 | Observatoire | 4 × 4 m | **plafond vitré** et **grandes baies** sur trois côtés, une **vraie carte stellaire** sur un pupitre bas (son menu passe d'une galaxie à l'autre), deux fauteuils, une lunette |
 
 On marche dedans : les modules ont de vrais murs, sol et plafond, habillés à l'intérieur.
+
+## Interactions
+
+| Module | Ce qui sert |
+|---|---|
+| Tous (sauf sas et amarrage) | **interrupteur** près de la porte arrière : allume ou éteint la pièce (pour vous) |
+| Habitation | lit (attendre), couchette du haut (point de réapparition), armoire (10 emplacements), console (wiki) |
+| Hub, dôme, support vital, laboratoire | console qui ouvre ce wiki |
+| Infirmerie | capsule de clonage (point de réapparition), deux lits médicaux (attendre) |
+| Laboratoire | table de recherche |
+| Observatoire | carte stellaire |
+| Stockage | terminal d'inventaire |
+| Sas | levier des portes |
 
 ## Construire dans et sur les modules
 
@@ -51,9 +64,9 @@ Un module est **pressurisé** dès qu'un module de la station (le vaisseau et ce
 
 ## Sas de dépressurisation
 
-L'entrée de la base. Son levier commande ses deux portes, jamais ouvertes ensemble :
-- **levier en bas** : porte intérieure (arrière) ouverte, porte extérieure (avant) fermée, le sas est pressurisé ;
-- **levier en haut** : porte intérieure fermée, porte extérieure ouverte, le sas n'a plus d'air.
+L'entrée de la base. Son levier, sur un boîtier contre le mur du fond, à droite de la porte intérieure, commande ses deux portes, jamais ouvertes ensemble :
+- **levier tiré vers soi** : porte intérieure (arrière) ouverte, porte extérieure (avant) fermée, le sas est pressurisé ;
+- **levier poussé vers le mur** : porte intérieure fermée, porte extérieure ouverte, le sas n'a plus d'air.
 
 Accrochez sa porte arrière à la station et laissez sa porte avant donner sur l'extérieur.
 

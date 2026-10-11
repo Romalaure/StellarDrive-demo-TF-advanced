@@ -23,7 +23,67 @@ namespace StellarDriveDemoTFAdvanced.Construction
     /// </summary>
     internal static class Usable
     {
-        private const ushort GameBed = 43, GameChest = 30;
+        private const ushort GameBed = 43, GameChest = 30, GamePod = 41;
+
+        /// <summary>A copy of an interaction object of one of the game's parts.</summary>
+        private static Transform Copy(Transform interactions, ushort partId, string path, string name, Vector3 at, Quaternion rotation)
+        {
+            PartSettings part = Resources.FindObjectsOfTypeAll<PartSettings>().FirstOrDefault(p => p != null && p.id == partId);
+            Transform source = part != null && part.part != null ? part.part.transform.Find(path) : null;
+            if (source == null)
+            {
+                AdvancedMod.Log.Warning($"station modules: {path} of part {partId} not found");
+                return null;
+            }
+            Transform copy = Object.Instantiate(source.gameObject, interactions, false).transform;
+            copy.name = name;
+            copy.localPosition = at;
+            copy.localRotation = rotation;
+            return copy;
+        }
+
+        /// <summary>The infirmary's two medical beds are the game's bed (wait).</summary>
+        public static void MedicalBeds(StationModules.Spec spec, GameObject prefab)
+        {
+            Transform interactions = prefab.transform.Find("Interactions");
+            if (interactions == null)
+                return;
+            float x = spec.Size.x * 0.5f - StationModules.Wall;
+            foreach (float side in new[] { -1f, 1f })
+                Copy(interactions, GameBed, "Interactions/Bed", "Bed", spec.Offset + new Vector3(side * (x - 0.5f), 0.3f, -0.5f), Quaternion.Euler(0f, 90f, 0f));
+        }
+
+        // The switch by the back door, inside
+        private static Vector3 SwitchAt(StationModules.Spec spec)
+        {
+            float back = spec.Shape == StationModules.Shape.Dome ? -(spec.Size.x * 0.5f - 0.4f) : -(spec.Size.z * 0.5f - StationModules.Wall);
+            return spec.Offset + new Vector3(StationModules.DoorWidth * 0.5f + 0.22f, 1.25f, back + 0.02f);
+        }
+
+        /// <summary>The light switch's plate, in the module's model.</summary>
+        public static void SwitchPlate(StationModules.Spec spec, StationModules.Shell shell)
+        {
+            Vector3 at = SwitchAt(spec) - spec.Offset;
+            shell.Armor.Box(at, new Vector3(0.12f, 0.18f, 0.03f));
+            shell.Glow.Box(at + new Vector3(0f, 0.03f, 0.018f), new Vector3(0.05f, 0.05f, 0.006f));
+        }
+
+        /// <summary>A switch by the back door that turns the module's lights on and off (for the player using it).</summary>
+        public static void LightSwitch(StationModules.Spec spec, GameObject prefab, StationModules.Shell shell)
+        {
+            Transform interactions = prefab.transform.Find("Interactions");
+            if (interactions == null)
+                return;
+            var light = new GameObject("TFA_LightSwitch") { layer = 6, tag = "Interactable" };
+            light.transform.SetParent(interactions, false);
+            light.transform.localPosition = SwitchAt(spec) + new Vector3(0f, 0f, 0.05f);
+            light.AddComponent<BoxCollider>().size = new Vector3(0.3f, 0.35f, 0.15f);
+            var interaction = light.AddComponent<LightSwitchInteraction>();
+            PartSettings chest = Resources.FindObjectsOfTypeAll<PartSettings>().FirstOrDefault(p => p != null && p.id == GameChest);
+            PartInteraction label = chest != null && chest.part != null ? chest.part.GetComponentInChildren<PartInteraction>(true) : null;
+            if (label != null)
+                StationConsoleInteraction.Configs(interaction) = new List<PartInteractionConfig>(label.Interactions);
+        }
 
         public static void Habitation(StationModules.Spec spec, GameObject prefab)
         {
@@ -55,6 +115,14 @@ namespace StellarDriveDemoTFAdvanced.Construction
             }
             else
                 AdvancedMod.Log.Warning("habitation: the game's bed was not found, the bunk is decoration");
+            // The upper bunk makes the room your respawn point, like the game's clone pod
+            Transform respawn = Copy(interactions, GamePod, "Interactions/CloneBay", "Respawn", spec.Offset + new Vector3(-x + 0.45f, 1.45f, 0.4f), Quaternion.identity);
+            if (respawn != null)
+                foreach (BoxCollider box in respawn.GetComponents<BoxCollider>())
+                {
+                    box.center = new Vector3(0f, 0.15f, 0f);
+                    box.size = new Vector3(0.9f, 0.4f, 2f);
+                }
             Console(prefab, spec.Offset + new Vector3(StationModules.ConsoleX, 1.3f, z - StationModules.Wall - 0.15f), new Vector3(0.8f, 0.8f, 0.3f));
         }
 
@@ -98,6 +166,25 @@ namespace StellarDriveDemoTFAdvanced.Construction
             Previous(guide) = Wiki.WikiGuide.EntryId;
             if (!guide.IsGuideActive)
                 guide.ToggleGuide();
+            return true;
+        }
+    }
+
+    /// <summary>A module's light switch: its lights (white strips, cyan glows) on or off, for this player.</summary>
+    internal sealed class LightSwitchInteraction : PartInteraction
+    {
+        public override bool Interact(InteractionType type)
+        {
+            if (type != InteractionType.Interact)
+                return base.Interact(type);
+            var ships = Common.GameServices.ShipsClient;
+            if (ships == null || !ships.TryGetTrackedShip(PartContext.ShipId, out var ship) || !ship.TryGetFloatingPartVisual(PartContext.PartId, out IShipPartVisual visual) || visual == null)
+                return false;
+            var lights = visual.GameObject.GetComponentsInChildren<MeshRenderer>(true)
+                .Where(r => r.name.StartsWith("TF_NoPaint_") && (r.name.EndsWith("Light") || r.name.EndsWith("Glow"))).ToList();
+            bool on = lights.Count > 0 && !lights[0].enabled;
+            foreach (MeshRenderer renderer in lights)
+                renderer.enabled = on;
             return true;
         }
     }
