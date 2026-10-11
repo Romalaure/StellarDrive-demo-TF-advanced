@@ -31,6 +31,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<string> DevShowcase { get; private set; }
         public static MelonPreferences_Entry<bool> DevBuildMenu { get; private set; }
         public static MelonPreferences_Entry<bool> DevSnapTest { get; private set; }
+        public static MelonPreferences_Entry<bool> DevWiki { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitBlackHole { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitStations { get; private set; }
         public static MelonPreferences_Entry<string> DevWorld { get; private set; }
@@ -79,6 +80,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevWorld, part ids (comma separated) set out on a test ship beside the player and photographed.");
             DevBuildMenu = _category.CreateEntry("DevBuildMenu", false,
                 description: "For mod development: with DevWorld, open the build menu, photograph each mod tab and log its layout.");
+            DevWiki = _category.CreateEntry("DevWiki", false,
+                description: "For mod development: with DevWorld, open the guide on the mod's wiki and photograph a few pages.");
             DevSnapTest = _category.CreateEntry("DevSnapTest", false,
                 description: "For mod development: with DevWorld, ask the build tool where parts go when aimed at placed parts, and photograph the result.");
             DevDockingTest = _category.CreateEntry("DevDockingTest", false,

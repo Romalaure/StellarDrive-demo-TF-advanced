@@ -50,6 +50,11 @@
     <Reference Include="System.Core" />
   </ItemGroup>
 
+  <!-- The wiki's pages, shown in the game's guide -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\docs\wiki\*.md" Exclude="..\..\docs\wiki\_Sidebar.md" LogicalName="Wiki.%(Filename).md" />
+  </ItemGroup>
+
   <Target Name="DeployToGameMods" AfterTargets="Build" Condition="'$(DeployToGame)' == 'true' And Exists('$(GamePath)\Mods')">
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GamePath)\Mods" />
     <Message Importance="high" Text="Deployed $(TargetFileName) -> $(GamePath)\Mods" />
