@@ -141,6 +141,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 $"Un mât et deux ailes de cellules photovoltaïques : jusqu'à {PowerCatalog.SolarWatts.Value:0} W sur ses prises électriques quand les ailes font face à l'étoile, rien la nuit ou dans l'ombre d'une planète. Posez-le sur le toit de la base, ailes vers le ciel. Sa prise signal donne la puissance produite (W).",
                 120f, new[] { (102u, 12), (112u, 10), (104u, 6), (101u, 6) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
+            settings.snappingStyle = Ships.Interface.Model.SnappingStyle.PreciseOnFloor;
             const float wing = 3f, chord = 1.6f, mast = 1.6f;
             Transform visuals = PartFactory.Blank(prefab, new Vector3(0f, 0.15f, 0f), new Vector3(0.8f, 0.3f, 0.8f));
             var model = new MachineModels.Model();

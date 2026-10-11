@@ -140,6 +140,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
             // A faint violet heart inside the ring
             model.Core.Cylinder(new Vector3(0f, ringY, -0.01f), new Vector3(0f, ringY, 0.01f), ringR * 0.25f, ringR * 0.25f, 16);
+            PortalDetails(model, width, height, depth, ringY, ringR);
             MachineModels.Attach(visuals, model, "Portal", MachineModels.Violet, MachineModels.Violet);
             var ringObject = new GameObject(PortalVisuals.RingName) { layer = visuals.gameObject.layer };
             ringObject.transform.SetParent(visuals, false);
@@ -152,6 +153,59 @@ namespace StellarDriveDemoTFAdvanced.Power
             PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachineSignal, CableType.Signal, new Vector3(0.45f, 0.17f, -face), Vector3.back);
             PowerParts.GraftSeated(prefab, bounds, Portal.CommandSocket, CableType.Signal, new Vector3(0.2f, 0.17f, -face), Vector3.back);
             PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachineFluid, CableType.Fluid, new Vector3(-0.35f, 0.17f, -face), Vector3.back);
+        }
+
+        /// <summary>
+        /// The portal generator's finer parts: glowing coils and cooling fins on the pylons,
+        /// conduits up to the ring clamps, chevrons around the ring, capacitor banks and a
+        /// control desk at the back, an emitter lens under the ring.
+        /// </summary>
+        private static void PortalDetails(MachineModels.Model model, float width, float height, float depth, float ringY, float ringR)
+        {
+            foreach (float x in new[] { -0.72f, 0.72f })
+            {
+                float outward = Mathf.Sign(x);
+                // Coils around the pylon, fins on its outer face, a conduit up to the ring clamp
+                for (int i = 0; i < 4; i++)
+                    model.Glow.Box(new Vector3(x, height + 0.14f + i * 0.16f, 0f), new Vector3(0.165f, 0.022f, 0.325f));
+                for (int i = 0; i < 6; i++)
+                    model.Armor.Box(new Vector3(x + outward * 0.09f, height + 0.1f + i * 0.12f, 0f), new Vector3(0.05f, 0.05f, 0.26f));
+                model.Dark.Cylinder(new Vector3(x * 0.82f, height, 0.2f), new Vector3(x * 0.82f, ringY - 0.12f, 0.17f), 0.025f, 0.025f, 8);
+                model.Dark.Cylinder(new Vector3(x * 0.82f, ringY - 0.12f, 0.17f), new Vector3(x * 0.88f, ringY - 0.02f, 0.1f), 0.025f, 0.025f, 8);
+                // Capacitor banks behind the pylon: three cells with a glowing band and a cap
+                for (int i = 0; i < 3; i++)
+                {
+                    Vector3 b = new Vector3(x - outward * (0.12f + i * 0.14f), height, -depth * 0.32f);
+                    model.Armor.Cylinder(b, b + Vector3.up * 0.34f, 0.055f, 0.055f, 10);
+                    model.Glow.Cylinder(b + Vector3.up * 0.2f, b + Vector3.up * 0.23f, 0.058f, 0.058f, 10, capA: false, capB: false);
+                    model.Dark.Cylinder(b + Vector3.up * 0.34f, b + Vector3.up * 0.37f, 0.045f, 0.035f, 10);
+                }
+            }
+            // Chevrons around the ring's front, lit
+            for (int k = 0; k < 9; k++)
+            {
+                float a = (90f + k * 40f) * Mathf.Deg2Rad;
+                Vector3 at = new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * (ringR + 0.075f) + new Vector3(0f, ringY, 0.07f);
+                Quaternion turn = Quaternion.Euler(0f, 0f, a * Mathf.Rad2Deg - 90f);
+                model.Armor.Box(at, new Vector3(0.12f, 0.06f, 0.06f), turn);
+                model.Glow.Box(at + Vector3.forward * 0.031f, new Vector3(0.07f, 0.025f, 0.004f), turn);
+            }
+            // An emitter lens under the ring, ringed with light
+            model.Armor.Cylinder(new Vector3(0f, height, 0.05f), new Vector3(0f, height + 0.05f, 0.05f), 0.2f, 0.17f, 16);
+            model.Core.Cylinder(new Vector3(0f, height + 0.05f, 0.05f), new Vector3(0f, height + 0.08f, 0.05f), 0.12f, 0.09f, 16);
+            model.Glow.Cylinder(new Vector3(0f, height + 0.05f, 0.05f), new Vector3(0f, height + 0.055f, 0.05f), 0.19f, 0.19f, 20, capA: false, capB: false);
+            // The control desk at the back: a tilted screen and a row of keys
+            Quaternion tilt = Quaternion.Euler(-35f, 0f, 0f);
+            Vector3 desk = new Vector3(0f, height + 0.13f, -depth * 0.36f);
+            model.Armor.Box(desk + new Vector3(0f, -0.07f, 0f), new Vector3(0.36f, 0.12f, 0.14f));
+            model.Armor.Box(desk, new Vector3(0.36f, 0.2f, 0.04f), tilt);
+            model.Dark.Box(desk + tilt * new Vector3(0f, 0.01f, -0.022f), new Vector3(0.3f, 0.14f, 0.004f), tilt);
+            model.Glow.Box(desk + tilt * new Vector3(0f, 0.01f, -0.025f), new Vector3(0.26f, 0.1f, 0.002f), tilt);
+            for (int i = 0; i < 6; i++)
+                model.Light.Box(desk + new Vector3(-0.125f + i * 0.05f, -0.005f, -0.085f), new Vector3(0.03f, 0.012f, 0.025f));
+            // Warning lights at the base's front corners
+            foreach (float x in new[] { -width * 0.42f, width * 0.42f })
+                model.Core.Cylinder(new Vector3(x, height, depth * 0.38f), new Vector3(x, height + 0.05f, depth * 0.38f), 0.03f, 0.02f, 8);
         }
 
         // Power on both sides, signal and fluid at the back

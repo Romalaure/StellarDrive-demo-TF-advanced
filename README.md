@@ -185,6 +185,8 @@ Les pièces du mod se débloquent à la **table de recherche** : une branche de 
 
 19 pièces posées qui complètent la coque du jeu : poteau, plancher en lattes, cloison en planches, rambarde, treillis et étagère en bois ; vitre, baie vitrée 2 × 2, dalle de verre, garde-corps vitré, verrière, cloison vitrée ; caillebotis, garde-corps 1 et 2 m, treillis métallique, colonne rivetée, gousset, tôle perforée. Le bois et le fer portent les textures de la coque du jeu (son tableau de textures, choisi par sommet comme la coque), le verre son verre.
 
+**Pièces posées sur des pièces posées** : le jeu n'accroche une pièce posée qu'à la coque. Le mod ajoute le cas d'une pièce visée : sur sa face du dessus, la nouvelle pièce s'y pose ; sur un côté, elle se met contre lui en restant droite, base au même niveau (grille de 25 cm comptée depuis la pièce visée). Ça vaut pour toutes les pièces posées : constructions, meubles et machines dans un module, panneaux solaires sur un toit, modules entre eux.
+
 ## Stations spatiales (onglet TF Station)
 
 | Module | Rôle |
@@ -194,8 +196,14 @@ Les pièces du mod se débloquent à la **table de recherche** : une branche de 
 | Hub de connexion | 4 × 4 m, une porte sur chaque face |
 | Module de stockage | étagères et terminal d'inventaire (10 emplacements) |
 | Module d'amarrage | sas à collier magnétique : un vaisseau équipé du même module s'y amarre |
-| Support de panneaux solaires | jusqu'à 3 000 W face à l'étoile, rien la nuit ou à l'ombre d'une planète |
+| Support de panneaux solaires | jusqu'à 3 000 W face à l'étoile, rien la nuit ou à l'ombre d'une planète ; se pose sur le toit d'un module |
+| Laboratoire | une vraie table de recherche dans la pièce, paillasses et flacons |
+| Infirmerie de clonage | une vraie capsule de clonage (point de réapparition), deux lits médicaux |
+| Module de support vital | usine à oxygène : 2 500 W, 0,1 oxygène/s dans la conduite de sa prise d'air |
+| Observatoire | plafond vitré, une vraie carte stellaire sur un pupitre |
 
+- **Assemblage** : un module posé contre le mur d'un autre s'aligne dessus, porte contre porte, centré, au même niveau, tourné pour que ses portes fassent face au voisin.
+- **Machines du jeu** : le laboratoire, l'infirmerie et l'observatoire gardent la machine du jeu dont ils sont faits (table de recherche, capsule de clonage, carte stellaire), qui fonctionne comme d'habitude.
 - **On entre dedans** : chaque module a ses propres collisions (sol, plafond, murs autour des portes), via les « colliders dynamiques » du jeu, et une boîte de placement réduite au plancher pour y poser meubles et machines.
 - **Air** : un module est pressurisé dès qu'un module de la station est relié à une conduite d'oxygène ; l'oxygène respiré est pris dans la conduite.
 - **Amarrage** : le collier est placé au point d'amarrage fixe du jeu (comme une porte d'amarrage) ; deux modules collier contre collier s'attirent et s'amarrent.
@@ -345,6 +353,10 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.9.0 : modules, constructions, table | ✅ rendus en jeu (photos) : habitation, couloir, hub, stockage, panneaux solaires, 19 pièces bois/verre/fer, table avec relief et repères ; ⏳ air des modules, production solaire et ouverture du terminal de stockage **à vérifier en jeu** |
 | v0.9.0 : Érèbe | ✅ étoile, 4 planètes, trou noir, 3 épaves créés ; Pyros, Thalassa, Mycélia visitées (éclairées par Érèbe le jour, nuit de l'autre côté) ; ⏳ Cristallis non visitée |
 | v0.9.0 : synchronisation des planètes du mod | ✅ corrigé : la planète de départ réagissait elle-même aux objets marqués d'une planète du mod (erreur réseau « Index was outside the bounds ») |
+| v0.9.0 : pièces posées sur des pièces posées | ✅ test en jeu par l'outil d'accrochage du jeu : couloir, habitation et stockage contre un hub (portes alignées, photo), cloison contre cloison, plancher sur plancher, vitre contre une cloison, panneaux solaires sur le toit du hub, coffre du jeu sur le sol du hub ; ⏳ geste du joueur avec l'outil de construction **à refaire en jeu** |
+| v0.9.0 : nouveaux modules | ✅ laboratoire, infirmerie, support vital et observatoire construits et photographiés de l'intérieur (table de recherche, capsule de clonage et carte stellaire du jeu en place, hologramme de la carte actif) ; ⏳ ouvrir la recherche, choisir la capsule comme point de réapparition et l'oxygène du support vital **à vérifier en jeu** |
+| v0.9.0 : onglets de construction | ✅ deux rangées d'onglets centrées dans le cadre, libellés à taille lisible (mesuré en jeu) |
+| v0.9.0 : collecteur et réacteur à matière noire | ✅ faces intérieures (entonnoir, anneaux) visibles : modèles en double face (photo) |
 | v0.9.0 : recherche | ✅ 11 techs ajoutées, celles du jeu et des autres mods ne bougent plus ; ⏳ écran de la table de recherche **à voir en jeu** |
 | Pose des pièces, écrans en vol, forces des moteurs, multijoueur | ⏳ **à faire en jeu** (procédure ci-dessous) |
 

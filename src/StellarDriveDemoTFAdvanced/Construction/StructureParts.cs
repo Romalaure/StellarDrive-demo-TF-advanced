@@ -82,6 +82,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             PartFactory.Describe(settings, spec.Label, spec.Description, spec.Mass, new[] { (101u, spec.Iron) });
             // No state: a plain placed part, nothing to simulate or synchronize
             settings.internalStateClass = null;
+            settings.snappingStyle = Ships.Interface.Model.SnappingStyle.PreciseOnAny;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, spec.Size.y * 0.5f, 0f), spec.Size);
 
             // Long parts take the tall drawn panel, flat ones the wide one

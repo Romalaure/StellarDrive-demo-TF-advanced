@@ -1,6 +1,12 @@
 # Constructions
 
-Onglet **TF Construction**. Le jeu a déjà des sols, murs et pentes de coque en bois, verre et fer ; ces pièces ajoutent les formes qui manquent. Ce sont des pièces posées : on les place sur n'importe quelle surface, elles se recyclent comme les autres.
+Onglet **TF Construction**. Le jeu a déjà des sols, murs et pentes de coque en bois, verre et fer ; ces pièces ajoutent les formes qui manquent. Ce sont des pièces posées : on les place sur n'importe quelle surface de la coque (sol, mur, plafond), elles se recyclent comme les autres.
+
+**Assemblage** : visez une pièce déjà posée.
+- Sur sa **face du dessus** (ou du dessous), la nouvelle pièce s'y pose (ou s'y accroche par en dessous).
+- Sur un **côté**, elle se place contre lui en restant droite, sa base au niveau de celle de la pièce visée : planches côte à côte, cloisons en enfilade, vitre contre un poteau.
+
+Les positions suivent une grille de 25 cm comptée depuis la pièce visée.
 
 | Bois | Verre | Fer |
 |---|---|---|

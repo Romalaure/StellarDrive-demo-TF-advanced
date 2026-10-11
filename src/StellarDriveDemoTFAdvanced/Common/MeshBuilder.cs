@@ -26,6 +26,12 @@ namespace StellarDriveDemoTFAdvanced.Common
         /// <summary>Vertex color of the next shapes (the game's hull shader reads its tint and texture layer from it).</summary>
         public Color VertexColor = Color.white;
 
+        /// <summary>
+        /// Every triangle is built with a back face too, so open shapes (funnels, rings, tubes
+        /// without caps) are seen from inside as well as from outside.
+        /// </summary>
+        public bool DoubleSided;
+
         /// <summary>Atlas rectangle (0-1) the next shapes map their faces to.</summary>
         public Rect Panel = new Rect(0f, 0f, 1f, 1f);
 
@@ -255,6 +261,13 @@ namespace StellarDriveDemoTFAdvanced.Common
                 t1 = project(p1) * PlanarScale;
                 t2 = project(p2) * PlanarScale;
             }
+            if (DoubleSided)
+                AddTriangle(p0, p2, p1, -n0, -n2, -n1, t0, t2, t1);
+            AddTriangle(p0, p1, p2, n0, n1, n2, t0, t1, t2);
+        }
+
+        private void AddTriangle(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 n0, Vector3 n1, Vector3 n2, Vector2 t0, Vector2 t1, Vector2 t2)
+        {
             int start = _vertices.Count;
             _colors.Add(VertexColor);
             _colors.Add(VertexColor);

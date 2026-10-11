@@ -35,6 +35,8 @@ namespace StellarDriveDemoTFAdvanced
             Common.FpsProbe.Install();
             Power.MachineTest.Install();
             Parts.Showcase.Install();
+            Parts.BuildMenuDev.Install();
+            Construction.SnapTest.Install();
             Power.PortalTest.Install();
             Construction.DockingTest.Install();
             Log.Msg("ready");

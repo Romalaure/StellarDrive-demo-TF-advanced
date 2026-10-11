@@ -133,6 +133,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
         {
             PartFactory.Describe(settings, spec.Label, spec.Description, spec.Mass, spec.Cost);
             settings.internalStateClass = null;
+            // On any face of the hull, and on other placed parts (see FloatingSnap)
+            settings.snappingStyle = Ships.Interface.Model.SnappingStyle.PreciseOnAny;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, spec.Size.y * 0.5f, 0f), spec.Size);
             var model = new Model();
             spec.Build(model);

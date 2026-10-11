@@ -30,6 +30,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
     {
         public const ushort Id = 7381;
         public const float Range = 300f;
+        /// <summary>The table top is square: the hologram's map fits inside its rim.</summary>
+        public const float Size = 1.4f;
 
         public static void Register()
         {
@@ -42,29 +44,69 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 $"Une table holographique qui cartographie le terrain sur {Range:0} m autour du vaisseau (relief en 3D), signale les gisements, rochers, coffres, bâtiments et vaisseaux, et affiche la fiche de la planète : biome, gravité, air, ressources, lieux et utilité. S'allume quand un joueur s'en approche.",
                 60f, new[] { (112u, 10), (102u, 10), (101u, 6), (Items.ModItems.Meteorite, 2) });
             settings.internalStateClass = null;
-            const float width = 1.6f, height = 0.95f, depth = 1.1f;
+            const float width = Size, height = 0.95f, depth = Size;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, height * 0.5f, 0f), new Vector3(width, height, depth));
             var model = new MachineModels.Model();
-            // A pedestal, a tilted bevel and the table top with a dark glass and glowing grid lines
-            model.Armor.Box(new Vector3(0f, 0.04f, 0f), new Vector3(width * 0.7f, 0.08f, depth * 0.7f));
-            model.Armor.Box(new Vector3(0f, 0.42f, 0f), new Vector3(width * 0.45f, 0.7f, depth * 0.45f));
-            model.Armor.Block(new[]
-            {
-                new Vector3(-width * 0.25f, 0.75f, -depth * 0.25f), new Vector3(width * 0.25f, 0.75f, -depth * 0.25f), new Vector3(-width * 0.5f, height - 0.06f, -depth * 0.5f), new Vector3(width * 0.5f, height - 0.06f, -depth * 0.5f),
-                new Vector3(-width * 0.25f, 0.75f, depth * 0.25f), new Vector3(width * 0.25f, 0.75f, depth * 0.25f), new Vector3(-width * 0.5f, height - 0.06f, depth * 0.5f), new Vector3(width * 0.5f, height - 0.06f, depth * 0.5f)
-            });
-            model.Armor.Box(new Vector3(0f, height - 0.03f, 0f), new Vector3(width, 0.06f, depth));
-            model.Dark.Box(new Vector3(0f, height + 0.002f, 0f), new Vector3(width - 0.12f, 0.006f, depth - 0.12f));
-            for (int i = 1; i < 8; i++)
-                model.Glow.Box(new Vector3(-width * 0.5f + 0.06f + (width - 0.12f) * i / 8f, height + 0.006f, 0f), new Vector3(0.006f, 0.002f, depth - 0.12f));
-            for (int i = 1; i < 6; i++)
-                model.Glow.Box(new Vector3(0f, height + 0.006f, -depth * 0.5f + 0.06f + (depth - 0.12f) * i / 6f), new Vector3(width - 0.12f, 0.002f, 0.006f));
-            model.Light.Box(new Vector3(0f, height - 0.03f, depth * 0.5f + 0.004f), new Vector3(width * 0.9f, 0.012f, 0.012f));
-            model.Light.Box(new Vector3(0f, height - 0.03f, -depth * 0.5f - 0.004f), new Vector3(width * 0.9f, 0.012f, 0.012f));
-            // Projector studs at the corners
+            // An octagonal pedestal on a plinth, vents on its front and back, four struts under the top
+            model.Armor.Box(new Vector3(0f, 0.04f, 0f), new Vector3(width * 0.62f, 0.08f, depth * 0.62f));
+            model.Armor.Cylinder(new Vector3(0f, 0.08f, 0f), new Vector3(0f, 0.7f, 0f), 0.34f, 0.3f, 8);
+            model.Light.Cylinder(new Vector3(0f, 0.09f, 0f), new Vector3(0f, 0.1f, 0f), 0.345f, 0.345f, 8, capA: false, capB: false);
+            foreach (float face in new[] { 0.29f, -0.29f })
+                MachineModels.Vent(model, 0f, 0.38f, face, 0.3f, 0.3f, 4);
             foreach (float x in new[] { -1f, 1f })
                 foreach (float z in new[] { -1f, 1f })
-                    model.Core.Cylinder(new Vector3(x * (width * 0.5f - 0.05f), height, z * (depth * 0.5f - 0.05f)), new Vector3(x * (width * 0.5f - 0.05f), height + 0.04f, z * (depth * 0.5f - 0.05f)), 0.025f, 0.015f, 6);
+                    model.Armor.Cylinder(new Vector3(x * 0.22f, 0.5f, z * 0.22f), new Vector3(x * (width * 0.42f), height - 0.08f, z * (depth * 0.42f)), 0.025f, 0.02f, 8);
+            // The top: a chamfered frame around a dark glass with a glowing grid
+            model.Armor.Block(new[]
+            {
+                new Vector3(-width * 0.44f, height - 0.1f, -depth * 0.44f), new Vector3(width * 0.44f, height - 0.1f, -depth * 0.44f), new Vector3(-width * 0.5f, height - 0.05f, -depth * 0.5f), new Vector3(width * 0.5f, height - 0.05f, -depth * 0.5f),
+                new Vector3(-width * 0.44f, height - 0.1f, depth * 0.44f), new Vector3(width * 0.44f, height - 0.1f, depth * 0.44f), new Vector3(-width * 0.5f, height - 0.05f, depth * 0.5f), new Vector3(width * 0.5f, height - 0.05f, depth * 0.5f)
+            });
+            float rim = 0.08f;
+            model.Armor.Box(new Vector3(0f, height - 0.025f, depth * 0.5f - rim * 0.5f), new Vector3(width, 0.05f, rim));
+            model.Armor.Box(new Vector3(0f, height - 0.025f, -depth * 0.5f + rim * 0.5f), new Vector3(width, 0.05f, rim));
+            model.Armor.Box(new Vector3(width * 0.5f - rim * 0.5f, height - 0.025f, 0f), new Vector3(rim, 0.05f, depth - 2f * rim));
+            model.Armor.Box(new Vector3(-width * 0.5f + rim * 0.5f, height - 0.025f, 0f), new Vector3(rim, 0.05f, depth - 2f * rim));
+            model.Dark.Box(new Vector3(0f, height - 0.03f, 0f), new Vector3(width - 2f * rim, 0.03f, depth - 2f * rim));
+            float inner = width - 2f * rim - 0.04f;
+            for (int i = 1; i < 10; i++)
+            {
+                float t = -inner * 0.5f + inner * i / 10f;
+                model.Glow.Box(new Vector3(t, height - 0.013f, 0f), new Vector3(0.004f, 0.002f, inner), null);
+                model.Glow.Box(new Vector3(0f, height - 0.013f, t), new Vector3(inner, 0.002f, 0.004f), null);
+            }
+            // The emitter in the middle: rings of light
+            model.Core.Cylinder(new Vector3(0f, height - 0.015f, 0f), new Vector3(0f, height - 0.005f, 0f), 0.06f, 0.05f, 16);
+            foreach (float r in new[] { 0.1f, 0.16f })
+                model.Glow.Cylinder(new Vector3(0f, height - 0.014f, 0f), new Vector3(0f, height - 0.01f, 0f), r, r, 24, capA: false, capB: false);
+            // Light strips along the rim, projector studs at the corners
+            foreach (float z in new[] { depth * 0.5f + 0.003f, -depth * 0.5f - 0.003f })
+                model.Light.Box(new Vector3(0f, height - 0.025f, z), new Vector3(width * 0.92f, 0.01f, 0.01f));
+            foreach (float x in new[] { width * 0.5f + 0.003f, -width * 0.5f - 0.003f })
+                model.Light.Box(new Vector3(x, height - 0.025f, 0f), new Vector3(0.01f, 0.01f, depth * 0.92f));
+            foreach (float x in new[] { -1f, 1f })
+                foreach (float z in new[] { -1f, 1f })
+                {
+                    Vector3 c = new Vector3(x * (width * 0.5f - rim * 0.5f), height, z * (depth * 0.5f - rim * 0.5f));
+                    model.Armor.Cylinder(c, c + Vector3.up * 0.03f, 0.03f, 0.025f, 8);
+                    model.Core.Cylinder(c + Vector3.up * 0.03f, c + Vector3.up * 0.05f, 0.015f, 0.008f, 8);
+                }
+            // A console on the front edge: a tilted keyboard and two small screens
+            Quaternion tilt = Quaternion.Euler(25f, 0f, 0f);
+            Vector3 desk = new Vector3(0f, height - 0.08f, -depth * 0.5f - 0.1f);
+            model.Armor.Box(desk, new Vector3(width * 0.6f, 0.04f, 0.2f), tilt);
+            for (int row = 0; row < 3; row++)
+                for (int k = 0; k < 12; k++)
+                    model.Dark.Box(desk + tilt * new Vector3(-width * 0.27f + k * width * 0.049f, 0.024f, -0.06f + row * 0.045f), new Vector3(0.03f, 0.008f, 0.03f), tilt);
+            foreach (float x in new[] { -width * 0.36f, width * 0.36f })
+            {
+                model.Dark.Box(desk + new Vector3(x, 0.03f, 0.02f), new Vector3(0.16f, 0.1f, 0.01f), Quaternion.Euler(-20f, 0f, 0f));
+                model.Glow.Box(desk + new Vector3(x, 0.03f, 0.014f), new Vector3(0.13f, 0.075f, 0.003f), Quaternion.Euler(-20f, 0f, 0f));
+            }
+            model.Armor.Box(desk + new Vector3(0f, -0.15f, 0.05f), new Vector3(width * 0.3f, 0.26f, 0.06f));
+            // A cable duct down the back to the floor
+            model.Dark.Cylinder(new Vector3(0.15f, 0.08f, 0.3f), new Vector3(0.15f, height - 0.1f, depth * 0.4f), 0.03f, 0.03f, 8);
+            model.Dark.Cylinder(new Vector3(-0.15f, 0.08f, 0.3f), new Vector3(-0.15f, height - 0.1f, depth * 0.4f), 0.03f, 0.03f, 8);
             MachineModels.Attach(visuals, model, "Scanner", MachineModels.Cyan, MachineModels.Cyan);
             visuals.gameObject.AddComponent<ScannerVisuals>();
         }
@@ -74,7 +116,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
     internal sealed class ScannerVisuals : DefaultShipPartVisuals
     {
         private const int Grid = 32;
-        private const float MapHalf = 0.68f, MapHeight = 0.45f, Top = 0.97f;
+        // The map stays inside the table's rim (ScannerTable.Size), the page above it
+        private const float MapHalf = ScannerTable.Size * 0.5f - 0.11f, MapHeight = 0.4f, Top = 0.96f;
         private static Material _holoMaterial;
 
         private GameObject _holo;
@@ -130,14 +173,14 @@ namespace StellarDriveDemoTFAdvanced.Construction
             _markers = Child("Markers");
             var page = new GameObject("TFA_ScannerPage") { layer = gameObject.layer };
             page.transform.SetParent(_holo.transform, false);
-            page.transform.localPosition = new Vector3(0f, MapHeight + 0.15f, 0f);
+            page.transform.localPosition = new Vector3(0f, MapHeight + 0.1f, 0f);
             _page = page.AddComponent<TextMeshPro>();
             _page.font = ComputerStyle.Font;
-            _page.fontSize = 1.1f;
+            _page.fontSize = 0.7f;
             _page.color = new Color(0.6f, 0.95f, 1f);
             _page.alignment = TextAlignmentOptions.Bottom;
             _page.textWrappingMode = TextWrappingModes.Normal;
-            _page.rectTransform.sizeDelta = new Vector2(2.6f, 1.4f);
+            _page.rectTransform.sizeDelta = new Vector2(ScannerTable.Size, 0.9f);
             _page.rectTransform.pivot = new Vector2(0.5f, 0f);
         }
 
@@ -270,6 +313,24 @@ namespace StellarDriveDemoTFAdvanced.Construction
             var triangles = new List<int>();
             if (hasGround)
             {
+                // A faint filled surface under the lines, so the relief reads as ground
+                for (int z = 0; z < Grid; z++)
+                {
+                    for (int x = 0; x < Grid; x++)
+                    {
+                        Vector3 a = _heights[z * (Grid + 1) + x], b = _heights[z * (Grid + 1) + x + 1];
+                        Vector3 c = _heights[(z + 1) * (Grid + 1) + x + 1], d = _heights[(z + 1) * (Grid + 1) + x];
+                        if (float.IsNaN(a.y) || float.IsNaN(b.y) || float.IsNaN(c.y) || float.IsNaN(d.y))
+                            continue;
+                        int start = vertices.Count;
+                        foreach (Vector3 p in new[] { a, b, c, d })
+                        {
+                            vertices.Add(p);
+                            colors.Add(HeightColor(p.y) * 0.22f);
+                        }
+                        triangles.AddRange(new[] { start, start + 2, start + 1, start, start + 3, start + 2, start, start + 1, start + 2, start, start + 2, start + 3 });
+                    }
+                }
                 // Lines of the relief as thin ribbons along x and z, colored by height
                 for (int z = 0; z <= Grid; z += 2)
                     for (int x = 0; x < Grid; x++)

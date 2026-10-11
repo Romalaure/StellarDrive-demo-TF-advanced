@@ -24,11 +24,12 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         internal sealed class Model
         {
-            public readonly MeshBuilder Armor = new MeshBuilder { Panel = GameSkin.PlainPanel };
-            public readonly MeshBuilder Dark = new MeshBuilder();
-            public readonly MeshBuilder Glow = new MeshBuilder();
-            public readonly MeshBuilder Light = new MeshBuilder();
-            public readonly MeshBuilder Core = new MeshBuilder();
+            // Double-sided: funnels, rings and open tubes are seen from every side
+            public readonly MeshBuilder Armor = new MeshBuilder { Panel = GameSkin.PlainPanel, DoubleSided = true };
+            public readonly MeshBuilder Dark = new MeshBuilder { DoubleSided = true };
+            public readonly MeshBuilder Glow = new MeshBuilder { DoubleSided = true };
+            public readonly MeshBuilder Light = new MeshBuilder { DoubleSided = true };
+            public readonly MeshBuilder Core = new MeshBuilder { DoubleSided = true };
         }
 
         /// <summary>A housing: a plinth, straight sides, then a top narrowing toward its cap (faceted like a hull).</summary>

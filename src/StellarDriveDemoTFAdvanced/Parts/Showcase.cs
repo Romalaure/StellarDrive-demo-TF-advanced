@@ -12,6 +12,7 @@ using Ships.Services;
 using StellarDriveDemoTFAdvanced.Common;
 using UnityEngine;
 using WorldTracking.Interface.Model.Spaces;
+using WorldTracking.Interface.Values;
 using WorldTracking.Services;
 using WorldTracking.Spaces;
 
@@ -39,29 +40,25 @@ namespace StellarDriveDemoTFAdvanced.Parts
         {
             ushort[] ids = Settings.DevShowcase.Value.Split(',').Select(s => ushort.TryParse(s.Trim(), out ushort id) ? id : (ushort)0).Where(id => id != 0).ToArray();
             // Station modules are rooms: more room between them
-            Spacing = ids.Any(id => id >= 7371 && id <= 7376) ? 8f : 3f;
+            Spacing = ids.Any(id => id >= 7371 && id <= 7380) ? 8f : 3f;
             var players = ServiceLocator.GetService<Players.Services.PlayersServerTracker>();
             var player = players?.ActivePlayers.FirstOrDefault();
+            for (int wait = 0; player == null && players != null && wait < 30; wait++)
+            {
+                yield return Worlds.StationVisit.Wait(1f);
+                player = players.ActivePlayers.FirstOrDefault();
+            }
             SpacesServer spaces = ServiceLocator.GetService<SpacesServer>();
             ShipsServerTracker ships = ServiceLocator.GetService<ShipsServerTracker>();
             var worldIds = ServiceLocator.GetService<WorldObjectsIdsServerTracker>();
             if (player == null || spaces == null || ships == null || worldIds == null || ids.Length == 0)
             {
-                AdvancedMod.Log.Warning("dev: showcase: nothing to show or services missing");
+                AdvancedMod.Log.Warning($"dev: showcase: nothing to show or services missing (player {player != null}, spaces {spaces != null}, ships {ships != null}, ids {worldIds != null}, parts {ids.Length})");
                 yield break;
             }
-            var data = JsonUtility.FromJson<ShipImportExportUtils.ShipImportExportData>(Json(ids));
-            SavedShipState state = new ShipsConverter().ConvertToState(data.ships).States.Cast<SavedShipState>().Single();
-            state.Id = worldIds.CreateUniqueIdForObject();
-            state.SpaceId = player.SpaceId;
-            // The player stands upright: their frame gives the local up and a side
-            Vector3 up = player.Rotation * Vector3.up;
-            state.Position = player.Position + up * 1.5f + player.Rotation * Vector3.right * 20f;
-            state.Rotation = player.Rotation;
-            state.Velocity = Vector3.zero;
-            state.RelativeSpaceId = spaces.GetOrCreateShipRelativeSpace(state.Id);
-            ships.LoadShip(state);
-            AdvancedMod.Log.Msg($"dev: showcase ship {state.Id} with {string.Join(", ", ids)}");
+            uint id = LoadShip(Json(ids), player, spaces, ships, worldIds, 20f);
+            MelonLoader.MelonCoroutines.Start(Construction.SnapTest.Pin(spaces, ships, id, 30f));
+            var state = new { Id = id };
             for (int i = 0; i < 5; i++)
             {
                 yield return Worlds.StationVisit.Wait(1f);
@@ -76,7 +73,43 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 yield break;
             }
             yield return Photograph(state.Id, "showcase");
+            // Rooms: a look inside each, from the doorway toward the far wall
+            if (Spacing > 3f)
+            {
+                var inside = new System.Collections.Generic.List<(Vector3, Vector3)>();
+                for (int i = 0; i < ids.Length; i++)
+                {
+                    float x = (i - (ids.Length - 1) * 0.5f) * Spacing;
+                    inside.Add((new Vector3(x + 0.6f, 1.3f, 1.6f), new Vector3(-0.25f, -0.25f, -1f)));
+                }
+                yield return PhotographFrom(state.Id, "showcase_inside", inside);
+            }
             AdvancedMod.Log.Msg($"dev: showcase done, ship has {ship.PartCount} parts");
+        }
+
+        /// <summary>Loads a ship from export JSON beside the player (<paramref name="side"/> meters to their right); returns its id.</summary>
+        public static uint LoadShip(string json, Players.TrackedPlayerServer player, SpacesServer spaces, ShipsServerTracker ships, WorldObjectsIdsServerTracker worldIds, float side)
+        {
+            var data = JsonUtility.FromJson<ShipImportExportUtils.ShipImportExportData>(json);
+            SavedShipState state = new ShipsConverter().ConvertToState(data.ships).States.Cast<SavedShipState>().Single();
+            state.Id = worldIds.CreateUniqueIdForObject();
+            state.SpaceId = player.SpaceId;
+            // The player stands upright: their frame gives the local up and a side
+            Vector3 up = player.Rotation * Vector3.up;
+            state.Position = player.Position + up * 1.5f + player.Rotation * Vector3.right * side;
+            state.Rotation = player.Rotation;
+            state.Velocity = Vector3.zero;
+            // In the client's physics space, so the ship gets colliders on this client too
+            uint physicsSpace = ClientOrigin.LocalPhysicsSpaceId;
+            var transpose = ServiceLocator.GetService<WorldTracking.Interface.Services.IWorldTransposeServer>();
+            if (physicsSpace != 0 && physicsSpace != state.SpaceId && transpose != null)
+            {
+                state.Position = transpose.Position(state.SpaceId, physicsSpace, state.Position);
+                state.SpaceId = physicsSpace;
+            }
+            state.RelativeSpaceId = spaces.GetOrCreateShipRelativeSpace(state.Id);
+            ships.LoadShip(state);
+            return state.Id;
         }
 
         /// <summary>Photographs a ship's model on this client from five angles, to dev/{prefix}_*.png.</summary>
@@ -156,9 +189,55 @@ namespace StellarDriveDemoTFAdvanced.Parts
             Object.Destroy(cameraObject);
         }
 
+        /// <summary>Photographs from points in the ship's frame (position, direction), to dev/{prefix}_{n}.png.</summary>
+        public static IEnumerator PhotographFrom(uint shipId, string prefix, System.Collections.Generic.IList<(Vector3 At, Vector3 Look)> views)
+        {
+            GameObject visual = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None)
+                .Where(t => t.parent == null && t.name.StartsWith("ship " + shipId + " ") && t.name.Contains("visual")).Select(t => t.gameObject).FirstOrDefault();
+            if (visual == null)
+                yield break;
+            Transform frame = visual.transform;
+            var cameraObject = new GameObject("TFA_ShowcaseCamera");
+            var camera = cameraObject.AddComponent<Camera>();
+            if (Camera.main != null)
+                camera.CopyFrom(Camera.main);
+            camera.enabled = false;
+            camera.fieldOfView = 75f;
+            camera.nearClipPlane = 0.05f;
+            var target = RenderTexture.GetTemporary(1600, 900, 24, RenderTextureFormat.ARGB32);
+            camera.targetTexture = target;
+            var sheet = new Texture2D(1600, 900, TextureFormat.RGBA32, false);
+            for (int i = 0; i < views.Count; i++)
+            {
+                camera.transform.position = frame.TransformPoint(views[i].At);
+                camera.transform.rotation = Quaternion.LookRotation(frame.TransformDirection(views[i].Look.normalized), frame.up);
+                camera.Render();
+                RenderTexture previous = RenderTexture.active;
+                RenderTexture.active = target;
+                sheet.ReadPixels(new Rect(0, 0, 1600, 900), 0, 0);
+                sheet.Apply();
+                RenderTexture.active = previous;
+                System.IO.File.WriteAllBytes(System.IO.Path.Combine(DevHarness.Folder, prefix + "_" + i + ".png"), sheet.EncodeToPNG());
+                yield return null;
+            }
+            camera.targetTexture = null;
+            RenderTexture.ReleaseTemporary(target);
+            Object.Destroy(sheet);
+            Object.Destroy(cameraObject);
+        }
+
         private static string Json(ushort[] ids)
         {
-            int halfX = Mathf.CeilToInt((ids.Length - 1) * Spacing * 0.5f) + 2;
+            var parts = new System.Collections.Generic.List<(ushort, Vector3, int, int)>();
+            for (int i = 0; i < ids.Length; i++)
+                parts.Add((ids[i], new Vector3((i - (ids.Length - 1) * 0.5f) * Spacing, -0.46f, 0f), 2, 4));
+            return Json(parts, Mathf.CeilToInt((ids.Length - 1) * Spacing * 0.5f) + 2);
+        }
+
+        /// <summary>Export JSON of a test ship: a floor of hull, then the given placed parts (settings id, coordinates, forward and up orientation ids).</summary>
+        public static string Json(System.Collections.Generic.IList<(ushort Id, Vector3 Coord, int Forward, int Up)> placed, int halfX)
+        {
+            ushort[] ids = placed.Select(p => p.Id).ToArray();
             var hull = new StringBuilder();
             for (int x = -halfX; x <= halfX; x++)
             {
@@ -174,9 +253,9 @@ namespace StellarDriveDemoTFAdvanced.Parts
             {
                 if (i > 0)
                     parts.Append(',');
-                float x = (i - (ids.Length - 1) * 0.5f) * Spacing;
+                Vector3 c = placed[i].Coord;
                 parts.Append(string.Format(CultureInfo.InvariantCulture,
-                    "{{\"id\":{0},\"settingsId\":{1},\"coord\":{{\"x\":{2},\"y\":-0.46,\"z\":0}},\"forwardOrientationId\":2,\"upOrientationId\":4}}", i + 1, ids[i], x));
+                    "{{\"id\":{0},\"settingsId\":{1},\"coord\":{{\"x\":{2},\"y\":{3},\"z\":{4}}},\"forwardOrientationId\":{5},\"upOrientationId\":{6}}}", i + 1, ids[i], c.x, c.y, c.z, placed[i].Forward, placed[i].Up));
             }
             // Default states for the parts that need one (the build tool makes them in play)
             var lists = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>>
@@ -187,7 +266,9 @@ namespace StellarDriveDemoTFAdvanced.Parts
             string emptySlots = string.Join(",", Enumerable.Repeat("{\"hasItem\":false,\"itemId\":0,\"quantity\":0}", 10));
             for (int i = 0; i < ids.Length; i++)
             {
-                string stateClass = (ids[i] >= 7000 ? SDModKit.Game.CustomParts.Get(ids[i]) : null)?.internalStateClass;
+                ushort settingsId = ids[i];
+                string stateClass = (settingsId >= 7000 ? SDModKit.Game.CustomParts.Get(settingsId) : null)?.internalStateClass
+                    ?? Resources.FindObjectsOfTypeAll<Ships.Interface.Settings.PartSettings>().FirstOrDefault(s => s != null && s.id == settingsId)?.internalStateClass;
                 int id = i + 1;
                 switch (stateClass)
                 {

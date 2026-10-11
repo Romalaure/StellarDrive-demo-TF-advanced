@@ -34,12 +34,14 @@ Ouvre un portail violet **45 m devant lui** (dans la direction de sa face avant)
 
 Fonctionnement : un signal > 0 sur la **prise de commande** le lance ; il charge **10 s** à 20 000 W, brûle **5 matière noire** (prise de fluide) puis le portail reste ouvert **30 s**, et le générateur se recharge 60 s. Prise d'état : 0 prêt, 1 à 99 charge %, 100 ouvert, -1 pas de cible, -2 pas assez de matière noire, -3 pas de courant, -10 et moins : secondes de recharge.
 
+Le modèle : un anneau dressé entre deux pylônes cerclés de bobines lumineuses et d'ailettes, des chevrons lumineux autour de l'anneau, une lentille d'émission dessous, des bancs de condensateurs et un pupitre de commande à l'arrière.
+
 C'est le seul moyen raisonnable d'atteindre la [galaxie d'Érèbe](Galaxie-Erebe.md).
 
 ## Table de cartographie
 
-Table holographique (onglet TF Avancé, rangée des ordinateurs). Quand un joueur s'en approche, elle affiche :
-- le **relief en 3D** du terrain sur 300 m autour du vaisseau ;
+Table holographique carrée de 1,4 m (onglet TF Avancé, rangée des ordinateurs) : piétement octogonal à ouïes, plateau de verre noir quadrillé, émetteur central, pupitre à clavier et deux petits écrans à l'avant. L'hologramme tient dans le cadre du plateau. Quand un joueur s'en approche, elle affiche :
+- le **relief en 3D** du terrain sur 300 m autour du vaisseau (lignes de niveau sur une surface translucide) ;
 - des repères : gisements et rochers (orange), coffres (jaune), bâtiments (violet), vaisseaux (blanc), votre vaisseau (vert) ;
 - la **fiche de la planète** : biome, gravité, air, ressources, lieux, utilité, dangers (les fiches de ce wiki).
 
