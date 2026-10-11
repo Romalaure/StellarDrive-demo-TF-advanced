@@ -29,9 +29,11 @@ namespace StellarDriveDemoTFAdvanced.Power
             PartFactory.Register(PowerCatalog.ReactorId, "SignalDisplay", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureReactor);
             PartFactory.Register(PowerCatalog.CryoBatteryId, "SignalDisplay", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureCryoBattery);
             PartFactory.Register(PowerCatalog.ShieldId, "SignalDisplay", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureShield);
+            PartFactory.Register(PowerCatalog.ShieldMk2Id, "SignalDisplay", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureShieldMk2);
+            PartFactory.Register(PowerCatalog.ShieldMk3Id, "SignalDisplay", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureShieldMk3);
             PartFactory.Register(PowerCatalog.CondenserId, "SignalDisplay", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureCondenser);
             PartFactory.Register(PowerCatalog.QuantumGyroId, "Gyroscope", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureQuantumGyro);
-            AdvancedMod.Log.Msg("registered the battery, the circuit breaker, the quantum reactor, the cryonite battery and the force field generator");
+            AdvancedMod.Log.Msg("registered the battery, the circuit breaker, the quantum reactor, the cryonite battery and the force field generators");
         }
 
         private static void ConfigureBattery(PartSettings settings, GameObject prefab)
@@ -159,9 +161,33 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private static void ConfigureShield(PartSettings settings, GameObject prefab)
         {
+            ForceField.Tier tier = ForceField.TierOf(PowerCatalog.ShieldId);
             PartFactory.Describe(settings, "Générateur de champ de force",
-                $"Enveloppe tout le vaisseau (et ce qui y est amarré) dans un champ qui encaisse les chocs et les forces de marée à la place de la coque : {PowerCatalog.ShieldCapacity.Value:0} points (un choc compte sa variation de vitesse en m/s). Consomme {PowerCatalog.ShieldWatts.Value:0} W sur ses prises électriques et {PowerCatalog.ShieldOxygenPerSecond.Value:0.###} unité/s d'oxygène sur sa prise de fluide. À zéro, il se casse et redémarre au bout de {PowerCatalog.ShieldCooldownSeconds.Value / 60f:0} min, rechargé. Sa prise signal donne la charge en % (-1 éteint, négatif : secondes avant redémarrage).",
+                $"Enveloppe tout le vaisseau (et ce qui y est amarré) dans un champ qui encaisse les chocs et les forces de marée à la place de la coque : {tier.Capacity:0} points (un choc compte sa variation de vitesse en m/s), {tier.Regen:0.#} points/s de recharge. Consomme {tier.Watts:0} W sur ses prises électriques et {tier.FluidPerSecond:0.###} unité/s d'oxygène sur sa prise de fluide. À zéro, il se casse et redémarre au bout de {PowerCatalog.ShieldCooldownSeconds.Value / 60f:0} min, rechargé. Sa prise signal donne la charge en % (-1 éteint, négatif : secondes avant redémarrage).",
                 120f, new[] { (Items.ModItems.QuantumCore, 1), (Items.ModItems.Cryonite, 6), (Items.ModItems.NexoranAlloy, 4), (Items.ModItems.Titanium, 6), (112u, 8) });
+            BuildShield(settings, prefab, tier);
+        }
+
+        private static void ConfigureShieldMk2(PartSettings settings, GameObject prefab)
+        {
+            ForceField.Tier tier = ForceField.TierOf(PowerCatalog.ShieldMk2Id);
+            PartFactory.Describe(settings, "Générateur de champ renforcé",
+                $"Le générateur de champ de force en plus solide (lueur dorée) : {tier.Capacity:0} points, {tier.Regen:0.#} points/s de recharge. Gourmand : {tier.Watts:0} W sur ses prises électriques et {tier.FluidPerSecond:0.###} unité/s d'oxygène sur sa prise de fluide. À zéro, il se casse et redémarre au bout de {PowerCatalog.ShieldCooldownSeconds.Value / 60f:0} min, rechargé. Sa prise signal donne la charge en %.",
+                260f, new[] { (Items.ModItems.QuantumCore, 3), (Items.ModItems.Cryonite, 15), (Items.ModItems.NexoranAlloy, 12), (Items.ModItems.Titanium, 20), (112u, 20) });
+            BuildShield(settings, prefab, tier);
+        }
+
+        private static void ConfigureShieldMk3(PartSettings settings, GameObject prefab)
+        {
+            ForceField.Tier tier = ForceField.TierOf(PowerCatalog.ShieldMk3Id);
+            PartFactory.Describe(settings, "Générateur de champ à matière noire",
+                $"Le champ le plus résistant (lueur violette) : {tier.Capacity:0} points, {tier.Regen:0.#} points/s de recharge. Très gourmand : {tier.Watts:0} W sur ses prises électriques et {tier.FluidPerSecond:0.###} unité/s de matière noire (pas d'oxygène) sur sa prise de fluide. À zéro, il se casse et redémarre au bout de {PowerCatalog.ShieldCooldownSeconds.Value / 60f:0} min, rechargé. Sa prise signal donne la charge en %.",
+                450f, new[] { (Items.ModItems.QuantumCore, 6), (Items.ModItems.ExoticMatter, 6), (Items.ModItems.Meteorite, 25), (Items.ModItems.NexoranAlloy, 20), (Items.ModItems.Titanium, 30) });
+            BuildShield(settings, prefab, tier);
+        }
+
+        private static void BuildShield(PartSettings settings, GameObject prefab, ForceField.Tier tier)
+        {
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             const float width = 0.95f, height = 0.42f, depth = 0.95f;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, 0.65f, 0f), new Vector3(width, 1.3f, depth));
@@ -206,7 +232,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             var core = new MeshBuilder();
             core.Cylinder(new Vector3(0f, -0.11f, 0f), new Vector3(0f, 0f, 0f), 0f, 0.075f, 6, capA: false, capB: false);
             core.Cylinder(new Vector3(0f, 0f, 0f), new Vector3(0f, 0.11f, 0f), 0.075f, 0f, 6, capA: false, capB: false);
-            MachineModels.Attach(visuals, model, "Shield", MachineModels.Cyan, MachineModels.Cyan);
+            MachineModels.Attach(visuals, model, "Shield" + tier.Level, tier.Glow, tier.Glow);
             var ringObject = new GameObject(ForceFieldVisuals.RingName) { layer = visuals.gameObject.layer };
             ringObject.transform.SetParent(visuals, false);
             ringObject.AddComponent<MeshFilter>().sharedMesh = ring.Build(ForceFieldVisuals.RingName);
@@ -217,6 +243,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             coreObject.transform.localPosition = new Vector3(0f, coreY, 0f);
             coreObject.AddComponent<MeshFilter>().sharedMesh = core.Build(ForceFieldVisuals.CoreName);
             coreObject.AddComponent<MeshRenderer>().sharedMaterial = LitMaterials.Get("TFA_ShieldRing", Color.white, 0f, 0.8f, Color.white);
+            new GameObject(ForceFieldVisuals.TierPrefix + tier.Level).transform.SetParent(visuals, false);
             visuals.gameObject.AddComponent<ForceFieldVisuals>();
             var bounds = prefab.GetComponent<ShipPartBounds>();
             GraftRow(prefab, bounds, 0.2f, -face, 0.22f,

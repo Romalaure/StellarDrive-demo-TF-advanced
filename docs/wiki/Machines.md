@@ -20,6 +20,16 @@ Enveloppe tout le vaisseau (et ce qui y est amarré) d'une bulle cyan qui encais
 
 **Avec le mod Arsenal** : le champ encaisse aussi ses armes. Les balles et éclats qui touchent la coque, et le souffle des explosions sur les pièces, vident le champ au lieu d'abîmer le vaisseau (dégâts de plaque ÷ 4, puissance d'explosion ÷ 20 : la plus grosse explosion prend environ la moitié d'un champ plein). Tant qu'il tient, les explosions ne poussent plus le vaisseau. Les missiles et roquettes qui entrent dans la bulle explosent dessus, avec une onde à l'endroit de l'impact. Prise signal : charge en % (-1 éteint, négatif : secondes avant redémarrage).
 
+### Modèles plus résistants
+
+| Générateur | Points | Recharge | Consommation | Fluide | Recherche |
+|---|---|---|---|---|---|
+| Champ de force (cyan) | 150 | 0,5 /s | 2 000 W | 0,02 oxygène/s | Technologie des artefacts |
+| **Champ renforcé** (doré) | 450 | 1,5 /s | 6 000 W | 0,05 oxygène/s | Technologie des artefacts |
+| **Champ à matière noire** (violet) | 1 200 | 4 /s | 10 000 W | 0,02 matière noire/s | Matière noire |
+
+Même fonctionnement et mêmes prises que le champ de base ; la bulle prend la couleur du générateur. Le champ à matière noire se branche sur un réservoir de matière noire (pas d'oxygène). Plusieurs générateurs sur un vaisseau : le plus chargé encaisse.
+
 ## Matière noire
 
 | Machine | Effet |

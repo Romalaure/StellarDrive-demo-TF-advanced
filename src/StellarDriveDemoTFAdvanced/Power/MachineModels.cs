@@ -113,6 +113,8 @@ namespace StellarDriveDemoTFAdvanced.Power
     {
         public const string RingName = "TF_NoPaint_ShieldRing";
         public const string CoreName = "TF_NoPaint_ShieldCore";
+        /// <summary>Empty child naming the generator model (its level), for the colors.</summary>
+        public const string TierPrefix = "TF_ShieldTier_";
 
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
@@ -134,9 +136,19 @@ namespace StellarDriveDemoTFAdvanced.Power
         private float _charge = 100f;
         private float _flash;
         private float _nextFit;
+        private Color _glow = MachineModels.Cyan;
 
         private void Awake()
         {
+            foreach (Transform child in transform)
+            {
+                if (child.name.StartsWith(TierPrefix) && int.TryParse(child.name.Substring(TierPrefix.Length), out int level))
+                {
+                    ForceField.Tier tier = System.Array.Find(ForceField.Tiers, t => t.Level == level);
+                    if (tier != null)
+                        _glow = tier.Glow;
+                }
+            }
             Transform ring = transform.Find(RingName);
             _ring = ring != null ? ring.GetComponent<Renderer>() : null;
             Transform core = transform.Find(CoreName);
@@ -169,7 +181,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         private void Show(bool up)
         {
             _up = up;
-            Color color = up ? MachineModels.Cyan : new Color(0.1f, 0.12f, 0.14f);
+            Color color = up ? _glow : new Color(0.1f, 0.12f, 0.14f);
             foreach (Renderer lit in new[] { _ring, _core })
             {
                 if (lit == null)
@@ -238,7 +250,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             Vector3 eye = bubble.InverseTransformPoint(camera.transform.position);
             float t = Time.time;
             float low = 1f - Mathf.Clamp01(_charge / 100f);
-            Color tint = Color.Lerp(new Color(0.35f, 0.85f, 1f), new Color(1f, 0.3f, 0.2f), low * low);
+            Color tint = Color.Lerp(Color.Lerp(_glow, Color.white, 0.1f), new Color(1f, 0.3f, 0.2f), low * low);
             // A failing field flickers
             float flicker = low > 0.6f && Mathf.PerlinNoise(t * 9f, 0.3f) < (low - 0.5f) ? 0.35f : 1f;
             float pulse = (0.9f + 0.1f * Mathf.Sin(t * 2.2f)) * flicker;

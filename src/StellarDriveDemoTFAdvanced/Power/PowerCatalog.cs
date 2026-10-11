@@ -22,6 +22,10 @@ namespace StellarDriveDemoTFAdvanced.Power
         public const float CryoBatteryRateScale = 3f;
         /// <summary>Artifacts: force field generator.</summary>
         public const ushort ShieldId = 7325;
+        /// <summary>Artifacts: reinforced force field generator (more charge, more power).</summary>
+        public const ushort ShieldMk2Id = 7328;
+        /// <summary>Dark matter: dark matter force field generator.</summary>
+        public const ushort ShieldMk3Id = 7329;
         /// <summary>Artifacts: makes oxygen from power.</summary>
         public const ushort CondenserId = 7326;
         /// <summary>Artifacts: a gyroscope with several gyroscopes' torque.</summary>
@@ -87,7 +91,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         public static MelonPreferences_Entry<float> ShieldCooldownSeconds { get; private set; }
 
         /// <summary>Parts whose FluidTankState carries a status, not fluid (no fluid mass).</summary>
-        public static bool HoldsNoFluid(ushort partSettingsId) => IsPowerPart(partSettingsId) || partSettingsId == ShieldId || partSettingsId == CondenserId
+        public static bool HoldsNoFluid(ushort partSettingsId) => IsPowerPart(partSettingsId) || ForceField.IsGenerator(partSettingsId) || partSettingsId == CondenserId
             || partSettingsId == DarkCollectorId || partSettingsId == DarkReactorId || partSettingsId == PortalId;
 
         public static bool IsPowerPart(ushort partSettingsId) =>

@@ -33,8 +33,48 @@ namespace StellarDriveDemoTFAdvanced.Power
         private const uint Oxygen = 108;
         private const float WriteInterval = 0.5f;
 
+        /// <summary>
+        /// The generator models: the reinforced and dark matter fields hold several times more and
+        /// recharge faster, for much more power (the dark matter one burns dark matter, not oxygen).
+        /// Scales apply to the ShieldCapacity / ShieldRegenPerSecond / ShieldWatts /
+        /// ShieldOxygenPerSecond settings.
+        /// </summary>
+        public sealed class Tier
+        {
+            public ushort Id;
+            public int Level;
+            public float CapacityScale, RegenScale, WattsScale, FluidScale;
+            public uint Fluid;
+            public Color Glow;
+
+            public float Capacity => Mathf.Max(1f, PowerCatalog.ShieldCapacity.Value * CapacityScale);
+            public float Regen => Mathf.Max(0f, PowerCatalog.ShieldRegenPerSecond.Value * RegenScale);
+            public float Watts => Mathf.Max(0f, PowerCatalog.ShieldWatts.Value * WattsScale);
+            public float FluidPerSecond => Mathf.Max(0f, PowerCatalog.ShieldOxygenPerSecond.Value * FluidScale);
+        }
+
+        public static readonly Tier[] Tiers =
+        {
+            new Tier { Id = PowerCatalog.ShieldId, Level = 1, CapacityScale = 1f, RegenScale = 1f, WattsScale = 1f, FluidScale = 1f, Fluid = Oxygen, Glow = MachineModels.Cyan },
+            new Tier { Id = PowerCatalog.ShieldMk2Id, Level = 2, CapacityScale = 3f, RegenScale = 3f, WattsScale = 3f, FluidScale = 2.5f, Fluid = Oxygen, Glow = new Color(1f, 0.72f, 0.2f) },
+            new Tier { Id = PowerCatalog.ShieldMk3Id, Level = 3, CapacityScale = 8f, RegenScale = 8f, WattsScale = 5f, FluidScale = 1f, Fluid = Items.ModItems.DarkMatter, Glow = MachineModels.Violet },
+        };
+
+        public static Tier TierOf(ushort partSettingsId)
+        {
+            foreach (Tier tier in Tiers)
+            {
+                if (tier.Id == partSettingsId)
+                    return tier;
+            }
+            return null;
+        }
+
+        public static bool IsGenerator(ushort partSettingsId) => TierOf(partSettingsId) != null;
+
         private sealed class Runtime
         {
+            public Tier Tier;
             public float Charge = -1f;
             public float CooldownUntil;
             public bool Up;
@@ -63,8 +103,6 @@ namespace StellarDriveDemoTFAdvanced.Power
             ByShip.Clear();
         }
 
-        public static float Capacity => Mathf.Max(1f, PowerCatalog.ShieldCapacity.Value);
-
         public static void BeforeTransfers(PowerServerTracker power, ShipsServerTracker ships, ConnectionsServerTracker connections, float deltaTime)
         {
             Generators.Clear();
@@ -74,18 +112,20 @@ namespace StellarDriveDemoTFAdvanced.Power
             {
                 foreach (StatefulPart part in ship.GetAllStatefulParts<ConstantState>())
                 {
-                    if (part.Settings.id != PowerCatalog.ShieldId)
+                    Tier tier = TierOf(part.Settings.id);
+                    if (tier == null)
                         continue;
-                    if (!Runtimes.TryGetValue((ship.Id, part.Id), out Runtime rt))
+                    if (!Runtimes.TryGetValue((ship.Id, part.Id), out Runtime rt) || rt.Tier != tier)
                     {
-                        rt = new Runtime();
+                        rt = new Runtime { Tier = tier };
                         Runtimes[(ship.Id, part.Id)] = rt;
                     }
+                    float capacity = tier.Capacity;
                     if (rt.Charge < 0f)
                     {
                         // From the save: the charge, or the time left before restarting
                         double saved = ((ConstantState)part.State).ConstantValue;
-                        rt.Charge = saved > 0 ? Mathf.Clamp01((float)saved / 100f) * Capacity : saved <= -2 ? 0f : Capacity;
+                        rt.Charge = saved > 0 ? Mathf.Clamp01((float)saved / 100f) * capacity : saved <= -2 ? 0f : capacity;
                         if (saved <= -2)
                             rt.CooldownUntil = now + (float)(-saved - 1);
                     }
@@ -107,18 +147,18 @@ namespace StellarDriveDemoTFAdvanced.Power
             if (rt.Charge <= 0f && rt.CooldownUntil > 0f)
             {
                 // Restarted after the breakdown
-                rt.Charge = Capacity;
+                rt.Charge = rt.Tier.Capacity;
                 rt.CooldownUntil = 0f;
             }
             if (!power.TryGetGroupFromSocket(new EntityPartSocket(entry.Ship.Id, entry.Part.Id, PowerCatalog.MachinePowerA), out PowerGroupServerState group)
                 && !power.TryGetGroupFromSocket(new EntityPartSocket(entry.Ship.Id, entry.Part.Id, PowerCatalog.MachinePowerB), out group))
                 return;
             var oxygenSocket = new EntityPartSocket(entry.Ship.Id, entry.Part.Id, OxygenSocket);
-            float oxygen = Mathf.Max(0f, PowerCatalog.ShieldOxygenPerSecond.Value) * deltaTime;
-            if (!connections.TryGetFluidGroupCacheFromSocket(oxygenSocket, out FluidGroupServerState fluid) || fluid.FluidItemId != Oxygen || fluid.Available < oxygen)
+            float oxygen = rt.Tier.FluidPerSecond * deltaTime;
+            if (!connections.TryGetFluidGroupCacheFromSocket(oxygenSocket, out FluidGroupServerState fluid) || fluid.FluidItemId != rt.Tier.Fluid || fluid.Available < oxygen)
                 return;
             // It draws its power like a consumer; it runs if the network had it last tick
-            float watts = Mathf.Max(0f, PowerCatalog.ShieldWatts.Value) * deltaTime;
+            float watts = rt.Tier.Watts * deltaTime;
             group.TotalPowerNeeded += watts;
             rt.Group = group;
             rt.PendingPower = watts;
@@ -135,7 +175,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 rt.Up = !cooling && rt.Group != null && rt.Group.NormalizedConsumerRate > 0.95f;
                 if (rt.Up)
                 {
-                    rt.Charge = Mathf.Min(Capacity, rt.Charge + Mathf.Max(0f, PowerCatalog.ShieldRegenPerSecond.Value) * deltaTime);
+                    rt.Charge = Mathf.Min(rt.Tier.Capacity, rt.Charge + rt.Tier.Regen * deltaTime);
                     if (!ByShip.TryGetValue(entry.Ship.Id, out List<Entry> list))
                         ByShip[entry.Ship.Id] = list = new List<Entry>();
                     list.Add(entry);
@@ -195,7 +235,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             Runtime rt = entry.Runtime;
             double value = now < rt.CooldownUntil ? -Mathf.Ceil(rt.CooldownUntil - now) - 1
-                : rt.Up ? System.Math.Max(0.1, System.Math.Round(rt.Charge / Capacity * 1000.0) / 10.0) : -1;
+                : rt.Up ? System.Math.Max(0.1, System.Math.Round(rt.Charge / rt.Tier.Capacity * 1000.0) / 10.0) : -1;
             bool kindChanged = double.IsNaN(rt.Written) || System.Math.Sign(value) != System.Math.Sign(rt.Written) || (value == -1) != (rt.Written == -1);
             if (!force && !kindChanged && (System.Math.Abs(value - rt.Written) < 0.5 || now - rt.LastWrite < WriteInterval))
                 return;

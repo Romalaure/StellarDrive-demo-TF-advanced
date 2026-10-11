@@ -123,11 +123,12 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
             string Part(int id, int settings, float x, float z) => string.Format(CultureInfo.InvariantCulture,
                 "{{\"id\":{0},\"settingsId\":{1},\"coord\":{{\"x\":{2},\"y\":-0.46,\"z\":{3}}},\"forwardOrientationId\":2,\"upOrientationId\":4}}", id, settings, x, z);
-            string parts = string.Join(",", Part(1, PowerCatalog.ReactorId, -1.5f, 0f), Part(2, PowerCatalog.ShieldId, 1.5f, 0f),
+            ForceField.Tier shield = ForceField.TierOf((ushort)Settings.DevMachineShield.Value) ?? ForceField.TierOf(PowerCatalog.ShieldId);
+            string parts = string.Join(",", Part(1, PowerCatalog.ReactorId, -1.5f, 0f), Part(2, shield.Id, 1.5f, 0f),
                 Part(3, PowerCatalog.CondenserId, 0f, -1.5f), Part(4, Tank, 1.5f, 1.8f), Part(5, Tank, -1.5f, -1.8f));
             string constants = "{\"partId\":2,\"constantValue\":100.0},{\"partId\":3,\"constantValue\":0.0}";
             string tanks = "{\"partId\":1,\"fluidItemId\":0,\"fluidQuantity\":0.0},"
-                + "{\"partId\":4,\"fluidItemId\":108,\"fluidQuantity\":40.0},{\"partId\":5,\"fluidItemId\":0,\"fluidQuantity\":0.0}";
+                + "{\"partId\":4,\"fluidItemId\":" + shield.Fluid + ",\"fluidQuantity\":40.0},{\"partId\":5,\"fluidItemId\":0,\"fluidQuantity\":0.0}";
             // Power: reactor 0 -> field 0, reactor 1 -> condenser 0; oxygen: tank 4 -> field 3; condenser 3 -> tank 5
             string Cable(int id, int type, int partA, int socketA, int partB, int socketB) =>
                 $"{{\"id\":{id},\"type\":{type},\"plugA\":{{\"shipId\":1,\"partId\":{partA},\"socketId\":{socketA}}},\"plugB\":{{\"shipId\":1,\"partId\":{partB},\"socketId\":{socketB}}}}}";

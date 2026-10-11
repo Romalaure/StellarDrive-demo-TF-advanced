@@ -25,6 +25,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> DevVisitPlanets { get; private set; }
         public static MelonPreferences_Entry<int> DevVisitPlanetId { get; private set; }
         public static MelonPreferences_Entry<bool> DevMachineTest { get; private set; }
+        public static MelonPreferences_Entry<int> DevMachineShield { get; private set; }
         public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevDockingTest { get; private set; }
         public static MelonPreferences_Entry<string> DevSnapshotParts { get; private set; }
@@ -102,6 +103,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevWorld, a planet id: a test ship opens a portal to that planet and flies through it.");
             DevMachineTest = _category.CreateEntry("DevMachineTest", false,
                 description: "For mod development: with DevWorld, drop a wired test ship with a reactor, a force field and a condenser above the player.");
+            DevMachineShield = _category.CreateEntry("DevMachineShield", 0,
+                description: "For mod development: with DevMachineTest, the force field generator's part id (0: the basic one).");
             DevVisitPlanetId = _category.CreateEntry("DevVisitPlanetId", 0,
                 description: "For mod development: with DevVisitPlanets, visit only this planet (0: all).");
             DevVisitBlackHole = _category.CreateEntry("DevVisitBlackHole", false,

@@ -161,6 +161,8 @@ Ce sont de vrais objets du jeu : ils s'empilent, pèsent, vont dans l'inventaire
 | **Batterie à cryonite** | 8 fois la capacité d'une batterie, charge et décharge 3 fois plus rapides | 8 cryonite, 4 titane, 8 cuivre, 4 aluminium |
 | **Moteur à matière exotique** | 78 000 N (dix propulseurs chimiques) pour 10 % de leurs ergols | 3 matière exotique, 1 noyau quantique, 12 titane, 6 alliages nexoriens |
 | **Générateur de champ de force** | protège **tout le vaisseau** (et les vaisseaux qui lui sont attachés) : absorbe 150 points de dégâts (chocs, forces de marée des trous noirs). Consomme 2 000 W et 0,02 oxygène/s. Se recharge de 0,5 point/s. Vide, il casse : **5 min** avant de redémarrer. Bulle translucide visible quand il est actif | 1 noyau quantique, 6 cryonite, 4 alliages nexoriens, 6 titane, 8 cuivre |
+| **Générateur de champ renforcé** | champ de force doré : **450 points**, recharge 1,5 point/s. Consomme 6 000 W et 0,05 oxygène/s | 3 noyaux quantiques, 15 cryonite, 12 alliages nexoriens, 20 titane, 20 cuivre |
+| **Générateur de champ à matière noire** | champ de force violet : **1 200 points**, recharge 4 points/s. Consomme 10 000 W et 0,02 **matière noire**/s (pas d'oxygène). Recherche « Matière noire » | 6 noyaux quantiques, 6 matière exotique, 25 météorite, 20 alliages nexoriens, 30 titane |
 | **Condenseur à cryonite** | fabrique 0,05 oxygène/s dans la conduite de sa prise de fluide (vide ou déjà d'oxygène), pour 1 500 W | 6 cryonite, 3 titane, 6 cuivre, 4 verre |
 | **Gyroscope quantique** | le couple de 5 gyroscopes, commandé comme le gyroscope du jeu | 1 noyau quantique, 4 alliages nexoriens, 4 titane, 4 cuivre |
 
@@ -300,7 +302,7 @@ Réglage : `BlackHole` (section `[TFAdvanced]`, les deux trous noirs), identique
 | `AbandonedStations` | `true` | crée les 3 stations abandonnées dans un monde qui ne les a pas encore |
 | `TerrainChunkBuffer` | `1.5` | place pour les chunks de terrain sur la carte graphique, fois celle du jeu ; au-dessus de 1, les hautes montagnes ne laissent plus de trous dans le sol (environ 38 Mo de mémoire vidéo par 0,1 et par planète proche) |
 | `ReactorWatts` (section `[TFAdvancedPower]`) | `12000` | puissance d'un réacteur quantique (W) |
-| `ShieldWatts` / `ShieldOxygenPerSecond` / `ShieldCapacity` / `ShieldRegenPerSecond` / `ShieldCooldownSeconds` (`[TFAdvancedPower]`) | `2000` / `0.02` / `150` / `0.5` / `300` | champ de force |
+| `ShieldWatts` / `ShieldOxygenPerSecond` / `ShieldCapacity` / `ShieldRegenPerSecond` / `ShieldCooldownSeconds` (`[TFAdvancedPower]`) | `2000` / `0.02` / `150` / `0.5` / `300` | champ de force ; le champ renforcé en prend ×3 (fluide ×2,5), celui à matière noire ×8 (puissance ×5, fluide ×1) |
 | `CondenserWatts` / `CondenserOxygenPerSecond` (`[TFAdvancedPower]`) | `1500` / `0.05` | condenseur à cryonite |
 | `QuantumGyroFactor` (`[TFAdvancedPower]`) | `5` | couple du gyroscope quantique, en gyroscopes |
 | `SelfTest` | `false` | développement : construit les pièces au menu, en écrit la description et des rendus PNG |
@@ -369,6 +371,7 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.10.1 : bulle du champ de force | ✅ en jeu (vaisseau de test câblé) : grille hexagonale, bord lumineux, bande de balayage, onde au choc (photo) ; le modèle du générateur ne change pas |
 | v0.10.1 : console de bord | ✅ écran relevé au-dessus du pied (photo) |
 | v0.10.1 : table de cartographie | ✅ les vaisseaux et coffres ne sont marqués que s'ils sont vraiment autour de la table (affichés, à moins de 300 m en hauteur comme à plat) : un vaisseau loin au-dessus ou en dessous n'apparaît plus en jaune |
+| v0.11.1 : champs renforcé et à matière noire | ⏳ compilé ; test en jeu (DevMachineTest + DevMachineShield) à faire |
 | v0.11.0 : champ de force contre Arsenal | ✅ en jeu (vaisseau de test sous champ, Arsenal 1.4.0) : explosion Arsenal de 1 400 absorbée, 30 pièces sur 30 gardées ; missile Arsenal tiré sur le vaisseau : il explose sur le champ, aucune pièce perdue. Souffle ramené à ÷ 20 ensuite |
 | v0.11.0 : prises en une rangée | ✅ toutes les prises des machines du mod sur la face arrière, en ligne (photo) |
 | v0.11.0 : réservoir de matière noire infini | ✅ construit (photo) ; mêmes mécanismes que le réservoir infini du mod TF |
