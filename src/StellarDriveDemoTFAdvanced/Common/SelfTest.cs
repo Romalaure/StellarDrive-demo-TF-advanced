@@ -73,6 +73,7 @@ namespace StellarDriveDemoTFAdvanced.Common
             TestCanvas();
             MaterialProbe.Run();
             PartSnapshots.Run();
+            GameCatalogDump.Run();
         }
 
         // A screen outside any ship: shows its idle text, and proves the canvas and font work here

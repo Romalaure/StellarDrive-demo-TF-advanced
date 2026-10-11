@@ -16,6 +16,8 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<float> SpinWarningRate { get; private set; }
         public static MelonPreferences_Entry<bool> SelfTest { get; private set; }
         public static MelonPreferences_Entry<bool> NewPlanets { get; private set; }
+        public static MelonPreferences_Entry<bool> Erebos { get; private set; }
+        public static MelonPreferences_Entry<bool> ResearchUnlocks { get; private set; }
         public static MelonPreferences_Entry<bool> BlackHoleEnabled { get; private set; }
         public static MelonPreferences_Entry<bool> AbandonedStations { get; private set; }
         public static MelonPreferences_Entry<float> TerrainChunkBuffer { get; private set; }
@@ -23,6 +25,10 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> DevVisitPlanets { get; private set; }
         public static MelonPreferences_Entry<int> DevVisitPlanetId { get; private set; }
         public static MelonPreferences_Entry<bool> DevMachineTest { get; private set; }
+        public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
+        public static MelonPreferences_Entry<bool> DevDockingTest { get; private set; }
+        public static MelonPreferences_Entry<string> DevSnapshotParts { get; private set; }
+        public static MelonPreferences_Entry<string> DevShowcase { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitBlackHole { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitStations { get; private set; }
         public static MelonPreferences_Entry<string> DevWorld { get; private set; }
@@ -49,6 +55,10 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "Warn when the ship turns faster than this (degrees per second).");
             SelfTest = _category.CreateEntry("SelfTest", false,
                 description: "For mod development: on the main menu, build every part of this mod and log what was built.");
+            ResearchUnlocks = _category.CreateEntry("ResearchUnlocks", true,
+                description: "The mod's parts are unlocked at the research table (its own branch of techs). Off: every part is available from the start. In multiplayer every player needs the same setting.");
+            Erebos = _category.CreateEntry("Erebos", true,
+                description: "The Erebos galaxy: a second star system with four planets, a black hole and wrecks, reached through a portal. Needs NewPlanets. In multiplayer every player needs the same setting.");
             NewPlanets = _category.CreateEntry("NewPlanets", true,
                 description: "Add the mod's planets to the star system. In multiplayer every player needs the same setting.");
             BlackHoleEnabled = _category.CreateEntry("BlackHole", true,
@@ -61,6 +71,14 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: place the mod's planets a few thousand km from the starting planet, to see them from its surface.");
             DevVisitPlanets = _category.CreateEntry("DevVisitPlanets", false,
                 description: "For mod development: with DevWorld, move the player onto each mod planet and take screenshots there.");
+            DevSnapshotParts = _category.CreateEntry("DevSnapshotParts", "",
+                description: "For mod development: with SelfTest, the parts to render (ids or game asset names, comma separated).");
+            DevShowcase = _category.CreateEntry("DevShowcase", "",
+                description: "For mod development: with DevWorld, part ids (comma separated) set out on a test ship beside the player and photographed.");
+            DevDockingTest = _category.CreateEntry("DevDockingTest", false,
+                description: "For mod development: with DevWorld, two ships with docking modules try to dock high in the air.");
+            DevPortalTest = _category.CreateEntry("DevPortalTest", 0,
+                description: "For mod development: with DevWorld, a planet id: a test ship opens a portal to that planet and flies through it.");
             DevMachineTest = _category.CreateEntry("DevMachineTest", false,
                 description: "For mod development: with DevWorld, drop a wired test ship with a reactor, a force field and a condenser above the player.");
             DevVisitPlanetId = _category.CreateEntry("DevVisitPlanetId", 0,

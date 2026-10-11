@@ -6,7 +6,7 @@
     <Nullable>disable</Nullable>
     <AssemblyName>StellarDriveDemoTFAdvanced</AssemblyName>
     <RootNamespace>StellarDriveDemoTFAdvanced</RootNamespace>
-    <Version>0.8.0</Version>
+    <Version>0.9.0</Version>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <!-- Game assemblies reference netstandard facades; silence the resulting version-conflict noise -->

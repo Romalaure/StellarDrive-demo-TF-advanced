@@ -35,96 +35,93 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             Scale(prefab, spec.Scale);
             Tint(prefab, spec);
             Shroud(prefab, spec);
-            // Plugs on the surface of the resized engine, not inside or away from it
-            var bounds = prefab.GetComponent<ShipPartBounds>();
-            if (bounds != null && !Mathf.Approximately(spec.Scale, 1f))
-            {
-                foreach (SocketObject socket in prefab.GetComponentsInChildren<SocketObject>(true))
-                    SDModKit.Content.PartFinish.Seat("TFA", prefab, bounds, socket);
-            }
         }
 
         /// <summary>
-        /// An armored shroud around the engine body, in the machines' style: faceted plates with
-        /// glowing vent slats and white edge strips, colored per engine.
+        /// An armored collar around the engine's bell, in the machines' style: an octagonal band
+        /// with a white edge, and four fins on the diagonals (clear of the propellant plugs) with
+        /// glowing slats. Built in the model's own frame, so it follows the engine's scale.
         /// </summary>
         private static void Shroud(GameObject prefab, EngineSpec spec)
         {
             Transform visual = prefab.transform.Find("Visual");
-            var bounds = prefab.GetComponent<ShipPartBounds>();
-            if (visual == null || bounds == null)
+            if (visual == null)
                 return;
-            // The engine's own model, in the part's frame (the placement box is larger)
+            // The thruster's model, in its own (unscaled) frame: base plate at the bottom, bell above
             Bounds body = new Bounds();
             bool any = false;
             foreach (MeshRenderer r in visual.GetComponentsInChildren<MeshRenderer>(true))
             {
                 MeshFilter f = r.GetComponent<MeshFilter>();
-                if (f == null || f.sharedMesh == null || r.GetComponentInParent<SocketObject>() != null
-                    || r.sharedMaterial == null || r.sharedMaterial.shader == null || r.sharedMaterial.shader.name != "Custom/PlanetObject" || r.name.StartsWith("TF"))
+                if (f == null || f.sharedMesh == null || r.GetComponentInParent<SocketObject>() != null || r.name.StartsWith("TF"))
                     continue;
                 Bounds mb = f.sharedMesh.bounds;
                 for (int k = 0; k < 8; k++)
                 {
                     Vector3 corner = mb.center + Vector3.Scale(mb.extents, new Vector3((k & 1) == 0 ? -1 : 1, (k & 2) == 0 ? -1 : 1, (k & 4) == 0 ? -1 : 1));
-                    Vector3 p = prefab.transform.InverseTransformPoint(r.transform.TransformPoint(corner));
+                    Vector3 p = visual.InverseTransformPoint(r.transform.TransformPoint(corner));
                     if (!any) { body = new Bounds(p, Vector3.zero); any = true; }
                     else body.Encapsulate(p);
                 }
             }
             if (!any)
                 return;
-            Vector3 c = body.center, s = body.size;
-            // The thruster's nozzle opens along its model's y axis: plates around it, never across it
-            const int axis = 1;
-            float length = s[axis] * 0.42f;
+            // One unit = the game thruster's base half-width (0.5 m)
+            float u = Mathf.Max(body.extents.x, body.extents.z) / 0.5f;
+            float bottom = body.min.y;
+            float height = body.size.y;
+            float Y(float fraction) => bottom + height * fraction;
             var model = new Power.MachineModels.Model();
+            // Collar around the bell's foot
+            float collarLow = Y(0.3f), collarHigh = Y(0.42f), collarRadius = 0.43f * u;
+            model.Armor.Cylinder(new Vector3(0f, collarLow, 0f), new Vector3(0f, collarHigh, 0f), collarRadius, collarRadius * 0.97f, 8, capA: false, capB: false);
+            model.Light.Cylinder(new Vector3(0f, collarHigh, 0f), new Vector3(0f, collarHigh + 0.012f * u, 0f), collarRadius * 0.98f, collarRadius * 0.98f, 8, capA: false, capB: false);
+            model.Dark.Cylinder(new Vector3(0f, collarLow - 0.02f * u, 0f), new Vector3(0f, collarLow, 0f), collarRadius * 1.01f, collarRadius * 1.01f, 8, capA: false, capB: false);
+            // Four fins on the diagonals
+            float finLow = Y(0.2f), finHigh = Y(0.72f);
             for (int i = 0; i < 4; i++)
             {
-                // The two other axes, both directions
-                int side = (axis + 1 + i / 2) % 3;
-                float sign = i % 2 == 0 ? 1f : -1f;
-                Vector3 normal = Vector3.zero;
-                normal[side] = sign;
-                int across = 3 - axis - side;
-                Vector3 size = Vector3.zero;
-                size[axis] = length;
-                size[side] = 0.03f * spec.Scale;
-                size[across] = s[across] * 0.48f;
-                // Snug against the nozzle's wall
-                Vector3 center = c + normal * (s[side] * 0.34f);
-                model.Armor.Box(center, size);
-                // Three slats and a white strip along the plate's edge
+                float angle = (45f + i * 90f) * Mathf.Deg2Rad;
+                Vector3 outward = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
+                Vector3 across = Vector3.Cross(Vector3.up, outward);
+                Vector3 center = outward * 0.44f * u + Vector3.up * ((finLow + finHigh) * 0.5f);
+                var size = new Vector3(0.05f * u, finHigh - finLow, 0.16f * u);
+                model.Armor.Box(center, size, across, Vector3.up, outward);
+                // Slats on the fin's outer edge, and a white strip down its top
                 for (int k = 0; k < 3; k++)
                 {
-                    Vector3 slat = size;
-                    slat[side] = 0.012f;
-                    slat[axis] = length * 0.12f;
-                    slat[across] = size[across] * 0.7f;
-                    Vector3 offset = Vector3.zero;
-                    offset[axis] = (k - 1) * length * 0.25f;
-                    model.Glow.Box(center + normal * 0.018f * spec.Scale + offset, slat);
+                    Vector3 slat = center + outward * (size.z * 0.5f + 0.006f * u) + Vector3.up * ((k - 1) * size.y * 0.24f);
+                    model.Glow.Box(slat, new Vector3(0.035f * u, size.y * 0.12f, 0.012f * u), across, Vector3.up, outward);
                 }
-                Vector3 strip = Vector3.zero;
-                strip[axis] = length;
-                strip[side] = 0.012f;
-                strip[across] = 0.012f;
-                Vector3 edge = Vector3.zero;
-                edge[across] = size[across] * 0.5f;
-                model.Light.Box(center + normal * 0.018f * spec.Scale + edge, strip);
+                model.Light.Box(center + Vector3.up * (size.y * 0.5f + 0.006f * u), new Vector3(0.052f * u, 0.012f * u, size.z * 0.95f), across, Vector3.up, outward);
             }
             Power.MachineModels.Attach(visual, model, "Engine" + spec.Key, spec.Glow != Color.black ? Power.MachineModels.Violet : Power.MachineModels.Red, Color.white);
         }
 
-        // Every direct child (model, sockets, interaction collider) scales around the part origin
+        // Everything scales around the part origin. The game instantiates the model container and the
+        // interactions container on their own and puts the sockets' plugs and click zones inside them at
+        // the sockets' part-space positions: those two containers keep scale 1, their content scales
         private static void Scale(GameObject prefab, float scale)
         {
             if (Mathf.Approximately(scale, 1f))
                 return;
+            Transform visual = prefab.GetComponentInChildren<Ships.Parts.Common.Model.Reactions.IShipPartVisual>(true)?.GameObject.transform;
+            Transform interactions = prefab.transform.Find("Interactions");
             foreach (Transform child in prefab.transform)
             {
                 child.localPosition *= scale;
-                child.localScale *= scale;
+                if (child == visual || child == interactions)
+                {
+                    foreach (Transform inner in child)
+                    {
+                        inner.localPosition *= scale;
+                        inner.localScale *= scale;
+                    }
+                }
+                else
+                {
+                    child.localScale *= scale;
+                }
             }
             var bounds = prefab.GetComponent<ShipPartBounds>();
             if (bounds != null)

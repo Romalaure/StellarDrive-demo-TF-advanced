@@ -13,7 +13,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         Titanium,
         Quartz,
         Cryonite,
-        Amber
+        Amber,
+        Meteorite
     }
 
     /// <summary>
@@ -45,6 +46,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 case OreKind.Titanium: donor = "RockLargeIron"; item = ModItems.Titanium; tint = new Color(0.62f, 0.7f, 0.86f); scale = 0.8f; health = 22f; min = 4; max = 9; break;
                 case OreKind.Quartz: donor = "CrystallSmallGlass"; item = ModItems.Quartz; tint = new Color(1.1f, 0.65f, 0.85f); scale = 1.4f; health = 3f; min = 2; max = 4; break;
                 case OreKind.Cryonite: donor = "CrystallSmallGlass"; item = ModItems.Cryonite; tint = new Color(0.45f, 0.9f, 1.25f); glow = new Color(0.05f, 0.35f, 0.6f); scale = 1.6f; health = 6f; min = 2; max = 4; break;
+                case OreKind.Meteorite: donor = "RockLargeIron"; item = ModItems.Meteorite; tint = new Color(0.34f, 0.28f, 0.26f); glow = new Color(0.45f, 0.12f, 0.01f); scale = 0.7f; health = 35f; min = 1; max = 3; break;
                 default: donor = "RockSmallCopper"; item = ModItems.Amber; tint = new Color(1.2f, 0.62f, 0.15f); glow = new Color(0.25f, 0.1f, 0f); scale = 1.6f; health = 5f; min = 1; max = 3; break;
             }
             GameObject rock = planet.HotspotPrefab(donor);

@@ -19,6 +19,9 @@ namespace StellarDriveDemoTFAdvanced.Items
         public Color Tint = Color.white;
         public Color Glow = Color.black;
         public Action<MeshBuilder> Model;
+        /// <summary>A fluid, carried in tanks and pipes (no model, like the game's fluids).</summary>
+        public bool Fluid;
+        public Color FluidColor = Color.black;
         public ItemSettings Settings;
     }
 
@@ -40,6 +43,8 @@ namespace StellarDriveDemoTFAdvanced.Items
         public const uint QuantumCore = 7411;
         public const uint ExoticMatter = 7412;
         public const uint NexoranAlloy = 7413;
+        public const uint Meteorite = 7414;
+        public const uint DarkMatter = 7415;
 
         // Game items
         public const uint Iron = 101, Glass = 102, StellarShard = 103, Aluminum = 104, Wood = 110, Copper = 112, GoldBar = 158, Key = 151;
@@ -53,7 +58,9 @@ namespace StellarDriveDemoTFAdvanced.Items
             new ModItem { Id = Artifact, Name = "Fragment d'artefact ancien", Mass = 3f, MaterialFrom = StellarShard, Tint = new Color(1f, 0.82f, 0.45f), Glow = new Color(0.35f, 0.22f, 0.05f), Model = Tablet },
             new ModItem { Id = QuantumCore, Name = "Noyau quantique", Mass = 4f, MaterialFrom = StellarShard, Tint = new Color(0.75f, 0.5f, 1.2f), Glow = new Color(0.4f, 0.15f, 0.9f), Model = Core },
             new ModItem { Id = ExoticMatter, Name = "Matière exotique", Mass = 0.5f, MaterialFrom = StellarShard, Tint = new Color(0.25f, 0.12f, 0.4f), Glow = new Color(0.55f, 0.1f, 0.35f), Model = m => Crystals(m, 4, 0.34f) },
-            new ModItem { Id = NexoranAlloy, Name = "Alliage nexorien", Mass = 3f, MaterialFrom = Iron, Tint = new Color(0.55f, 0.85f, 0.9f), Model = Ingot }
+            new ModItem { Id = NexoranAlloy, Name = "Alliage nexorien", Mass = 3f, MaterialFrom = Iron, Tint = new Color(0.55f, 0.85f, 0.9f), Model = Ingot },
+            new ModItem { Id = Meteorite, Name = "Météorite", Mass = 4f, MaterialFrom = Iron, Tint = new Color(0.32f, 0.27f, 0.25f), Glow = new Color(0.55f, 0.18f, 0.02f), Model = MeteoriteChunk },
+            new ModItem { Id = DarkMatter, Name = "Matière noire", Mass = 0.2f, Fluid = true, FluidColor = new Color(0.22f, 0.05f, 0.35f) }
         };
 
         private static readonly AccessTools.FieldRef<ItemSettingsList, ItemSettings[]> Items = AccessTools.FieldRefAccess<ItemSettingsList, ItemSettings[]>("items");
@@ -79,6 +86,8 @@ namespace StellarDriveDemoTFAdvanced.Items
                 settings.itemName = item.Name;
                 settings.mass = item.Mass;
                 settings.maxStackSize = 255;
+                settings.isFluid = item.Fluid;
+                settings.fluidColor = item.FluidColor;
                 item.Settings = settings;
             }
         }
@@ -114,7 +123,7 @@ namespace StellarDriveDemoTFAdvanced.Items
 
         private static void BuildModels(ItemSettingsList list)
         {
-            if (All.All(i => i.Settings.itemObject != null))
+            if (All.All(i => i.Fluid || i.Settings.itemObject != null))
                 return;
             ItemSettings[] items = Items(list);
             if (items == null)
@@ -125,7 +134,7 @@ namespace StellarDriveDemoTFAdvanced.Items
                 _holder.SetActive(false);
                 Object.DontDestroyOnLoad(_holder);
             }
-            foreach (ModItem item in All.Where(i => i.Settings.itemObject == null))
+            foreach (ModItem item in All.Where(i => !i.Fluid && i.Settings.itemObject == null))
             {
                 ItemSettings donor = items.FirstOrDefault(i => i != null && i.id == item.MaterialFrom);
                 MeshRenderer donorRenderer = donor?.itemObject?.GetComponentInChildren<MeshRenderer>(true);
@@ -228,6 +237,15 @@ namespace StellarDriveDemoTFAdvanced.Items
                 Vector3 p = Quaternion.Euler(0f, a, 0f) * new Vector3(0.1f, 0f, 0f);
                 m.Box(p + new Vector3(0f, 0.12f, 0f), new Vector3(0.018f, 0.2f, 0.018f));
             }
+        }
+
+        // A pitted, rounded lump of iron-nickel with fusion-crust facets
+        private static void MeteoriteChunk(MeshBuilder m)
+        {
+            m.Cylinder(new Vector3(0f, 0f, 0f), new Vector3(0.01f, 0.1f, 0f), 0.12f, 0.16f, 7);
+            m.Cylinder(new Vector3(0.01f, 0.1f, 0f), new Vector3(-0.01f, 0.2f, 0.02f), 0.16f, 0.09f, 7);
+            m.Box(new Vector3(0.09f, 0.14f, 0.05f), new Vector3(0.1f, 0.09f, 0.1f), Quaternion.Euler(25f, 40f, 15f));
+            m.Box(new Vector3(-0.1f, 0.07f, -0.06f), new Vector3(0.09f, 0.08f, 0.09f), Quaternion.Euler(-15f, 20f, 35f));
         }
 
         private static void Ingot(MeshBuilder m)

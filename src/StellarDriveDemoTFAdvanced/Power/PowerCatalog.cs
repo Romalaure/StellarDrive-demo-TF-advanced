@@ -26,6 +26,14 @@ namespace StellarDriveDemoTFAdvanced.Power
         public const ushort CondenserId = 7326;
         /// <summary>Artifacts: a gyroscope with several gyroscopes' torque.</summary>
         public const ushort QuantumGyroId = 7327;
+        /// <summary>Dark matter: gathers dark matter from space with power.</summary>
+        public const ushort DarkCollectorId = 7391;
+        /// <summary>Dark matter: a tank for it (the game's fluid tank, in the machines' colors).</summary>
+        public const ushort DarkTankId = 7392;
+        /// <summary>Dark matter: burns it for a lot of power.</summary>
+        public const ushort DarkReactorId = 7393;
+        /// <summary>Dark matter: opens a portal in front of the ship to its target.</summary>
+        public const ushort PortalId = 7395;
 
         // Force field generator and condenser: ConstantState (one value, saved, synchronized, emitted on
         // socket 0), not FluidTankState, which the game would take for a tank on their fluid socket
@@ -59,6 +67,18 @@ namespace StellarDriveDemoTFAdvanced.Power
         public static MelonPreferences_Entry<float> ReactorWatts { get; private set; }
         public static MelonPreferences_Entry<float> ShieldWatts { get; private set; }
         public static MelonPreferences_Entry<float> CondenserWatts { get; private set; }
+        public static MelonPreferences_Entry<float> DarkCollectorWatts { get; private set; }
+        public static MelonPreferences_Entry<float> DarkCollectorPerSecond { get; private set; }
+        public static MelonPreferences_Entry<float> DarkReactorWatts { get; private set; }
+        public static MelonPreferences_Entry<float> DarkReactorBurnPerSecond { get; private set; }
+        public static MelonPreferences_Entry<float> PortalWatts { get; private set; }
+        public static MelonPreferences_Entry<float> SolarWatts { get; private set; }
+        public static MelonPreferences_Entry<float> PortalChargeSeconds { get; private set; }
+        public static MelonPreferences_Entry<float> PortalDarkMatter { get; private set; }
+        public static MelonPreferences_Entry<float> PortalOpenSeconds { get; private set; }
+        public static MelonPreferences_Entry<float> PortalCooldownSeconds { get; private set; }
+        public static MelonPreferences_Entry<float> PortalDistance { get; private set; }
+        public static MelonPreferences_Entry<float> PortalRadius { get; private set; }
         public static MelonPreferences_Entry<float> CondenserOxygenPerSecond { get; private set; }
         public static MelonPreferences_Entry<float> QuantumGyroFactor { get; private set; }
         public static MelonPreferences_Entry<float> ShieldOxygenPerSecond { get; private set; }
@@ -67,7 +87,8 @@ namespace StellarDriveDemoTFAdvanced.Power
         public static MelonPreferences_Entry<float> ShieldCooldownSeconds { get; private set; }
 
         /// <summary>Parts whose FluidTankState carries a status, not fluid (no fluid mass).</summary>
-        public static bool HoldsNoFluid(ushort partSettingsId) => IsPowerPart(partSettingsId) || partSettingsId == ShieldId || partSettingsId == CondenserId;
+        public static bool HoldsNoFluid(ushort partSettingsId) => IsPowerPart(partSettingsId) || partSettingsId == ShieldId || partSettingsId == CondenserId
+            || partSettingsId == DarkCollectorId || partSettingsId == DarkReactorId || partSettingsId == PortalId;
 
         public static bool IsPowerPart(ushort partSettingsId) =>
             partSettingsId == BatteryId || partSettingsId == BreakerId || partSettingsId == ReactorId || partSettingsId == CryoBatteryId;
@@ -98,6 +119,30 @@ namespace StellarDriveDemoTFAdvanced.Power
                 description: "A breaker trips when its output network asks for more than its rating for this long (s).");
             ReactorWatts = category.CreateEntry("ReactorWatts", 12000f,
                 description: "Power a quantum reactor gives its network, without fuel, without end (W). Three wood generators: 12 000 W.");
+            DarkCollectorWatts = category.CreateEntry("DarkCollectorWatts", 8000f,
+                description: "Power a dark matter collector draws while it works (W).");
+            DarkCollectorPerSecond = category.CreateEntry("DarkCollectorPerSecond", 0.004f,
+                description: "Dark matter a collector gathers (unit/s); five times more near a black hole, three times in the Erebos galaxy.");
+            DarkReactorWatts = category.CreateEntry("DarkReactorWatts", 40000f,
+                description: "Power a dark matter reactor gives while it has fuel (W).");
+            DarkReactorBurnPerSecond = category.CreateEntry("DarkReactorBurnPerSecond", 0.002f,
+                description: "Dark matter a reactor burns (unit/s).");
+            SolarWatts = category.CreateEntry("SolarWatts", 3000f,
+                description: "Power a solar panel support gives with its wings facing the star (W).");
+            PortalWatts = category.CreateEntry("PortalWatts", 20000f,
+                description: "Power a portal generator draws while it charges (W).");
+            PortalChargeSeconds = category.CreateEntry("PortalChargeSeconds", 10f,
+                description: "Time a portal generator charges before the portal opens (s).");
+            PortalDarkMatter = category.CreateEntry("PortalDarkMatter", 5f,
+                description: "Dark matter a portal burns when it opens (units).");
+            PortalOpenSeconds = category.CreateEntry("PortalOpenSeconds", 30f,
+                description: "How long a portal stays open (s).");
+            PortalCooldownSeconds = category.CreateEntry("PortalCooldownSeconds", 60f,
+                description: "Time before the generator can open another portal (s).");
+            PortalDistance = category.CreateEntry("PortalDistance", 45f,
+                description: "Distance from the generator to the portal it opens, straight in front of it (m).");
+            PortalRadius = category.CreateEntry("PortalRadius", 18f,
+                description: "Radius of the portal (m): the ship's center must pass through it.");
             CondenserWatts = category.CreateEntry("CondenserWatts", 1500f,
                 description: "Power a cryonite condenser draws while it makes oxygen (W).");
             CondenserOxygenPerSecond = category.CreateEntry("CondenserOxygenPerSecond", 0.05f,

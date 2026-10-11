@@ -1,8 +1,8 @@
 # StellarDrive Demo — TF Advanced
 
-Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, structure, 7 nouvelles planètes (dont une glaciaire, une futuriste et une jungle) avec régions, arbres et plantes variés, ruines, villages et cité à visiter avec leurs coffres, épaves, nouveaux minerais et objets rares, pièces avancées (réacteur quantique, champ de force, condenseur, gyroscope quantique, moteur exotique), 3 stations spatiales abandonnées, 2 trous noirs, champs d'astéroïdes, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Toutes les pièces sont dans un seul onglet de construction, **TF Avancé**.
+Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, constructions en bois, verre et fer, **stations spatiales** à construire, 7 nouvelles planètes autour d'Otrera et une **seconde galaxie, Érèbe** (4 planètes, un trou noir, des épaves) atteinte par **portail**, nouveaux minerais (dont la **météorite**) et une nouvelle énergie, la **matière noire**, pièces avancées (réacteur quantique, champ de force, condenseur, gyroscope quantique, moteur exotique, machines à matière noire, générateur de portail, table de cartographie), une branche de la **table de recherche**, 3 stations abandonnées, 3 trous noirs, champs d'astéroïdes, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Trois onglets de construction : **TF Avancé**, **TF Construction**, **TF Station**.
 
-Guide des planètes (biomes, ressources, utilité, itinéraire) : [docs/PLANETES.md](docs/PLANETES.md).
+**Wiki** (chaque planète, ses ressources et son utilité ; machines, constructions, stations, recherche) : [docs/wiki](docs/wiki/Home.md). Résumé : [docs/PLANETES.md](docs/PLANETES.md).
 
 Rapport technique (moteur, systèmes du jeu, faisabilité de chaque projet) : [docs/AUDIT.md](docs/AUDIT.md).
 
@@ -147,7 +147,9 @@ Sept planètes rejoignent le système 442 Otrera, en orbite autour de la même �
 | **Fragment d'artefact ancien** (rare) | coffres des temples, villages et halles |
 | **Noyau quantique** (rare) | coffres des gratte-ciel et dômes de TF Nexora, stations Kepler et Orion |
 | **Alliage nexorien** | coffres de la cité de TF Nexora, stations |
-| **Matière exotique** (rare) | coffres de la Sonde Hadès, près du trou noir |
+| **Matière exotique** (rare) | coffres de la Sonde Hadès, épaves d'Érèbe |
+| **Météorite** | gisements sombres aux veines orange : TF Petra, Pyros, Mycélia, Cristallis ; épaves |
+| **Matière noire** (fluide) | collecteur de matière noire ; réservoirs des épaves d'Érèbe |
 
 Ce sont de vrais objets du jeu : ils s'empilent, pèsent, vont dans l'inventaire et les coffres, tombent au sol, se sauvegardent, avec leur modèle 3D texturé (matériaux du jeu) et leur icône.
 
@@ -174,6 +176,39 @@ Comment ça marche : chaque planète est une copie de la planète de la démo (4
 - **Multijoueur** : chaque joueur doit avoir le mod et le même réglage `NewPlanets`. Les planètes du mod n'ont pas d'objet réseau FishNet (seule la scène du jeu peut en créer) : depuis la v0.8.0, les arbres coupés et rochers minés y sont écrits, marqués, dans l'état réseau de la planète de départ, que tous les clients reçoivent, puis relus par chaque client pour la bonne planète.
 - **Sauvegardes** : ne désinstalle pas le mod (et ne coupe pas `NewPlanets`) pendant qu'un joueur ou un vaisseau se trouve sur l'une de ces planètes.
 - L'éclairage précalculé et les distances d'affichage sont ceux de la planète de départ.
+
+## Recherche
+
+Les pièces du mod se débloquent à la **table de recherche** : une branche de 11 techs rattachées aux techs du jeu (construction métallique après Iron Panels, propulsion avancée après Chemical Propulsion…), payées en ressources. Le mod place ses techs dans les cases libres de l'arbre sans déplacer celles du jeu ni des autres mods. Détail : [wiki, Recherche](docs/wiki/Recherche.md). `ResearchUnlocks = false` : tout est disponible d'emblée.
+
+## Constructions en bois, verre et fer (onglet TF Construction)
+
+19 pièces posées qui complètent la coque du jeu : poteau, plancher en lattes, cloison en planches, rambarde, treillis et étagère en bois ; vitre, baie vitrée 2 × 2, dalle de verre, garde-corps vitré, verrière, cloison vitrée ; caillebotis, garde-corps 1 et 2 m, treillis métallique, colonne rivetée, gousset, tôle perforée. Le bois et le fer portent les textures de la coque du jeu (son tableau de textures, choisi par sommet comme la coque), le verre son verre.
+
+## Stations spatiales (onglet TF Station)
+
+| Module | Rôle |
+|---|---|
+| Module d'habitation | 4 × 6 m : couchettes, table, casiers, hublots, deux portes |
+| Couloir pressurisé | 2,4 × 4 m entre deux modules |
+| Hub de connexion | 4 × 4 m, une porte sur chaque face |
+| Module de stockage | étagères et terminal d'inventaire (10 emplacements) |
+| Module d'amarrage | sas à collier magnétique : un vaisseau équipé du même module s'y amarre |
+| Support de panneaux solaires | jusqu'à 3 000 W face à l'étoile, rien la nuit ou à l'ombre d'une planète |
+
+- **On entre dedans** : chaque module a ses propres collisions (sol, plafond, murs autour des portes), via les « colliders dynamiques » du jeu, et une boîte de placement réduite au plancher pour y poser meubles et machines.
+- **Air** : un module est pressurisé dès qu'un module de la station est relié à une conduite d'oxygène ; l'oxygène respiré est pris dans la conduite.
+- **Amarrage** : le collier est placé au point d'amarrage fixe du jeu (comme une porte d'amarrage) ; deux modules collier contre collier s'attirent et s'amarrent.
+
+## Matière noire et portail
+
+- **Collecteur de matière noire** : 0,004 unité/s pour 8 000 W ; ×5 près d'un trou noir, ×3 dans Érèbe. **Réservoir** de matière noire. **Réacteur à matière noire** : 40 000 W pour 0,002 unité/s.
+- **Générateur de portail** : un signal sur sa prise de commande ; 10 s de charge à 20 000 W, 5 matière noire, puis un portail de 18 m de rayon s'ouvre 45 m devant lui, fixe dans l'espace, 30 s. Le vaisseau qui le traverse ressort près de la **cible de son ordinateur de visée ou de sa carte stellaire** (planète : ~20 km d'altitude ; balise : 300 m). Le saut passe par l'espace de distorsion du jeu.
+- **Table de cartographie** : relief 3D du terrain sur 300 m (fonction d'altitude du jeu sur l'hôte), repères des gisements, coffres, bâtiments et vaisseaux, et la fiche de la planète.
+
+## Galaxie d'Érèbe
+
+Une seconde étoile (copie de l'étoile du jeu, une géante orange) à 0,18 année-lumière, avec **Pyros** (volcanique), **Thalassa** (océanique), **Mycélia** (fongique, champignons géants) et **Cristallis** (cristalline, anneau), le trou noir **Œil d'Érèbe** et trois épaves avec de la matière noire. Le jeu n'attend qu'une étoile : l'éclairage, le jour et la nuit, la carte stellaire et le suivi d'étoile prennent l'étoile la plus proche ; les deux restent visibles. La carte stellaire n'affiche que le système où l'on se trouve. Réglage `Erebos`.
 
 ## Stations spatiales abandonnées
 
@@ -303,6 +338,14 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.8.0 : cité de Nexora | ✅ 8 grands gratte-ciel, 14 tours, 8 dômes, 28 lampadaires, places, voitures, kiosques, coffres posés ; 81,8 FPS |
 | v0.8.0 : Avant-poste Orion | ✅ collisions présentes (sondes dans Orion et Kepler). Le décor traversé et les coffres inutilisables venaient très probablement de la physique de l'hôte bloquée par le bug d'anneau (corrigé en v0.7.1) |
 | v0.8.0 : onglet unique, filtres du Targeting Computer, carte stellaire, gyroscope quantique | ✅ compilés et chargés sans erreur. ⏳ Rendu de l'onglet fusionné, filtres et couple du gyroscope **à vérifier en jeu**. Les noms de la carte stellaire tournent maintenant seulement autour de l'axe de l'hologramme et ne sont plus dupliqués ; le bug « planètes dans tous les sens » n'a pas pu être reproduit |
+| v0.9.0 : prises du moteur exotique | ✅ cause trouvée en jeu : le jeu replace les prises dans le modèle déjà agrandi (agrandies deux fois) ; le contenu du modèle est agrandi, plus le conteneur ; prises sur le socle (vérifié en photo) |
+| v0.9.0 : portail | ✅ vaisseau de test : charge 10 s, 5 matière noire brûlée, portail ouvert (photo), vaisseau poussé à travers : en orbite de TF Verdance à 17,7 km, puis de Thalassa dans Érèbe |
+| v0.9.0 : matière noire | ✅ collecteur 0,004/s, réacteur à matière noire en marche, réservoirs |
+| v0.9.0 : amarrage | ✅ deux modules d'amarrage collier contre collier s'attirent et s'amarrent (états « docked » des deux côtés) ; ⏳ avec une porte d'amarrage du jeu **à vérifier** |
+| v0.9.0 : modules, constructions, table | ✅ rendus en jeu (photos) : habitation, couloir, hub, stockage, panneaux solaires, 19 pièces bois/verre/fer, table avec relief et repères ; ⏳ air des modules, production solaire et ouverture du terminal de stockage **à vérifier en jeu** |
+| v0.9.0 : Érèbe | ✅ étoile, 4 planètes, trou noir, 3 épaves créés ; Pyros, Thalassa, Mycélia visitées (éclairées par Érèbe le jour, nuit de l'autre côté) ; ⏳ Cristallis non visitée |
+| v0.9.0 : synchronisation des planètes du mod | ✅ corrigé : la planète de départ réagissait elle-même aux objets marqués d'une planète du mod (erreur réseau « Index was outside the bounds ») |
+| v0.9.0 : recherche | ✅ 11 techs ajoutées, celles du jeu et des autres mods ne bougent plus ; ⏳ écran de la table de recherche **à voir en jeu** |
 | Pose des pièces, écrans en vol, forces des moteurs, multijoueur | ⏳ **à faire en jeu** (procédure ci-dessous) |
 
 ### Procédure de test en jeu

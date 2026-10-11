@@ -18,7 +18,11 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         Kapok,
         Palm,
         /// <summary>Jungle canopy tree, dark and dense.</summary>
-        Jungle
+        Jungle,
+        /// <summary>Erebos: a giant mushroom, a pale stem under a wide glowing cap.</summary>
+        Mushroom,
+        /// <summary>Erebos: a charred, leafless tree of the volcanic plains.</summary>
+        Charred
     }
 
     internal enum PlantKind
@@ -100,7 +104,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 group.RecalculateBounds();
             }
             // The giant's trunk is much thicker and taller than the fir's
-            if (kind == TreeKind.Kapok)
+            if (kind == TreeKind.Kapok || kind == TreeKind.Mushroom)
             {
                 foreach (Collider collider in copy.GetComponentsInChildren<Collider>(true))
                 {
@@ -209,6 +213,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 case TreeKind.Kapok: return Tinted(fir, "KapokBark", new Color(0.62f, 0.58f, 0.5f));
                 case TreeKind.Palm: return Tinted(fir, "PalmBark", new Color(0.66f, 0.55f, 0.38f));
                 case TreeKind.Jungle: return Tinted(fir, "JungleBark", new Color(0.4f, 0.34f, 0.26f));
+                case TreeKind.Mushroom: return Tinted(fir, "MushroomStem", new Color(0.92f, 0.86f, 0.95f));
+                case TreeKind.Charred: return Tinted(fir, "CharredBark", new Color(0.12f, 0.1f, 0.1f));
             }
             Color color = birch ? new Color(0.95f, 0.93f, 0.88f) : kind == TreeKind.Acacia ? new Color(0.5f, 0.38f, 0.3f) : new Color(0.45f, 0.36f, 0.28f);
             return Tinted(fir, (birch ? "Birch" : kind == TreeKind.Acacia ? "Acacia" : "Oak") + "Bark", color);
@@ -225,6 +231,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 case TreeKind.Kapok: return Tinted(fir, "KapokLeaves", new Color(0.26f, 0.52f, 0.2f));
                 case TreeKind.Palm: return Tinted(fir, "PalmLeaves", new Color(0.42f, 0.66f, 0.22f));
                 case TreeKind.Jungle: return Tinted(fir, "JungleLeaves", new Color(0.18f, 0.42f, 0.2f));
+                case TreeKind.Mushroom: return Tinted(fir, "MushroomCap", new Color(1.6f, 0.45f, 1.9f));
+                case TreeKind.Charred: return Tinted(fir, "CharredEmbers", new Color(1.4f, 0.35f, 0.08f));
                 default: return Tinted(fir, "AutumnBirchLeaves", new Color(0.95f, 0.78f, 0.22f));
             }
         }
@@ -292,6 +300,22 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     mesh.Trunk(new Vector3(0.3f, 11f, 0.1f), new Vector3(4f, 16f, 1.6f), 0.32f, 0.16f);
                     mesh.Trunk(new Vector3(0.3f, 12f, 0.1f), new Vector3(-3.4f, 16.5f, -1.8f), 0.32f, 0.16f);
                     mesh.Crown(new Vector3(0.2f, 17f, 0f), new Vector3(7.5f, 4.2f, 7.5f), 44, 4.6f, RoundCluster, 0.35f);
+                    break;
+                case TreeKind.Mushroom:
+                    // A thick stem leaning a little, a skirt ring, then a wide flat cap
+                    mesh.Trunk(new Vector3(0f, -0.4f, 0f), new Vector3(0.6f, 6f, 0.2f), 1.1f, 0.8f);
+                    mesh.Trunk(new Vector3(0.6f, 6f, 0.2f), new Vector3(1.1f, 11.5f, 0.3f), 0.8f, 0.7f);
+                    mesh.Trunk(new Vector3(0.75f, 7.8f, 0.22f), new Vector3(0.8f, 8.1f, 0.24f), 1.5f, 1.2f);
+                    mesh.Crown(new Vector3(1.1f, 12.2f, 0.3f), new Vector3(9f, 1.6f, 9f), 46, 4.2f, RoundCluster, 0.9f);
+                    mesh.Crown(new Vector3(1.1f, 13.2f, 0.3f), new Vector3(5.5f, 1.2f, 5.5f), 20, 3.4f, RoundCluster, 0.8f);
+                    break;
+                case TreeKind.Charred:
+                    // A burnt trunk with a few bare, twisted limbs and glowing embers at their tips
+                    mesh.Trunk(Vector3.zero, new Vector3(0.4f, 7f, 0.1f), 0.45f, 0.18f);
+                    mesh.Trunk(new Vector3(0.3f, 4.5f, 0.1f), new Vector3(2.6f, 7.4f, 0.9f), 0.16f, 0.05f);
+                    mesh.Trunk(new Vector3(0.35f, 5.4f, 0.1f), new Vector3(-2f, 8.2f, -1.1f), 0.14f, 0.05f);
+                    mesh.Trunk(new Vector3(0.3f, 3.2f, 0.1f), new Vector3(-1.4f, 4.8f, 1.8f), 0.12f, 0.04f);
+                    mesh.Crown(new Vector3(0.4f, 7.4f, 0.1f), new Vector3(1.2f, 1f, 1.2f), 5, 0.8f, SmallCluster, 0.2f);
                     break;
                 case TreeKind.Acacia:
                     mesh.Trunk(Vector3.zero, new Vector3(0.8f, 5.6f, 0.2f), 0.36f, 0.24f);

@@ -82,6 +82,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 {
                     Place(planet, up, i * 120f);
                     yield return Wait(2f);
+                    Galaxy.LogLighting();
                     DevHarness.Screenshot($"visit_{planet.Id}_{i}");
                     yield return Wait(0.5f);
                 }
@@ -190,10 +191,16 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private static bool TryFindLand(Planet planet, out Vector3 up)
         {
             var random = new System.Random((int)planet.Id);
-            for (int attempt = 0; attempt < 64; attempt++)
+            // On the day side of the planet's own star
+            Vector3 toStar = Vector3.zero;
+            Stars.Star star = Galaxy.OrbitsErebos(planet.Id) ? Galaxy.Erebos : Galaxy.AllStars.FirstOrDefault(s => s != null && s != Galaxy.Erebos);
+            var transpose = ServiceLocator.GetService<WorldTracking.Interface.Services.IWorldTransposeServer>();
+            if (star != null && star.Space != null && transpose != null)
+                toStar = transpose.Position((WorldTracking.Interface.Model.Spaces.Common.ISpace)star.Space, planet.SurfaceSpace, Vector3.zero).normalized;
+            for (int attempt = 0; attempt < 256; attempt++)
             {
                 up = new Vector3((float)random.NextDouble() * 2f - 1f, (float)random.NextDouble() * 2f - 1f, (float)random.NextDouble() * 2f - 1f).normalized;
-                if (Elevation(planet, up) > 110f)
+                if (Elevation(planet, up) > 110f && (toStar == Vector3.zero || Vector3.Dot(up, toStar) > 0.45f))
                     return true;
             }
             up = Vector3.up;

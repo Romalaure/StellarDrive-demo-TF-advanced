@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.8.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.9.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -34,6 +34,9 @@ namespace StellarDriveDemoTFAdvanced
             Items.ItemProbe.Install();
             Common.FpsProbe.Install();
             Power.MachineTest.Install();
+            Parts.Showcase.Install();
+            Power.PortalTest.Install();
+            Construction.DockingTest.Install();
             Log.Msg("ready");
         }
 
@@ -78,11 +81,15 @@ namespace StellarDriveDemoTFAdvanced
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void RegisterParts()
         {
-            Try("the TF AvancÃ© build tab", Parts.AdvancedTab.Declare);
+            Try("the build tabs", Parts.AdvancedTab.Declare);
             Try("the ship computer screens", DashboardParts.Register);
             Try("the engines", Propulsion.EngineParts.Register);
             Try("the battery and the circuit breaker", Power.PowerParts.Register);
+            Try("the dark matter machines and the portal", Power.SuperiorParts.Register);
             Try("the structural parts", Construction.StructureParts.Register);
+            Try("the wood, glass and iron parts", Construction.MaterialParts.Register);
+            Try("the station modules", Construction.StationModules.Register);
+            Try("the cartography table", Construction.ScannerTable.Register);
             _partsRegistered = true;
             ScheduleSelfTest();
         }
@@ -112,7 +119,10 @@ namespace StellarDriveDemoTFAdvanced
             Worlds.LootCaches.OnSceneLoaded(_inGame);
             DevHarness.OnSceneLoaded(sceneName);
             if (_partsRegistered)
+            {
+                EnsureResearch();
                 ScheduleSelfTest();
+            }
         }
 
         private static bool _inGame;
@@ -126,8 +136,12 @@ namespace StellarDriveDemoTFAdvanced
                 Worlds.AbandonedStations.Update();
             if (_inGame)
                 Worlds.LootCaches.Update();
+            if (_inGame && GameServices.IsServer)
+                UpdatePortals();
             if (_partsRegistered && Settings.SelfTest.Value)
                 RunSelfTest();
+            if (_partsRegistered && _inGame)
+                TickResearch();
         }
 
         public override void OnLateUpdate()
@@ -140,6 +154,34 @@ namespace StellarDriveDemoTFAdvanced
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ScheduleSelfTest() => SelfTest.Schedule();
+
+        private static void UpdatePortals()
+        {
+            try
+            {
+                Power.Portal.Update();
+            }
+            catch (Exception e)
+            {
+                ErrorLog.Report("portal", e);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void TickResearch() => Parts.ModResearch.Tick();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void EnsureResearch()
+        {
+            try
+            {
+                Parts.ModResearch.Ensure();
+            }
+            catch (Exception e)
+            {
+                Log.Error("research: " + e);
+            }
+        }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void RunSelfTest() => SelfTest.Update();

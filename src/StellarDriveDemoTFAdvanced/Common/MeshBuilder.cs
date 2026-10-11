@@ -15,11 +15,23 @@ namespace StellarDriveDemoTFAdvanced.Common
         private readonly List<Vector3> _normals = new List<Vector3>();
         private readonly List<Vector2> _uvs = new List<Vector2>();
         private readonly List<int> _triangles = new List<int>();
+        private readonly List<Color> _colors = new List<Color>();
+
+        /// <summary>
+        /// Above 0: texture coordinates are planar, in meters times this scale, projected along each
+        /// face's main axis (like the game's hull) instead of one atlas panel per face.
+        /// </summary>
+        public float PlanarScale;
+
+        /// <summary>Vertex color of the next shapes (the game's hull shader reads its tint and texture layer from it).</summary>
+        public Color VertexColor = Color.white;
 
         /// <summary>Atlas rectangle (0-1) the next shapes map their faces to.</summary>
         public Rect Panel = new Rect(0f, 0f, 1f, 1f);
 
         public bool HasGeometry => _triangles.Count > 0;
+
+        public int VertexCount => _vertices.Count;
 
         /// <summary>The part of a texture atlas a game mesh uses (its UV bounds), to map new shapes onto the same texture area.</summary>
         public static Rect UvArea(Mesh mesh)
@@ -50,6 +62,8 @@ namespace StellarDriveDemoTFAdvanced.Common
             mesh.SetVertices(_vertices);
             mesh.SetNormals(_normals);
             mesh.SetUVs(0, _uvs);
+            if (_colors.Count == _vertices.Count)
+                mesh.SetColors(_colors);
             if (paletteUv.HasValue)
             {
                 var palette = new List<Vector2>(_vertices.Count);
@@ -71,6 +85,7 @@ namespace StellarDriveDemoTFAdvanced.Common
                 _vertices.Add(v + offset);
             _normals.AddRange(other._normals);
             _uvs.AddRange(other._uvs);
+            _colors.AddRange(other._colors);
             foreach (int index in other._triangles)
                 _triangles.Add(start + index);
         }
@@ -229,7 +244,21 @@ namespace StellarDriveDemoTFAdvanced.Common
                 (n1, n2) = (n2, n1);
                 (t1, t2) = (t2, t1);
             }
+            if (PlanarScale > 0f)
+            {
+                // Project on the plane across the face's main axis
+                Vector3 n = Vector3.Cross(p1 - p0, p2 - p0);
+                Vector3 a = new Vector3(Mathf.Abs(n.x), Mathf.Abs(n.y), Mathf.Abs(n.z));
+                System.Func<Vector3, Vector2> project = a.x >= a.y && a.x >= a.z ? (System.Func<Vector3, Vector2>)(p => new Vector2(p.z, p.y))
+                    : a.y >= a.z ? (p => new Vector2(p.x, p.z)) : (System.Func<Vector3, Vector2>)(p => new Vector2(p.x, p.y));
+                t0 = project(p0) * PlanarScale;
+                t1 = project(p1) * PlanarScale;
+                t2 = project(p2) * PlanarScale;
+            }
             int start = _vertices.Count;
+            _colors.Add(VertexColor);
+            _colors.Add(VertexColor);
+            _colors.Add(VertexColor);
             _vertices.Add(p0);
             _vertices.Add(p1);
             _vertices.Add(p2);

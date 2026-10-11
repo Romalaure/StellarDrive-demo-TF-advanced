@@ -68,7 +68,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             }
         }
 
-        private static IEnumerator Wait(float seconds)
+        internal static IEnumerator Wait(float seconds)
         {
             float until = Time.unscaledTime + seconds;
             while (Time.unscaledTime < until)
@@ -76,7 +76,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         }
 
         // Like a respawn on a ship: into the station's own space, then the client is told
-        private static void Move(TrackedShipServer station, Vector3 local, Quaternion look)
+        internal static void Move(TrackedShipServer station, Vector3 local, Quaternion look)
         {
             ISpacesServerProvider spaces = ServiceLocator.GetService<ISpacesServerProvider>();
             PlayersServerTracker players = ServiceLocator.GetService<PlayersServerTracker>();

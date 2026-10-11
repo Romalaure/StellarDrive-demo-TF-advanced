@@ -72,7 +72,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             foreach (Spec part in All)
             {
                 Spec spec = part;
-                PartFactory.Register(spec.Id, Donor, AdvancedTab.ConstructionRow, (settings, prefab) => Configure(spec, settings, prefab));
+                PartFactory.Register(spec.Id, Donor, AdvancedTab.ConstructionName, AdvancedTab.ConstructionRow, (settings, prefab) => Configure(spec, settings, prefab));
             }
             AdvancedMod.Log.Msg($"registered {All.Length} structural parts");
         }

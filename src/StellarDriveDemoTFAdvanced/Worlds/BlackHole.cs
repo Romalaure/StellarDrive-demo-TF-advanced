@@ -99,7 +99,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             // Horizon 10 km, 0.5 m/s² at 1 000 km
             new Hole { Name = "Trou noir de Petra", AnchorPlanet = 102, OffsetFromAnchor = new Vector3(1.9e6f, 0.9e6f, -2.1e6f), Horizon = 10000f, DiskTilt = Quaternion.Euler(48f, 35f, -12f) },
             // Two and a half times heavier, near the ice planet
-            new Hole { Name = "Trou noir de Glacia", AnchorPlanet = 105, OffsetFromAnchor = new Vector3(-2.4e6f, -1.3e6f, 3.1e6f), Horizon = 25000f, DiskTilt = Quaternion.Euler(-22f, 110f, 30f) }
+            new Hole { Name = "Trou noir de Glacia", AnchorPlanet = 105, OffsetFromAnchor = new Vector3(-2.4e6f, -1.3e6f, 3.1e6f), Horizon = 25000f, DiskTilt = Quaternion.Euler(-22f, 110f, 30f) },
+            // The Eye of Erebos, beside Pyros in the Erebos galaxy: four times Petra's
+            new Hole { Name = "Œil d'Érèbe", AnchorPlanet = 111, OffsetFromAnchor = new Vector3(1.8e6f, -0.6e6f, 1.7e6f), Horizon = 40000f, DiskTilt = Quaternion.Euler(12f, -40f, 65f) }
         };
 
         private static bool _hasAnchors;

@@ -98,6 +98,46 @@ namespace StellarDriveDemoTFAdvanced.Parts
             return visuals;
         }
 
+        /// <summary>
+        /// Like <see cref="BlankFromSignalDisplay"/> for any donor: its model, its own visual
+        /// behaviour and its plugs removed, the part's state and interactions kept. Returns the
+        /// visual transform to build the new model under.
+        /// </summary>
+        public static Transform Blank(GameObject prefab, Vector3 boundsCenter, Vector3 boundsSize)
+        {
+            if (prefab.transform.Find("Visuals") != null && prefab.GetComponentInChildren<SignalDisplayVisuals>(true) != null)
+                return BlankFromSignalDisplay(prefab, boundsCenter, boundsSize);
+            GameSkin.Capture(prefab);
+            IShipPartVisual visual = prefab.GetComponentInChildren<IShipPartVisual>(true);
+            Transform visuals = visual != null ? visual.GameObject.transform : (prefab.transform.Find("Visuals") ?? prefab.transform.Find("Visual"));
+            if (visuals == null)
+            {
+                visuals = new GameObject("Visuals").transform;
+                visuals.SetParent(prefab.transform, false);
+            }
+            foreach (MonoBehaviour behaviour in visuals.GetComponents<MonoBehaviour>())
+            {
+                if (behaviour is IShipPartVisual)
+                    Object.DestroyImmediate(behaviour);
+            }
+            foreach (Transform child in visuals.Cast<Transform>().ToList())
+                Object.DestroyImmediate(child.gameObject);
+            visuals.localPosition = Vector3.zero;
+            visuals.localRotation = Quaternion.identity;
+            visuals.localScale = Vector3.one;
+            SetBounds(prefab, boundsCenter, boundsSize);
+            foreach (SocketObject socket in prefab.GetComponentsInChildren<SocketObject>(true))
+            {
+                if (socket.visualObject != null)
+                    Object.DestroyImmediate(socket.visualObject);
+                if (socket != null && socket.interactive != null)
+                    Object.DestroyImmediate(socket.interactive);
+                if (socket != null)
+                    Object.DestroyImmediate(socket.gameObject);
+            }
+            return visuals;
+        }
+
         /// <summary>Placement box and the interaction collider (look at it, recycle it) of the whole part.</summary>
         public static void SetBounds(GameObject prefab, Vector3 center, Vector3 size)
         {
@@ -133,13 +173,13 @@ namespace StellarDriveDemoTFAdvanced.Parts
         }
     }
 
-    /// <summary>The mod's parts are in no research node, so the build menu would keep them locked forever.</summary>
+    /// <summary>The mod's parts outside its research branch (see <see cref="ModResearch"/>) are available from the start.</summary>
     [HarmonyPatch(typeof(ResearchClientProxy), nameof(ResearchClientProxy.IsPartUnlocked))]
     internal static class PartUnlockPatch
     {
         private static void Postfix(PartSettings part, ref bool __result)
         {
-            if (!__result && part != null && PartFactory.Ids.Contains(part.id))
+            if (!__result && part != null && PartFactory.Ids.Contains(part.id) && !ModResearch.IsResearchPart(part.id))
                 __result = true;
         }
     }

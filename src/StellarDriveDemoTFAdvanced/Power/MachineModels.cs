@@ -109,6 +109,8 @@ namespace StellarDriveDemoTFAdvanced.Power
     internal sealed class ForceFieldVisuals : DefaultShipPartVisuals
     {
         public const string RingName = "TF_NoPaint_ShieldRing";
+        public const string CoreName = "TF_NoPaint_ShieldCore";
+        private static Texture2D _hexTexture;
 
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
@@ -116,6 +118,8 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static Mesh _sphere;
 
         private Renderer _ring;
+        private Renderer _core;
+        private float _coreY;
         private GameObject _bubble;
         private Renderer _bubbleRenderer;
         private MaterialPropertyBlock _block;
@@ -128,6 +132,9 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             Transform ring = transform.Find(RingName);
             _ring = ring != null ? ring.GetComponent<Renderer>() : null;
+            Transform core = transform.Find(CoreName);
+            _core = core != null ? core.GetComponent<Renderer>() : null;
+            _coreY = core != null ? core.localPosition.y : 0f;
             _block = new MaterialPropertyBlock();
             Show(false);
         }
@@ -151,18 +158,28 @@ namespace StellarDriveDemoTFAdvanced.Power
         private void Show(bool up)
         {
             _up = up;
-            if (_ring != null)
+            Color color = up ? MachineModels.Cyan : new Color(0.1f, 0.12f, 0.14f);
+            foreach (Renderer lit in new[] { _ring, _core })
             {
-                _ring.GetPropertyBlock(_block);
-                Color color = up ? MachineModels.Cyan : new Color(0.1f, 0.12f, 0.14f);
+                if (lit == null)
+                    continue;
+                lit.GetPropertyBlock(_block);
                 _block.SetColor(BaseColorId, color);
                 _block.SetColor(EmissionColorId, up ? color * 3f : Color.black);
-                _ring.SetPropertyBlock(_block);
+                lit.SetPropertyBlock(_block);
             }
         }
 
         private void LateUpdate()
         {
+            // The core turns and bobs while the field is up
+            if (_core != null && _up)
+            {
+                _core.transform.localRotation = Quaternion.Euler(0f, Time.time * 90f, 0f);
+                Vector3 p = _core.transform.localPosition;
+                p.y = _coreY + Mathf.Sin(Time.time * 1.7f) * 0.025f;
+                _core.transform.localPosition = p;
+            }
             // Only placed parts (on a ship) get a bubble, not the build menu's previews
             Transform ship = transform.root;
             bool onShip = ship != null && ship.name.StartsWith("ship ");
@@ -181,9 +198,12 @@ namespace StellarDriveDemoTFAdvanced.Power
                 Fit(ship);
             }
             _flash = Mathf.MoveTowards(_flash, 0f, Time.deltaTime * 2.5f);
-            float alpha = 0.08f + 0.35f * _flash + 0.04f * Mathf.Sin(Time.time * 2f);
+            // Hexagons drifting over the bubble, redder as the charge falls, flaring on hits
+            float low = 1f - Mathf.Clamp01(_charge / 100f);
+            float alpha = 0.16f + 0.12f * low + 0.5f * _flash + 0.05f * Mathf.Sin(Time.time * 2f);
+            Color tint = Color.Lerp(new Color(0.3f, 0.85f, 1f), new Color(1f, 0.35f, 0.25f), low * low);
             _bubbleRenderer.GetPropertyBlock(_block);
-            _block.SetColor(BaseColorId, new Color(0.3f, 0.8f, 1f, alpha));
+            _block.SetColor(BaseColorId, new Color(tint.r, tint.g, tint.b, alpha));
             _bubbleRenderer.SetPropertyBlock(_block);
         }
 
@@ -191,28 +211,11 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             if (_bubbleMaterial == null)
             {
-                Material template = null;
-                foreach (Material m in Resources.FindObjectsOfTypeAll<Material>())
-                {
-                    if (m != null && m.shader != null && m.shader.name == "Universal Render Pipeline/Particles/Unlit")
-                    {
-                        template = m;
-                        break;
-                    }
-                }
-                if (template == null)
-                    return false;
-                _bubbleMaterial = new Material(template) { name = "TFA_ForceField" };
-                _bubbleMaterial.SetTexture("_BaseMap", Texture2D.whiteTexture);
-                _bubbleMaterial.SetFloat("_Surface", 1f);
-                _bubbleMaterial.SetFloat("_Blend", 2f);
-                _bubbleMaterial.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
-                _bubbleMaterial.SetFloat("_DstBlend", (float)BlendMode.One);
-                _bubbleMaterial.SetFloat("_ZWrite", 0f);
-                _bubbleMaterial.SetFloat("_Cull", 0f);
-                _bubbleMaterial.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-                _bubbleMaterial.renderQueue = 3000;
+                _bubbleMaterial = TransparentMaterials.Additive("TFA_ForceField", HexTexture());
+                _bubbleMaterial?.SetTextureScale("_BaseMap", new Vector2(14f, 7f));
             }
+            if (_bubbleMaterial == null)
+                return false;
             if (_sphere == null)
             {
                 GameObject primitive = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -227,6 +230,41 @@ namespace StellarDriveDemoTFAdvanced.Power
             _bubbleRenderer.shadowCastingMode = ShadowCastingMode.Off;
             _bubbleRenderer.receiveShadows = false;
             return true;
+        }
+
+        // Thin hexagon outlines over a faint fill (in alpha), tiling
+        private static Texture2D HexTexture()
+        {
+            if (_hexTexture != null)
+                return _hexTexture;
+            const int w = 128, h = 222;
+            _hexTexture = new Texture2D(w, h, TextureFormat.RGBA32, true) { name = "TFA_ForceFieldHex", wrapMode = TextureWrapMode.Repeat };
+            var pixels = new Color32[w * h];
+            // Hexagon centres on a lattice that repeats every w by h (h = w * sqrt 3)
+            var centres = new System.Collections.Generic.List<Vector2>();
+            for (int row = -1; row <= 3; row++)
+                for (int col = -1; col <= 2; col++)
+                    centres.Add(new Vector2(col * w / 2f + (row % 2 != 0 ? w / 4f : 0f), row * h / 2f));
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    float best = float.MaxValue, second = float.MaxValue;
+                    var at = new Vector2(x, y);
+                    foreach (Vector2 c in centres)
+                    {
+                        float d = (at - c).magnitude;
+                        if (d < best) { second = best; best = d; }
+                        else if (d < second) second = d;
+                    }
+                    float line = Mathf.Clamp01(1f - (second - best) / 12f);
+                    byte a = (byte)(Mathf.Clamp01(0.1f + line * 0.9f) * 255f);
+                    pixels[y * w + x] = new Color32(255, 255, 255, a);
+                }
+            }
+            _hexTexture.SetPixels32(pixels);
+            _hexTexture.Apply(true);
+            return _hexTexture;
         }
 
         // An ellipsoid around the ship's whole model, in the ship's own axes

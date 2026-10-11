@@ -30,6 +30,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private static readonly List<Planet> Clones = new List<Planet>();
         private static readonly FieldInfo IdField = AccessTools.Field(typeof(Planet), "id");
         private static readonly FieldInfo PositionField = AccessTools.Field(typeof(Planet), "positionAlignedToParentAxis");
+        private static readonly FieldInfo ParentField = AccessTools.Field(typeof(Planet), "orbitParent");
 
         public static IReadOnlyList<Planet> Planets => Clones;
 
@@ -48,6 +49,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 AdvancedMod.Log.Warning("planets: the demo planet was not found, no new planets");
                 return;
             }
+            // Erebos's planets orbit their own star, made first
+            Stars.Star erebos = PlanetCatalog.All.Any(p => p.System == PlanetWiki.Erebos) && Settings.Erebos.Value ? Galaxy.EnsureStar() : null;
             // Built under an inactive holder so nothing of the copy wakes up before it is reshaped
             var holder = new GameObject("TFA_PlanetHolder");
             holder.SetActive(false);
@@ -55,12 +58,16 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             {
                 foreach (PlanetSpec spec in PlanetCatalog.All)
                 {
+                    if (spec.System == PlanetWiki.Erebos && erebos == null)
+                        continue;
                     try
                     {
                         Planet clone = Object.Instantiate(template.gameObject, holder.transform).GetComponent<Planet>();
                         clone.name = spec.Name;
                         IdField.SetValue(clone, spec.Id);
                         PositionField.SetValue(clone, spec.Position((Vector3Double)PositionField.GetValue(template)));
+                        if (spec.System == PlanetWiki.Erebos)
+                            ParentField.SetValue(clone, erebos);
                         // FishNet keeps scene network objects disabled until the server spawns them, and only
                         // spawns those baked in the scene: the copy runs without one (see README, multiplayer)
                         foreach (FishNet.Observing.NetworkObserver observer in clone.GetComponents<FishNet.Observing.NetworkObserver>())
@@ -115,6 +122,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         public static void Forget()
         {
             Clones.Clear();
+            Galaxy.Forget();
         }
     }
 

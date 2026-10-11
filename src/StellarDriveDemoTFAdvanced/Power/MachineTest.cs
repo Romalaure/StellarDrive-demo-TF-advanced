@@ -57,11 +57,10 @@ namespace StellarDriveDemoTFAdvanced.Power
             SavedShipState state = new ShipsConverter().ConvertToState(data.ships).States.Cast<SavedShipState>().Single();
             state.Id = ids.CreateUniqueIdForObject();
             state.SpaceId = player.SpaceId;
-            Vector3 up = Vector3.up;
-            if (spaces.GetSpace(player.SpaceId) is PlanetSurfaceSpace surface)
-                up = ((Vector3)(surface.Center + (Vector3Double)player.Position)).normalized;
-            state.Position = player.Position + up * 40f + Vector3.Cross(up, Vector3.right).normalized * 12f;
-            state.Rotation = Quaternion.FromToRotation(Vector3.up, up);
+            // The player stands upright: their frame gives the local up and a side
+            Vector3 up = player.Rotation * Vector3.up;
+            state.Position = player.Position + up * 40f + player.Rotation * Vector3.right * 12f;
+            state.Rotation = player.Rotation;
             state.Velocity = Vector3.zero;
             state.RelativeSpaceId = spaces.GetOrCreateShipRelativeSpace(state.Id);
             ships.LoadShip(state);
@@ -90,6 +89,8 @@ namespace StellarDriveDemoTFAdvanced.Power
                 string Tank(ushort part) => ship.GetAllStatefulParts<FluidTankState>().Where(p => p.Id == part).Select(p => ((FluidTankState)p.State)).Select(t => $"{t.FluidQuantity:0.00} ({t.FluidFlow:0.###})").FirstOrDefault()
                     ?? ship.GetAllStatefulParts<ConstantState>().Where(p => p.Id == part).Select(p => ((ConstantState)p.State).ConstantValue.ToString("0.0")).FirstOrDefault() ?? "gone";
                 AdvancedMod.Log.Msg($"dev: machine test t={2 * (i + 1)} s: parts {ship.PartCount}, reactor {Tank(1)}, field charge/status {Tank(2)}, condenser {Tank(3)}, oxygen tank {Tank(4)}, filled tank {Tank(5)}");
+                if (i == 5)
+                    yield return Parts.Showcase.Photograph(state.Id, "machines");
             }
         }
 

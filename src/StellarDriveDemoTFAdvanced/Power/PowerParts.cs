@@ -167,31 +167,79 @@ namespace StellarDriveDemoTFAdvanced.Power
                 $"Enveloppe tout le vaisseau (et ce qui y est amarré) dans un champ qui encaisse les chocs et les forces de marée à la place de la coque : {PowerCatalog.ShieldCapacity.Value:0} points (un choc compte sa variation de vitesse en m/s). Consomme {PowerCatalog.ShieldWatts.Value:0} W sur ses prises électriques et {PowerCatalog.ShieldOxygenPerSecond.Value:0.###} unité/s d'oxygène sur sa prise de fluide. À zéro, il se casse et redémarre au bout de {PowerCatalog.ShieldCooldownSeconds.Value / 60f:0} min, rechargé. Sa prise signal donne la charge en % (-1 éteint, négatif : secondes avant redémarrage).",
                 120f, new[] { (Items.ModItems.QuantumCore, 1), (Items.ModItems.Cryonite, 6), (Items.ModItems.NexoranAlloy, 4), (Items.ModItems.Titanium, 6), (112u, 8) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
-            const float width = 0.95f, height = 0.7f, depth = 0.95f;
-            Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, 0.6f, 0f), new Vector3(width, 1.2f, depth));
+            const float width = 0.95f, height = 0.42f, depth = 0.95f;
+            Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, 0.65f, 0f), new Vector3(width, 1.3f, depth));
             var model = new MachineModels.Model();
-            MachineModels.Housing(model, width, height, depth, 0.7f);
-            float face = depth * 0.47f;
-            MachineModels.Vent(model, -0.25f, 0.28f, face, 0.24f, 0.3f, 3);
-            MachineModels.Vent(model, 0.25f, 0.28f, face, 0.24f, 0.3f, 3);
-            MachineModels.Grille(model, 0.28f, face, 0.12f, 0.34f);
-            // The emitter: a mast, a lit ring and a dish
-            model.Armor.Cylinder(new Vector3(0f, height, 0f), new Vector3(0f, height + 0.3f, 0f), 0.09f, 0.07f, 8);
-            model.Armor.Cylinder(new Vector3(0f, height + 0.38f, 0f), new Vector3(0f, height + 0.46f, 0f), 0.12f, 0.38f, 12, capA: true, capB: false);
+            // Octagonal plinth, a low housing with vents and grille
+            model.Armor.Cylinder(new Vector3(0f, 0f, 0f), new Vector3(0f, 0.07f, 0f), width * 0.56f, width * 0.54f, 8);
+            model.Light.Cylinder(new Vector3(0f, 0.07f, 0f), new Vector3(0f, 0.08f, 0f), width * 0.545f, width * 0.545f, 8, capA: false, capB: false);
+            MachineModels.Housing(model, width * 0.9f, height, depth * 0.9f, 0.62f);
+            float face = depth * 0.9f * 0.47f;
+            MachineModels.Vent(model, -0.22f, 0.2f, face, 0.2f, 0.18f, 3);
+            MachineModels.Vent(model, 0.22f, 0.2f, face, 0.2f, 0.18f, 3);
+            MachineModels.Grille(model, 0.2f, face, 0.1f, 0.2f);
+            MachineModels.Vent(model, 0f, 0.2f, -face, 0.34f, 0.18f, 3);
+            // Central column with three field rings
+            float top = height;
+            model.Dark.Cylinder(new Vector3(0f, top, 0f), new Vector3(0f, top + 0.42f, 0f), 0.09f, 0.07f, 8);
+            model.Armor.Cylinder(new Vector3(0f, top, 0f), new Vector3(0f, top + 0.05f, 0f), 0.2f, 0.16f, 8);
             var ring = new MeshBuilder();
-            ring.Cylinder(new Vector3(0f, height + 0.28f, 0f), new Vector3(0f, height + 0.34f, 0f), 0.26f, 0.26f, 16);
-            MachineModels.Attach(visuals, model, "Shield", MachineModels.Red, MachineModels.Cyan);
+            for (int i = 0; i < 3; i++)
+            {
+                float y = top + 0.1f + i * 0.11f;
+                float r = 0.17f - i * 0.025f;
+                ring.Cylinder(new Vector3(0f, y, 0f), new Vector3(0f, y + 0.035f, 0f), r, r, 16);
+            }
+            // Four emitter prongs rising from the corners, bent toward the core
+            float coreY = top + 0.66f;
+            for (int i = 0; i < 4; i++)
+            {
+                float angle = (45f + i * 90f) * Mathf.Deg2Rad;
+                Vector3 outward = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
+                Vector3 across = Vector3.Cross(Vector3.up, outward);
+                Vector3 foot = outward * 0.4f + Vector3.up * (top - 0.08f);
+                Vector3 knee = outward * 0.36f + Vector3.up * (top + 0.42f);
+                Vector3 tip = outward * 0.16f + Vector3.up * (coreY + 0.04f);
+                Prong(model.Armor, foot, knee, across, 0.07f, 0.05f);
+                Prong(model.Armor, knee, tip, across, 0.05f, 0.035f);
+                Vector3 leg = (knee - foot).normalized;
+                model.Light.Box(Vector3.Lerp(foot, knee, 0.5f) + outward * 0.03f, new Vector3(0.012f, (knee - foot).magnitude * 0.9f, 0.012f), across, leg, Vector3.Cross(across, leg));
+                model.Core.Cylinder(tip, tip - outward * 0.05f + Vector3.up * 0.01f, 0.025f, 0.008f, 6);
+            }
+            // The floating core, a crystal turned by ForceFieldVisuals
+            var core = new MeshBuilder();
+            core.Cylinder(new Vector3(0f, -0.11f, 0f), new Vector3(0f, 0f, 0f), 0f, 0.075f, 6, capA: false, capB: false);
+            core.Cylinder(new Vector3(0f, 0f, 0f), new Vector3(0f, 0.11f, 0f), 0.075f, 0f, 6, capA: false, capB: false);
+            MachineModels.Attach(visuals, model, "Shield", MachineModels.Cyan, MachineModels.Cyan);
             var ringObject = new GameObject(ForceFieldVisuals.RingName) { layer = visuals.gameObject.layer };
             ringObject.transform.SetParent(visuals, false);
             ringObject.AddComponent<MeshFilter>().sharedMesh = ring.Build(ForceFieldVisuals.RingName);
             var ringRenderer = ringObject.AddComponent<MeshRenderer>();
             ringRenderer.sharedMaterial = LitMaterials.Get("TFA_ShieldRing", Color.white, 0f, 0.8f, Color.white);
+            var coreObject = new GameObject(ForceFieldVisuals.CoreName) { layer = visuals.gameObject.layer };
+            coreObject.transform.SetParent(visuals, false);
+            coreObject.transform.localPosition = new Vector3(0f, coreY, 0f);
+            coreObject.AddComponent<MeshFilter>().sharedMesh = core.Build(ForceFieldVisuals.CoreName);
+            coreObject.AddComponent<MeshRenderer>().sharedMaterial = LitMaterials.Get("TFA_ShieldRing", Color.white, 0f, 0.8f, Color.white);
             visuals.gameObject.AddComponent<ForceFieldVisuals>();
             var bounds = prefab.GetComponent<ShipPartBounds>();
-            GraftSeated(prefab, bounds, PowerCatalog.MachinePowerA, CableType.Power, new Vector3(-width * 0.47f, 0.28f, 0f), Vector3.left);
-            GraftSeated(prefab, bounds, PowerCatalog.MachinePowerB, CableType.Power, new Vector3(width * 0.47f, 0.28f, 0f), Vector3.right);
-            GraftSeated(prefab, bounds, PowerCatalog.MachineSignal, CableType.Signal, new Vector3(0.2f, 0.4f, -depth * 0.47f), Vector3.back);
-            GraftSeated(prefab, bounds, ForceField.OxygenSocket, CableType.Fluid, new Vector3(-0.2f, 0.3f, -depth * 0.47f), Vector3.back);
+            GraftSeated(prefab, bounds, PowerCatalog.MachinePowerA, CableType.Power, new Vector3(-width * 0.9f * 0.47f, 0.2f, 0f), Vector3.left);
+            GraftSeated(prefab, bounds, PowerCatalog.MachinePowerB, CableType.Power, new Vector3(width * 0.9f * 0.47f, 0.2f, 0f), Vector3.right);
+            GraftSeated(prefab, bounds, PowerCatalog.MachineSignal, CableType.Signal, new Vector3(0.3f, 0.2f, -face), Vector3.back);
+            GraftSeated(prefab, bounds, ForceField.OxygenSocket, CableType.Fluid, new Vector3(-0.3f, 0.2f, -face), Vector3.back);
+        }
+
+        // A square-section arm from a to b, narrowing
+        private static void Prong(MeshBuilder m, Vector3 a, Vector3 b, Vector3 across, float wa, float wb)
+        {
+            Vector3 along = (b - a).normalized;
+            Vector3 normal = Vector3.Cross(across, along).normalized;
+            Vector3 ha = across * wa * 0.5f, hb = across * wb * 0.5f, na = normal * wa * 0.5f, nb = normal * wb * 0.5f;
+            m.Block(new[]
+            {
+                a - ha - na, a + ha - na, b - hb - nb, b + hb - nb,
+                a - ha + na, a + ha + na, b - hb + nb, b + hb + nb
+            });
         }
 
         private static readonly int ColorId = Shader.PropertyToID("_Color");
@@ -264,7 +312,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         }
 
         // A plug looks into the part; SDModKit then sets it just clear of the part's bounds
-        private static void GraftSeated(GameObject prefab, ShipPartBounds bounds, byte id, CableType type, Vector3 position, Vector3 outward)
+        internal static void GraftSeated(GameObject prefab, ShipPartBounds bounds, byte id, CableType type, Vector3 position, Vector3 outward)
         {
             Quaternion rotation = Quaternion.LookRotation(-outward, Mathf.Abs(outward.y) > 0.9f ? Vector3.forward : Vector3.up);
             GameObject socket = ContentBuilder.GraftSocket(prefab, id, type, position, rotation);

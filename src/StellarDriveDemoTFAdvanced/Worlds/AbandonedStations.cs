@@ -46,6 +46,10 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             public Color32 Outside = new Color32(205, 208, 212, 255);
             public Color32 Band = new Color32(225, 120, 40, 255);
             public Color32 Inside = new Color32(176, 172, 164, 255);
+            /// <summary>Share of hull faces missing (holes, torn plating).</summary>
+            public float Breaches = 1f;
+            /// <summary>Dark matter left in a tank aboard (units, 0 for none).</summary>
+            public int DarkMatter;
             /// <summary>Rare finds in its chests: (item, chance).</summary>
             public (uint Item, int Min, int Max, double Chance)[] Rare = new (uint, int, int, double)[0];
         }
@@ -97,6 +101,51 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     b.Module(-1, 0, -2, 1, 2, 2);
                     b.Module(-1, 3, -1, 1, 3, 1);
                     b.Entrance(0, 0, 2, 2);
+                }
+            },
+
+            // ---- Wrecks drifting in the Erebos galaxy: torn ships with their cargo and dark matter
+
+            new StationSpec
+            {
+                Name = "Épave du Vagabond", AnchorPlanet = 112, Offset = new Vector3(6e6f, 1.5e6f, -4e6f), Seed = 101, Breaches = 4f, DarkMatter = 12,
+                Band = new Color32(40, 160, 150, 255), Outside = new Color32(120, 118, 112, 255), Inside = new Color32(90, 88, 84, 255),
+                Rare = new[] { (Items.ModItems.Meteorite, 2, 6, 0.6), (Items.ModItems.QuantumCore, 1, 1, 0.25), (Items.ModItems.NexoranAlloy, 2, 4, 0.35) },
+                Build = b =>
+                {
+                    // A freighter: cockpit, a long hold, the engine section broken off behind it
+                    b.Module(-1, 0, 9, 1, 2, 11);
+                    b.Module(-2, 0, -3, 2, 3, 8);
+                    b.Module(-2, 0, -9, 2, 2, -6);
+                    b.Entrance(0, 0, -3, 3);
+                }
+            },
+            new StationSpec
+            {
+                Name = "Épave du Léviathan", AnchorPlanet = 114, Offset = new Vector3(-8e6f, -2e6f, 5e6f), Seed = 117, Breaches = 5f, DarkMatter = 20,
+                Band = new Color32(140, 60, 200, 255), Outside = new Color32(70, 70, 80, 255), Inside = new Color32(100, 96, 110, 255),
+                Rare = new[] { (Items.ModItems.ExoticMatter, 1, 2, 0.4), (Items.ModItems.QuantumCore, 1, 2, 0.35), (Items.ModItems.Meteorite, 3, 8, 0.6), (Items.ModItems.Artifact, 1, 1, 0.3) },
+                Build = b =>
+                {
+                    // A capital ship's spine with a broken bridge tower and side bays
+                    b.Module(-2, 0, -14, 2, 3, 14);
+                    b.Module(-1, 4, 6, 1, 7, 9);
+                    b.Module(3, 0, -4, 7, 2, 2);
+                    b.Module(-7, 0, -8, -3, 2, -2);
+                    b.Entrance(0, 0, 14, 2);
+                }
+            },
+            new StationSpec
+            {
+                Name = "Épave de l'Icare", AnchorPlanet = 111, Offset = new Vector3(3e6f, 4e6f, -2e6f), Seed = 131, Breaches = 6f, DarkMatter = 30,
+                Band = new Color32(230, 140, 30, 255), Outside = new Color32(60, 58, 56, 255), Inside = new Color32(80, 76, 72, 255),
+                Rare = new[] { (Items.ModItems.ExoticMatter, 1, 3, 0.5), (Items.ModItems.Meteorite, 4, 10, 0.7) },
+                Build = b =>
+                {
+                    // A scorched explorer that came too close to the Eye of Erebos
+                    b.Module(-2, 0, -4, 2, 2, 4);
+                    b.Module(-1, 0, 5, 1, 2, 8);
+                    b.Entrance(0, 0, 8, 2);
                 }
             }
         };
@@ -269,7 +318,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                         if (_inside.Contains(n) || _openings.Contains(v * 10 + new Vector3Int(face, 0, 0)))
                             continue;
                         bool wall = face < 4;
-                        if (_random.NextDouble() < (wall ? 0.05 : 0.03))
+                        if (_random.NextDouble() < (wall ? 0.05 : 0.03) * (Spec != null ? Spec.Breaches : 1f))
                             continue;
                         bool window = wall && v.y % 4 == 1 && _random.NextDouble() < 0.35;
                         hull.Add(HullFace(v, face, window ? GlassWall : (face == 4 && _random.NextDouble() < 0.06 ? GlassFloor : wall ? IronWall : IronFloor)));
@@ -304,6 +353,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     floating.Add(Floating(nextPart++, Bed, new Vector3(m.x1, m.y0 - 0.5f + 0.04f, m.z0), 2, 4));
                     if (_random.NextDouble() < 0.5)
                         floating.Add(Floating(nextPart++, Bed, new Vector3(m.x0, m.y0 - 0.5f + 0.04f, m.z0), 2, 4));
+                }
+                if (Spec != null && Spec.DarkMatter > 0)
+                {
+                    floating.Add(Floating(nextPart, FluidTank, new Vector3(Mathf.Round(cx), core.y0 - 0.5f + 0.04f, core.z0), 2, 4));
+                    tanks.Add(string.Format(CultureInfo.InvariantCulture, "{{\"partId\":{0},\"fluidItemId\":{1},\"fluidQuantity\":{2:0.0}}}", nextPart, Items.ModItems.DarkMatter, Spec.DarkMatter));
+                    nextPart++;
                 }
                 foreach (uint fluid in new[] { Oxygen, Ethanol })
                 {

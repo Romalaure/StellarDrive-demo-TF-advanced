@@ -10,6 +10,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         public ulong Id;
         public string Name;
         public string Biome;
+        /// <summary>The star system it belongs to (<see cref="PlanetWiki.Otrera"/> or <see cref="PlanetWiki.Erebos"/>).</summary>
+        public string System = PlanetWiki.Otrera;
         /// <summary>Orbit position: the demo planet's position turned around the star's axis, and scaled.</summary>
         public float OrbitAngle;
         public float OrbitScale = 1f;
@@ -94,6 +96,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     PointsOfInterest.Village(p, RuinStyle.Basalt, 0.35f);
                     PointsOfInterest.CargoWrecks(p, 0.5f);
                     PointsOfInterest.Deposits(p, OreKind.Titanium, 0.8f);
+                    // Meteorites fell on this airless world and were never worn away
+                    PointsOfInterest.Deposits(p, OreKind.Meteorite, 0.35f);
                 }
             },
             new PlanetSpec
@@ -228,6 +232,110 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     PointsOfInterest.Wrecks(p, 0.35f);
                     PointsOfInterest.CargoWrecks(p, 0.3f);
                     PointsOfInterest.Deposits(p, OreKind.Amber, 0.8f);
+                }
+            },
+
+            // ---- The Erebos galaxy (orbiting the orange giant Érèbe, reached through a portal)
+
+            new PlanetSpec
+            {
+                Id = 111, Name = "Pyros", System = PlanetWiki.Erebos, MapColor = new Color(1f, 0.38f, 0.12f), Biome = "volcanique", OrbitAngle = 30f, OrbitScale = 0.7f, Gravity = 1.2f, RotationHours = 1.3f,
+                Shape = p =>
+                {
+                    // Black basalt plains, rust-red slopes, glowing lava lakes under a smoky red sky
+                    p.Material(PlanetShaper.Ground, PlanetShaper.Shore, new Color(0.17f, 0.15f, 0.15f));
+                    p.Material(PlanetShaper.Shore, PlanetShaper.Shore, new Color(0.45f, 0.14f, 0.06f));
+                    p.Material(PlanetShaper.Water, PlanetShaper.Water, new Color(2.2f, 0.65f, 0.12f));
+                    p.Shoreline(105f, 82f);
+                    p.Relief(1.6f, 1.4f, new Vector3(0.36f, -0.21f, 0.44f));
+                    p.Craters(40, 1200f, 6000f, 30f, 120f);
+                    p.Ceiling(6000f);
+                    p.Sky(new Vector3(0.32f, 0.08f, 0.03f), 2.2f, 0.75f, 0.75f, clouds: false, breathable: false);
+                    p.Trees((p.Tree(TreeKind.Charred), 100, 0f));
+                    p.ForestDensity(-0.55f);
+                    p.FloraElevation(110f, 1e7f);
+                    PointsOfInterest.Ruins(p, RuinStyle.Basalt, 0.6f);
+                    PointsOfInterest.Village(p, RuinStyle.Basalt, 0.3f);
+                    PointsOfInterest.CargoWrecks(p, 0.4f);
+                    PointsOfInterest.Deposits(p, OreKind.Meteorite, 1f);
+                    PointsOfInterest.Deposits(p, OreKind.Titanium, 0.5f);
+                }
+            },
+            new PlanetSpec
+            {
+                Id = 112, Name = "Thalassa", System = PlanetWiki.Erebos, MapColor = new Color(0.15f, 0.55f, 1f), Biome = "océanique", OrbitAngle = 140f, OrbitScale = 1.05f, Gravity = 0.9f, RotationHours = 0.9f,
+                Shape = p =>
+                {
+                    // A world of sea: low islands of white sand and palms in a turquoise ocean
+                    p.Material(PlanetShaper.Ground, PlanetShaper.Ground, new Color(0.45f, 0.75f, 0.35f));
+                    p.Material(PlanetShaper.Shore, PlanetShaper.Shore, new Color(1.05f, 0.98f, 0.82f));
+                    p.Material(PlanetShaper.Water, PlanetShaper.Water, new Color(0.1f, 0.62f, 0.85f));
+                    p.Relief(0.55f, 1.6f, new Vector3(-0.44f, 0.18f, 0.29f));
+                    p.Shoreline(205f, 185f);
+                    p.Sky(new Vector3(0.05f, 0.14f, 0.32f), 2.6f, 0.3f, 1f, clouds: true, breathable: true);
+                    GameObject grass = PlanetShaper.Tinted(p.GrassPrefab, "island", new Color(0.8f, 1.05f, 0.6f));
+                    GameObject palm = p.Tree(TreeKind.Palm);
+                    p.Trees((palm, 100, 0f));
+                    p.ForestDensity(0.4f);
+                    p.Grass(grass);
+                    // Only on the islands, above the sea and its beaches
+                    p.FloraElevation(212f, 206f);
+                    PointsOfInterest.Village(p, RuinStyle.Sandstone, 0.5f);
+                    PointsOfInterest.Ruins(p, RuinStyle.Sandstone, 0.4f);
+                    PointsOfInterest.Wrecks(p, 0.5f);
+                    PointsOfInterest.Deposits(p, OreKind.Quartz, 0.6f);
+                    PointsOfInterest.Deposits(p, OreKind.Amber, 0.5f);
+                }
+            },
+            new PlanetSpec
+            {
+                Id = 113, Name = "Mycélia", System = PlanetWiki.Erebos, MapColor = new Color(0.8f, 0.3f, 0.9f), Biome = "fongique", OrbitAngle = -95f, OrbitScale = 1.35f, Gravity = 0.8f, RotationHours = 1.7f,
+                Shape = p =>
+                {
+                    // Violet moss, forests of giant glowing mushrooms, spores in a toxic green haze
+                    GameObject violet = p.Plant(PlantKind.VioletFlowers), white = p.Plant(PlantKind.WhiteFlowers), fern = p.Plant(PlantKind.Fern);
+                    p.Material(PlanetShaper.Ground, PlanetShaper.Ground, new Color(0.55f, 0.32f, 0.62f));
+                    p.Material(PlanetShaper.Shore, PlanetShaper.Shore, new Color(0.35f, 0.25f, 0.3f));
+                    p.Material(PlanetShaper.Water, PlanetShaper.Water, new Color(0.35f, 0.9f, 0.45f));
+                    p.Shoreline(95f, 78f);
+                    p.Relief(1.1f, 1.15f, new Vector3(0.12f, 0.47f, -0.33f));
+                    p.Sky(new Vector3(0.09f, 0.22f, 0.08f), 2.4f, 0.85f, 0.7f, clouds: true, breathable: false);
+                    GameObject moss = PlanetShaper.Tinted(p.GrassPrefab, "moss", new Color(0.85f, 0.45f, 1f));
+                    p.Trees((p.Tree(TreeKind.Mushroom), 100, 0f));
+                    p.ForestDensity(0.9f);
+                    p.FloraElevation(84f, 84f);
+                    p.Undergrowth(0.5f, (moss, 60), (violet, 15), (white, 10), (PlanetShaper.Tinted(fern, "sporefern", new Color(1.1f, 0.6f, 1.2f)), 15));
+                    PointsOfInterest.Ruins(p, RuinStyle.Mossy, 0.5f);
+                    PointsOfInterest.CargoWrecks(p, 0.4f);
+                    PointsOfInterest.Deposits(p, OreKind.Meteorite, 0.6f);
+                    PointsOfInterest.Deposits(p, OreKind.Cryonite, 0.4f);
+                }
+            },
+            new PlanetSpec
+            {
+                Ring = ring =>
+                {
+                    // A ring of glittering crystal shards
+                    ring.ringConfig.AsteroidsTexLitColor = new Color(0.9f, 0.8f, 1.2f);
+                    ring.ringConfig.ringDirectScatteringColor *= 1.6f;
+                },
+                Id = 114, Name = "Cristallis", System = PlanetWiki.Erebos, MapColor = new Color(0.8f, 0.85f, 1f), Biome = "cristalline", OrbitAngle = -10f, OrbitScale = 1.8f, Gravity = 0.6f, RotationHours = 2.2f,
+                Shape = p =>
+                {
+                    // Pale lilac salt flats and sharp ridges, fields of crystals, a thin cold air
+                    p.Material(PlanetShaper.Ground, PlanetShaper.Water, new Color(0.88f, 0.84f, 0.98f));
+                    p.Material(PlanetShaper.Shore, PlanetShaper.Water, new Color(0.7f, 0.75f, 0.95f));
+                    p.Material(PlanetShaper.Water, PlanetShaper.Water, new Color(0.55f, 0.6f, 1f));
+                    p.Shoreline(300f, 64.2f);
+                    p.Relief(2f, 1.8f, new Vector3(-0.15f, -0.38f, 0.26f));
+                    p.Ceiling(7000f);
+                    p.Sky(new Vector3(0.18f, 0.16f, 0.3f), 1.6f, 0.15f, 0.95f, clouds: false, breathable: false);
+                    p.FloraElevation(1e7f, 1e7f);
+                    PointsOfInterest.Ruins(p, RuinStyle.Ice, 0.4f);
+                    PointsOfInterest.Wrecks(p, 0.5f);
+                    PointsOfInterest.Deposits(p, OreKind.Quartz, 1f);
+                    PointsOfInterest.Deposits(p, OreKind.Cryonite, 0.8f);
+                    PointsOfInterest.Deposits(p, OreKind.Meteorite, 0.3f);
                 }
             }
         };

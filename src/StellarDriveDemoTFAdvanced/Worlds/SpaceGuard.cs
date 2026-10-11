@@ -62,9 +62,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
     internal static class MagnetsCacheGuardPatch
     {
         private static int _skipped;
+        private static int _logged;
 
         private static Exception Finalizer(Exception __exception)
         {
+            if (__exception != null && !(__exception is ArgumentException) && _logged++ == 0)
+                AdvancedMod.Log.Error("docking magnets update failed: " + __exception);
             if (!(__exception is ArgumentException))
                 return __exception;
             if (_skipped++ % 500 == 0)

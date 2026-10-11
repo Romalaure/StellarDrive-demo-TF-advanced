@@ -46,13 +46,22 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             foreach (Transform child in map.transform.Cast<Transform>().Where(c => c.name.StartsWith("TFA_Map")).ToList())
                 Object.Destroy(child.gameObject);
             Material line = map.GetComponentsInChildren<LineRenderer>(true).Select(l => l.sharedMaterial).FirstOrDefault(m => m != null);
+            MapSystemFilter filter = map.GetComponent<MapSystemFilter>() ?? map.gameObject.AddComponent<MapSystemFilter>();
+            filter.Clear();
             foreach (PlanetHologram hologram in map.Holograms.Values)
             {
                 PlanetSpec spec = PlanetCatalog.All.FirstOrDefault(p => p.Id == hologram.Id);
                 if (spec != null)
                     Tint(hologram.HologramObject, spec.MapColor);
                 string name = hologram.Id == PlanetFactory.TemplateId ? hologram.Planet.Name + " (départ)" : hologram.Planet.Name;
-                Label(map.transform, layer, name, hologram.Position + Vector3.up * (hologram.Radius + 0.025f), spec != null ? Color.Lerp(spec.MapColor, Color.white, 0.4f) : Color.white);
+                GameObject label = Label(map.transform, layer, name, hologram.Position + Vector3.up * (hologram.Radius + 0.025f), spec != null ? Color.Lerp(spec.MapColor, Color.white, 0.4f) : Color.white);
+                // The planet, the orbit drawn right after it, and its label belong to its star system
+                bool erebos = spec != null && spec.System == PlanetWiki.Erebos;
+                filter.Add(erebos, hologram.HologramObject);
+                filter.Add(erebos, label);
+                int index = hologram.HologramObject.transform.GetSiblingIndex();
+                if (index + 1 < map.transform.childCount && map.transform.GetChild(index + 1).GetComponent<OrbitHologram>() != null)
+                    filter.Add(erebos, map.transform.GetChild(index + 1).gameObject);
             }
 
             IPlanetsProvider planets = ServiceLocator.GetService<IPlanetsClientProvider>();
@@ -77,7 +86,11 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     ball.GetComponent<MeshRenderer>().sharedMaterial = LitMaterials.Get("TFA_MapHole", Color.black, 0f, 0.9f);
                     if (line != null)
                         Ring(map.transform, layer, line, local, size * 2.2f, HoleColor);
-                    Label(map.transform, layer, hole.Name, local - Vector3.up * (size + 0.035f), HoleColor, 0.16f);
+                    bool erebosHole = Galaxy.OrbitsErebos(hole.AnchorPlanet);
+                    filter.Add(erebosHole, ball);
+                    filter.Add(erebosHole, Label(map.transform, layer, hole.Name, local - Vector3.up * (size + 0.035f), HoleColor, 0.16f));
+                    if (line != null)
+                        filter.Add(erebosHole, map.transform.GetChild(map.transform.childCount - 2).gameObject);
                 }
             }
             if (Settings.AbandonedStations.Value)
@@ -99,7 +112,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     pin.transform.localRotation = Quaternion.Euler(45f, 0f, 45f);
                     pin.transform.localScale = Vector3.one * 0.012f;
                     pin.GetComponent<MeshRenderer>().sharedMaterial = LitMaterials.Get("TFA_MapStation", StationColor, 0.2f, 0.6f, StationColor * 0.8f);
-                    Label(map.transform, layer, station.Name, local + Vector3.up * 0.012f, StationColor, 0.14f);
+                    bool erebosStation = Galaxy.OrbitsErebos(anchorId);
+                    filter.Add(erebosStation, pin);
+                    filter.Add(erebosStation, Label(map.transform, layer, station.Name, local + Vector3.up * 0.012f, StationColor, 0.14f));
                 }
             }
         }
@@ -131,7 +146,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             }
         }
 
-        private static void Label(Transform parent, int layer, string text, Vector3 localPosition, Color color, float size = 0.22f)
+        private static GameObject Label(Transform parent, int layer, string text, Vector3 localPosition, Color color, float size = 0.22f)
         {
             var go = new GameObject("TFA_MapLabel") { layer = layer };
             go.transform.SetParent(parent, false);
@@ -146,6 +161,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             label.rectTransform.sizeDelta = new Vector2(1f, 0.1f);
             label.rectTransform.pivot = new Vector2(0.5f, 0f);
             go.AddComponent<FaceCamera>();
+            return go;
         }
 
         private static void Ring(Transform parent, int layer, Material material, Vector3 center, float radius, Color color)
@@ -188,6 +204,45 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             if (away.sqrMagnitude < 1e-6f)
                 return;
             transform.rotation = Quaternion.LookRotation(away.normalized, up);
+        }
+    }
+
+    /// <summary>The star map shows the star system the ship is in: Otrera's planets or Erebos's.</summary>
+    internal sealed class MapSystemFilter : MonoBehaviour
+    {
+        private readonly List<GameObject> _otrera = new List<GameObject>();
+        private readonly List<GameObject> _erebos = new List<GameObject>();
+        private float _next;
+        private bool? _shown;
+
+        public void Clear()
+        {
+            _otrera.Clear();
+            _erebos.Clear();
+            _shown = null;
+        }
+
+        public void Add(bool erebos, GameObject item)
+        {
+            if (item != null)
+                (erebos ? _erebos : _otrera).Add(item);
+        }
+
+        private void Update()
+        {
+            if (Time.unscaledTime < _next)
+                return;
+            _next = Time.unscaledTime + 1f;
+            bool inErebos = Galaxy.Erebos != null && Galaxy.Nearest() == Galaxy.Erebos;
+            if (_shown == inErebos)
+                return;
+            _shown = inErebos;
+            foreach (GameObject item in _otrera)
+                if (item != null)
+                    item.SetActive(!inErebos);
+            foreach (GameObject item in _erebos)
+                if (item != null)
+                    item.SetActive(inErebos);
         }
     }
 }

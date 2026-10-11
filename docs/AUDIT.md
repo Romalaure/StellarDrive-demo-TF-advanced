@@ -111,3 +111,14 @@ Seul l'hôte simule. Toute mécanique qui ajoute des forces ou de l'énergie doi
 - **Gyroscope quantique** : postfix de `ShipRotation.CalculateShipRotationForce`, couple supplémentaire `(facteur - 1) x 8 000 x RotationStrength`.
 - **Onglet de construction** : le panneau du jeu n'a pas de défilement (3 rangées x 8) ; un seul onglet du mod, mis à l'échelle si une rangée déborde.
 - **Carte stellaire** : les étiquettes tournaient vers la caméra sur tous les axes (et pouvaient être ajoutées deux fois) ; elles tournent désormais autour de l'axe de l'hologramme seulement.
+
+## 14. Galaxie, portail, stations, recherche (v0.9.0)
+
+- **Recherche** : techs ajoutées à la `ResearchSettingsList` du jeu (ids 7501+), placées par le mod dans les cases libres ; les techs > 99 du jeu et des autres mods sont exclues du rangement de SDModKit, qui les déplaçait. Ré-placement quand un autre mod ajoute des techs plus tard.
+- **Pièces agrandies** : le jeu instancie le conteneur du modèle (`IShipPartVisual`) et celui des interactions puis y place les prises à leur position dans la pièce : ces conteneurs gardent l'échelle 1, leur contenu est agrandi.
+- **Portail** : le vaisseau racine entre dans un espace de distorsion (`SpacesServer.CreateWarpSpaceForShip`), y est déplacé (`UpdateWarpSpace`) et en sort (`ExitWarpSpace`, dans l'espace de la balise visée si elle est en orbite). Le portail est ancré dans l'espace où il s'ouvre.
+- **Modules de station** : `IShipPartDynamicCollider` (comme les portes du jeu) pour des collisions creuses ; air par un postfix de `PlayerStatusUpdater.TryTakeOxygen`. Le point d'amarrage du jeu est fixe dans le repère de la pièce (0.5, 0.5, 0.25), pour l'aimant comme pour la jonction : le modèle est décalé pour y mettre le collier. Patcher `ShipMagnetData` est impossible ici : une copie de la struct passée à un patch, même par transpiler, est corrompue.
+- **Seconde étoile** : copie de l'objet `Star` du jeu (cellule d'étoile différente) ; `StarsClientTracker.GetCurrentStar`, `SceneLighting` et `LocalLightTracker` prennent l'étoile la plus proche ; toutes les étoiles sont dessinées. Les planètes d'Érèbe ont cette étoile pour `orbitParent`.
+- **Synchronisation des planètes du mod** : la planète de départ ignore désormais les événements de destruction marqués (ses tableaux d'objets ne vont pas si loin : erreur réseau côté client).
+- **Champ de force, portail** : matériaux transparents copiés d'un matériau du jeu (et non d'un autre mod), mots-clés remis à zéro.
+

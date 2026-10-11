@@ -213,6 +213,26 @@ namespace StellarDriveDemoTFAdvanced.Worlds
     [HarmonyPatch(typeof(PlanetNetworkedState), "OnPlanetObjectDestroyed")]
     internal static class ModPlanetStateEventPatch
     {
+        // A tagged id is a mod planet's object: the demo planet must not act on it (its own object
+        // arrays do not reach that far), on the host's server side or any client
+        private static bool Prefix(PlanetNetworkedState __instance, PlanetDestroyedObjectEvent destroyedEvent)
+        {
+            try
+            {
+                if (ModPlanetState.PlanetId(__instance) != PlanetFactory.TemplateId)
+                    return true;
+                if (destroyedEvent.ObjectId is DenseObjectId dense && ModPlanetState.TryUntag(dense.PlacedObjectId, out _, out _))
+                    return false;
+                if (destroyedEvent.ObjectId is HotspotObjectId hotspot && ModPlanetState.TryUntag(hotspot.PlacedObjectId, out _, out _))
+                    return false;
+            }
+            catch (System.Exception e)
+            {
+                ErrorLog.Report("mod planet state", e);
+            }
+            return true;
+        }
+
         private static void Postfix(PlanetNetworkedState __instance, PlanetDestroyedObjectEvent destroyedEvent, bool asServer)
         {
             try
