@@ -372,7 +372,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             var local = new Bounds();
             foreach (Renderer r in ship.GetComponentsInChildren<Renderer>())
             {
-                if (r == _bubbleRenderer)
+                // Not the bubble itself (shell and lattice): it would measure itself and grow at each fit
+                if (r.transform.IsChildOf(_bubble.transform) || !r.enabled || !r.gameObject.activeInHierarchy)
                     continue;
                 Bounds b = r.bounds;
                 for (int i = 0; i < 8; i++)

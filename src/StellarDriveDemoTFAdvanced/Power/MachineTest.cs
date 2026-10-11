@@ -88,7 +88,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 }
                 string Tank(ushort part) => ship.GetAllStatefulParts<FluidTankState>().Where(p => p.Id == part).Select(p => ((FluidTankState)p.State)).Select(t => $"{t.FluidQuantity:0.00} ({t.FluidFlow:0.###})").FirstOrDefault()
                     ?? ship.GetAllStatefulParts<ConstantState>().Where(p => p.Id == part).Select(p => ((ConstantState)p.State).ConstantValue.ToString("0.0")).FirstOrDefault() ?? "gone";
-                AdvancedMod.Log.Msg($"dev: machine test t={2 * (i + 1)} s: parts {ship.PartCount}, reactor {Tank(1)}, field charge/status {Tank(2)}, condenser {Tank(3)}, oxygen tank {Tank(4)}, filled tank {Tank(5)}");
+                AdvancedMod.Log.Msg($"dev: machine test t={2 * (i + 1)} s: parts {ship.PartCount}, reactor {Tank(1)}, field charge/status {Tank(2)}, condenser {Tank(3)}, oxygen tank {Tank(4)}, filled tank {Tank(5)}, bubble size {Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).FirstOrDefault(b => b.name == "TFA_ForceFieldBubble")?.localScale.ToString("F2")}");
                 if (i == 5)
                     yield return Parts.Showcase.Photograph(state.Id, "machines");
             }
