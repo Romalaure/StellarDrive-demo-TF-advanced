@@ -21,6 +21,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             PartFactory.Register(PowerCatalog.DarkCollectorId, "SignalDisplay", AdvancedTab.Name, AdvancedTab.SuperiorRow, ConfigureCollector);
             PartFactory.Register(PowerCatalog.DarkTankId, "FluidTank", AdvancedTab.Name, AdvancedTab.SuperiorRow, ConfigureTank);
+            PartFactory.Register(InfiniteDarkTank.Id, "FluidTank", AdvancedTab.Name, AdvancedTab.SuperiorRow, ConfigureInfiniteTank);
             PartFactory.Register(PowerCatalog.DarkReactorId, "SignalDisplay", AdvancedTab.Name, AdvancedTab.SuperiorRow, ConfigureReactor);
             PartFactory.Register(PowerCatalog.PortalId, "SignalDisplay", AdvancedTab.Name, AdvancedTab.SuperiorRow, ConfigurePortal);
             AdvancedMod.Log.Msg("registered the dark matter collector, tank and reactor, and the portal generator");
@@ -66,6 +67,15 @@ namespace StellarDriveDemoTFAdvanced.Power
                 "Le réservoir de fluide du jeu, blindé de météorite pour garder la matière noire (il prend aussi les autres fluides). Branchement et prise signal comme le réservoir du jeu.",
                 30f, new[] { (ModItems.Meteorite, 2), (ModItems.Titanium, 4), (Glass, 4) });
             Recolor(prefab, new Color(0.45f, 0.38f, 0.6f), new Color(0.08f, 0.02f, 0.14f));
+        }
+
+        private static void ConfigureInfiniteTank(PartSettings settings, GameObject prefab)
+        {
+            PartFactory.Describe(settings, "Réservoir de matière noire infini",
+                "Un réservoir de fluide toujours plein de matière noire : ce que les conduites y puisent se recrée aussitôt, et son contenu ne pèse rien. Pour alimenter sans fin un réacteur à matière noire ou un générateur de portail. Branchement et prise signal comme le réservoir du jeu.",
+                30f, new[] { (ModItems.Meteorite, 20), (ModItems.QuantumCore, 2), (ModItems.ExoticMatter, 2), (ModItems.Titanium, 8) });
+            // Darker shell, a stronger violet glow than the plain dark matter tank
+            Recolor(prefab, new Color(0.3f, 0.22f, 0.45f), new Color(0.35f, 0.08f, 0.6f));
         }
 
         private static void ConfigureReactor(PartSettings settings, GameObject prefab)
@@ -148,11 +158,9 @@ namespace StellarDriveDemoTFAdvanced.Power
             ringObject.AddComponent<MeshRenderer>().sharedMaterial = LitMaterials.Get("TFA_PortalRingPart", Color.white, 0f, 0.8f, Color.white);
             visuals.gameObject.AddComponent<PortalVisuals>();
             var bounds = prefab.GetComponent<ShipPartBounds>();
-            PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachinePowerA, CableType.Power, new Vector3(-width * 0.47f, 0.17f, 0f), Vector3.left);
-            PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachinePowerB, CableType.Power, new Vector3(width * 0.47f, 0.17f, 0f), Vector3.right);
-            PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachineSignal, CableType.Signal, new Vector3(0.45f, 0.17f, -face), Vector3.back);
-            PowerParts.GraftSeated(prefab, bounds, Portal.CommandSocket, CableType.Signal, new Vector3(0.2f, 0.17f, -face), Vector3.back);
-            PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachineFluid, CableType.Fluid, new Vector3(-0.35f, 0.17f, -face), Vector3.back);
+            PowerParts.GraftRow(prefab, bounds, 0.17f, -face, 0.24f,
+                (PowerCatalog.MachinePowerA, CableType.Power), (PowerCatalog.MachineFluid, CableType.Fluid), (Portal.CommandSocket, CableType.Signal),
+                (PowerCatalog.MachineSignal, CableType.Signal), (PowerCatalog.MachinePowerB, CableType.Power));
         }
 
         /// <summary>
@@ -208,14 +216,12 @@ namespace StellarDriveDemoTFAdvanced.Power
                 model.Core.Cylinder(new Vector3(x, height, depth * 0.38f), new Vector3(x, height + 0.05f, depth * 0.38f), 0.03f, 0.02f, 8);
         }
 
-        // Power on both sides, signal and fluid at the back
+        // Every socket in one row at the back: power, fluid, signal, power
         private static void Sockets(GameObject prefab, float side, float face, float y)
         {
             var bounds = prefab.GetComponent<ShipPartBounds>();
-            PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachinePowerA, CableType.Power, new Vector3(-side, y, 0f), Vector3.left);
-            PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachinePowerB, CableType.Power, new Vector3(side, y, 0f), Vector3.right);
-            PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachineSignal, CableType.Signal, new Vector3(0.2f, y, -face), Vector3.back);
-            PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachineFluid, CableType.Fluid, new Vector3(-0.2f, y, -face), Vector3.back);
+            PowerParts.GraftRow(prefab, bounds, y, -face, 0.2f,
+                (PowerCatalog.MachinePowerA, CableType.Power), (PowerCatalog.MachineFluid, CableType.Fluid), (PowerCatalog.MachineSignal, CableType.Signal), (PowerCatalog.MachinePowerB, CableType.Power));
         }
 
         private static readonly int ColorId = Shader.PropertyToID("_Color");

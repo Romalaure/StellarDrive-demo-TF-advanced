@@ -16,7 +16,9 @@ Onglet de construction **TF Avancé**. Les machines se débloquent à la [table 
 
 ## Champ de force
 
-Enveloppe tout le vaisseau (et ce qui y est amarré) d'une bulle cyan qui encaisse les chocs et les forces de marée des trous noirs : **150 points** (un choc compte sa variation de vitesse en m/s). Consomme 2 000 W et 0,02 oxygène/s, se recharge de 0,5 point/s. À zéro il casse et redémarre **5 minutes** plus tard. La bulle est une coque d'énergie : presque invisible de face, lumineuse sur les bords, couverte d'une grille hexagonale, traversée par une bande de balayage qui monte ; chaque impact lance une onde qui s'étend sur la bulle. Elle rougit quand la charge baisse et vacille quand elle est presque vide. Prise signal : charge en % (-1 éteint, négatif : secondes avant redémarrage).
+Enveloppe tout le vaisseau (et ce qui y est amarré) d'une bulle cyan qui encaisse les chocs et les forces de marée des trous noirs : **150 points** (un choc compte sa variation de vitesse en m/s). Consomme 2 000 W et 0,02 oxygène/s, se recharge de 0,5 point/s. À zéro il casse et redémarre **5 minutes** plus tard. La bulle est une coque d'énergie : presque invisible de face, lumineuse sur les bords, couverte d'une grille hexagonale, traversée par une bande de balayage qui monte ; chaque impact lance une onde qui s'étend sur la bulle. Elle rougit quand la charge baisse et vacille quand elle est presque vide.
+
+**Avec le mod Arsenal** : le champ encaisse aussi ses armes. Les balles et éclats qui touchent la coque, et le souffle des explosions sur les pièces, vident le champ au lieu d'abîmer le vaisseau (dégâts de plaque ÷ 4, puissance d'explosion ÷ 20 : la plus grosse explosion prend environ la moitié d'un champ plein). Tant qu'il tient, les explosions ne poussent plus le vaisseau. Les missiles et roquettes qui entrent dans la bulle explosent dessus, avec une onde à l'endroit de l'impact. Prise signal : charge en % (-1 éteint, négatif : secondes avant redémarrage).
 
 ## Matière noire
 
@@ -24,6 +26,7 @@ Enveloppe tout le vaisseau (et ce qui y est amarré) d'une bulle cyan qui encais
 |---|---|
 | Collecteur de matière noire | 0,004 unité/s pour 8 000 W, ×5 près d'un trou noir, ×3 dans Érèbe ; la verse dans la conduite de sa prise de fluide |
 | Réservoir de matière noire | le réservoir du jeu blindé de météorite (prend tous les fluides) |
+| Réservoir de matière noire infini | toujours plein de matière noire : ce qu'on y puise se recrée, son contenu ne pèse rien |
 | Réacteur à matière noire | 40 000 W pour 0,002 unité/s de matière noire |
 
 ## Générateur de portail
@@ -52,3 +55,7 @@ Propulseur vectoriel, moteur lourd, moteur de précision, moteur économe, moteu
 ## Carte stellaire
 
 La carte stellaire du jeu montre le système où se trouve le vaisseau. Dans son menu (comme dans celui de l'ordinateur de visée), le bouton **Galaxie** passe de **442 Otrera** à **Érèbe** puis revient au système du vaisseau : la carte et la liste des cibles montrent les planètes de la galaxie choisie.
+
+## Prises
+
+Toutes les machines du mod ont leurs prises **en une seule rangée sur la face arrière** : tous les câbles partent dans le même axe. De gauche à droite (vu de derrière) : électricité, fluide, signal, électricité.

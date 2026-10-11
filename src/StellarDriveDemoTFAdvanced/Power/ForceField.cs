@@ -178,6 +178,19 @@ namespace StellarDriveDemoTFAdvanced.Power
             return true;
         }
 
+        /// <summary>Host: whether a working field covers the ship or anything docked to it.</summary>
+        public static bool IsUp(ShipsServerTracker ships, uint shipId)
+        {
+            if (ByShip.Count == 0)
+                return false;
+            foreach (var data in ships.GetRootConnectedShips(shipId))
+            {
+                if (ByShip.TryGetValue(data.Ship.Id, out List<Entry> list) && list.Any(e => e.Runtime.Up && e.Runtime.Charge > 0f))
+                    return true;
+            }
+            return false;
+        }
+
         private static void Write(Entry entry, float now, bool force = false)
         {
             Runtime rt = entry.Runtime;

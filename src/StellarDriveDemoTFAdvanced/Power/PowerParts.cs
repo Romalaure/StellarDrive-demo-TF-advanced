@@ -63,9 +63,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
             MachineModels.Attach(visuals, model, name, glow, glow);
             var bounds = prefab.GetComponent<ShipPartBounds>();
-            GraftSeated(prefab, bounds, PowerCatalog.BatteryPowerA, CableType.Power, new Vector3(-width * 0.47f, height * 0.35f, 0f), Vector3.left);
-            GraftSeated(prefab, bounds, PowerCatalog.BatteryPowerB, CableType.Power, new Vector3(width * 0.47f, height * 0.35f, 0f), Vector3.right);
-            GraftSeated(prefab, bounds, PowerCatalog.StatusSignal, CableType.Signal, new Vector3(0f, height * 0.45f, -depth * 0.47f), Vector3.back);
+            GraftRow(prefab, bounds, height * 0.35f, -depth * 0.47f, 0.22f,
+                (PowerCatalog.BatteryPowerA, CableType.Power), (PowerCatalog.StatusSignal, CableType.Signal), (PowerCatalog.BatteryPowerB, CableType.Power));
         }
 
         private static void ConfigureReactor(PartSettings settings, GameObject prefab)
@@ -97,9 +96,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             model.Light.Cylinder(new Vector3(0f, top + 0.005f, 0f), new Vector3(0f, top + 0.02f, 0f), 0.26f, 0.26f, 8, capA: false, capB: false);
             MachineModels.Attach(visuals, model, "Reactor", MachineModels.Red, MachineModels.Violet);
             var bounds = prefab.GetComponent<ShipPartBounds>();
-            GraftSeated(prefab, bounds, PowerCatalog.BatteryPowerA, CableType.Power, new Vector3(-width * 0.47f, 0.36f, 0f), Vector3.left);
-            GraftSeated(prefab, bounds, PowerCatalog.BatteryPowerB, CableType.Power, new Vector3(width * 0.47f, 0.36f, 0f), Vector3.right);
-            GraftSeated(prefab, bounds, PowerCatalog.StatusSignal, CableType.Signal, new Vector3(-width * 0.47f, 0.6f, 0.25f), Vector3.left);
+            GraftRow(prefab, bounds, 0.36f, BackOf(bounds), 0.22f,
+                (PowerCatalog.BatteryPowerA, CableType.Power), (PowerCatalog.StatusSignal, CableType.Signal), (PowerCatalog.BatteryPowerB, CableType.Power));
         }
 
         private static void ConfigureCryoBattery(PartSettings settings, GameObject prefab)
@@ -136,10 +134,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
             MachineModels.Attach(visuals, model, "Condenser", MachineModels.Cyan, MachineModels.Cyan);
             var bounds = prefab.GetComponent<ShipPartBounds>();
-            GraftSeated(prefab, bounds, PowerCatalog.MachinePowerA, CableType.Power, new Vector3(-width * 0.47f, 0.3f, 0f), Vector3.left);
-            GraftSeated(prefab, bounds, PowerCatalog.MachinePowerB, CableType.Power, new Vector3(width * 0.47f, 0.3f, 0f), Vector3.right);
-            GraftSeated(prefab, bounds, PowerCatalog.MachineSignal, CableType.Signal, new Vector3(0.18f, 0.35f, -depth * 0.47f), Vector3.back);
-            GraftSeated(prefab, bounds, Condenser.OxygenSocket, CableType.Fluid, new Vector3(-0.18f, 0.3f, -depth * 0.47f), Vector3.back);
+            GraftRow(prefab, bounds, 0.3f, -depth * 0.47f, 0.2f,
+                (PowerCatalog.MachinePowerA, CableType.Power), (PowerCatalog.MachineSignal, CableType.Signal), (Condenser.OxygenSocket, CableType.Fluid), (PowerCatalog.MachinePowerB, CableType.Power));
         }
 
         // The game's gyroscope, its body in violet with a lit quantum ring; torque from QuantumGyroscopePatch
@@ -223,10 +219,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             coreObject.AddComponent<MeshRenderer>().sharedMaterial = LitMaterials.Get("TFA_ShieldRing", Color.white, 0f, 0.8f, Color.white);
             visuals.gameObject.AddComponent<ForceFieldVisuals>();
             var bounds = prefab.GetComponent<ShipPartBounds>();
-            GraftSeated(prefab, bounds, PowerCatalog.MachinePowerA, CableType.Power, new Vector3(-width * 0.9f * 0.47f, 0.2f, 0f), Vector3.left);
-            GraftSeated(prefab, bounds, PowerCatalog.MachinePowerB, CableType.Power, new Vector3(width * 0.9f * 0.47f, 0.2f, 0f), Vector3.right);
-            GraftSeated(prefab, bounds, PowerCatalog.MachineSignal, CableType.Signal, new Vector3(0.3f, 0.2f, -face), Vector3.back);
-            GraftSeated(prefab, bounds, ForceField.OxygenSocket, CableType.Fluid, new Vector3(-0.3f, 0.2f, -face), Vector3.back);
+            GraftRow(prefab, bounds, 0.2f, -face, 0.22f,
+                (PowerCatalog.MachinePowerA, CableType.Power), (PowerCatalog.MachineSignal, CableType.Signal), (ForceField.OxygenSocket, CableType.Fluid), (PowerCatalog.MachinePowerB, CableType.Power));
         }
 
         // A square-section arm from a to b, narrowing
@@ -305,13 +299,24 @@ namespace StellarDriveDemoTFAdvanced.Power
 
             // Power in on the left side, power out on the right side, the two signals on top
             var bounds = prefab.GetComponent<ShipPartBounds>();
-            GraftSeated(prefab, bounds, PowerCatalog.BreakerInput, CableType.Power, new Vector3(-0.2f, 0.06f, 0f), Vector3.left);
-            GraftSeated(prefab, bounds, PowerCatalog.BreakerOutput, CableType.Power, new Vector3(0.2f, 0.06f, 0f), Vector3.right);
-            GraftSeated(prefab, bounds, PowerCatalog.StatusSignal, CableType.Signal, new Vector3(-0.1f, 0.12f, 0.09f), Vector3.up);
-            GraftSeated(prefab, bounds, PowerCatalog.BreakerControl, CableType.Signal, new Vector3(0.1f, 0.12f, 0.09f), Vector3.up);
+            GraftRow(prefab, bounds, 0.06f, BackOf(bounds), 0.12f,
+                (PowerCatalog.BreakerInput, CableType.Power), (PowerCatalog.StatusSignal, CableType.Signal), (PowerCatalog.BreakerControl, CableType.Signal), (PowerCatalog.BreakerOutput, CableType.Power));
         }
 
         // A plug looks into the part; SDModKit then sets it just clear of the part's bounds
+        /// <summary>
+        /// Sockets in one row on the part's back face, left to right as listed: every cable leaves
+        /// the part along the same axis.
+        /// </summary>
+        internal static void GraftRow(GameObject prefab, ShipPartBounds bounds, float y, float backZ, float spacing, params (byte Id, CableType Type)[] sockets)
+        {
+            for (int i = 0; i < sockets.Length; i++)
+                GraftSeated(prefab, bounds, sockets[i].Id, sockets[i].Type, new Vector3((i - (sockets.Length - 1) * 0.5f) * spacing, y, backZ), Vector3.back);
+        }
+
+        // The back face of a part's placement box
+        internal static float BackOf(ShipPartBounds bounds) => bounds != null ? bounds.center.z - bounds.bounds.z * 0.47f : -0.3f;
+
         internal static void GraftSeated(GameObject prefab, ShipPartBounds bounds, byte id, CableType type, Vector3 position, Vector3 outward)
         {
             Quaternion rotation = Quaternion.LookRotation(-outward, Mathf.Abs(outward.y) > 0.9f ? Vector3.forward : Vector3.up);

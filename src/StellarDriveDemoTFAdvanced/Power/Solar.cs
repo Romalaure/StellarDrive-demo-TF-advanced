@@ -189,9 +189,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
             root.AddComponent<ModuleColliders>();
             var bounds = prefab.GetComponent<ShipPartBounds>();
-            PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachinePowerA, CableType.Power, new Vector3(-0.4f, 0.06f, 0f), Vector3.left);
-            PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachinePowerB, CableType.Power, new Vector3(0.4f, 0.06f, 0f), Vector3.right);
-            PowerParts.GraftSeated(prefab, bounds, PowerCatalog.MachineSignal, CableType.Signal, new Vector3(0f, 0.06f, -0.4f), Vector3.back);
+            PowerParts.GraftRow(prefab, bounds, 0.06f, -0.4f, 0.2f,
+                (PowerCatalog.MachinePowerA, CableType.Power), (PowerCatalog.MachineSignal, CableType.Signal), (PowerCatalog.MachinePowerB, CableType.Power));
         }
     }
 }

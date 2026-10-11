@@ -369,6 +369,9 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.10.1 : bulle du champ de force | ✅ en jeu (vaisseau de test câblé) : grille hexagonale, bord lumineux, bande de balayage, onde au choc (photo) ; le modèle du générateur ne change pas |
 | v0.10.1 : console de bord | ✅ écran relevé au-dessus du pied (photo) |
 | v0.10.1 : table de cartographie | ✅ les vaisseaux et coffres ne sont marqués que s'ils sont vraiment autour de la table (affichés, à moins de 300 m en hauteur comme à plat) : un vaisseau loin au-dessus ou en dessous n'apparaît plus en jaune |
+| v0.11.0 : champ de force contre Arsenal | ✅ en jeu (vaisseau de test sous champ, Arsenal 1.4.0) : explosion Arsenal de 1 400 absorbée, 30 pièces sur 30 gardées ; missile Arsenal tiré sur le vaisseau : il explose sur le champ, aucune pièce perdue. Souffle ramené à ÷ 20 ensuite |
+| v0.11.0 : prises en une rangée | ✅ toutes les prises des machines du mod sur la face arrière, en ligne (photo) |
+| v0.11.0 : réservoir de matière noire infini | ✅ construit (photo) ; mêmes mécanismes que le réservoir infini du mod TF |
 | v0.10.3 : taille du champ de force | ✅ la bulle se mesurait elle-même (sa grille comptait dans la taille du vaisseau) et grossissait de 30 % toutes les 2 s ; elle est exclue du calcul. Vérifié en jeu : taille constante (9,4 × 5,2 × 9,5 m) sur 24 s |
 | v0.10.2 : carte stellaire en double | ✅ cause trouvée : le jeu construit une deuxième carte, invisible, sur le corps physique du vaisseau (pour cliquer les planètes) ; le mod y ajoutait ses noms et repères, qui apparaissaient en double devant le vaisseau en vol puis tremblaient. Seule la carte affichée est décorée (vérifié en jeu : 24 repères, tous sur le vaisseau affiché) |
 | v0.10.1 : interactions des modules | ✅ en jeu : 3 interrupteurs (pièces éteintes), 3 lits, 2 consoles, 2 points de réapparition trouvés ; la couchette du haut a fait de l'habitation le point de réapparition |

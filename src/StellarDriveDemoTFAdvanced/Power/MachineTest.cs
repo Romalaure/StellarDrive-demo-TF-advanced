@@ -91,6 +91,21 @@ namespace StellarDriveDemoTFAdvanced.Power
                 AdvancedMod.Log.Msg($"dev: machine test t={2 * (i + 1)} s: parts {ship.PartCount}, reactor {Tank(1)}, field charge/status {Tank(2)}, condenser {Tank(3)}, oxygen tank {Tank(4)}, filled tank {Tank(5)}, bubble size {Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).FirstOrDefault(b => b.name == "TFA_ForceFieldBubble")?.localScale.ToString("F2")}");
                 if (i == 5)
                     yield return Parts.Showcase.Photograph(state.Id, "machines");
+                // With the Arsenal mod: a big blast on the ship, then a missile at it
+                System.Type blast = HarmonyLib.AccessTools.TypeByName("Arsenal.Damage.PartDamage");
+                if (blast != null && i == 7)
+                {
+                    HarmonyLib.AccessTools.Method(blast, "ApplyBlast").Invoke(null, new object[] { ship, Vector3.zero, 4f, 1400f });
+                    AdvancedMod.Log.Msg($"dev: machine test: Arsenal blast of 1400 on the ship: parts {ship.PartCount}, field {Tank(2)}");
+                }
+                System.Type missiles = HarmonyLib.AccessTools.TypeByName("Arsenal.Vehicles.Missiles");
+                Transform visual = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).FirstOrDefault(t => t.parent == null && t.name == $"ship {state.Id} visual");
+                if (missiles != null && visual != null && i == 8)
+                {
+                    Vector3 from = visual.position + visual.forward * 45f + visual.up * 3f;
+                    HarmonyLib.AccessTools.Method(missiles, "Launch").Invoke(null, new object[] { from, (visual.position - from).normalized * 40f, state.Id, 0u, true, 0u, -1 });
+                    AdvancedMod.Log.Msg("dev: machine test: Arsenal missile fired at the ship");
+                }
             }
         }
 
