@@ -85,6 +85,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 (StationModules.HubId, new Vector3(0f, -0.46f, 0f), 0, 4),
                 (7343, new Vector3(5f, -0.46f, 0f), 0, 4),
                 (7342, new Vector3(5f, -0.46f, -2f), 0, 4),
+                (StationModules.StairsId, new Vector3(0f, -0.46f, -10f), 0, 4),
             };
             uint first = Showcase.LoadShip(Showcase.Json(placed, 9), player, spaces, ships, worldIds, 20f);
             MelonLoader.MelonCoroutines.Start(Pin(spaces, ships, first, 40f));
@@ -111,6 +112,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 ("solar panel on the hub's roof", StationModules.SolarId, new Vector3(-1f, 6f, -1f), Vector3.down),
                 ("storage chest on the hub's floor", 30, new Vector3(1.2f, 1.5f, -1.2f), Vector3.down),
                 ("window on the plank wall's face", 7351, new Vector3(5.2f, 1f, 2f), Vector3.back),
+                ("corridor at the stairs' upper door", StationModules.CorridorId, new Vector3(1.4f, 3.6f, -4f), Vector3.back),
+                ("corner on the hub's right wall", StationModules.CornerId, new Vector3(6f, 1.2f, 1.3f), Vector3.left),
+                ("game signal display on the hub's left wall", 82, new Vector3(-6f, 1.8f, -1.3f), Vector3.right),
             };
             PartSettings[] all = Resources.FindObjectsOfTypeAll<PartSettings>();
             foreach (var probe in probes)

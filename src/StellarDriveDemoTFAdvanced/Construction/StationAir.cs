@@ -53,11 +53,12 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     {
                         if (part?.Settings == null || !StationModules.ById.TryGetValue(part.Settings.id, out StationModules.Spec spec))
                             continue;
-                        if (!inside)
-                        {
-                            Vector3 local = Quaternion.Inverse(part.LocalRotation) * (position - part.LocalPosition);
-                            inside = StationModules.Interior(spec).Contains(local);
-                        }
+                        Vector3 local = Quaternion.Inverse(part.LocalRotation) * (position - part.LocalPosition);
+                        bool here = StationModules.Interior(spec).Contains(local);
+                        // An airlock open to the outside has no air
+                        if (here && spec.Id == StationModules.AirlockId && AirlockColliders.OuterOpen(part.State as Ships.Interface.Model.Parts.State.LeverState))
+                            return;
+                        inside |= here;
                         if (air == null && connections.TryGetFluidGroupCacheFromSocket(new EntityPartSocket(ship.Id, part.Id, spec.AirSocket), out FluidGroupServerState line)
                             && line.FluidItemId == Oxygen && line.Available >= amount)
                             air = line;

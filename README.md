@@ -200,9 +200,15 @@ Les pièces du mod se débloquent à la **table de recherche** : une branche de 
 | Laboratoire | une vraie table de recherche dans la pièce, paillasses et flacons |
 | Infirmerie de clonage | une vraie capsule de clonage (point de réapparition), deux lits médicaux |
 | Module de support vital | usine à oxygène : 2 500 W, 0,1 oxygène/s dans la conduite de sa prise d'air |
-| Observatoire | plafond vitré, une vraie carte stellaire sur un pupitre |
+| Observatoire | plafond vitré, grandes baies sur trois côtés, une vraie carte stellaire sur un pupitre bas |
+| Sas de dépressurisation | deux portes étanches commandées par un levier, jamais ouvertes ensemble ; sans air quand la porte extérieure est ouverte |
+| Couloirs d'angle, en T, en U (demi-tour), long | coude à 90°, embranchement, demi-tour à 180°, couloir vitré de 8 m |
+| Cage d'escalier | deux étages : escalier, palier à 3 m, porte en bas et porte en haut |
 
-- **Assemblage** : un module posé contre le mur d'un autre s'aligne dessus, porte contre porte, centré, au même niveau, tourné pour que ses portes fassent face au voisin.
+- **Assemblage** : un module posé contre le mur d'un autre se met en face de la porte de ce mur la plus proche du viseur, à la hauteur de son étage, tourné pour qu'une de ses portes y fasse face.
+- **Habitation utilisable** : la couchette du bas est le lit du jeu (dormir), les casiers sont un rangement de 10 emplacements, la console ouvre le wiki du mod (comme celle du hub).
+- **Murs** : un objet du jeu se fixe sur le mur d'un module comme sur la coque ; les constructions du mod s'y adossent debout.
+- **Peinture** : avec le pistolet du mod TF (v0.12.0 ou plus), extérieur et intérieur ont chacun leur couleur (on peint le côté visé, ou les deux).
 - **Machines du jeu** : le laboratoire, l'infirmerie et l'observatoire gardent la machine du jeu dont ils sont faits (table de recherche, capsule de clonage, carte stellaire), qui fonctionne comme d'habitude.
 - **On entre dedans** : chaque module a ses propres collisions (sol, plafond, murs autour des portes), via les « colliders dynamiques » du jeu, et une boîte de placement réduite au plancher pour y poser meubles et machines.
 - **Air** : un module est pressurisé dès qu'un module de la station est relié à une conduite d'oxygène ; l'oxygène respiré est pris dans la conduite.
@@ -355,6 +361,12 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.9.0 : synchronisation des planètes du mod | ✅ corrigé : la planète de départ réagissait elle-même aux objets marqués d'une planète du mod (erreur réseau « Index was outside the bounds ») |
 | v0.9.0 : pièces posées sur des pièces posées | ✅ test en jeu par l'outil d'accrochage du jeu : couloir, habitation et stockage contre un hub (portes alignées, photo), cloison contre cloison, plancher sur plancher, vitre contre une cloison, panneaux solaires sur le toit du hub, coffre du jeu sur le sol du hub ; ⏳ geste du joueur avec l'outil de construction **à refaire en jeu** |
 | v0.9.0 : nouveaux modules | ✅ laboratoire, infirmerie, support vital et observatoire construits et photographiés de l'intérieur (table de recherche, capsule de clonage et carte stellaire du jeu en place, hologramme de la carte actif) ; ⏳ ouvrir la recherche, choisir la capsule comme point de réapparition et l'oxygène du support vital **à vérifier en jeu** |
+| v0.10.0 : accrochage des modules | ✅ test en jeu par l'outil d'accrochage du jeu : couloir à la porte du haut d'une cage d'escalier (à 3 m, centré sur la porte), coude contre un hub, écran du jeu fixé sur le mur d'un hub, plus les cas de la v0.9.0 |
+| v0.10.0 : nouveaux modules | ✅ sas (levier, portes qui coulissent, photo), couloirs d'angle, en T, en U, long, cage d'escalier : construits et photographiés de l'intérieur ; ⏳ monter l'escalier et passer le sas **à faire en jeu** |
+| v0.10.0 : peinture extérieur / intérieur | ✅ module peint par le code du mod TF : extérieur rouge, intérieur bleu (photos) ; ⏳ au pistolet, en visant **à faire en jeu** |
+| v0.10.0 : habitation | ✅ lit, armoire et console en place (interaction du lit copiée du lit du jeu) ; ⏳ dormir, ranger et ouvrir le wiki depuis la console **à faire en jeu** |
+| v0.10.0 : Upgrade Table | ✅ le mod Upgrade Table copiait le laboratoire (même état que la table de recherche) ; il copie de nouveau la table du jeu (vérifié dans l'arbre de la pièce) |
+| v0.10.0 : écrans de bord | ✅ le texte « en attente du vaisseau » du modèle restait sous les stats : le canevas en double est retiré |
 | v0.9.0 : wiki dans le Guide | ✅ entrée « Wiki TF Avancé » dans le Guide du jeu, 23 pages rendues (titres, listes, tableaux, liens), navigation Accueil → Pyros → Machines → Retour (photos) ; ⏳ clic de souris sur un lien **à refaire en jeu** |
 | v0.9.0 : onglets de construction | ✅ deux rangées d'onglets centrées dans le cadre, libellés à taille lisible (mesuré en jeu) |
 | v0.9.0 : collecteur et réacteur à matière noire | ✅ faces intérieures (entonnoir, anneaux) visibles : modèles en double face (photo) |

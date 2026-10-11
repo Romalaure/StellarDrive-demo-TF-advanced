@@ -88,7 +88,36 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     Icon(button).enabled = false;
                 filterButtons.Add((filter, button));
             }
+            // One more button, cycling the galaxy the list and the star map show
+            TargetingComputerButton galaxy = Object.Instantiate(prefab, list);
+            galaxy.name = "TFA_TargetGalaxy";
+            galaxy.transform.SetSiblingIndex(Filters.Length);
+            if (Icon(galaxy) != null)
+                Icon(galaxy).enabled = false;
+            if (DistanceText(galaxy) != null)
+                DistanceText(galaxy).text = "";
+            Button cycle = galaxy.GetComponentInChildren<Button>(true);
+            if (cycle != null)
+            {
+                cycle.onClick = new Button.ButtonClickedEvent();
+                cycle.onClick.AddListener(() =>
+                {
+                    // Follow the ship, then Otrera, then Erebos
+                    MapSystemFilter.View = MapSystemFilter.View == null ? false : MapSystemFilter.View == false ? true : (bool?)null;
+                    GalaxyLabel(galaxy);
+                    Apply(canvas, filterButtons);
+                });
+            }
+            GalaxyLabel(galaxy);
             Apply(canvas, filterButtons);
+        }
+
+        private static void GalaxyLabel(TargetingComputerButton button)
+        {
+            if (NameText(button) == null)
+                return;
+            string shown = MapSystemFilter.ShowsErebos ? "Érèbe" : "442 Otrera";
+            NameText(button).text = "Galaxie : " + shown + (MapSystemFilter.View == null ? " (où est le vaisseau)" : "") + "  »";
         }
 
         private static void Apply(TargetingComputerCanvas canvas, List<(Filter Filter, TargetingComputerButton Button)> filterButtons)
@@ -109,6 +138,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     case Filter.Beacons: shown = target.TargetType == TargetType.Beacon && !station; break;
                     default: shown = true; break;
                 }
+                // Planets of the other galaxy are hidden, as on the star map
+                if (shown && target.TargetType == TargetType.Planet)
+                    shown = Galaxy.OrbitsErebos(target.PlanetId) == MapSystemFilter.ShowsErebos;
                 button.gameObject.SetActive(shown);
             }
             foreach ((Filter filter, TargetingComputerButton button) in filterButtons)

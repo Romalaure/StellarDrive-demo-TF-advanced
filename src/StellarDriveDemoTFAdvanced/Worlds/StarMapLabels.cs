@@ -207,9 +207,17 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         }
     }
 
-    /// <summary>The star map shows the star system the ship is in: Otrera's planets or Erebos's.</summary>
+    /// <summary>
+    /// The star map shows one star system: by default the one the ship is in (Otrera's planets or
+    /// Erebos's); the targeting menu of the star map can show the other (see <see cref="TargetingFilters"/>).
+    /// </summary>
     internal sealed class MapSystemFilter : MonoBehaviour
     {
+        /// <summary>The galaxy chosen in the menu: null follows the ship, true Erebos, false Otrera.</summary>
+        public static bool? View;
+
+        public static bool ShowsErebos => View ?? (Galaxy.Erebos != null && Galaxy.Nearest() == Galaxy.Erebos);
+
         private readonly List<GameObject> _otrera = new List<GameObject>();
         private readonly List<GameObject> _erebos = new List<GameObject>();
         private float _next;
@@ -232,8 +240,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             if (Time.unscaledTime < _next)
                 return;
-            _next = Time.unscaledTime + 1f;
-            bool inErebos = Galaxy.Erebos != null && Galaxy.Nearest() == Galaxy.Erebos;
+            _next = Time.unscaledTime + 0.25f;
+            bool inErebos = ShowsErebos;
             if (_shown == inErebos)
                 return;
             _shown = inErebos;

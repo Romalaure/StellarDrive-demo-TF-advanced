@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 using Ships;
 using Ships.Parts.Common;
 using Ships.Parts.Common.Model;
@@ -183,6 +184,12 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                 return false;
 
             int layer = _anchor.gameObject.layer;
+            // A copy of the part carries the canvas its original built (with the idle text): only ours stays
+            foreach (Transform old in _anchor.Cast<Transform>().Where(t => t.name == "TFA_Canvas").ToList())
+            {
+                old.gameObject.SetActive(false);
+                Destroy(old.gameObject);
+            }
             var canvasObject = new GameObject("TFA_Canvas", typeof(RectTransform)) { layer = layer };
             canvasObject.transform.SetParent(_anchor, false);
             var canvas = canvasObject.AddComponent<Canvas>();

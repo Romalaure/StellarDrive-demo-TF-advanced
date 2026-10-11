@@ -1,3 +1,4 @@
+using System.Linq;
 using HarmonyLib;
 using Ships.Interface.Model;
 using Ships.Interface.Model.Placement;
@@ -158,35 +159,61 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     return null;
                 bool hasTarget = TryTarget(ship, out Vector3 targetPos, out Quaternion targetRot, out ushort targetId);
                 ushort placingId = Placing != null ? Placing.id : (ushort)0;
+                SnappingStyle style = Placing != null ? Placing.snappingStyle : SnappingStyle.PreciseOnAny;
                 bool modules = StationModules.ById.ContainsKey(placingId) && StationModules.ById.ContainsKey(targetId);
 
                 // The part's upright: the preview's, snapped to the ship's axes
                 PartOrientation upright = Nearest(props.PartUp);
                 bool side = Mathf.Abs(Vector3.Dot(n, upright.GetVector3())) < 0.5f;
-                if (Placing != null && Placing.snappingStyle == SnappingStyle.PreciseOnWall && !side)
+                if (style == SnappingStyle.PreciseOnWall && !side)
                     return null;
-                PartOrientation up = side ? upright : face;
-                Vector3 upVector = up.GetVector3();
-                PartOrientation forward = Nearest(props.PartForward, upVector);
-                if (modules && side && StationModules.ById.TryGetValue(placingId, out StationModules.Spec spec)
-                    && (spec.Openings & (StationModules.Side.Left | StationModules.Side.Right)) == 0)
+                // Constructions and modules stand upright against a side; other parts are mounted
+                // on it like on the hull: lying on the face, or (wall parts) hung facing out of it
+                PartOrientation up, forward;
+                if (!side || Builds(placingId))
                 {
-                    // Doors at the ends only: the module's length runs away from the one it joins
-                    // (one door, at the back: it faces the module, so forward points away)
-                    bool backOnly = (spec.Openings & StationModules.Side.Front) == 0;
-                    forward = backOnly || Vector3.Dot(props.PartForward, n) >= 0f ? face : face.GetInverse();
+                    up = side ? upright : face;
+                    forward = Nearest(props.PartForward, up.GetVector3());
                 }
+                else if (style == SnappingStyle.PreciseOnWall)
+                {
+                    up = upright;
+                    forward = face.GetInverse();
+                }
+                else if (style == SnappingStyle.PreciseOnFloor)
+                {
+                    return null;
+                }
+                else
+                {
+                    up = face;
+                    forward = Nearest(Quaternion.FromToRotation(props.PartUp, n) * props.PartForward, n);
+                }
+                Vector3 upVector = up.GetVector3();
                 Quaternion rotation = Quaternion.LookRotation(forward.GetVector3(), upVector);
                 Bounds bounds = props.Bounds;
+                Vector3 frame = hasTarget ? targetPos + targetRot * ModuleOffset(targetId) : Vector3.zero;
 
                 // Along the face's normal: just clear of the face
                 float plane = FacePlane(ship, n) ?? Vector3.Dot(props.Hit.Pos, n);
+
+                // A module against a module: doorway to doorway, at the doorway's floor
+                if (modules && side && TryJoin(props, n, upVector, frame, targetRot, targetId, placingId, out Quaternion turn, out Vector3 joined))
+                {
+                    forward = Nearest(turn * Vector3.forward);
+                    Vector3 c = turn * bounds.center;
+                    float a = plane + ModuleGap - (Vector3.Dot(c, n) - Extent(bounds, turn, n));
+                    Vector3 coordJoined = joined - n * Vector3.Dot(joined, n) + n * a;
+                    var joinedPlacement = new FloatingPartPlacement(coordJoined, forward, up);
+                    LastTried = $"{coordJoined:F2} {forward}/{up} joined";
+                    return ship.IsFloatingPlacementFree(joinedPlacement, bounds) ? joinedPlacement : (IPartPlacement)null;
+                }
+
                 Vector3 center = rotation * bounds.center;
                 float along = plane + (modules ? ModuleGap : Gap) - (Vector3.Dot(center, n) - Extent(bounds, rotation, n));
 
                 // Across: around where the player aims, on a grid from the part aimed at
                 Vector3 coord = Vector3.zero;
-                Vector3 frame = hasTarget ? targetPos + targetRot * ModuleOffset(targetId) : Vector3.zero;
                 Vector3 ownOffset = rotation * ModuleOffset(placingId);
                 foreach (PartOrientation axisOrientation in new[] { PartOrientation.Right, PartOrientation.Up, PartOrientation.Forward })
                 {
@@ -195,7 +222,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                         continue;
                     float origin = Vector3.Dot(frame, axis) - Vector3.Dot(ownOffset, axis);
                     float value;
-                    if (side && Mathf.Abs(Vector3.Dot(axis, upVector)) > 0.5f)
+                    if (side && Builds(placingId) && Mathf.Abs(Vector3.Dot(axis, upVector)) > 0.5f)
                         value = hasTarget ? origin : Snap(Vector3.Dot(props.Hit.Pos, axis), 0f);  // base level with the target's
                     else if (modules)
                         value = origin;  // module centered on the one it joins
@@ -208,6 +235,64 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 LastTried = $"{coord:F2} {forward}/{up} bounds {bounds.center:F2} {bounds.size:F2}";
                 return ship.IsFloatingPlacementFree(placement, bounds) ? placement : (IPartPlacement)null;
             }
+
+            /// <summary>
+            /// Turns the new module so one of its doorways faces the aimed wall (the turn closest to the
+            /// preview's), and places it so that doorway lines up with the aimed wall's doorway nearest
+            /// to the crosshair, at that doorway's floor. Returns its part origin (the component along
+            /// the wall's normal is set by the caller).
+            /// </summary>
+            private static bool TryJoin(HitSnapDetectionProperties props, Vector3 n, Vector3 up, Vector3 frame, Quaternion targetRot, ushort targetId, ushort placingId,
+                out Quaternion rotation, out Vector3 origin)
+            {
+                rotation = Quaternion.identity;
+                origin = Vector3.zero;
+                StationModules.Spec target = StationModules.ById[targetId], placing = StationModules.ById[placingId];
+                // The aimed wall, in the target's frame
+                Quaternion toTarget = Quaternion.Inverse(targetRot);
+                Vector3 nLocal = toTarget * n;
+                StationModules.Side wall = new[] { StationModules.Side.Front, StationModules.Side.Back, StationModules.Side.Left, StationModules.Side.Right }
+                    .OrderByDescending(sd => Vector3.Dot(StationModules.Normal(sd), nLocal)).First();
+                Vector3 hitLocal = toTarget * (props.Hit.Pos - frame);
+                int level = Mathf.Clamp(Mathf.FloorToInt(hitLocal.y / target.LevelHeight), 0, target.Levels - 1);
+                float aimed = Vector3.Dot(hitLocal, StationModules.Along(wall));
+                var doors = target.AllDoors.Where(d => d.Side == wall).ToList();
+                // No doorway there: the middle of the wall, at the aimed floor
+                StationModules.Door door = doors.Count > 0
+                    ? doors.OrderBy(d => Mathf.Abs(d.Offset - aimed) + (d.Level == level ? 0f : 100f)).First()
+                    : new StationModules.Door(wall, 0f, level);
+                Vector3 doorPoint = frame + targetRot * (StationModules.Along(wall) * door.Offset + Vector3.up * (door.Level * target.LevelHeight));
+
+                // The new module's turns about the up axis, each with its doorways facing the wall
+                float best = float.NegativeInfinity;
+                bool found = false;
+                foreach (PartOrientation f in Axes)
+                {
+                    Vector3 forward = f.GetVector3();
+                    if (Mathf.Abs(Vector3.Dot(forward, up)) > 0.5f)
+                        continue;
+                    Quaternion turn = Quaternion.LookRotation(forward, up);
+                    foreach (StationModules.Door own in placing.AllDoors)
+                    {
+                        if (Vector3.Dot(turn * StationModules.Normal(own.Side), -n) < 0.9f)
+                            continue;
+                        // The preview's heading first, then the lowest doorway
+                        float score = Vector3.Dot(forward, props.PartForward) - own.Level * 0.1f - Mathf.Abs(own.Offset) * 0.01f;
+                        if (score <= best)
+                            continue;
+                        best = score;
+                        found = true;
+                        rotation = turn;
+                        Vector3 ownDoor = placing.Offset + StationModules.Along(own.Side) * own.Offset + Vector3.up * (own.Level * placing.LevelHeight);
+                        origin = doorPoint - turn * ownDoor;
+                    }
+                }
+                return found;
+            }
         }
+
+        /// <summary>Parts that stand upright against a side face: this mod's construction sets, station modules and solar panels.</summary>
+        private static bool Builds(ushort id) =>
+            StationModules.ById.ContainsKey(id) || id == StationModules.SolarId || (id >= 7331 && id <= 7367);
     }
 }

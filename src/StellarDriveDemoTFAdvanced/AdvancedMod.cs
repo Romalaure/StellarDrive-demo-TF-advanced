@@ -38,6 +38,7 @@ namespace StellarDriveDemoTFAdvanced
             Parts.BuildMenuDev.Install();
             Construction.SnapTest.Install();
             Wiki.WikiDev.Install();
+            Parts.PrefabDump.Install();
             Power.PortalTest.Install();
             Construction.DockingTest.Install();
             Log.Msg("ready");
@@ -74,6 +75,14 @@ namespace StellarDriveDemoTFAdvanced
 
         public override void OnLateInitializeMelon()
         {
+            try
+            {
+                Parts.UpgradeTableGuard.Install(HarmonyInstance);
+            }
+            catch (Exception e)
+            {
+                Log.Warning("Upgrade Table guard not applied: " + e.GetBaseException().Message);
+            }
             // Every part of this mod is a clone of a game part made by SDModKit
             if (AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "SDModKit"))
                 RegisterParts();

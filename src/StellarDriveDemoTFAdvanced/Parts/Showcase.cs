@@ -40,7 +40,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
         {
             ushort[] ids = Settings.DevShowcase.Value.Split(',').Select(s => ushort.TryParse(s.Trim(), out ushort id) ? id : (ushort)0).Where(id => id != 0).ToArray();
             // Station modules are rooms: more room between them
-            Spacing = ids.Any(id => id >= 7371 && id <= 7380) ? 8f : 3f;
+            Spacing = ids.Any(id => id >= 7371 && id <= 7387 && id != 7381) ? 8f : 3f;
             var players = ServiceLocator.GetService<Players.Services.PlayersServerTracker>();
             var player = players?.ActivePlayers.FirstOrDefault();
             for (int wait = 0; player == null && players != null && wait < 30; wait++)
@@ -72,6 +72,16 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 AdvancedMod.Log.Warning("dev: showcase ship gone");
                 yield break;
             }
+            if (Settings.DevPaintTest.Value)
+            {
+                // The TF mod's paint: exterior red, interior blue, on every part of the test ship
+                for (int i = 0; i < ids.Length; i++)
+                {
+                    PaintThroughTF(state.Id, (ushort)(i + 1), new Color32(200, 40, 40, 255));
+                    PaintThroughTF(state.Id, (ushort)((i + 1) | 0x8000), new Color32(40, 90, 210, 255));
+                }
+                yield return Worlds.StationVisit.Wait(1f);
+            }
             yield return Photograph(state.Id, "showcase");
             // Rooms: a look inside each, from the doorway toward the far wall
             if (Spacing > 3f)
@@ -85,6 +95,23 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 yield return PhotographFrom(state.Id, "showcase_inside", inside);
             }
             AdvancedMod.Log.Msg($"dev: showcase done, ship has {ship.PartCount} parts");
+        }
+
+        // StellarDriveDemoTF.Paint.PaintNet.ServerSet(new PartKey(ship, part), new PaintData(color, PaintFinish.None)), by reflection
+        private static void PaintThroughTF(uint ship, ushort part, Color32 color)
+        {
+            System.Type net = HarmonyLib.AccessTools.TypeByName("StellarDriveDemoTF.Paint.PaintNet");
+            System.Type key = HarmonyLib.AccessTools.TypeByName("StellarDriveDemoTF.Paint.PartKey");
+            System.Type data = HarmonyLib.AccessTools.TypeByName("StellarDriveDemoTF.Paint.PaintData");
+            System.Type finish = HarmonyLib.AccessTools.TypeByName("StellarDriveDemoTF.Paint.PaintFinish");
+            if (net == null || key == null || data == null || finish == null)
+            {
+                AdvancedMod.Log.Warning("dev: paint test: the TF mod's paint was not found");
+                return;
+            }
+            object k = System.Activator.CreateInstance(key, ship, part);
+            object d = System.Activator.CreateInstance(data, color, System.Activator.CreateInstance(finish));
+            HarmonyLib.AccessTools.Method(net, "ServerSet").Invoke(null, new[] { k, d });
         }
 
         /// <summary>Loads a ship from export JSON beside the player (<paramref name="side"/> meters to their right); returns its id.</summary>

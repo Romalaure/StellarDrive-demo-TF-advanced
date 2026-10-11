@@ -92,7 +92,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     model.Core.Cylinder(c + Vector3.up * 0.03f, c + Vector3.up * 0.05f, 0.015f, 0.008f, 8);
                 }
             // A console on the front edge: a tilted keyboard and two small screens
-            Quaternion tilt = Quaternion.Euler(25f, 0f, 0f);
+            // The keyboard rises toward the table, the screens lean back: both face the player standing at the front (-Z)
+            Quaternion tilt = Quaternion.Euler(-25f, 0f, 0f);
             Vector3 desk = new Vector3(0f, height - 0.08f, -depth * 0.5f - 0.1f);
             model.Armor.Box(desk, new Vector3(width * 0.6f, 0.04f, 0.2f), tilt);
             for (int row = 0; row < 3; row++)
@@ -100,8 +101,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     model.Dark.Box(desk + tilt * new Vector3(-width * 0.27f + k * width * 0.049f, 0.024f, -0.06f + row * 0.045f), new Vector3(0.03f, 0.008f, 0.03f), tilt);
             foreach (float x in new[] { -width * 0.36f, width * 0.36f })
             {
-                model.Dark.Box(desk + new Vector3(x, 0.03f, 0.02f), new Vector3(0.16f, 0.1f, 0.01f), Quaternion.Euler(-20f, 0f, 0f));
-                model.Glow.Box(desk + new Vector3(x, 0.03f, 0.014f), new Vector3(0.13f, 0.075f, 0.003f), Quaternion.Euler(-20f, 0f, 0f));
+                model.Dark.Box(desk + new Vector3(x, 0.03f, 0.02f), new Vector3(0.16f, 0.1f, 0.01f), Quaternion.Euler(20f, 0f, 0f));
+                model.Glow.Box(desk + new Vector3(x, 0.03f, 0.014f), new Vector3(0.13f, 0.075f, 0.003f), Quaternion.Euler(20f, 0f, 0f));
             }
             model.Armor.Box(desk + new Vector3(0f, -0.15f, 0.05f), new Vector3(width * 0.3f, 0.26f, 0.06f));
             // A cable duct down the back to the floor

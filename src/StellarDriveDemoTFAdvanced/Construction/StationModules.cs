@@ -30,10 +30,35 @@ namespace StellarDriveDemoTFAdvanced.Construction
     {
         public const ushort HabitationId = 7371, CorridorId = 7372, HubId = 7373, StorageId = 7374, SolarId = 7375, DockingId = 7376;
         public const ushort LaboratoryId = 7377, InfirmaryId = 7378, LifeSupportId = 7379, ObservatoryId = 7380;
+        public const ushort AirlockId = 7382, CornerId = 7383, TeeId = 7384, UTurnId = 7385, StairsId = 7386, LongCorridorId = 7387;
         public const float Wall = 0.15f, DoorWidth = 1.6f, DoorHeight = 2.2f;
+        /// <summary>The habitation console, on the front wall between the doorway and the right wall.</summary>
+        public const float ConsoleX = 1.33f;
 
         [Flags]
         internal enum Side { None = 0, Front = 1, Back = 2, Left = 4, Right = 8 }
+
+        /// <summary>A doorway: its wall, its center along that wall (meters from the wall's middle, toward +X or +Z) and its floor level.</summary>
+        internal struct Door
+        {
+            public Side Side;
+            public float Offset;
+            public int Level;
+
+            public Door(Side side, float offset = 0f, int level = 0)
+            {
+                Side = side;
+                Offset = offset;
+                Level = level;
+            }
+        }
+
+        /// <summary>Outward normal of a wall in the module's frame.</summary>
+        public static Vector3 Normal(Side side) =>
+            side == Side.Front ? Vector3.forward : side == Side.Back ? Vector3.back : side == Side.Left ? Vector3.left : Vector3.right;
+
+        /// <summary>The axis a wall's door offsets are measured along.</summary>
+        public static Vector3 Along(Side side) => side == Side.Front || side == Side.Back ? Vector3.right : Vector3.forward;
 
         internal sealed class Spec
         {
@@ -61,6 +86,17 @@ namespace StellarDriveDemoTFAdvanced.Construction
             public bool GlassRoof;
             /// <summary>Build menu row, under the first.</summary>
             public int Row;
+            /// <summary>Doorways, when not one centered on each side of <see cref="Openings"/>.</summary>
+            public Door[] Doors;
+            /// <summary>Floors stacked in the module (a stairwell has two), each Size.y / Levels high.</summary>
+            public int Levels = 1;
+            /// <summary>Windows in the end walls too, and the window band's bottom and top above each floor.</summary>
+            public bool EndWindows;
+            public float WindowLow = 1.2f, WindowHigh = 1.85f;
+
+            public float LevelHeight => Size.y / Levels;
+
+            public IEnumerable<Door> AllDoors => Doors ?? new[] { Side.Back, Side.Front, Side.Left, Side.Right }.Where(d => (Openings & d) != 0).Select(d => new Door(d));
         }
 
         private const uint Iron = 101, Glass = 102, Aluminum = 104, Copper = 112;
@@ -70,8 +106,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
             new Spec
             {
                 Id = HabitationId, Label = "Module d'habitation", Mass = 900f, Size = new Vector3(4f, 3f, 6f), Openings = Side.Front | Side.Back, Windows = true,
+                Donor = "StorageChest", StateClass = "StorageState", AirSocket = 0,
                 Cost = new[] { (Iron, 40), (Glass, 12), (Aluminum, 10), (Copper, 6) },
-                Description = "Une pièce de station de 4 × 6 m, 3 m sous plafond, avec deux couchettes, une table, des casiers et des hublots. Portes aux deux bouts. Pressurisée si un module de la station est relié à une conduite d'oxygène (prise de fluide sous le plancher, à l'arrière).",
+                Description = "Une pièce de station de 4 × 6 m, 3 m sous plafond, avec hublots et portes aux deux bouts. Tout y sert : la couchette du bas est un vrai lit (dormir pour passer le temps, comme le lit du jeu), l'armoire à casiers est un rangement de dix emplacements, et la console murale ouvre le wiki du mod. Pressurisée si un module de la station est relié à une conduite d'oxygène (prise de fluide sous le plancher, à l'arrière).",
                 Interior = Habitation
             },
             new Spec
@@ -85,7 +122,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 Id = HubId, Label = "Hub de connexion", Mass = 700f, Size = new Vector3(4f, 3f, 4f), Openings = Side.Front | Side.Back | Side.Left | Side.Right, Windows = false,
                 Cost = new[] { (Iron, 30), (Glass, 4), (Aluminum, 8), (Copper, 8) },
-                Description = "Carrefour de 4 × 4 m avec une porte sur chaque face pour relier jusqu'à quatre modules, et une console centrale.",
+                Description = "Carrefour de 4 × 4 m avec une porte sur chaque face pour relier jusqu'à quatre modules, et une console centrale qui ouvre le wiki du mod.",
                 Interior = Hub
             },
             new Spec
@@ -132,10 +169,60 @@ namespace StellarDriveDemoTFAdvanced.Construction
             new Spec
             {
                 Id = ObservatoryId, Label = "Observatoire", Mass = 600f, Size = new Vector3(4f, 3f, 4f), Openings = Side.Back, Windows = true, GlassRoof = true, Row = 1,
-                Donor = "StarMap", KeepDonor = true, DonorAt = new Vector3(0f, Wall + 0.74f, 0.4f), DonorTurn = 180f, AirSocket = 3,
+                EndWindows = true, WindowLow = 0.7f, WindowHigh = 2.55f,
+                Donor = "StarMap", KeepDonor = true, DonorAt = new Vector3(0f, Wall + 0.42f, 0.4f), DonorTurn = 180f, AirSocket = 3,
                 Cost = new[] { (Iron, 24), (Glass, 24), (Aluminum, 8), (Copper, 8) },
-                Description = "Une coupole vitrée pour regarder les étoiles, avec une vraie carte stellaire posée sur un pupitre (elle choisit la cible comme celle du jeu), deux fauteuils et une lunette. Une porte à l'arrière.",
+                Description = "Une coupole vitrée pour regarder les étoiles : plafond de verre et grandes baies sur trois côtés, une vraie carte stellaire sur un pupitre bas (elle choisit la cible comme celle du jeu, et son menu passe d'une galaxie à l'autre), deux fauteuils et une lunette. Une porte à l'arrière.",
                 Interior = Observatory
+            },
+            // Ways in and between: airlock, corridors that turn, a stairwell to a second floor
+            new Spec
+            {
+                Id = AirlockId, Label = "Sas de dépressurisation", Mass = 600f, Size = new Vector3(3f, 2.6f, 3f), Openings = Side.Back | Side.Front, Row = 2,
+                Donor = "Lever", KeepDonor = true, DonorAt = new Vector3(1.05f, 1.05f, -0.75f), DonorTurn = -90f, AirSocket = 1,
+                Cost = new[] { (Iron, 26), (Glass, 4), (Aluminum, 8), (Copper, 8) },
+                Description = "L'entrée de la base : deux portes étanches commandées par le levier du sas. Levier en bas : la porte intérieure (arrière) est ouverte, l'extérieure fermée et le sas est pressurisé ; levier en haut : la porte intérieure se ferme, l'extérieure (avant) s'ouvre et le sas se vide de son air. Jamais les deux ouvertes. La prise signal du levier donne l'état du sas.",
+                Interior = Airlock
+            },
+            new Spec
+            {
+                Id = CornerId, Label = "Couloir d'angle", Mass = 260f, Size = new Vector3(2.4f, 2.6f, 2.4f), Row = 2,
+                Doors = new[] { new Door(Side.Back), new Door(Side.Right) },
+                Cost = new[] { (Iron, 12), (Aluminum, 3) },
+                Description = "Coude de couloir à 90° : une porte à l'arrière, une à droite. Tournez-le en le posant pour tourner à gauche.",
+                Interior = SmallCorridor
+            },
+            new Spec
+            {
+                Id = TeeId, Label = "Couloir en T", Mass = 300f, Size = new Vector3(2.4f, 2.6f, 2.4f), Row = 2,
+                Doors = new[] { new Door(Side.Back), new Door(Side.Left), new Door(Side.Right) },
+                Cost = new[] { (Iron, 14), (Aluminum, 4) },
+                Description = "Embranchement en T : une porte à l'arrière, une de chaque côté.",
+                Interior = SmallCorridor
+            },
+            new Spec
+            {
+                Id = UTurnId, Label = "Couloir en U (demi-tour)", Mass = 420f, Size = new Vector3(4.8f, 2.6f, 2.4f), Row = 2,
+                Doors = new[] { new Door(Side.Back, -1.2f), new Door(Side.Back, 1.2f) },
+                Cost = new[] { (Iron, 18), (Aluminum, 5) },
+                Description = "Demi-tour à 180° : deux portes côte à côte sur la même face, pour revenir en sens inverse le long d'une rangée de modules.",
+                Interior = UTurn
+            },
+            new Spec
+            {
+                Id = LongCorridorId, Label = "Couloir long", Mass = 700f, Size = new Vector3(2.4f, 2.6f, 8f), Openings = Side.Front | Side.Back, Windows = true, Row = 2,
+                WindowLow = 1.0f, WindowHigh = 1.9f,
+                Cost = new[] { (Iron, 28), (Glass, 6), (Aluminum, 8) },
+                Description = "Couloir vitré de 8 m pour éloigner deux parties de la station.",
+                Interior = Corridor
+            },
+            new Spec
+            {
+                Id = StairsId, Label = "Cage d'escalier", Mass = 1200f, Size = new Vector3(4f, 6f, 6f), Row = 2, Levels = 2, Windows = true,
+                Doors = new[] { new Door(Side.Back, 0f, 0), new Door(Side.Front, 0f, 1) },
+                Cost = new[] { (Iron, 50), (Glass, 8), (Aluminum, 12) },
+                Description = "Deux étages reliés par un escalier : une porte en bas à l'arrière, une en haut à l'avant (palier à 3 m). Accrochez des modules au palier pour bâtir un second étage. Les modules posés contre la porte du haut se mettent à sa hauteur.",
+                Interior = Stairs
             },
         };
 
@@ -173,9 +260,17 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 ? KeepDonor(spec, prefab, shell)
                 : PartFactory.Blank(prefab, spec.Offset + new Vector3(0f, Wall * 0.5f, 0f), new Vector3(size.x, Wall, size.z));
             shell.Build(spec);
+            // Furniture takes the interior color of the module's paint
+            shell.Inside = true;
             spec.Interior?.Invoke(shell);
             shell.Attach(visuals, "Module" + spec.Id, spec.Offset);
             shell.AttachColliders(prefab, spec.Offset);
+            if (spec.Id == HabitationId)
+                Usable.Habitation(spec, prefab);
+            if (spec.Id == HubId)
+                Usable.Console(prefab, spec.Offset + new Vector3(0f, 1.05f, 0f), new Vector3(1.2f, 0.4f, 1.2f));
+            if (spec.Id == AirlockId)
+                prefab.transform.Find("TFA_ModuleColliders")?.gameObject.AddComponent<AirlockColliders>();
             if (spec.Id == StorageId)
             {
                 // The inventory opens from the terminal at the far end
@@ -276,8 +371,12 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 s.Dark.Box(new Vector3(x - 0.56f, 1.5f, -z + 0.9f + i * 0.45f), new Vector3(0.012f, 0.25f, 0.06f));
             }
             s.Solid(new Vector3(x - 0.3f, 1f, -z + 1.35f), new Vector3(0.5f, 2f, 1.3f));
-            s.Dark.Box(new Vector3(x - 0.02f, 1.5f, 1.4f), new Vector3(0.03f, 0.55f, 0.9f));
-            s.Glow.Box(new Vector3(x - 0.04f, 1.5f, 1.4f), new Vector3(0.01f, 0.45f, 0.8f));
+            // The console: a screen with its keyboard shelf on the front wall, beside the door
+            float wallZ = z - Wall;
+            s.Dark.Box(new Vector3(ConsoleX, 1.5f, wallZ - 0.015f), new Vector3(0.8f, 0.5f, 0.03f));
+            s.Glow.Box(new Vector3(ConsoleX, 1.5f, wallZ - 0.035f), new Vector3(0.7f, 0.42f, 0.01f));
+            s.Armor.Box(new Vector3(ConsoleX, 1.05f, wallZ - 0.15f), new Vector3(0.8f, 0.04f, 0.3f));
+            s.Text(new Vector3(ConsoleX, 1.5f, wallZ - 0.045f), Quaternion.LookRotation(Vector3.forward, Vector3.up), "TERMINAL\n<size=60%>Wiki de la station</size>", 0.09f);
         }
 
         private static void Corridor(Shell s)
@@ -406,9 +505,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
         private static void Observatory(Shell s)
         {
             // A desk for the star map, two armchairs facing the sky
-            s.Armor.Box(new Vector3(0f, Wall + 0.37f, 0.4f), new Vector3(0.9f, 0.74f, 0.8f));
-            s.Light.Box(new Vector3(0f, Wall + 0.745f, -0.004f), new Vector3(0.8f, 0.01f, 0.012f));
-            s.Solid(new Vector3(0f, Wall + 0.37f, 0.4f), new Vector3(0.9f, 0.74f, 0.8f));
+            s.Armor.Box(new Vector3(0f, Wall + 0.21f, 0.4f), new Vector3(0.9f, 0.42f, 0.8f));
+            s.Light.Box(new Vector3(0f, Wall + 0.425f, -0.004f), new Vector3(0.8f, 0.01f, 0.012f));
+            s.Solid(new Vector3(0f, Wall + 0.21f, 0.4f), new Vector3(0.9f, 0.42f, 0.8f));
             foreach (float side in new[] { -1f, 1f })
             {
                 Vector3 c = new Vector3(side * 1.1f, Wall, -0.6f);
@@ -420,6 +519,107 @@ namespace StellarDriveDemoTFAdvanced.Construction
             s.Dark.Cylinder(new Vector3(1.4f, Wall, 1.3f), new Vector3(1.4f, 1.1f, 1.3f), 0.04f, 0.04f, 8);
             s.Armor.Cylinder(new Vector3(1.25f, 1.0f, 1.15f), new Vector3(1.6f, 1.6f, 1.5f), 0.08f, 0.11f, 12);
             s.Glow.Cylinder(new Vector3(1.6f, 1.6f, 1.5f), new Vector3(1.61f, 1.62f, 1.51f), 0.1f, 0.1f, 12);
+        }
+
+        private static void SmallCorridor(Shell s)
+        {
+            float half = s.Size.x * 0.5f - Wall - 0.2f;
+            // A grating square in the middle, lights above the doors
+            for (int i = 0; i < 9; i++)
+            {
+                float t = -half + 2f * half * i / 8f;
+                s.Dark.Box(new Vector3(t, Wall + 0.004f, 0f), new Vector3(0.03f, 0.008f, 2f * half));
+                s.Dark.Box(new Vector3(0f, Wall + 0.004f, t), new Vector3(2f * half, 0.008f, 0.03f));
+            }
+            s.Light.Box(new Vector3(0f, s.Size.y - Wall - 0.02f, 0f), new Vector3(0.8f, 0.03f, 0.8f));
+        }
+
+        private static void UTurn(Shell s)
+        {
+            float x = s.Size.x * 0.5f - Wall, z = s.Size.z * 0.5f - Wall;
+            // A partition between the two doorways, a rail around the far wall
+            s.Armor.Box(new Vector3(0f, 1.1f, -z + 0.6f), new Vector3(0.12f, 2.2f, 1.2f));
+            s.Solid(new Vector3(0f, 1.1f, -z + 0.6f), new Vector3(0.12f, 2.2f, 1.2f));
+            s.Armor.Cylinder(new Vector3(-x + 0.08f, 1f, z - 0.08f), new Vector3(x - 0.08f, 1f, z - 0.08f), 0.025f, 0.025f, 8);
+            for (int i = 0; i < 20; i++)
+                s.Dark.Box(new Vector3(-x + 0.2f + i * (2f * x - 0.4f) / 19f, Wall + 0.004f, 0.3f), new Vector3(0.03f, 0.008f, 1.2f));
+            s.Amber.Box(new Vector3(0f, 2.3f, -z + 0.02f), new Vector3(0.5f, 0.12f, 0.02f));
+        }
+
+        private static void Airlock(Shell s)
+        {
+            float x = s.Size.x * 0.5f - Wall;
+            // The lever's control box on the right wall, warning stripes, a red and a green lamp
+            s.Armor.Box(new Vector3(x - 0.25f, 0.6f, -0.75f), new Vector3(0.5f, 0.9f, 0.6f));
+            s.Solid(new Vector3(x - 0.25f, 0.6f, -0.75f), new Vector3(0.5f, 0.9f, 0.6f));
+            s.Text(new Vector3(x - 0.51f, 0.85f, -0.75f), Quaternion.LookRotation(Vector3.right, Vector3.up), "SAS\n<size=60%>levier bas : intérieur\nlevier haut : extérieur</size>", 0.07f);
+            for (int i = 0; i < 8; i++)
+            {
+                MeshBuilder stripe = i % 2 == 0 ? s.Amber : s.Dark;
+                stripe.Box(new Vector3(-x + 0.01f, 0.3f + i * 0.25f, 0f), new Vector3(0.02f, 0.25f, 0.3f), Quaternion.Euler(45f, 0f, 0f));
+            }
+            s.Red.Cylinder(new Vector3(0f, 2.4f, s.Size.z * 0.5f - Wall - 0.03f), new Vector3(0f, 2.4f, s.Size.z * 0.5f - Wall - 0.1f), 0.06f, 0.06f, 10);
+            s.Glow.Cylinder(new Vector3(0f, 2.4f, -s.Size.z * 0.5f + Wall + 0.03f), new Vector3(0f, 2.4f, -s.Size.z * 0.5f + Wall + 0.1f), 0.06f, 0.06f, 10);
+            // The two doors (moved by AirlockDoors), and their collision boxes (by AirlockColliders)
+            foreach ((Side side, string name) in new[] { (Side.Front, AirlockDoors.Outer), (Side.Back, AirlockDoors.Inner) })
+            {
+                float dz = (side == Side.Front ? 1f : -1f) * (s.Size.z * 0.5f - Wall * 0.5f);
+                // Two leaves that slide apart into the wall
+                foreach ((float half, string suffix) in new[] { (-1f, "L"), (1f, "R") })
+                {
+                    var leaf = new MeshBuilder { Panel = GameSkin.PlainPanel, DoubleSided = true };
+                    leaf.Box(new Vector3(0f, Wall + (DoorHeight - Wall) * 0.5f, 0f), new Vector3(DoorWidth * 0.5f - 0.01f, DoorHeight - Wall, 0.06f));
+                    leaf.Box(new Vector3(-half * (DoorWidth * 0.25f - 0.03f), Wall + (DoorHeight - Wall) * 0.5f, 0f), new Vector3(0.04f, DoorHeight - Wall - 0.1f, 0.08f));
+                    s.Leaves.Add((name + suffix, new Vector3(half * DoorWidth * 0.25f, 0f, dz), leaf));
+                }
+                s.Solid(new Vector3(0f, Wall + (DoorHeight - Wall) * 0.5f, dz), new Vector3(DoorWidth, DoorHeight - Wall, Wall), Quaternion.identity, name);
+            }
+        }
+
+        private static void Stairs(Shell s)
+        {
+            float x = s.Size.x * 0.5f - Wall, z = s.Size.z * 0.5f - Wall, level = s.Spec.LevelHeight;
+            // The landing of the upper floor, over the front of the well
+            const float landing = 1.0f;
+            Vector3 landingCenter = new Vector3(0f, level + Wall * 0.5f, (landing + z) * 0.5f);
+            Vector3 landingSize = new Vector3(2f * x, Wall, z - landing);
+            s.Hull.Box(landingCenter, landingSize);
+            s.Solid(landingCenter, landingSize);
+            s.Inner.Box(landingCenter + Vector3.up * (Wall * 0.5f + 0.004f), new Vector3(landingSize.x, 0.008f, landingSize.z));
+            // The stairs along the left wall, up from the back to the landing's edge
+            float width = 1.0f, sx = -x + width * 0.5f;
+            Vector3 bottom = new Vector3(sx, Wall, -z + 0.25f), top = new Vector3(sx, level + Wall, landing);
+            int steps = 16;
+            for (int i = 0; i < steps; i++)
+            {
+                float t0 = i / (float)steps, t1 = (i + 1) / (float)steps;
+                Vector3 a = Vector3.Lerp(bottom, top, t0), b = Vector3.Lerp(bottom, top, t1);
+                s.Armor.Box(new Vector3(sx, (a.y + b.y) * 0.5f - 0.05f, (a.z + b.z) * 0.5f), new Vector3(width, b.y - a.y + 0.1f, b.z - a.z));
+                s.Amber.Box(new Vector3(sx, b.y - 0.045f, b.z - 0.01f), new Vector3(width - 0.1f, 0.01f, 0.02f));
+            }
+            // A ramp to walk on under the steps
+            Vector3 run = top - bottom;
+            float slope = Mathf.Atan2(run.y, run.z) * Mathf.Rad2Deg;
+            s.Solid((bottom + top) * 0.5f - Vector3.up * 0.05f, new Vector3(width, 0.1f, run.magnitude), Quaternion.Euler(-slope, 0f, 0f));
+            // Railings: along the stairs' open side and the landing's edge
+            Vector3 railBottom = bottom + new Vector3(width * 0.5f, 0.9f, 0f), railTop = top + new Vector3(width * 0.5f, 0.9f, 0f);
+            s.Armor.Cylinder(railBottom, railTop, 0.025f, 0.025f, 8);
+            for (int i = 0; i <= 4; i++)
+            {
+                Vector3 post = Vector3.Lerp(bottom, top, i / 4f) + new Vector3(width * 0.5f, 0f, 0f);
+                s.Armor.Cylinder(post, post + Vector3.up * 0.9f, 0.02f, 0.02f, 6);
+            }
+            float edge = landing + 0.03f;
+            s.Armor.Cylinder(new Vector3(sx + width * 0.5f, level + Wall + 1f, edge), new Vector3(x - 0.05f, level + Wall + 1f, edge), 0.025f, 0.025f, 8);
+            for (int i = 0; i <= 4; i++)
+            {
+                float px = Mathf.Lerp(sx + width * 0.5f, x - 0.05f, i / 4f);
+                s.Armor.Cylinder(new Vector3(px, level + Wall, edge), new Vector3(px, level + Wall + 1f, edge), 0.02f, 0.02f, 6);
+            }
+            s.Solid(new Vector3((sx + width * 0.5f + x) * 0.5f, level + Wall + 0.5f, edge), new Vector3(x - sx - width * 0.5f, 1f, 0.06f));
+            // Light under the landing and at the top
+            s.Light.Box(new Vector3(0f, level - 0.02f, (landing + z) * 0.5f), new Vector3(1.2f, 0.03f, 0.3f));
+            s.Light.Box(new Vector3(0f, s.Size.y - Wall - 0.02f, 0f), new Vector3(1.2f, 0.03f, 0.3f));
         }
 
         private static void Docking(Shell s)
@@ -447,26 +647,38 @@ namespace StellarDriveDemoTFAdvanced.Construction
         internal sealed class Shell
         {
             public readonly Vector3 Size;
-            public readonly MeshBuilder Armor = new MeshBuilder { Panel = GameSkin.PlainPanel };
+            public Spec Spec { get; private set; }
+            /// <summary>While true, Armor is the furniture's (painted with the module's interior color).</summary>
+            public bool Inside;
+            private readonly MeshBuilder _armorOut = new MeshBuilder { Panel = GameSkin.PlainPanel, DoubleSided = true };
+            private readonly MeshBuilder _armorIn = new MeshBuilder { Panel = GameSkin.PlainPanel, DoubleSided = true };
+            public MeshBuilder Armor => Inside ? _armorIn : _armorOut;
+            /// <summary>Moving parts (airlock door leaves): name, position, model.</summary>
+            public readonly List<(string Name, Vector3 At, MeshBuilder Model)> Leaves = new List<(string, Vector3, MeshBuilder)>();
+            private readonly List<(Vector3 At, Quaternion Rotation, string Text, float Size)> _texts = new List<(Vector3, Quaternion, string, float)>();
             public readonly MeshBuilder Hull = new MeshBuilder { PlanarScale = 1f, VertexColor = new Color(0.62f, 0.64f, 0.67f, 1f) };
             public readonly MeshBuilder Inner = new MeshBuilder { PlanarScale = 1f, VertexColor = new Color(0.85f, 0.86f, 0.88f, 1f) };
-            public readonly MeshBuilder Dark = new MeshBuilder();
-            public readonly MeshBuilder Glow = new MeshBuilder();
-            public readonly MeshBuilder Light = new MeshBuilder();
-            public readonly MeshBuilder Amber = new MeshBuilder();
-            public readonly MeshBuilder Red = new MeshBuilder();
-            public readonly MeshBuilder Fabric = new MeshBuilder();
+            public readonly MeshBuilder Dark = new MeshBuilder { DoubleSided = true };
+            public readonly MeshBuilder Glow = new MeshBuilder { DoubleSided = true };
+            public readonly MeshBuilder Light = new MeshBuilder { DoubleSided = true };
+            public readonly MeshBuilder Amber = new MeshBuilder { DoubleSided = true };
+            public readonly MeshBuilder Red = new MeshBuilder { DoubleSided = true };
+            public readonly MeshBuilder Fabric = new MeshBuilder { DoubleSided = true };
             public readonly MeshBuilder Crate = new MeshBuilder { PlanarScale = 1f, VertexColor = new Color(0.8f, 0.65f, 0.48f, 0f) };
-            public readonly MeshBuilder Glass = new MeshBuilder();
-            private readonly List<Bounds> _colliders = new List<Bounds>();
+            public readonly MeshBuilder Glass = new MeshBuilder { DoubleSided = true };
+            private readonly List<(Bounds Box, Quaternion Rotation, string Name)> _colliders = new List<(Bounds, Quaternion, string)>();
 
             public Shell(Vector3 size)
             {
                 Size = size;
             }
 
-            /// <summary>A box players and ships collide with.</summary>
-            public void Solid(Vector3 center, Vector3 size) => _colliders.Add(new Bounds(center, size));
+            /// <summary>A box players and ships collide with (turned, for ramps; named, for doors that open).</summary>
+            public void Solid(Vector3 center, Vector3 size, Quaternion? rotation = null, string name = null) =>
+                _colliders.Add((new Bounds(center, size), rotation ?? Quaternion.identity, name));
+
+            /// <summary>A line of text on a screen or a sign, in the module's frame.</summary>
+            public void Text(Vector3 at, Quaternion rotation, string text, float size) => _texts.Add((at, rotation, text, size));
 
             private void Slab(MeshBuilder m, Vector3 center, Vector3 size)
             {
@@ -476,6 +688,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
             public void Build(Spec spec)
             {
+                Spec = spec;
                 float w = Size.x, h = Size.y, l = Size.z;
                 // Floor and ceiling, the inside lined with light panels
                 Slab(Hull, new Vector3(0f, Wall * 0.5f, 0f), new Vector3(w, Wall, l));
@@ -497,11 +710,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     Slab(Hull, new Vector3(0f, h - Wall * 0.5f, 0f), new Vector3(w, Wall, l));
                     Inner.Box(new Vector3(0f, h - Wall - 0.003f, 0f), new Vector3(w - 2f * Wall, 0.006f, l - 0.02f));
                 }
-                // Side walls (x), ends (z)
-                SideWall(spec, -1f, (spec.Openings & Side.Left) != 0);
-                SideWall(spec, 1f, (spec.Openings & Side.Right) != 0);
-                EndWall(-1f, (spec.Openings & Side.Back) != 0);
-                EndWall(1f, (spec.Openings & Side.Front) != 0);
+                // Side walls (x), ends (z), around their doorways
+                foreach (Side side in new[] { Side.Left, Side.Right, Side.Back, Side.Front })
+                    Face(spec, side);
                 // Ribs around the outside, every 1.5 m or so, with a white strip
                 int ribs = Mathf.Max(2, Mathf.RoundToInt(l / 1.5f) + 1);
                 for (int i = 0; i < ribs; i++)
@@ -520,59 +731,83 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 }
             }
 
-            private void SideWall(Spec spec, float side, bool door)
+            /// <summary>
+            /// One wall, level by level: full panels (or a band of windows) between the doorways,
+            /// a lintel over each doorway, the inside lined with light panels everywhere.
+            /// </summary>
+            private void Face(Spec spec, Side side)
             {
                 float w = Size.x, h = Size.y, l = Size.z;
-                float x = side * (w * 0.5f - Wall * 0.5f);
-                float inner = side * (w * 0.5f - Wall - 0.003f);
-                if (door)
+                bool sideWall = side == Side.Left || side == Side.Right;
+                float length = sideWall ? l : w - 2f * Wall;
+                float levelHeight = spec.LevelHeight;
+                bool windows = sideWall ? spec.Windows : spec.EndWindows;
+                var doors = spec.AllDoors.Where(d => d.Side == side).ToList();
+                for (int level = 0; level < spec.Levels; level++)
                 {
-                    float rest = (l - DoorWidth) * 0.5f;
-                    Slab(Hull, new Vector3(x, h * 0.5f, -l * 0.5f + rest * 0.5f), new Vector3(Wall, h, rest));
-                    Slab(Hull, new Vector3(x, h * 0.5f, l * 0.5f - rest * 0.5f), new Vector3(Wall, h, rest));
-                    Slab(Hull, new Vector3(x, (DoorHeight + h) * 0.5f, 0f), new Vector3(Wall, h - DoorHeight, DoorWidth));
-                    DoorFrame(new Vector3(x, 0f, 0f), Vector3.forward, Vector3.right * side);
-                    return;
-                }
-                if (spec.Windows)
-                {
-                    // Lower wall, a band of windows, upper wall
-                    const float low = 1.2f, high = 1.85f;
-                    Slab(Hull, new Vector3(x, low * 0.5f, 0f), new Vector3(Wall, low, l));
-                    Slab(Hull, new Vector3(x, (high + h) * 0.5f, 0f), new Vector3(Wall, h - high, l));
-                    int panes = Mathf.Max(1, Mathf.RoundToInt(l / 1.5f));
-                    for (int i = 0; i <= panes; i++)
+                    float y0 = level * levelHeight, y1 = y0 + levelHeight;
+                    float u = -length * 0.5f;
+                    foreach (Door door in doors.Where(d => d.Level == level).OrderBy(d => d.Offset))
                     {
-                        float z = -l * 0.5f + l * i / panes;
-                        Slab(Armor, new Vector3(x, (low + high) * 0.5f, Mathf.Clamp(z, -l * 0.5f + 0.06f, l * 0.5f - 0.06f)), new Vector3(Wall + 0.02f, high - low, 0.12f));
+                        float a = door.Offset - DoorWidth * 0.5f, b = door.Offset + DoorWidth * 0.5f;
+                        Band(spec, side, u, a, y0, y1, windows);
+                        Panel(side, a, b, y0 + DoorHeight, y1);
+                        DoorFrame(At(side, door.Offset, y0, 0f), Along(side), Normal(side));
+                        u = b;
                     }
-                    Glass.Box(new Vector3(x, (low + high) * 0.5f, 0f), new Vector3(0.03f, high - low, l - 0.1f));
-                    Solid(new Vector3(x, (low + high) * 0.5f, 0f), new Vector3(Wall, high - low, l));
-                    Inner.Box(new Vector3(inner, low * 0.5f, 0f), new Vector3(0.006f, low - 0.02f, l - 0.02f));
-                    return;
+                    Band(spec, side, u, length * 0.5f, y0, y1, windows);
                 }
-                Slab(Hull, new Vector3(x, h * 0.5f, 0f), new Vector3(Wall, h, l));
-                Inner.Box(new Vector3(inner, h * 0.5f, 0f), new Vector3(0.006f, h - 2f * Wall, l - 0.02f));
             }
 
-            private void EndWall(float end, bool door)
+            // A wall's point: u along the wall, v up, d inward from the wall's middle
+            private Vector3 At(Side side, float u, float v, float d)
             {
-                float w = Size.x, h = Size.y, l = Size.z;
-                float z = end * (l * 0.5f - Wall * 0.5f);
-                if (!door)
+                float w = Size.x, l = Size.z;
+                Vector3 n = Normal(side);
+                Vector3 middle = side == Side.Left || side == Side.Right ? n * (w * 0.5f - Wall * 0.5f) : n * (l * 0.5f - Wall * 0.5f);
+                return middle + Along(side) * u + Vector3.up * v - n * d;
+            }
+
+            private static Vector3 Extent(Side side, float u, float v, float d)
+            {
+                Vector3 along = Along(side), n = Normal(side);
+                Vector3 e = along * u + Vector3.up * v + n * d;
+                return new Vector3(Mathf.Abs(e.x), Mathf.Abs(e.y), Mathf.Abs(e.z));
+            }
+
+            // Between doorways: a plain wall, or a wall with a band of windows if it is wide enough
+            private void Band(Spec spec, Side side, float u0, float u1, float y0, float y1, bool windows)
+            {
+                if (u1 - u0 < 0.02f)
+                    return;
+                float low = y0 + spec.WindowLow, high = Mathf.Min(y0 + spec.WindowHigh, y1 - 0.1f);
+                if (!windows || u1 - u0 < 0.8f || high <= low)
                 {
-                    Slab(Hull, new Vector3(0f, h * 0.5f, z), new Vector3(w - 2f * Wall, h, Wall));
-                    Inner.Box(new Vector3(0f, h * 0.5f, end * (l * 0.5f - Wall - 0.003f)), new Vector3(w - 2f * Wall - 0.02f, h - 2f * Wall, 0.006f));
+                    Panel(side, u0, u1, y0, y1);
                     return;
                 }
-                float rest = (w - 2f * Wall - DoorWidth) * 0.5f;
-                if (rest > 0.01f)
+                Panel(side, u0, u1, y0, low);
+                Panel(side, u0, u1, high, y1);
+                int panes = Mathf.Max(1, Mathf.RoundToInt((u1 - u0) / 1.5f));
+                for (int i = 0; i <= panes; i++)
                 {
-                    Slab(Hull, new Vector3(-(DoorWidth * 0.5f + rest * 0.5f), h * 0.5f, z), new Vector3(rest, h, Wall));
-                    Slab(Hull, new Vector3(DoorWidth * 0.5f + rest * 0.5f, h * 0.5f, z), new Vector3(rest, h, Wall));
+                    float u = Mathf.Clamp(u0 + (u1 - u0) * i / panes, u0 + 0.06f, u1 - 0.06f);
+                    Slab(_armorOut, At(side, u, (low + high) * 0.5f, 0f), Extent(side, 0.12f, high - low, Wall + 0.02f));
                 }
-                Slab(Hull, new Vector3(0f, (DoorHeight + h) * 0.5f, z), new Vector3(DoorWidth, h - DoorHeight, Wall));
-                DoorFrame(new Vector3(0f, 0f, z), Vector3.right, Vector3.forward * end);
+                Glass.Box(At(side, (u0 + u1) * 0.5f, (low + high) * 0.5f, 0f), Extent(side, u1 - u0 - 0.1f, high - low, 0.03f));
+                Solid(At(side, (u0 + u1) * 0.5f, (low + high) * 0.5f, 0f), Extent(side, u1 - u0, high - low, Wall));
+            }
+
+            // A solid piece of wall, lined inside
+            private void Panel(Side side, float u0, float u1, float v0, float v1)
+            {
+                if (u1 - u0 < 0.02f || v1 - v0 < 0.02f)
+                    return;
+                Slab(Hull, At(side, (u0 + u1) * 0.5f, (v0 + v1) * 0.5f, 0f), Extent(side, u1 - u0, v1 - v0, Wall));
+                // The lining stops at the floor and ceiling slabs
+                float a = Mathf.Max(v0, Wall), b = Mathf.Min(v1, Size.y - Wall);
+                if (b - a > 0.02f)
+                    Inner.Box(At(side, (u0 + u1) * 0.5f, (a + b) * 0.5f, Wall * 0.5f + 0.006f), Extent(side, u1 - u0 - 0.01f, b - a, 0.008f));
             }
 
             // A white-edged frame and a yellow-black threshold around a doorway
@@ -605,10 +840,38 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     visuals = holder.transform;
                 }
                 Material hull = HullLook.Material();
+                Material armor = LitMaterials.Get("TFA_MachineArmor", new Color(0.42f, 0.43f, 0.46f), 0.55f, 0.45f);
+                // "TF_PaintInner" renderers take the interior color of the TF paint tool, the others the exterior one
                 Add(visuals, layer, "TFA_" + name + "Hull", Hull, hull, new Vector2(0.125f, 0.5f));
-                Add(visuals, layer, "TFA_" + name + "Inner", Inner, hull, new Vector2(0.125f, 0.5f));
-                Add(visuals, layer, "TFA_" + name + "Crates", Crate, hull, new Vector2(0.125f, 0.5f));
-                GameSkin.AddMesh(visuals, layer, "TFA_" + name + "Armor", Armor, LitMaterials.Get("TFA_MachineArmor", new Color(0.42f, 0.43f, 0.46f), 0.55f, 0.45f));
+                Add(visuals, layer, PaintInner + name + "Inner", Inner, hull, new Vector2(0.125f, 0.5f));
+                Add(visuals, layer, "TF_NoPaint_" + name + "Crates", Crate, hull, new Vector2(0.125f, 0.5f));
+                GameSkin.AddMesh(visuals, layer, "TFA_" + name + "Armor", _armorOut, armor);
+                if (_armorIn.HasGeometry)
+                    GameSkin.AddMesh(visuals, layer, PaintInner + name + "Furniture", _armorIn, armor);
+                foreach ((string leafName, Vector3 at, MeshBuilder leaf) in Leaves)
+                {
+                    var holder = new GameObject(leafName) { layer = layer };
+                    holder.transform.SetParent(visuals, false);
+                    holder.transform.localPosition = at;
+                    GameSkin.AddMesh(holder.transform, layer, PaintInner + name + leafName, leaf, armor);
+                }
+                if (Leaves.Count > 0)
+                    visuals.gameObject.AddComponent<AirlockDoors>();
+                foreach ((Vector3 at, Quaternion rotation, string text, float size) in _texts)
+                {
+                    var sign = new GameObject("TF_NoPaint_" + name + "Text") { layer = layer };
+                    sign.transform.SetParent(visuals, false);
+                    sign.transform.localPosition = at;
+                    // A TextMeshPro reads from behind its forward: `rotation` looks from the reader into the screen
+                    sign.transform.localRotation = rotation;
+                    var tmp = sign.AddComponent<TMPro.TextMeshPro>();
+                    tmp.font = ShipComputer.ComputerStyle.Font;
+                    tmp.text = text;
+                    tmp.fontSize = size * 10f;
+                    tmp.color = new Color(0.6f, 0.95f, 1f);
+                    tmp.alignment = TMPro.TextAlignmentOptions.Center;
+                    tmp.rectTransform.sizeDelta = new Vector2(1f, 0.5f);
+                }
                 Add(visuals, layer, "TF_NoPaint_" + name + "Dark", Dark, LitMaterials.Get("TFA_MachineDark", new Color(0.04f, 0.04f, 0.05f), 0.3f, 0.5f), null);
                 Add(visuals, layer, "TF_NoPaint_" + name + "Glow", Glow, LitMaterials.Get("TFA_ModuleGlow", MachineModels.Cyan, 0f, 0.8f, MachineModels.Cyan * 1.2f), null);
                 Add(visuals, layer, "TF_NoPaint_" + name + "Light", Light, LitMaterials.Get("TFA_MachineLight", Color.white, 0f, 0.8f, Color.white * 1.2f), null);
@@ -617,6 +880,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 Add(visuals, layer, "TF_NoPaint_" + name + "Fabric", Fabric, LitMaterials.Get("TFA_ModuleFabric", new Color(0.25f, 0.35f, 0.55f), 0f, 0.15f), null);
                 Add(visuals, layer, "TF_NoPaint_" + name + "Glass", Glass, HullLook.Glass(), new Vector2(0.125f, 0.5f), ShadowCastingMode.Off);
             }
+
+            public const string PaintInner = "TF_PaintInner_";
 
             private static void Add(Transform parent, int layer, string name, MeshBuilder builder, Material material, Vector2? uv1, ShadowCastingMode shadows = ShadowCastingMode.On)
             {
@@ -639,11 +904,13 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 root.layer = ship;
                 for (int i = 0; i < _colliders.Count; i++)
                 {
-                    var child = new GameObject("Box" + i) { layer = ship, tag = "ShipFloatingPart" };
+                    (Bounds bounds, Quaternion rotation, string name) = _colliders[i];
+                    var child = new GameObject(name ?? "Box" + i) { layer = ship, tag = "ShipFloatingPart" };
                     child.transform.SetParent(root.transform, false);
+                    child.transform.localPosition = bounds.center + offset;
+                    child.transform.localRotation = rotation;
                     var box = child.AddComponent<BoxCollider>();
-                    box.center = _colliders[i].center + offset;
-                    box.size = _colliders[i].size;
+                    box.size = bounds.size;
                 }
                 root.AddComponent<ModuleColliders>();
             }
@@ -657,10 +924,12 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         public void SetNetworkState(IStatefulPartState state)
         {
+            GetComponent<AirlockColliders>()?.Apply(state);
         }
 
         public void ReactToNetworkStateChange(StatefulPartStateChangeEvent change)
         {
+            GetComponent<AirlockColliders>()?.Apply(change.NewState);
         }
     }
 

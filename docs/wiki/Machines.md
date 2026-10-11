@@ -40,7 +40,7 @@ C'est le seul moyen raisonnable d'atteindre la [galaxie d'Érèbe](Galaxie-Erebe
 
 ## Table de cartographie
 
-Table holographique carrée de 1,4 m (onglet TF Avancé, rangée des ordinateurs) : piétement octogonal à ouïes, plateau de verre noir quadrillé, émetteur central, pupitre à clavier et deux petits écrans à l'avant. L'hologramme tient dans le cadre du plateau. Quand un joueur s'en approche, elle affiche :
+Table holographique carrée de 1,4 m (onglet TF Avancé, rangée des ordinateurs) : piétement octogonal à ouïes, plateau de verre noir quadrillé, émetteur central, pupitre à clavier et deux petits écrans à l'avant, tournés vers le joueur. L'hologramme tient dans le cadre du plateau. Quand un joueur s'en approche, elle affiche :
 - le **relief en 3D** du terrain sur 300 m autour du vaisseau (lignes de niveau sur une surface translucide) ;
 - des repères : gisements et rochers (orange), coffres (jaune), bâtiments (violet), vaisseaux (blanc), votre vaisseau (vert) ;
 - la **fiche de la planète** : biome, gravité, air, ressources, lieux, utilité, dangers (les fiches de ce wiki).
@@ -48,3 +48,7 @@ Table holographique carrée de 1,4 m (onglet TF Avancé, rangée des ordinateurs
 ## Moteurs
 
 Propulseur vectoriel, moteur lourd, moteur de précision, moteur économe, moteur à matière exotique (78 000 N pour 10 % des ergols).
+
+## Carte stellaire
+
+La carte stellaire du jeu montre le système où se trouve le vaisseau. Dans son menu (comme dans celui de l'ordinateur de visée), le bouton **Galaxie** passe de **442 Otrera** à **Érèbe** puis revient au système du vaisseau : la carte et la liste des cibles montrent les planètes de la galaxie choisie.

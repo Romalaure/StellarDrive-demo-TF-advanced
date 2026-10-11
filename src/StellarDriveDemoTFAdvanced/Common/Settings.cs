@@ -32,6 +32,8 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> DevBuildMenu { get; private set; }
         public static MelonPreferences_Entry<bool> DevSnapTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevWiki { get; private set; }
+        public static MelonPreferences_Entry<bool> DevPaintTest { get; private set; }
+        public static MelonPreferences_Entry<string> DevPrefabDump { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitBlackHole { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitStations { get; private set; }
         public static MelonPreferences_Entry<string> DevWorld { get; private set; }
@@ -80,6 +82,10 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevWorld, part ids (comma separated) set out on a test ship beside the player and photographed.");
             DevBuildMenu = _category.CreateEntry("DevBuildMenu", false,
                 description: "For mod development: with DevWorld, open the build menu, photograph each mod tab and log its layout.");
+            DevPrefabDump = _category.CreateEntry("DevPrefabDump", "",
+                description: "For mod development: with DevWorld, part ids (comma separated) whose prefab tree is written to dev/prefab_dump.txt.");
+            DevPaintTest = _category.CreateEntry("DevPaintTest", false,
+                description: "For mod development: with DevShowcase, paint the parts with the TF mod (exterior red, interior blue) before the photos.");
             DevWiki = _category.CreateEntry("DevWiki", false,
                 description: "For mod development: with DevWorld, open the guide on the mod's wiki and photograph a few pages.");
             DevSnapTest = _category.CreateEntry("DevSnapTest", false,
