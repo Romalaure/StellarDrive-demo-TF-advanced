@@ -132,7 +132,9 @@ namespace StellarDriveDemoTFAdvanced.Power
             // Power: reactor 0 -> field 0, reactor 1 -> condenser 0; oxygen: tank 4 -> field 3; condenser 3 -> tank 5
             string Cable(int id, int type, int partA, int socketA, int partB, int socketB) =>
                 $"{{\"id\":{id},\"type\":{type},\"plugA\":{{\"shipId\":1,\"partId\":{partA},\"socketId\":{socketA}}},\"plugB\":{{\"shipId\":1,\"partId\":{partB},\"socketId\":{socketB}}}}}";
-            string cablesJson = string.Join(",", Cable(1, 2, 1, 0, 2, 1), Cable(2, 2, 1, 1, 3, 1), Cable(3, 1, 4, 0, 2, 3), Cable(4, 1, 3, 3, 5, 0));
+            // A reactor feeding two networks gives each half: a hungry field keeps it all (no condenser power)
+            bool wholeReactor = shield.Watts > PowerCatalog.ReactorWatts.Value * 0.5f;
+            string cablesJson = string.Join(",", Cable(1, 2, 1, 0, 2, 1), wholeReactor ? Cable(2, 2, 1, 0, 3, 1) : Cable(2, 2, 1, 1, 3, 1), Cable(3, 1, 4, 0, 2, 3), Cable(4, 1, 3, 3, 5, 0));
             var sb = new StringBuilder();
             sb.Append("{\"rootShipId\":1,\"cables\":[").Append(cablesJson).Append("],\"ships\":[{");
             sb.Append("\"id\":1,\"relativeSpaceId\":0,\"spaceId\":0,\"position\":{\"x\":0,\"y\":0,\"z\":0},\"velocity\":{\"x\":0,\"y\":0,\"z\":0},\"rotation\":{\"x\":0,\"y\":0,\"z\":0,\"w\":1},");

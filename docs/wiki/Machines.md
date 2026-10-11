@@ -28,7 +28,7 @@ Enveloppe tout le vaisseau (et ce qui y est amarré) d'une bulle cyan qui encais
 | **Champ renforcé** (doré) | 450 | 1,5 /s | 6 000 W | 0,05 oxygène/s | Technologie des artefacts |
 | **Champ à matière noire** (violet) | 1 200 | 4 /s | 10 000 W | 0,02 matière noire/s | Matière noire |
 
-Même fonctionnement et mêmes prises que le champ de base ; la bulle prend la couleur du générateur. Le champ à matière noire se branche sur un réservoir de matière noire (pas d'oxygène). Plusieurs générateurs sur un vaisseau : le plus chargé encaisse.
+Même fonctionnement et mêmes prises que le champ de base ; la bulle prend la couleur du générateur. Le champ à matière noire se branche sur un réservoir de matière noire (pas d'oxygène) ; il lui faut un réacteur quantique entier : branché sur deux réseaux, le réacteur n'en donne que la moitié à chacun. Plusieurs générateurs sur un vaisseau : le plus chargé encaisse.
 
 ## Matière noire
 
