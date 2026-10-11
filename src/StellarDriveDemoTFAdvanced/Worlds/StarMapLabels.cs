@@ -41,6 +41,11 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
         private static void Decorate(PlanetsHologram map)
         {
+            // The star map has a second, unseen hologram under its interactions, on the ship's
+            // physics body (for clicking planets). That body runs ahead of the drawn ship in flight:
+            // anything shown there appears doubled in front of the ship and shakes. Only the drawn map is decorated.
+            if (map.GetComponentInParent<StarMapVisuals>() == null)
+                return;
             int layer = map.gameObject.layer;
             // Generated again (ship context changes): one set of labels and markers only
             foreach (Transform child in map.transform.Cast<Transform>().Where(c => c.name.StartsWith("TFA_Map")).ToList())

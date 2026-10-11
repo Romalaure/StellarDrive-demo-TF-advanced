@@ -369,7 +369,7 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.10.1 : bulle du champ de force | ✅ en jeu (vaisseau de test câblé) : grille hexagonale, bord lumineux, bande de balayage, onde au choc (photo) ; le modèle du générateur ne change pas |
 | v0.10.1 : console de bord | ✅ écran relevé au-dessus du pied (photo) |
 | v0.10.1 : table de cartographie | ✅ les vaisseaux et coffres ne sont marqués que s'ils sont vraiment autour de la table (affichés, à moins de 300 m en hauteur comme à plat) : un vaisseau loin au-dessus ou en dessous n'apparaît plus en jaune |
-| v0.10.1 : carte stellaire | ✅ en vol à 200 m/s, la carte reste stable (60 images) ; le choix de l'étoile la plus proche ne bascule plus que si l'autre est nettement plus proche. ⏳ L'instabilité vue en jeu n'a pas été reproduite |
+| v0.10.2 : carte stellaire en double | ✅ cause trouvée : le jeu construit une deuxième carte, invisible, sur le corps physique du vaisseau (pour cliquer les planètes) ; le mod y ajoutait ses noms et repères, qui apparaissaient en double devant le vaisseau en vol puis tremblaient. Seule la carte affichée est décorée (vérifié en jeu : 24 repères, tous sur le vaisseau affiché) |
 | v0.10.1 : interactions des modules | ✅ en jeu : 3 interrupteurs (pièces éteintes), 3 lits, 2 consoles, 2 points de réapparition trouvés ; la couchette du haut a fait de l'habitation le point de réapparition |
 | v0.10.1 : module posé seul | ✅ en jeu : la requête de création envoyée pour un hub crée une nouvelle station (dalle + hub, photo) ; ⏳ le geste avec l'outil de construction **à faire en jeu** |
 | v0.10.1 : levier du sas | ✅ dans le repère de la pièce (le jeu y lit le geste), contre le mur du fond ; ⏳ le manier **à faire en jeu** |

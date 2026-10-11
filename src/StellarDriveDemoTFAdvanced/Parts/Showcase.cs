@@ -131,6 +131,10 @@ namespace StellarDriveDemoTFAdvanced.Parts
             }
             Transform root = map.transform.root;
             var planets = map.Holograms.Values.Take(3).ToList();
+            // Mod markers: where they are (the drawn ship, or its physics body)
+            var markers = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).Where(t => t.name.StartsWith("TFA_Map") && t.root.name.StartsWith("ship " + shipId + " "))
+                .GroupBy(t => t.root.name).Select(g => g.Key + " x" + g.Count());
+            AdvancedMod.Log.Msg("dev: map markers under: " + string.Join(", ", markers));
             var spaces = ServiceLocator.GetService<SpacesServer>();
             var ships = ServiceLocator.GetService<ShipsServerTracker>();
             for (int frame = 0; frame < 60; frame++)
