@@ -202,13 +202,15 @@ Les pièces du mod se débloquent à la **table de recherche** : une branche de 
 | Module de support vital | usine à oxygène : 2 500 W, 0,1 oxygène/s dans la conduite de sa prise d'air |
 | Observatoire | plafond vitré, grandes baies sur trois côtés, une vraie carte stellaire sur un pupitre bas |
 | Sas de dépressurisation | deux portes étanches commandées par un levier, jamais ouvertes ensemble ; sans air quand la porte extérieure est ouverte |
-| Couloirs d'angle, en T, en U (demi-tour), long | coude à 90°, embranchement, demi-tour à 180°, couloir vitré de 8 m |
-| Cage d'escalier | deux étages : escalier, palier à 3 m, porte en bas et porte en haut |
+| Couloirs d'angle, en T, en U (demi-tour), long, cylindrique | coude à 90° et T de 4,4 m (deux modules y tiennent côte à côte), demi-tour à 180° de 8,6 m, couloir vitré de 8 m, tube rond |
+| Cage d'escalier | 4 × 8 m, deux étages : escalier à 31°, palier à 3 m, porte en bas et porte en haut |
+| Dôme d'habitation | salle ronde de 6 m sous une coupole |
+| Siège de commande à leviers | le poste de pilotage avancé du jeu avec six leviers d'accoudoir qui suivent ses six signaux |
 
 - **Assemblage** : un module posé contre le mur d'un autre se met en face de la porte de ce mur la plus proche du viseur, à la hauteur de son étage, tourné pour qu'une de ses portes y fasse face.
 - **Habitation utilisable** : la couchette du bas est le lit du jeu (dormir), les casiers sont un rangement de 10 emplacements, la console ouvre le wiki du mod (comme celle du hub).
 - **Murs** : un objet du jeu se fixe sur le mur d'un module comme sur la coque ; les constructions du mod s'y adossent debout.
-- **Peinture** : avec le pistolet du mod TF (v0.12.0 ou plus), extérieur et intérieur ont chacun leur couleur (on peint le côté visé, ou les deux).
+- **Peinture et matériau** : avec le pistolet du mod TF (v0.12.0 ou plus), extérieur et intérieur ont chacun leur couleur et leur matériau (métal, bois, métal sombre, blanc, verre) ; on peint le côté visé, ou les deux.
 - **Machines du jeu** : le laboratoire, l'infirmerie et l'observatoire gardent la machine du jeu dont ils sont faits (table de recherche, capsule de clonage, carte stellaire), qui fonctionne comme d'habitude.
 - **On entre dedans** : chaque module a ses propres collisions (sol, plafond, murs autour des portes), via les « colliders dynamiques » du jeu, et une boîte de placement réduite au plancher pour y poser meubles et machines.
 - **Air** : un module est pressurisé dès qu'un module de la station est relié à une conduite d'oxygène ; l'oxygène respiré est pris dans la conduite.
@@ -362,6 +364,9 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.9.0 : pièces posées sur des pièces posées | ✅ test en jeu par l'outil d'accrochage du jeu : couloir, habitation et stockage contre un hub (portes alignées, photo), cloison contre cloison, plancher sur plancher, vitre contre une cloison, panneaux solaires sur le toit du hub, coffre du jeu sur le sol du hub ; ⏳ geste du joueur avec l'outil de construction **à refaire en jeu** |
 | v0.9.0 : nouveaux modules | ✅ laboratoire, infirmerie, support vital et observatoire construits et photographiés de l'intérieur (table de recherche, capsule de clonage et carte stellaire du jeu en place, hologramme de la carte actif) ; ⏳ ouvrir la recherche, choisir la capsule comme point de réapparition et l'oxygène du support vital **à vérifier en jeu** |
 | v0.10.0 : accrochage des modules | ✅ test en jeu par l'outil d'accrochage du jeu : couloir à la porte du haut d'une cage d'escalier (à 3 m, centré sur la porte), coude contre un hub, écran du jeu fixé sur le mur d'un hub, plus les cas de la v0.9.0 |
+| v0.10.0 : escalier | ✅ rayons le long de l'escalier en jeu : surface continue du sol (0,15 m) au palier (3,15 m), 0,24 m de montée tous les 0,4 m ; 1,45 m pour y accéder depuis la porte du bas ; ⏳ monter à pied **à faire en jeu** |
+| v0.10.0 : matériaux | ✅ dôme et coude peints par le code du mod TF : extérieur en bois, intérieur en blanc teinté (photos) |
+| v0.10.0 : dôme, tube, siège à leviers | ✅ construits et photographiés (intérieurs du dôme et du tube) ; ⏳ leviers qui bougent en pilotant **à voir en jeu** |
 | v0.10.0 : nouveaux modules | ✅ sas (levier, portes qui coulissent, photo), couloirs d'angle, en T, en U, long, cage d'escalier : construits et photographiés de l'intérieur ; ⏳ monter l'escalier et passer le sas **à faire en jeu** |
 | v0.10.0 : peinture extérieur / intérieur | ✅ module peint par le code du mod TF : extérieur rouge, intérieur bleu (photos) ; ⏳ au pistolet, en visant **à faire en jeu** |
 | v0.10.0 : habitation | ✅ lit, armoire et console en place (interaction du lit copiée du lit du jeu) ; ⏳ dormir, ranger et ouvrir le wiki depuis la console **à faire en jeu** |

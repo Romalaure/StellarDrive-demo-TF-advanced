@@ -40,7 +40,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
         {
             ushort[] ids = Settings.DevShowcase.Value.Split(',').Select(s => ushort.TryParse(s.Trim(), out ushort id) ? id : (ushort)0).Where(id => id != 0).ToArray();
             // Station modules are rooms: more room between them
-            Spacing = ids.Any(id => id >= 7371 && id <= 7387 && id != 7381) ? 8f : 3f;
+            Spacing = ids.Any(id => id >= 7371 && id <= 7390 && id != 7381) ? 8f : 3f;
             var players = ServiceLocator.GetService<Players.Services.PlayersServerTracker>();
             var player = players?.ActivePlayers.FirstOrDefault();
             for (int wait = 0; player == null && players != null && wait < 30; wait++)
@@ -74,11 +74,11 @@ namespace StellarDriveDemoTFAdvanced.Parts
             }
             if (Settings.DevPaintTest.Value)
             {
-                // The TF mod's paint: exterior red, interior blue, on every part of the test ship
+                // The TF mod's paint: exterior in wood, interior in white with a blue tint, on every part of the test ship
                 for (int i = 0; i < ids.Length; i++)
                 {
-                    PaintThroughTF(state.Id, (ushort)(i + 1), new Color32(200, 40, 40, 255));
-                    PaintThroughTF(state.Id, (ushort)((i + 1) | 0x8000), new Color32(40, 90, 210, 255));
+                    PaintThroughTF(state.Id, (ushort)(i + 1), new Color32(230, 200, 170, 255), 2);
+                    PaintThroughTF(state.Id, (ushort)((i + 1) | 0x8000), new Color32(150, 200, 255, 255), 4);
                 }
                 yield return Worlds.StationVisit.Wait(1f);
             }
@@ -98,7 +98,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
         }
 
         // StellarDriveDemoTF.Paint.PaintNet.ServerSet(new PartKey(ship, part), new PaintData(color, PaintFinish.None)), by reflection
-        private static void PaintThroughTF(uint ship, ushort part, Color32 color)
+        private static void PaintThroughTF(uint ship, ushort part, Color32 color, byte material)
         {
             System.Type net = HarmonyLib.AccessTools.TypeByName("StellarDriveDemoTF.Paint.PaintNet");
             System.Type key = HarmonyLib.AccessTools.TypeByName("StellarDriveDemoTF.Paint.PartKey");
@@ -110,7 +110,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 return;
             }
             object k = System.Activator.CreateInstance(key, ship, part);
-            object d = System.Activator.CreateInstance(data, color, System.Activator.CreateInstance(finish));
+            object d = System.Activator.CreateInstance(data, color, System.Activator.CreateInstance(finish), material);
             HarmonyLib.AccessTools.Method(net, "ServerSet").Invoke(null, new[] { k, d });
         }
 

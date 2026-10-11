@@ -83,9 +83,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
             var placed = new List<(ushort Id, Vector3 Coord, int Forward, int Up)>
             {
                 (StationModules.HubId, new Vector3(0f, -0.46f, 0f), 0, 4),
-                (7343, new Vector3(5f, -0.46f, 0f), 0, 4),
-                (7342, new Vector3(5f, -0.46f, -2f), 0, 4),
-                (StationModules.StairsId, new Vector3(0f, -0.46f, -10f), 0, 4),
+                (7343, new Vector3(9f, -0.46f, 0f), 0, 4),
+                (7342, new Vector3(9f, -0.46f, -2f), 0, 4),
+                (StationModules.StairsId, new Vector3(0f, -0.46f, -16f), 0, 4),
             };
             uint first = Showcase.LoadShip(Showcase.Json(placed, 9), player, spaces, ships, worldIds, 20f);
             MelonLoader.MelonCoroutines.Start(Pin(spaces, ships, first, 40f));
@@ -107,12 +107,12 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 ("corridor on the hub's front wall", StationModules.CorridorId, new Vector3(1.3f, 1.2f, 6f), Vector3.back),
                 ("habitation on the hub's left wall", StationModules.HabitationId, new Vector3(-6f, 1.2f, 1.3f), Vector3.right),
                 ("storage on the hub's back wall", StationModules.StorageId, new Vector3(-1.3f, 1.2f, -6f), Vector3.forward),
-                ("plank wall beside the plank wall", 7343, new Vector3(5.8f, 1f, 0.01f), Vector3.left),
-                ("plank floor on the plank floor", 7342, new Vector3(5.2f, 2f, -1.8f), Vector3.down),
+                ("plank wall beside the plank wall", 7343, new Vector3(9.8f, 1f, 0.01f), Vector3.left),
+                ("plank floor on the plank floor", 7342, new Vector3(9.2f, 2f, -1.8f), Vector3.down),
                 ("solar panel on the hub's roof", StationModules.SolarId, new Vector3(-1f, 6f, -1f), Vector3.down),
                 ("storage chest on the hub's floor", 30, new Vector3(1.2f, 1.5f, -1.2f), Vector3.down),
-                ("window on the plank wall's face", 7351, new Vector3(5.2f, 1f, 2f), Vector3.back),
-                ("corridor at the stairs' upper door", StationModules.CorridorId, new Vector3(1.4f, 3.6f, -4f), Vector3.back),
+                ("window on the plank wall's face", 7351, new Vector3(9.2f, 1f, 2f), Vector3.back),
+                ("corridor at the stairs' upper door", StationModules.CorridorId, new Vector3(1.4f, 3.6f, -9f), Vector3.back),
                 ("corner on the hub's right wall", StationModules.CornerId, new Vector3(6f, 1.2f, 1.3f), Vector3.left),
                 ("game signal display on the hub's left wall", 82, new Vector3(-6f, 1.8f, -1.3f), Vector3.right),
             };
@@ -138,6 +138,19 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 AdvancedMod.Log.Msg($"dev: snap test: {probe.Name}: hit {hit.collider.name} tag {hit.collider.tag} at {local.Pos:F2} normal {local.Normal:F2} style {settings.snappingStyle} -> {where}");
                 if (placement is FloatingPartPlacement p)
                     placed.Add((probe.Id, p.Coord, (int)p.ForwardOrientation, (int)p.UpOrientation));
+            }
+            // The stairwell's walking surface: heights along the stairs (left side) and the middle
+            foreach (float sx in new[] { -1.35f, 0f })
+            {
+                var heights = new System.Text.StringBuilder();
+                for (float sz = -19.6f; sz <= -12.4f; sz += 0.4f)
+                {
+                    Vector3 from = proxy.ToWorldPos(new FloatingPartPlacement(new Vector3(sx, 5f, sz), PartOrientation.Forward));
+                    Vector3 down = proxy.ToWorldRotation(Quaternion.identity) * Vector3.down;
+                    heights.Append(ClientScene.PhysicsScene.Raycast(from, down, out RaycastHit h, 12f, RaycastMasks.BuildDetectionLayer)
+                        ? $"{(5f - h.distance):0.00} " : "- ");
+                }
+                AdvancedMod.Log.Msg($"dev: snap test: stairs x={sx}: {heights}");
             }
             uint second = Showcase.LoadShip(Showcase.Json(placed, 9), player, spaces, ships, worldIds, 45f);
             MelonLoader.MelonCoroutines.Start(Pin(spaces, ships, second, 20f));

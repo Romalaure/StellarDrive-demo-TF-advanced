@@ -7,10 +7,12 @@ Onglet **TF Station**. Posez un premier module sur une plateforme de coque (en o
 | Module d'habitation | 4 × 6 m, 3 m sous plafond | **lit** (la couchette du bas : dormir pour passer le temps, comme le lit du jeu), **armoire** à casiers (rangement de 10 emplacements), **console** (ouvre ce wiki), table et tabourets, hublots ; portes aux deux bouts |
 | Couloir pressurisé | 2,4 × 4 m | mains courantes, caillebotis, éclairage |
 | Couloir long | 2,4 × 8 m | vitré sur les côtés |
-| Couloir d'angle | 2,4 × 2,4 m | coude à 90° : une porte à l'arrière, une à droite (tournez-le pour aller à gauche) |
-| Couloir en T | 2,4 × 2,4 m | une porte à l'arrière, une de chaque côté |
-| Couloir en U (demi-tour) | 4,8 × 2,4 m | deux portes côte à côte sur la même face : demi-tour à 180° |
-| Cage d'escalier | 4 × 6 m, deux étages de 3 m | escalier jusqu'à un palier ; porte en bas à l'arrière, porte en haut à l'avant |
+| Couloir d'angle | 4,4 × 4,4 m | coude à 90° : une porte à l'arrière, une à droite (tournez-le pour aller à gauche) ; assez grand pour que les deux modules reliés ne se touchent pas |
+| Couloir en T | 4,4 × 4,4 m | une porte à l'arrière, une de chaque côté, chacune pouvant recevoir un module de 4 m de large |
+| Couloir en U (demi-tour) | 8,6 × 2,8 m | deux portes sur la même face, à 4,3 m l'une de l'autre : deux modules côte à côte, demi-tour à 180° |
+| Couloir cylindrique | tube de 3,4 m de diamètre, 4 m de long | couloir rond à arceaux lumineux |
+| Cage d'escalier | 4 × 8 m, deux étages de 3 m | escalier en pente douce (31°) le long du mur gauche, palier à 3 m ; porte en bas à l'arrière, porte en haut à l'avant |
+| Dôme d'habitation | 6 m de diamètre, 5,6 m sous la coupole | salle ronde : table ronde, banquettes, plantes lumineuses ; portes à l'arrière et à l'avant |
 | Hub de connexion | 4 × 4 m | une porte sur chaque face, console centrale (ouvre ce wiki) |
 | Sas de dépressurisation | 3 × 3 m | deux portes étanches et un levier (voir plus bas) |
 | Module de stockage | 4 × 4 m | étagères ; terminal d'inventaire au fond (10 emplacements) |
@@ -33,9 +35,15 @@ On marche dedans : les modules ont de vrais murs, sol et plafond, habillés à l
 
 La **cage d'escalier** fait deux étages. Un module posé contre la porte du haut se met à la hauteur du palier (3 m). Pour bâtir un second étage : cage d'escalier, puis couloirs et modules accrochés à sa porte du haut.
 
+## Siège de commande à leviers
+
+Le poste de pilotage avancé du jeu (on s'y assoit, il pilote et sort six signaux) avec deux consoles d'accoudoir de trois leviers chacune, qui suivent les commandes : à gauche les déplacements, à droite les rotations. Onglet TF Station.
+
 ## Peinture : extérieur et intérieur
 
 Avec le pistolet à peinture du mod TF, un module a **deux couleurs**. Visez un mur du dehors : vous peignez l'extérieur. Visez-le du dedans : vous peignez l'intérieur (habillage des murs, mobilier). Avec « Les deux faces » choisi, les deux sont peints d'un coup. Le panneau du pistolet indique « intérieur » quand c'est le cas.
+
+**Matériau** : le panneau du pistolet a aussi une rangée « Matériau — modules de station » : D'origine, Métal, Bois, Métal sombre, Blanc, Verre. Le matériau choisi s'applique au côté visé (ou aux deux), en plus de la couleur. Avec Verre, les murs (ou la coupole du dôme) deviennent transparents.
 
 ## Air
 

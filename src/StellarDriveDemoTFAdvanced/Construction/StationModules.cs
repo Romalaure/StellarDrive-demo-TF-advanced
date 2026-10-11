@@ -31,6 +31,10 @@ namespace StellarDriveDemoTFAdvanced.Construction
         public const ushort HabitationId = 7371, CorridorId = 7372, HubId = 7373, StorageId = 7374, SolarId = 7375, DockingId = 7376;
         public const ushort LaboratoryId = 7377, InfirmaryId = 7378, LifeSupportId = 7379, ObservatoryId = 7380;
         public const ushort AirlockId = 7382, CornerId = 7383, TeeId = 7384, UTurnId = 7385, StairsId = 7386, LongCorridorId = 7387;
+        public const ushort ControlSeatId = 7388, DomeId = 7389, TubeId = 7390;
+
+        /// <summary>A module's outline: a box, a round room under a dome, or a round tube.</summary>
+        internal enum Shape { Box, Dome, Tube }
         public const float Wall = 0.15f, DoorWidth = 1.6f, DoorHeight = 2.2f;
         /// <summary>The habitation console, on the front wall between the doorway and the right wall.</summary>
         public const float ConsoleX = 1.33f;
@@ -93,6 +97,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             /// <summary>Windows in the end walls too, and the window band's bottom and top above each floor.</summary>
             public bool EndWindows;
             public float WindowLow = 1.2f, WindowHigh = 1.85f;
+            public Shape Shape;
 
             public float LevelHeight => Size.y / Levels;
 
@@ -186,26 +191,26 @@ namespace StellarDriveDemoTFAdvanced.Construction
             },
             new Spec
             {
-                Id = CornerId, Label = "Couloir d'angle", Mass = 260f, Size = new Vector3(2.4f, 2.6f, 2.4f), Row = 2,
+                Id = CornerId, Label = "Couloir d'angle", Mass = 420f, Size = new Vector3(4.4f, 3f, 4.4f), Row = 2,
                 Doors = new[] { new Door(Side.Back), new Door(Side.Right) },
                 Cost = new[] { (Iron, 12), (Aluminum, 3) },
-                Description = "Coude de couloir à 90° : une porte à l'arrière, une à droite. Tournez-le en le posant pour tourner à gauche.",
+                Description = "Coude à 90° de 4,4 × 4,4 m : une porte à l'arrière, une à droite ; assez grand pour que les deux modules qu'il relie ne se touchent pas. Tournez-le en le posant pour tourner à gauche.",
                 Interior = SmallCorridor
             },
             new Spec
             {
-                Id = TeeId, Label = "Couloir en T", Mass = 300f, Size = new Vector3(2.4f, 2.6f, 2.4f), Row = 2,
+                Id = TeeId, Label = "Couloir en T", Mass = 480f, Size = new Vector3(4.4f, 3f, 4.4f), Row = 2,
                 Doors = new[] { new Door(Side.Back), new Door(Side.Left), new Door(Side.Right) },
                 Cost = new[] { (Iron, 14), (Aluminum, 4) },
-                Description = "Embranchement en T : une porte à l'arrière, une de chaque côté.",
+                Description = "Embranchement en T de 4,4 × 4,4 m : une porte à l'arrière, une de chaque côté, chacune assez loin des autres pour y accrocher un module de 4 m de large.",
                 Interior = SmallCorridor
             },
             new Spec
             {
-                Id = UTurnId, Label = "Couloir en U (demi-tour)", Mass = 420f, Size = new Vector3(4.8f, 2.6f, 2.4f), Row = 2,
-                Doors = new[] { new Door(Side.Back, -1.2f), new Door(Side.Back, 1.2f) },
+                Id = UTurnId, Label = "Couloir en U (demi-tour)", Mass = 620f, Size = new Vector3(8.6f, 3f, 2.8f), Row = 2,
+                Doors = new[] { new Door(Side.Back, -2.15f), new Door(Side.Back, 2.15f) },
                 Cost = new[] { (Iron, 18), (Aluminum, 5) },
-                Description = "Demi-tour à 180° : deux portes côte à côte sur la même face, pour revenir en sens inverse le long d'une rangée de modules.",
+                Description = "Demi-tour à 180° : deux portes sur la même face, à 4,3 m l'une de l'autre, pour accrocher deux modules de 4 m côte à côte et revenir en sens inverse.",
                 Interior = UTurn
             },
             new Spec
@@ -218,11 +223,26 @@ namespace StellarDriveDemoTFAdvanced.Construction
             },
             new Spec
             {
-                Id = StairsId, Label = "Cage d'escalier", Mass = 1200f, Size = new Vector3(4f, 6f, 6f), Row = 2, Levels = 2, Windows = true,
+                Id = StairsId, Label = "Cage d'escalier", Mass = 1400f, Size = new Vector3(4f, 6f, 8f), Row = 2, Levels = 2, Windows = true,
                 Doors = new[] { new Door(Side.Back, 0f, 0), new Door(Side.Front, 0f, 1) },
                 Cost = new[] { (Iron, 50), (Glass, 8), (Aluminum, 12) },
-                Description = "Deux étages reliés par un escalier : une porte en bas à l'arrière, une en haut à l'avant (palier à 3 m). Accrochez des modules au palier pour bâtir un second étage. Les modules posés contre la porte du haut se mettent à sa hauteur.",
+                Description = "Deux étages reliés par un escalier en pente douce (31°) le long du mur gauche : une porte en bas à l'arrière, une en haut à l'avant (palier à 3 m). En entrant par le bas, l'escalier part à gauche. Les modules posés contre la porte du haut se mettent à sa hauteur.",
                 Interior = Stairs
+            },
+            // Round modules
+            new Spec
+            {
+                Id = DomeId, Label = "Dôme d'habitation", Mass = 1300f, Size = new Vector3(6f, 5.6f, 6f), Openings = Side.Back | Side.Front, Row = 3, Shape = Shape.Dome,
+                Cost = new[] { (Iron, 50), (Glass, 16), (Aluminum, 14), (Copper, 6) },
+                Description = "Une grande salle ronde de 6 m sous un dôme : mur circulaire de 2,6 m, coupole jusqu'à 5,6 m, une table ronde, des banquettes et un puits de lumière. Portes à l'arrière et à l'avant. Avec le matériau Verre du pistolet à peinture, la coupole devient transparente.",
+                Interior = DomeRoom
+            },
+            new Spec
+            {
+                Id = TubeId, Label = "Couloir cylindrique", Mass = 420f, Size = new Vector3(3.4f, 3.25f, 4f), Openings = Side.Back | Side.Front, Row = 3, Shape = Shape.Tube,
+                Cost = new[] { (Iron, 18), (Aluminum, 5) },
+                Description = "Un couloir en tube de 4 m, rond comme un module de station orbitale, avec des arceaux lumineux.",
+                Interior = TubeCorridor
             },
         };
 
@@ -236,6 +256,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 PartFactory.Register(spec.Id, spec.Donor, AdvancedTab.StationName, AdvancedTab.StationRow + spec.Row, (settings, prefab) => Configure(spec, settings, prefab));
             }
             PartFactory.Register(SolarId, "SignalDisplay", AdvancedTab.StationName, AdvancedTab.StationRow, Solar.Configure);
+            PartFactory.Register(ControlSeatId, "MainControlAdvanced", AdvancedTab.StationName, AdvancedTab.StationRow + 3, ControlSeat.Configure);
             AdvancedMod.Log.Msg($"registered {All.Length + 1} station modules");
         }
 
@@ -580,7 +601,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
         {
             float x = s.Size.x * 0.5f - Wall, z = s.Size.z * 0.5f - Wall, level = s.Spec.LevelHeight;
             // The landing of the upper floor, over the front of the well
-            const float landing = 1.0f;
+            // The stairs run from 1.45 m inside the back wall (room to step on them) to the landing
+            float landing = z - 1.25f;
             Vector3 landingCenter = new Vector3(0f, level + Wall * 0.5f, (landing + z) * 0.5f);
             Vector3 landingSize = new Vector3(2f * x, Wall, z - landing);
             s.Hull.Box(landingCenter, landingSize);
@@ -588,8 +610,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
             s.Inner.Box(landingCenter + Vector3.up * (Wall * 0.5f + 0.004f), new Vector3(landingSize.x, 0.008f, landingSize.z));
             // The stairs along the left wall, up from the back to the landing's edge
             float width = 1.0f, sx = -x + width * 0.5f;
-            Vector3 bottom = new Vector3(sx, Wall, -z + 0.25f), top = new Vector3(sx, level + Wall, landing);
-            int steps = 16;
+            Vector3 bottom = new Vector3(sx, Wall, -z + 1.45f), top = new Vector3(sx, level + Wall, landing);
+            int steps = 18;
             for (int i = 0; i < steps; i++)
             {
                 float t0 = i / (float)steps, t1 = (i + 1) / (float)steps;
@@ -620,6 +642,39 @@ namespace StellarDriveDemoTFAdvanced.Construction
             // Light under the landing and at the top
             s.Light.Box(new Vector3(0f, level - 0.02f, (landing + z) * 0.5f), new Vector3(1.2f, 0.03f, 0.3f));
             s.Light.Box(new Vector3(0f, s.Size.y - Wall - 0.02f, 0f), new Vector3(1.2f, 0.03f, 0.3f));
+        }
+
+        private static void DomeRoom(Shell s)
+        {
+            // A round table in the middle, benches round it, planters with glowing plants
+            s.Armor.Cylinder(new Vector3(0f, Wall, 0f), new Vector3(0f, 0.72f, 0f), 0.12f, 0.12f, 12);
+            s.Armor.Cylinder(new Vector3(0f, 0.72f, 0f), new Vector3(0f, 0.78f, 0f), 0.9f, 0.9f, 24);
+            s.Glow.Cylinder(new Vector3(0f, 0.78f, 0f), new Vector3(0f, 0.785f, 0f), 0.85f, 0.85f, 24, capA: false, capB: false);
+            s.Solid(new Vector3(0f, 0.45f, 0f), new Vector3(1.6f, 0.66f, 1.6f));
+            for (int i = 0; i < 4; i++)
+            {
+                float a = (45f + i * 90f) * Mathf.Deg2Rad;
+                Vector3 dir = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                Quaternion turn = Quaternion.LookRotation(dir, Vector3.up);
+                // A bench facing the table, and a planter behind it against the wall
+                s.Fabric.Box(dir * 1.6f + Vector3.up * 0.42f, new Vector3(1.4f, 0.1f, 0.5f), turn);
+                s.Armor.Box(dir * 1.6f + Vector3.up * 0.25f, new Vector3(1.3f, 0.3f, 0.4f), turn);
+                s.Fabric.Box(dir * 1.86f + Vector3.up * 0.75f, new Vector3(1.4f, 0.5f, 0.1f), turn);
+                s.Solid(dir * 1.6f + Vector3.up * 0.3f, new Vector3(1.4f, 0.4f, 0.5f), turn);
+                Vector3 pot = dir * 2.45f;
+                s.Armor.Cylinder(pot + Vector3.up * Wall, pot + Vector3.up * 0.55f, 0.25f, 0.3f, 12);
+                s.Glow.Cylinder(pot + Vector3.up * 0.55f, pot + Vector3.up * 1.2f, 0.25f, 0.02f, 8);
+            }
+        }
+
+        private static void TubeCorridor(Shell s)
+        {
+            float r = s.Size.x * 0.5f, z = s.Size.z * 0.5f - Wall;
+            // Handrails along both sides
+            foreach (float side in new[] { -1f, 1f })
+                s.Armor.Cylinder(new Vector3(side * (r - 0.45f), 1.0f, -z + 0.1f), new Vector3(side * (r - 0.45f), 1.0f, z - 0.1f), 0.025f, 0.025f, 8);
+            for (int i = 0; i < 12; i++)
+                s.Dark.Box(new Vector3(0f, Wall + 0.004f, -z + 0.15f + i * (2f * z - 0.3f) / 11f), new Vector3(1.4f, 0.008f, 0.03f));
         }
 
         private static void Docking(Shell s)
@@ -689,6 +744,11 @@ namespace StellarDriveDemoTFAdvanced.Construction
             public void Build(Spec spec)
             {
                 Spec = spec;
+                if (spec.Shape != Shape.Box)
+                {
+                    BuildRound(spec);
+                    return;
+                }
                 float w = Size.x, h = Size.y, l = Size.z;
                 // Floor and ceiling, the inside lined with light panels
                 Slab(Hull, new Vector3(0f, Wall * 0.5f, 0f), new Vector3(w, Wall, l));
@@ -730,6 +790,177 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     Glow.Box(new Vector3(side * (w * 0.5f - Wall - 0.01f), Wall + 0.05f, 0f), new Vector3(0.012f, 0.02f, l * 0.85f));
                 }
             }
+
+            // ---- Round outlines
+
+            private void BuildRound(Spec spec)
+            {
+                if (spec.Shape == Shape.Dome)
+                    BuildDome();
+                else
+                    BuildTube();
+            }
+
+            private static Vector3 Round(float angle) => new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
+
+            /// <summary>
+            /// A round room: a disc floor, a circular wall 2.6 m high with a doorway portal at the back
+            /// and the front, and a dome over it, all lined inside.
+            /// </summary>
+            private void BuildDome()
+            {
+                float r = Size.x * 0.5f;
+                const float wallTop = 2.6f;
+                const int sides = 24, bands = 6;
+                float step = Mathf.PI * 2f / sides;
+
+                // Floor: a disc, solid as twelve slices from the middle to the rim
+                for (int i = 0; i < sides; i++)
+                {
+                    Vector3 a = Round(i * step) * r, b = Round((i + 1) * step) * r;
+                    Hull.Face(new Vector3(0f, Wall, 0f), a + Vector3.up * Wall, b + Vector3.up * Wall, new Vector3(0f, Wall, 0f), Vector3.up);
+                    Hull.Face(Vector3.zero, a, b, Vector3.zero, Vector3.down);
+                    Hull.Face(a, b, b + Vector3.up * Wall, a + Vector3.up * Wall, (a + b).normalized);
+                    Vector3 ai = Round(i * step) * (r - Wall), bi = Round((i + 1) * step) * (r - Wall);
+                    Inner.Face(new Vector3(0f, Wall + 0.006f, 0f), ai + Vector3.up * (Wall + 0.006f), bi + Vector3.up * (Wall + 0.006f), new Vector3(0f, Wall + 0.006f, 0f), Vector3.up);
+                }
+                for (int i = 0; i < 12; i++)
+                {
+                    float angle = (i + 0.5f) * Mathf.PI * 2f / 12f;
+                    Vector3 dir = Round(angle);
+                    Solid(dir * r * 0.5f + Vector3.up * Wall * 0.5f, new Vector3(2f * r * Mathf.Sin(Mathf.PI / 12f) * 1.05f, Wall, r), Quaternion.LookRotation(dir, Vector3.up));
+                }
+
+                // The circular wall, open where the doorways are
+                for (int i = 0; i < sides; i++)
+                {
+                    float a0 = i * step, a1 = (i + 1) * step;
+                    Vector3 mid = Round((a0 + a1) * 0.5f);
+                    if (Mathf.Abs(mid.x * r) < 0.6f)
+                        continue;
+                    RingPanel(r, a0, a1, 0f, wallTop);
+                }
+                foreach (float end in new[] { -1f, 1f })
+                {
+                    // A straight portal around each doorway, deep enough to meet the curve
+                    float z = end * (r - 0.2f);
+                    foreach (float side in new[] { -1f, 1f })
+                        Slab(Hull, new Vector3(side * 0.99f, wallTop * 0.5f, z), new Vector3(0.38f, wallTop, 0.4f));
+                    Slab(Hull, new Vector3(0f, (DoorHeight + wallTop) * 0.5f, z), new Vector3(1.6f, wallTop - DoorHeight, 0.4f));
+                    // The portal's inside face takes the interior look
+                    float inside = end * (r - 0.4f - 0.006f);
+                    foreach (float side in new[] { -1f, 1f })
+                        Inner.Box(new Vector3(side * 0.99f, (Wall + wallTop) * 0.5f, inside), new Vector3(0.36f, wallTop - Wall, 0.008f));
+                    Inner.Box(new Vector3(0f, (DoorHeight + wallTop) * 0.5f, inside), new Vector3(1.6f, wallTop - DoorHeight, 0.008f));
+                    DoorFrame(new Vector3(0f, 0f, end * (r - Wall * 0.5f)), Vector3.right, Vector3.forward * end);
+                }
+
+                // The dome: bands of panels from the wall's top to the crown
+                for (int k = 0; k < bands; k++)
+                {
+                    float p0 = k * Mathf.PI * 0.5f / bands, p1 = (k + 1) * Mathf.PI * 0.5f / bands;
+                    for (int i = 0; i < sides; i++)
+                    {
+                        float a0 = i * step, a1 = (i + 1) * step;
+                        Vector3 Point(float a, float p, float radius) => Round(a) * Mathf.Cos(p) * radius + Vector3.up * (wallTop + Mathf.Sin(p) * radius);
+                        Vector3 o00 = Point(a0, p0, r), o10 = Point(a1, p0, r), o11 = Point(a1, p1, r), o01 = Point(a0, p1, r);
+                        Vector3 center = (o00 + o10 + o11 + o01) * 0.25f;
+                        Vector3 normal = (center - Vector3.up * wallTop).normalized;
+                        Hull.Face(o00, o10, o11, o01, normal);
+                        float ri = r - Wall;
+                        Inner.Face(Point(a0, p0, ri - 0.006f), Point(a1, p0, ri - 0.006f), Point(a1, p1, ri - 0.006f), Point(a0, p1, ri - 0.006f), -normal);
+                        Vector3 tangent = ((o01 + o11) - (o00 + o10)).normalized;
+                        float width = Mathf.Max((o10 - o00).magnitude, 0.05f), height = ((o01 + o11) - (o00 + o10)).magnitude * 0.5f;
+                        Solid(center - normal * Wall * 0.5f, new Vector3(width * 1.04f, height * 1.04f, Wall), Quaternion.LookRotation(normal, tangent));
+                    }
+                }
+                // A ring of light round the crown, a white band at the wall's top outside
+                Light.Cylinder(new Vector3(0f, wallTop + r - 0.35f, 0f), new Vector3(0f, wallTop + r - 0.33f, 0f), 0.6f, 0.6f, 20, capA: false, capB: false);
+                _armorOut.Cylinder(new Vector3(0f, wallTop - 0.05f, 0f), new Vector3(0f, wallTop + 0.05f, 0f), r + 0.03f, r + 0.03f, sides, capA: false, capB: false);
+                Glow.Cylinder(new Vector3(0f, Wall + 0.04f, 0f), new Vector3(0f, Wall + 0.06f, 0f), r - Wall - 0.02f, r - Wall - 0.02f, sides, capA: false, capB: false);
+            }
+
+            // One panel of a vertical circular wall, lined inside, and its collision
+            private void RingPanel(float r, float a0, float a1, float y0, float y1)
+            {
+                Vector3 p0 = Round(a0), p1 = Round(a1), mid = Round((a0 + a1) * 0.5f);
+                Hull.Face(p0 * r + Vector3.up * y0, p1 * r + Vector3.up * y0, p1 * r + Vector3.up * y1, p0 * r + Vector3.up * y1, mid);
+                float ri = r - Wall - 0.006f;
+                float a = Mathf.Max(y0, Wall), b = Mathf.Min(y1, Size.y - Wall);
+                Inner.Face(p0 * ri + Vector3.up * a, p1 * ri + Vector3.up * a, p1 * ri + Vector3.up * b, p0 * ri + Vector3.up * b, -mid);
+                Hull.Face(p0 * (r - Wall) + Vector3.up * y1, p1 * (r - Wall) + Vector3.up * y1, p1 * r + Vector3.up * y1, p0 * r + Vector3.up * y1, Vector3.up);
+                Solid(mid * (r - Wall * 0.5f) + Vector3.up * (y0 + y1) * 0.5f, new Vector3((p1 - p0).magnitude * r * 1.04f, y1 - y0, Wall), Quaternion.LookRotation(mid, Vector3.up));
+            }
+
+            /// <summary>
+            /// A round tube along Z with a flat floor, end walls round a doorway at each end, and rings
+            /// of light inside.
+            /// </summary>
+            private void BuildTube()
+            {
+                float r = Size.x * 0.5f, l = Size.z, cy = Size.y - r;
+                const int sides = 20;
+                float step = Mathf.PI * 2f / sides;
+                Vector3 Ring(float a, float radius, float z) => new Vector3(Mathf.Cos(a) * radius, Mathf.Max(0f, cy + Mathf.Sin(a) * radius), z);
+
+                // Floor
+                float floorHalf = Mathf.Sqrt(Mathf.Max(0.1f, r * r - (cy - Wall) * (cy - Wall)));
+                Slab(Hull, new Vector3(0f, Wall * 0.5f, 0f), new Vector3(2f * floorHalf, Wall, l));
+                Inner.Box(new Vector3(0f, Wall + 0.004f, 0f), new Vector3(2f * floorHalf - 0.1f, 0.008f, l - 0.02f));
+
+                // The shell, above the floor
+                for (int i = 0; i < sides; i++)
+                {
+                    float a0 = i * step, a1 = (i + 1) * step, am = (a0 + a1) * 0.5f;
+                    if (cy + Mathf.Sin(am) * r < Wall + 0.1f)
+                        continue;
+                    Vector3 radial = new Vector3(Mathf.Cos(am), Mathf.Sin(am), 0f);
+                    Hull.Face(Ring(a0, r, -l * 0.5f), Ring(a1, r, -l * 0.5f), Ring(a1, r, l * 0.5f), Ring(a0, r, l * 0.5f), radial);
+                    float ri = r - Wall - 0.006f;
+                    Inner.Face(Ring(a0, ri, -l * 0.5f + Wall), Ring(a1, ri, -l * 0.5f + Wall), Ring(a1, ri, l * 0.5f - Wall), Ring(a0, ri, l * 0.5f - Wall), -radial);
+                    Vector3 center = new Vector3(0f, cy, 0f) + radial * (r - Wall * 0.5f);
+                    Solid(center, new Vector3(2f * r * Mathf.Sin(step * 0.5f) * 1.06f, Wall, l), Quaternion.LookRotation(Vector3.forward, radial));
+                }
+
+                // End walls: from the round shell to the doorway's edge, at both ends
+                float doorHalf = DoorWidth * 0.5f, doorTop = DoorHeight;
+                Vector3 doorCenter = new Vector3(0f, (Wall + doorTop) * 0.5f, 0f);
+                float doorHalfHeight = (doorTop - Wall) * 0.5f;
+                foreach (float end in new[] { -1f, 1f })
+                {
+                    float zo = end * l * 0.5f, zi = end * (l * 0.5f - Wall);
+                    for (int i = 0; i < sides; i++)
+                    {
+                        float a0 = i * step, a1 = (i + 1) * step;
+                        Vector3 r0 = Ring(a0, r, 0f), r1 = Ring(a1, r, 0f);
+                        Vector3 d0 = DoorEdge(r0, doorCenter, doorHalf, doorHalfHeight), d1 = DoorEdge(r1, doorCenter, doorHalf, doorHalfHeight);
+                        Hull.Face(r0 + Vector3.forward * zo, r1 + Vector3.forward * zo, d1 + Vector3.forward * zo, d0 + Vector3.forward * zo, Vector3.forward * end);
+                        Inner.Face(r0 * 0.97f + Vector3.forward * zi, r1 * 0.97f + Vector3.forward * zi, d1 + Vector3.forward * zi, d0 + Vector3.forward * zi, -Vector3.forward * end);
+                    }
+                    float zc = end * (l * 0.5f - Wall * 0.5f);
+                    foreach (float side in new[] { -1f, 1f })
+                        Solid(new Vector3(side * (r + doorHalf) * 0.5f, Size.y * 0.5f, zc), new Vector3(r - doorHalf, Size.y, Wall));
+                    Solid(new Vector3(0f, (doorTop + Size.y) * 0.5f, zc), new Vector3(DoorWidth, Size.y - doorTop, Wall));
+                    DoorFrame(new Vector3(0f, 0f, zc), Vector3.right, Vector3.forward * end);
+                }
+                // Rings of light inside, ribs outside
+                for (int k = 0; k < 3; k++)
+                {
+                    float z = -l * 0.5f + l * (k + 1) / 4f;
+                    Glow.Cylinder(new Vector3(0f, cy, z), new Vector3(0f, cy, z + 0.05f), r - Wall - 0.02f, r - Wall - 0.02f, sides, capA: false, capB: false);
+                    _armorOut.Cylinder(new Vector3(0f, cy, z - 0.06f), new Vector3(0f, cy, z + 0.06f), r + 0.05f, r + 0.05f, sides, capA: false, capB: false);
+                }
+            }
+
+            // Where a line from the doorway's middle toward a point meets the doorway's edge
+            private static Vector3 DoorEdge(Vector3 toward, Vector3 center, float halfWidth, float halfHeight)
+            {
+                Vector3 d = toward - center;
+                float tx = Mathf.Abs(d.x) > 1e-4f ? halfWidth / Mathf.Abs(d.x) : float.MaxValue;
+                float ty = Mathf.Abs(d.y) > 1e-4f ? halfHeight / Mathf.Abs(d.y) : float.MaxValue;
+                return center + d * Mathf.Min(1f, Mathf.Min(tx, ty));
+            }
+
 
             /// <summary>
             /// One wall, level by level: full panels (or a band of windows) between the doorways,
@@ -842,8 +1073,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 Material hull = HullLook.Material();
                 Material armor = LitMaterials.Get("TFA_MachineArmor", new Color(0.42f, 0.43f, 0.46f), 0.55f, 0.45f);
                 // "TF_PaintInner" renderers take the interior color of the TF paint tool, the others the exterior one
-                Add(visuals, layer, "TFA_" + name + "Hull", Hull, hull, new Vector2(0.125f, 0.5f));
-                Add(visuals, layer, PaintInner + name + "Inner", Inner, hull, new Vector2(0.125f, 0.5f));
+                Variants(visuals, layer, "TFA_" + name + "Hull", Hull, false);
+                Variants(visuals, layer, name + "Inner", Inner, true);
                 Add(visuals, layer, "TF_NoPaint_" + name + "Crates", Crate, hull, new Vector2(0.125f, 0.5f));
                 GameSkin.AddMesh(visuals, layer, "TFA_" + name + "Armor", _armorOut, armor);
                 if (_armorIn.HasGeometry)
@@ -882,6 +1113,47 @@ namespace StellarDriveDemoTFAdvanced.Construction
             }
 
             public const string PaintInner = "TF_PaintInner_";
+
+            /// <summary>
+            /// The walls in every material the TF paint tool offers ("TF_MatVariant_N_" renderers, only
+            /// the chosen one drawn): 0 the module's own look, 1 light metal, 2 wood, 3 dark metal,
+            /// 4 white, 5 glass.
+            /// </summary>
+            private static void Variants(Transform parent, int layer, string name, MeshBuilder builder, bool interior)
+            {
+                if (!builder.HasGeometry)
+                    return;
+                Material hull = HullLook.Material();
+                Mesh mesh = builder.Build(name, new Vector2(0.125f, 0.5f));
+                // Vertex color: the tint, and in alpha the hull texture (0 wood, 1 metal)
+                var looks = new (int Variant, Color? Color, Material Material)[]
+                {
+                    (0, null, hull),
+                    (1, new Color(0.85f, 0.87f, 0.9f, 1f), hull),
+                    (2, new Color(0.78f, 0.62f, 0.45f, 0f), hull),
+                    (3, new Color(0.3f, 0.31f, 0.33f, 1f), hull),
+                    (4, new Color(1f, 1f, 1f, 1f), hull),
+                    (5, new Color(1f, 1f, 1f, 1f), HullLook.Glass()),
+                };
+                foreach ((int variant, Color? color, Material material) in looks)
+                {
+                    Mesh look = mesh;
+                    if (color.HasValue)
+                    {
+                        look = Object.Instantiate(mesh);
+                        look.name = name + "_" + variant;
+                        look.colors = Enumerable.Repeat(color.Value, mesh.vertexCount).ToArray();
+                    }
+                    string objectName = (interior ? PaintInner : "") + "TF_MatVariant_" + variant + "_" + name;
+                    var child = new GameObject(objectName) { layer = layer };
+                    child.transform.SetParent(parent, false);
+                    child.AddComponent<MeshFilter>().sharedMesh = look;
+                    var renderer = child.AddComponent<MeshRenderer>();
+                    renderer.sharedMaterial = material;
+                    renderer.shadowCastingMode = variant == 5 ? ShadowCastingMode.Off : ShadowCastingMode.On;
+                    renderer.enabled = variant == 0;
+                }
+            }
 
             private static void Add(Transform parent, int layer, string name, MeshBuilder builder, Material material, Vector2? uv1, ShadowCastingMode shadows = ShadowCastingMode.On)
             {

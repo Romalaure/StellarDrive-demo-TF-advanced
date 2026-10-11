@@ -224,6 +224,9 @@ namespace StellarDriveDemoTFAdvanced.Common
             }
         }
 
+        /// <summary>A four-cornered face, wound to face <paramref name="outward"/>.</summary>
+        public void Face(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 outward) => Quad(p0, p1, p2, p3, outward);
+
         private void Quad(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 outward)
         {
             // Diagonals give the normal even when two corners meet (wedges built with Block)
