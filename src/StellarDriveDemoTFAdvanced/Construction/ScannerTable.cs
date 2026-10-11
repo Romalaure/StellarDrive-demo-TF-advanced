@@ -282,7 +282,16 @@ namespace StellarDriveDemoTFAdvanced.Construction
             }
             foreach (Transform t in FindObjectsByType<Transform>(FindObjectsSortMode.None).Where(t => t.parent == null && t.name.StartsWith("ship ") && t.name.Contains("visual") && t != ship))
             {
-                bool chest = t.GetComponentsInChildren<Transform>(true).Any(c => c.name.StartsWith("OpenedCase") || c.name.StartsWith("Case"));
+                // Only ships really around the table: drawn, and near in all three directions (a ship far
+                // above or below would otherwise land on the map)
+                if (!t.gameObject.activeInHierarchy || (t.position - center).sqrMagnitude > ScannerTable.Range * ScannerTable.Range * 2f
+                    || Mathf.Abs(Vector3.Dot(t.position - center, up)) > ScannerTable.Range)
+                    continue;
+                // A chest: a ship made of a loot case only (the cases lying around), its model shown
+                var renderers = t.GetComponentsInChildren<Renderer>();
+                if (renderers.Length == 0 || !renderers.Any(r => r.enabled))
+                    continue;
+                bool chest = t.GetComponentsInChildren<Transform>().Any(c => c.gameObject.activeInHierarchy && (c.name.StartsWith("OpenedCase") || c.name.StartsWith("Case")));
                 Mark(t.position, chest ? new Color(1f, 0.9f, 0.2f) : Color.white, chest ? 0.07f : 0.12f);
                 if (chest)
                     chests++;

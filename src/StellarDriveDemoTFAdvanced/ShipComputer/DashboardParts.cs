@@ -68,18 +68,19 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             PartFactory.Describe(settings, "Console de bord",
                 "Pupitre à poser au sol, écran incliné vers le pilote. Affiche les quatre sections FLIGHT, PROPULSION, POWER et DIAGNOSTICS du vaisseau où il est posé. Aucune prise ni touche.",
                 30f, new[] { (101u, 6), (102u, 3), (112u, 3) });
-            Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, 0.68f, 0.06f), new Vector3(1.04f, 1.36f, 0.72f));
+            Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, 0.8f, 0.06f), new Vector3(1.04f, 1.6f, 0.72f));
 
             // Screen leaning back 40 degrees, facing +Z
             Vector3 normal = new Vector3(0f, Mathf.Sin(40f * Mathf.Deg2Rad), Mathf.Cos(40f * Mathf.Deg2Rad));
             Vector3 screenUp = new Vector3(0f, normal.z, -normal.y);
-            Vector3 center = new Vector3(0f, 1.06f, 0.1f);
+            // High enough that the screen's lower edge clears the pedestal (top at 0.93 m)
+            Vector3 center = new Vector3(0f, 1.3f, 0.1f);
 
             var frame = new MeshBuilder { Panel = GameSkin.PlainPanel };
             frame.Box(new Vector3(0f, 0.02f, 0f), new Vector3(0.9f, 0.04f, 0.6f));
             frame.Box(new Vector3(0f, 0.48f, -0.06f), new Vector3(0.7f, 0.9f, 0.34f));
             // Neck between the pedestal and the screen housing
-            frame.Box(new Vector3(0f, 0.97f, 0.02f), new Vector3(0.5f, 0.16f, 0.24f));
+            frame.Box(new Vector3(0f, 1.06f, 0.0f), new Vector3(0.5f, 0.3f, 0.24f));
             frame.Box(center - normal * 0.03f, new Vector3(1.04f, 0.06f, 0.66f), Vector3.right, normal, screenUp);
             var glass = new MeshBuilder();
             glass.Box(center + normal * 0.001f, new Vector3(0.96f, 0.002f, 0.58f), Vector3.right, normal, screenUp);

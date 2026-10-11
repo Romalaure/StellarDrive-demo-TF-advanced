@@ -127,7 +127,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             if (transpose == null)
                 return _nearest = Stars.FirstOrDefault();
             PreciseWorldPosition here = transpose.ToPreciseWorldPos(ClientOrigin.LocalVisualSpace);
-            _nearest = Stars.OrderBy(s => here.DeltaDouble(new PreciseWorldPosition(s.position, Vector3.zero)).Magnitude).First();
+            double Distance(Star s) => here.DeltaDouble(new PreciseWorldPosition(s.position, Vector3.zero)).Magnitude;
+            Star closest = Stars.OrderBy(Distance).First();
+            // Another star only takes over when clearly nearer: no back and forth (the star map, the
+            // light) from one frame to the next while flying or switching spaces
+            if (_nearest == null || !Stars.Contains(_nearest) || double.IsNaN(Distance(_nearest)) || Distance(closest) < Distance(_nearest) * 0.8)
+                _nearest = closest;
             return _nearest;
         }
 

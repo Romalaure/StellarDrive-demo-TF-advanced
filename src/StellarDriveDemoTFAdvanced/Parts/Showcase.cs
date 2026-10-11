@@ -57,6 +57,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 yield break;
             }
             uint id = LoadShip(Json(ids), player, spaces, ships, worldIds, 20f);
+            if (!Settings.DevMapTest.Value)
             MelonLoader.MelonCoroutines.Start(Construction.SnapTest.Pin(spaces, ships, id, 30f));
             var state = new { Id = id };
             for (int i = 0; i < 5; i++)
@@ -94,6 +95,8 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 }
                 yield return PhotographFrom(state.Id, "showcase_inside", inside);
             }
+            if (Settings.DevMapTest.Value)
+                yield return MapTest(state.Id);
             if (Settings.DevInteractTest.Value)
                 yield return InteractTest(state.Id);
             AdvancedMod.Log.Msg($"dev: showcase done, ship has {ship.PartCount} parts");
@@ -114,6 +117,44 @@ namespace StellarDriveDemoTFAdvanced.Parts
             object k = System.Activator.CreateInstance(key, ship, part);
             object d = System.Activator.CreateInstance(data, color, System.Activator.CreateInstance(finish), material);
             HarmonyLib.AccessTools.Method(net, "ServerSet").Invoke(null, new[] { k, d });
+        }
+
+        // The star map while the ship moves: where its planets are, frame by frame, in the map's frame and the ship's
+        private static IEnumerator MapTest(uint shipId)
+        {
+            var map = Object.FindObjectsByType<Ships.Parts.StarMap.PlanetsHologram>(FindObjectsSortMode.None)
+                .FirstOrDefault(m => m.transform.root.name.StartsWith("ship " + shipId + " "));
+            if (map == null)
+            {
+                AdvancedMod.Log.Warning("dev: map test: no star map on the test ship");
+                yield break;
+            }
+            Transform root = map.transform.root;
+            var planets = map.Holograms.Values.Take(3).ToList();
+            var spaces = ServiceLocator.GetService<SpacesServer>();
+            var ships = ServiceLocator.GetService<ShipsServerTracker>();
+            for (int frame = 0; frame < 60; frame++)
+            {
+                // Flying: 200 m/s along the ship's forward, upward a little
+                TrackedShipServer flying = ships?.GetShip(shipId);
+                if (flying != null && spaces != null)
+                {
+                    var st = flying.PhysicsState.LocalPhysicsState;
+                    spaces.SetWorldObjectPhysics(flying, flying.SpaceId, new WorldTracking.Interface.Model.LocalPhysicsState { Position = st.Position, Rotation = st.Rotation, Velocity = st.Rotation * new Vector3(0f, 20f, 200f) });
+                }
+                int shown = map.transform.Cast<Transform>().Count(c => c.gameObject.activeSelf);
+                AdvancedMod.Log.Msg($"dev: map flight {frame}: nearest {Worlds.Galaxy.Nearest()?.name} erebos shown {Worlds.MapSystemFilter.ShowsErebos} children shown {shown} space {WorldTracking.Interface.Values.ClientOrigin.LocalPhysicsSpaceId}");
+                var text = new StringBuilder($"dev: map frame {frame}: ship v {root.position:F1} map in ship {root.InverseTransformPoint(map.transform.position):F3} rot {(Quaternion.Inverse(root.rotation) * map.transform.rotation).eulerAngles:F1}");
+                foreach (var planet in planets)
+                {
+                    Transform t = planet.HologramObject.transform;
+                    text.Append($" | {planet.Planet.Name} local {t.localPosition:F3} in ship {root.InverseTransformPoint(t.position):F3}");
+                }
+                foreach (Transform label in map.transform.Cast<Transform>().Where(c => c.name == "TFA_MapLabel").Take(2))
+                    text.Append($" | label in ship {root.InverseTransformPoint(label.position):F3}");
+                AdvancedMod.Log.Msg(text.ToString());
+                yield return null;
+            }
         }
 
         // The modules' interactions on this client: count them, use the light switches and a respawn bunk
