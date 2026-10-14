@@ -150,9 +150,33 @@ namespace StellarDriveDemoTFAdvanced.Combat
             if (target == null)
                 yield break;
             int startParts = target.PartCount;
-            // 1-4: that design (scout, corsair, raider, cruiser), 5: one at random
-            PirateDesign design = which >= 1 && which <= 4 ? PirateShips.All[which - 1] : PirateShips.Random();
-            Pirates.ForceSpawn(target, design, 1, 500f);
+            float home = Zones.TryOffset(Zones.HomePlanet, target.PhysicsState.SpaceId, target.PhysicsState.Position, out Vector3 toHome) ? toHome.magnitude / 1000f : -1f;
+            AdvancedMod.Log.Msg($"dev: pirate test: target {home:0} km from the home planet, safe zone {Zones.InSafeZone(target.PhysicsState.SpaceId, target.PhysicsState.Position)}");
+            if (which == 6)
+            {
+                // A pirate base 700 m away
+                var spec = Worlds.AbandonedStations.All.First(s => s.Pirate);
+                var blueprint = new Worlds.AbandonedStations.Blueprint(spec.Seed) { Spec = spec };
+                spec.Build(blueprint);
+                var baseData = JsonUtility.FromJson<ShipImportExportUtils.ShipImportExportData>(blueprint.ToJson(spec.Name));
+                SavedShipState baseState = new ShipsConverter().ConvertToState(baseData.ships).States.Cast<SavedShipState>().Single();
+                var baseIds = ServiceLocator.GetService<WorldTracking.Services.WorldObjectsIdsServerTracker>();
+                SpacesServer baseSpaces = ServiceLocator.GetService<SpacesServer>();
+                baseState.Id = baseIds.CreateUniqueIdForObject();
+                baseState.SpaceId = target.PhysicsState.SpaceId;
+                baseState.Position = target.PhysicsState.Position + target.PhysicsState.Rotation * new Vector3(700f, 60f, 0f);
+                baseState.Rotation = Quaternion.LookRotation(target.PhysicsState.Position - baseState.Position);
+                baseState.RelativeSpaceId = baseSpaces.GetOrCreateShipRelativeSpace(baseState.Id);
+                ships.LoadShip(baseState);
+                Pirates.AddBase(baseState.Id);
+                AdvancedMod.Log.Msg($"dev: pirate test: base {baseState.Id} built with {baseState.StatefulParts.Length} parts");
+            }
+            else
+            {
+                // 1-4: that design (scout, corsair, raider, cruiser), 5: one at random
+                PirateDesign design = which >= 1 && which <= 4 ? PirateShips.All[which - 1] : PirateShips.Random();
+                Pirates.ForceSpawn(target, design, 1, 500f);
+            }
             uint[] spawned = Pirates.All.Keys.ToArray();
             for (int i = 0; i < 25; i++)
             {
@@ -166,7 +190,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
                         continue;
                     Vector3 to = target.PhysicsState.Position - self.PhysicsState.Position;
                     float angle = Vector3.Angle(self.PhysicsState.Rotation * Vector3.forward, to);
-                    AdvancedMod.Log.Msg($"dev: pirate test t={2 * (i + 1)} s: planet {(pirate.PlanetCenter.HasValue ? Vector3.Angle(self.PhysicsState.Position - pirate.PlanetCenter.Value, target.PhysicsState.Rotation * Vector3.up).ToString("0") + "° off target up" : "no")}, {pirate.Design.Name} {pirate.ShipId} distance {to.magnitude:0} m, nose off by {angle:0}°, speed {(self.PhysicsState.Velocity - target.PhysicsState.Velocity).magnitude:0} m/s, hull {pirate.Health:0}, guns {pirate.Guns}, weapons {pirate.Weapons.Count}, parts {self.PartCount}; target parts {target.PartCount}/{startParts}");
+                    AdvancedMod.Log.Msg($"dev: pirate test t={2 * (i + 1)} s: {(pirate.IsBase ? $"bearing {pirate.Bearing.Count}, " : "")}planet {(pirate.PlanetCenter.HasValue ? Vector3.Angle(self.PhysicsState.Position - pirate.PlanetCenter.Value, target.PhysicsState.Rotation * Vector3.up).ToString("0") + "° off target up" : "no")}, {pirate.Design.Name} {pirate.ShipId} distance {to.magnitude:0} m, nose off by {angle:0}°, speed {(self.PhysicsState.Velocity - target.PhysicsState.Velocity).magnitude:0} m/s, hull {pirate.Health:0}, guns {pirate.Guns}, weapons {pirate.Weapons.Count}, parts {self.PartCount}; target parts {target.PartCount}/{startParts}");
                 }
                 // Fight back: Arsenal missiles at the first pirate, as a player would fire them
                 System.Type missiles = HarmonyLib.AccessTools.TypeByName("Arsenal.Vehicles.Missiles");

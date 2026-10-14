@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Core.Values;
 using StellarDriveDemoTFAdvanced.Common;
 using UnityEngine;
@@ -341,7 +342,39 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     PointsOfInterest.Deposits(p, OreKind.Cryonite, 0.8f);
                     PointsOfInterest.Deposits(p, OreKind.Meteorite, 0.3f);
                 }
+            },
+            new PlanetSpec
+            {
+                Ring = ring =>
+                {
+                    // A belt of dark scrap and wrecks, lit red
+                    ring.ringConfig.AsteroidsTexLitColor = new Color(0.45f, 0.18f, 0.16f);
+                    ring.ringConfig.ringDirectScatteringColor *= 0.6f;
+                },
+                Id = BastionId, Name = "Bastion Écarlate", System = PlanetWiki.Erebos, MapColor = new Color(0.85f, 0.12f, 0.1f), Biome = "artificielle (forteresse pirate)", OrbitAngle = 75f, OrbitScale = 1.55f, Gravity = 1.3f, RotationHours = 3f,
+                Shape = p =>
+                {
+                    // A world plated with dark metal by the pirates: flat plains of plating, red coolant
+                    // pools, no air, no life; fortresses, gun turrets and ramparts everywhere
+                    p.Material(PlanetShaper.Ground, PlanetShaper.Shore, new Color(0.2f, 0.2f, 0.23f));
+                    p.Material(PlanetShaper.Shore, PlanetShaper.Shore, new Color(0.3f, 0.12f, 0.1f));
+                    p.Material(PlanetShaper.Water, PlanetShaper.Water, new Color(0.9f, 0.1f, 0.05f));
+                    p.Shoreline(96f, 80f);
+                    p.Relief(0.25f, 0.6f, new Vector3(0.31f, 0.12f, -0.44f));
+                    p.Craters(25, 800f, 3000f, 20f, 60f);
+                    p.NoAtmosphere();
+                    p.FloraElevation(1e7f, 1e7f);
+                    // Nothing grows on plating: no huge firs either
+                    p.ClearHotspots(c => c.distributionSteps.Any(s => s.objectPrefab != null && s.objectPrefab.name.StartsWith("FirTree")));
+                    PointsOfInterest.Fortress(p, 2f);
+                    PointsOfInterest.CargoWrecks(p, 0.5f);
+                    PointsOfInterest.Deposits(p, OreKind.Uranium, 0.8f);
+                    PointsOfInterest.Deposits(p, OreKind.Meteorite, 0.5f);
+                }
             }
         };
+
+        /// <summary>The pirates' artificial planet in the Erebos galaxy.</summary>
+        public const ulong BastionId = 115;
     }
 }

@@ -64,6 +64,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             new WikiEntry { Id = 114, Name = "Cristallis", System = Erebos, Biome = "cristalline : plaines de sel, crêtes, anneau de cristal", Gravity = "0,6 g", Air = "trop mince",
                 Resources = new[] { "quartz (beaucoup)", "cryonite", "météorite", "astéroïdes de cristal" }, Places = new[] { "ruines de glace", "épaves", "épave du Léviathan (en orbite)" },
                 Use = "quartz et cryonite en masse ; faible gravité.", Danger = "air trop mince : oxygène obligatoire." },
+            new WikiEntry { Id = 115, Name = "Bastion Écarlate", System = Erebos, Biome = "artificielle : plaines de blindage, bassins rouges, forteresses pirates", Gravity = "1,3 g", Air = "aucun",
+                Resources = new[] { "uranium", "météorite", "butin des bases pirates" }, Places = new[] { "forteresses, tourelles, remparts", "3 bases pirates en orbite", "anneau de débris" },
+                Use = "le repaire des pirates : bases à détruire et à piller.", Danger = "pirates très nombreux (attaques 4 fois plus fréquentes), bases armées ; pas d'air." },
         };
 
         private static readonly List<WikiEntry> Extra = new List<WikiEntry>();

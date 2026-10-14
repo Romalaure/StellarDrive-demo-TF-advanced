@@ -18,8 +18,35 @@ namespace StellarDriveDemoTFAdvanced.Worlds
     internal static class FutureCity
     {
         private static readonly Color GlowColor = new Color(0.25f, 0.9f, 1f);
-        private static GameObject[] _built;
+        private static readonly Color FortressGlow = new Color(1f, 0.12f, 0.05f);
+        private static GameObject[] _built, _fortress;
         private static GameObject _holder;
+
+        /// <summary>
+        /// The pirate fortress's pieces (the Bastion's surface): tall tower, tower, dome, pylon,
+        /// landing pad, barrier, gun turret, bunker, rampart; red lights. Null without the demo rock.
+        /// </summary>
+        public static GameObject[] Fortress(PlanetShaper.Context planet)
+        {
+            if (_fortress != null && _fortress.Length > 0 && _fortress[0] != null)
+                return _fortress;
+            GameObject rock = planet.HotspotPrefab("RockLargeIron");
+            if (rock == null)
+                return null;
+            _fortress = new[]
+            {
+                Piece(rock, "TowerTall", (m, g) => Tower(m, g, 64f), "TFA_Fort", FortressGlow),
+                Piece(rock, "Tower", (m, g) => Tower(m, g, 34f), "TFA_Fort", FortressGlow),
+                Piece(rock, "Dome", Dome, "TFA_Fort", FortressGlow),
+                Piece(rock, "Pylon", Pylon, "TFA_Fort", FortressGlow),
+                Piece(rock, "Pad", Pad, "TFA_Fort", FortressGlow),
+                Piece(rock, "Barrier", Barrier, "TFA_Fort", FortressGlow),
+                Piece(rock, "Cannon", Cannon, "TFA_Fort", FortressGlow),
+                Piece(rock, "Bunker", Bunker, "TFA_Fort", FortressGlow),
+                Piece(rock, "Rampart", Rampart, "TFA_Fort", FortressGlow)
+            };
+            return _fortress;
+        }
 
         /// <summary>The city's pieces: big tower, small tower, dome, pylon, landing pad, arch; null when the demo rock is not available.</summary>
         public static GameObject[] Prefabs(PlanetShaper.Context planet)
@@ -49,7 +76,10 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             return _built;
         }
 
-        private static GameObject Piece(GameObject rock, string name, Action<MeshBuilder, MeshBuilder> build)
+        private static GameObject Piece(GameObject rock, string name, Action<MeshBuilder, MeshBuilder> build) =>
+            Piece(rock, name, build, "TFA_City", GlowColor);
+
+        private static GameObject Piece(GameObject rock, string name, Action<MeshBuilder, MeshBuilder> build, string prefix, Color glowColor)
         {
             if (_holder == null)
             {
@@ -58,7 +88,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Object.DontDestroyOnLoad(_holder);
             }
             GameObject copy = Object.Instantiate(rock, _holder.transform);
-            copy.name = "TFA_City" + name;
+            copy.name = prefix + name;
 
             var hull = new MeshBuilder { Panel = GameSkin.TallPanel };
             var glow = new MeshBuilder();
@@ -74,7 +104,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             lights.transform.SetParent(visual, false);
             lights.AddComponent<MeshFilter>().sharedMesh = glow.Build(copy.name + "_Glow");
             var lightRenderer = lights.AddComponent<MeshRenderer>();
-            lightRenderer.sharedMaterial = LitMaterials.Get("TFA_CityGlow", GlowColor, 0f, 0.9f, GlowColor * 3f);
+            lightRenderer.sharedMaterial = LitMaterials.Get(prefix + "Glow", glowColor, 0f, 0.9f, glowColor * 3f);
             lightRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             PlanetObjectVisuals visuals = copy.GetComponentInChildren<PlanetObjectVisuals>(true);
             if (visuals != null)
@@ -328,6 +358,62 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             }
             m.Box(new Vector3(5.5f, 0.8f, 1.5f), new Vector3(2.4f, 1.6f, 1.6f), Quaternion.Euler(0f, 25f, 0f));
             m.Box(new Vector3(5.4f, 2.3f, 1.4f), new Vector3(2.2f, 1.4f, 1.5f), Quaternion.Euler(0f, 40f, 4f));
+        }
+
+        // ---- Fortress pieces
+
+        // A heavy gun turret: an armoured ring, a turret house and twin long barrels raised to the sky
+        private static void Cannon(MeshBuilder m, MeshBuilder g)
+        {
+            m.Cylinder(new Vector3(0f, -0.6f, 0f), new Vector3(0f, 1.6f, 0f), 8f, 7.2f, 12);
+            g.Cylinder(new Vector3(0f, 1.2f, 0f), new Vector3(0f, 1.35f, 0f), 7.35f, 7.35f, 24, capA: false, capB: false);
+            m.Cylinder(new Vector3(0f, 1.6f, 0f), new Vector3(0f, 2.4f, 0f), 5.5f, 5.2f, 12);
+            Quaternion yaw = Quaternion.Euler(0f, 35f, 0f);
+            m.Box(new Vector3(0f, 4.4f, 0f), new Vector3(8f, 4f, 9f), yaw);
+            m.Box(new Vector3(0f, 6.7f, -0.8f), new Vector3(6f, 0.8f, 6f), yaw);
+            g.Box(yaw * new Vector3(0f, 4.6f, 4.52f), new Vector3(6f, 0.25f, 0.04f), yaw);
+            foreach (float side in new[] { -1.4f, 1.4f })
+            {
+                Vector3 root = yaw * new Vector3(side, 4.8f, 4f);
+                Vector3 tip = root + yaw * (Quaternion.Euler(-25f, 0f, 0f) * Vector3.forward) * 16f;
+                m.Cylinder(root, tip, 0.75f, 0.6f, 10);
+                m.Cylinder(tip, tip + (tip - root).normalized * 1.2f, 0.85f, 0.85f, 10);
+                g.Cylinder(tip + (tip - root).normalized * 1.18f, tip + (tip - root).normalized * 1.22f, 0.5f, 0.5f, 10);
+            }
+            // Ammunition hoist and a sensor mast
+            m.Box(yaw * new Vector3(0f, 3.2f, -5.5f), new Vector3(3f, 3.6f, 2.4f), yaw);
+            m.Cylinder(yaw * new Vector3(2.5f, 7f, -2f), yaw * new Vector3(2.5f, 11f, -2f), 0.15f, 0.1f, 6);
+            g.Cylinder(yaw * new Vector3(2.5f, 11f, -2f), yaw * new Vector3(2.5f, 11.4f, -2f), 0.3f, 0.3f, 8);
+        }
+
+        // A low sloped bunker with firing slits
+        private static void Bunker(MeshBuilder m, MeshBuilder g)
+        {
+            m.Box(new Vector3(0f, -0.2f, 0f), new Vector3(16f, 1.2f, 11f));
+            m.Block(new[]
+            {
+                new Vector3(-7.5f, 0.4f, -5f), new Vector3(7.5f, 0.4f, -5f), new Vector3(-5.5f, 4.2f, -3f), new Vector3(5.5f, 4.2f, -3f),
+                new Vector3(-7.5f, 0.4f, 5f), new Vector3(7.5f, 0.4f, 5f), new Vector3(-5.5f, 4.2f, 3f), new Vector3(5.5f, 4.2f, 3f)
+            });
+            for (int i = 0; i < 4; i++)
+                g.Box(new Vector3(-4.5f + i * 3f, 2.4f, 4.05f), new Vector3(1.8f, 0.3f, 0.05f), Quaternion.Euler(-45f, 0f, 0f));
+            m.Box(new Vector3(0f, 4.9f, -1f), new Vector3(3f, 1.4f, 2.5f));
+            g.Box(new Vector3(0f, 5f, 0.27f), new Vector3(2.2f, 0.2f, 0.04f));
+        }
+
+        // A stretch of rampart with crenels and a lit walkway
+        private static void Rampart(MeshBuilder m, MeshBuilder g)
+        {
+            m.Box(new Vector3(0f, 2.6f, 0f), new Vector3(24f, 6.4f, 3f));
+            for (int i = 0; i < 6; i++)
+                m.Box(new Vector3(-10f + i * 4f, 6.4f, 1f), new Vector3(2.2f, 1.6f, 1f));
+            g.Box(new Vector3(0f, 5f, 1.52f), new Vector3(23f, 0.2f, 0.04f));
+            g.Box(new Vector3(0f, 5f, -1.52f), new Vector3(23f, 0.2f, 0.04f));
+            foreach (float x in new[] { -12.5f, 12.5f })
+            {
+                m.Box(new Vector3(x, 4f, 0f), new Vector3(4f, 9f, 4f));
+                g.Box(new Vector3(x, 8.6f, 2.02f), new Vector3(2.4f, 0.25f, 0.04f));
+            }
         }
 
         // A gateway arch over a road, lit underneath

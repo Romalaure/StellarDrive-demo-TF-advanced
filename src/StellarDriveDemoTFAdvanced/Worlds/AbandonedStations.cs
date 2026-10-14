@@ -52,6 +52,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             public int DarkMatter;
             /// <summary>Rare finds in its chests: (item, chance).</summary>
             public (uint Item, int Min, int Max, double Chance)[] Rare = new (uint, int, int, double)[0];
+            /// <summary>A pirate base (with the Arsenal mod): armed, hostile, see <see cref="Combat.Pirates"/>.</summary>
+            public bool Pirate;
         }
 
         public static readonly StationSpec[] All =
@@ -135,6 +137,84 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     b.Entrance(0, 0, 14, 2);
                 }
             },
+            // ---- Pirate bases in the Erebos galaxy, around the Bastion (and one near Pyros)
+
+            new StationSpec
+            {
+                Name = "Base pirate : Forteresse Écarlate", AnchorPlanet = Worlds.PlanetCatalog.BastionId, Offset = new Vector3(5e6f, 1.2e6f, -2.5e6f), Seed = 201, Breaches = 0f, Pirate = true,
+                Band = new Color32(220, 30, 20, 255), Outside = new Color32(58, 52, 54, 255), Inside = new Color32(90, 80, 80, 255), DarkMatter = 30,
+                Rare = new[] { (Items.ModItems.QuantumCore, 1, 2, 0.6), (Items.ModItems.ExoticMatter, 1, 3, 0.5), (Items.ModItems.NexoranAlloy, 3, 8, 0.7), (Items.ModItems.Uranium, 4, 10, 0.7), (Items.ModItems.Artifact, 1, 1, 0.3) },
+                Build = b =>
+                {
+                    // A fortified core with four armed arms and a command tower
+                    b.Module(-4, 0, -4, 4, 4, 4);
+                    b.Module(-1, 0, 5, 1, 2, 12);
+                    b.Module(-1, 0, -12, 1, 2, -5);
+                    b.Module(5, 0, -1, 12, 2, 1);
+                    b.Module(-12, 0, -1, -5, 2, 1);
+                    b.Module(-2, 5, -2, 2, 9, 2);
+                    b.Entrance(0, 0, 12, 2);
+                    b.Battery(-1, 2, 12, 0);  // guns at each arm's end, facing out
+                    b.Battery(1, 2, 12, 0);
+                    b.Battery(-1, 2, -12, 2);
+                    b.Battery(1, 2, -12, 2);
+                    b.Battery(12, 2, -1, 1);
+                    b.Battery(12, 2, 1, 1);
+                    b.Battery(-12, 2, -1, 3);
+                    b.Battery(-12, 2, 1, 3);
+                    b.Battery(-3, 4, 0, 3, Combat.PirateShips.Plasma);
+                    b.Battery(3, 4, 0, 1, Combat.PirateShips.Plasma);
+                    b.Battery(0, 4, 3, 0, Combat.PirateShips.Plasma);
+                    b.Battery(0, 4, -3, 2, Combat.PirateShips.Plasma);
+                    b.Battery(0, 9, 0, 0, Combat.PirateShips.Pdc);
+                    b.Battery(-4, 4, -4, 2, Combat.PirateShips.Pdc);
+                    b.Battery(4, 4, 4, 0, Combat.PirateShips.Pdc);
+                }
+            },
+            new StationSpec
+            {
+                Name = "Base pirate : Chantier de la Rouille", AnchorPlanet = Worlds.PlanetCatalog.BastionId, Offset = new Vector3(-4e6f, -1e6f, 4.5e6f), Seed = 211, Breaches = 0.3f, Pirate = true,
+                Band = new Color32(230, 110, 20, 255), Outside = new Color32(80, 64, 52, 255), Inside = new Color32(100, 90, 80, 255), DarkMatter = 15,
+                Rare = new[] { (Items.ModItems.Titanium, 6, 14, 0.8), (Items.ModItems.NexoranAlloy, 3, 6, 0.6), (Items.ModItems.Meteorite, 4, 10, 0.6), (Items.ModItems.QuantumCore, 1, 1, 0.35) },
+                Build = b =>
+                {
+                    // A shipyard: a long spine, two docking cradles and a crane tower
+                    b.Module(-2, 0, -16, 2, 3, 16);
+                    b.Module(3, 0, -10, 9, 2, -4);
+                    b.Module(3, 0, 4, 9, 2, 10);
+                    b.Module(-1, 4, 10, 1, 10, 12);
+                    b.Entrance(0, 0, -16, 3);
+                    b.Battery(-1, 3, 16, 0);
+                    b.Battery(1, 3, 16, 0);
+                    b.Battery(0, 3, -16, 2);
+                    b.Battery(9, 2, -7, 1);
+                    b.Battery(9, 2, 7, 1);
+                    b.Battery(-2, 3, 0, 3);
+                    b.Battery(-2, 3, 8, 3);
+                    b.Battery(0, 10, 11, 0, Combat.PirateShips.Laser);
+                    b.Battery(0, 3, -6, 2, Combat.PirateShips.Pdc);
+                    b.Battery(0, 3, 6, 0, Combat.PirateShips.Pdc);
+                }
+            },
+            new StationSpec
+            {
+                Name = "Base pirate : Avant-poste du Croc", AnchorPlanet = 111, Offset = new Vector3(-3e6f, 2e6f, 3.5e6f), Seed = 223, Breaches = 0.5f, Pirate = true,
+                Band = new Color32(200, 40, 30, 255), Outside = new Color32(64, 60, 58, 255), Inside = new Color32(96, 90, 86, 255), DarkMatter = 10,
+                Rare = new[] { (Items.ModItems.Meteorite, 4, 10, 0.7), (Items.ModItems.Uranium, 3, 8, 0.6), (Items.ModItems.ExoticMatter, 1, 2, 0.3) },
+                Build = b =>
+                {
+                    b.Module(-3, 0, -3, 3, 3, 3);
+                    b.Module(-1, 0, 4, 1, 2, 8);
+                    b.Module(-1, 4, -1, 1, 7, 1);
+                    b.Entrance(0, 0, 8, 2);
+                    b.Battery(-1, 2, 8, 0);
+                    b.Battery(1, 2, 8, 0);
+                    b.Battery(3, 3, 0, 1);
+                    b.Battery(-3, 3, 0, 3);
+                    b.Battery(0, 3, -3, 2);
+                    b.Battery(0, 7, 0, 0, Combat.PirateShips.Pdc);
+                }
+            },
             new StationSpec
             {
                 Name = "Épave de l'Icare", AnchorPlanet = 111, Offset = new Vector3(3e6f, 4e6f, -2e6f), Seed = 131, Breaches = 6f, DarkMatter = 30,
@@ -178,6 +258,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             foreach (StationSpec spec in All)
             {
                 if (existing.Contains(spec.Name))
+                    continue;
+                // Pirate bases need the Arsenal mod (their guns are its parts)
+                if (spec.Pirate && (!Power.ArsenalShield.Installed || !Settings.Pirates.Value))
                     continue;
                 try
                 {
@@ -260,6 +343,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             state.Rotation = Quaternion.Euler(spec.Seed * 7f % 30f, spec.Seed * 13f % 360f, spec.Seed * 3f % 20f);
             state.RelativeSpaceId = spaces.GetOrCreateShipRelativeSpace(state.Id);
             ships.LoadShip(state);
+            if (spec.Pirate)
+                Combat.Pirates.AddBase(state.Id);
             AdvancedMod.Log.Msg($"stations: created {spec.Name} (ship {state.Id}, {state.HullParts.Length} hull parts, {state.StatefulParts.Length} parts)");
         }
 
@@ -278,9 +363,20 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             private readonly List<(int x0, int y0, int z0, int x1, int y1, int z1)> _modules = new List<(int, int, int, int, int, int)>();
             private readonly System.Random _random;
 
+            private readonly List<(ushort Weapon, Vector3 At, int Forward)> _batteries = new List<(ushort, Vector3, int)>();
+
             public Blueprint(int seed)
             {
                 _random = new System.Random(seed);
+            }
+
+            /// <summary>
+            /// An Arsenal ship weapon on the roof of this interior voxel, facing a side (0 +z, 1 +x,
+            /// 2 -z, 3 -x): a machine gun by default.
+            /// </summary>
+            public void Battery(int x, int y, int z, int facing, ushort weapon = Combat.PirateShips.MachineGun)
+            {
+                _batteries.Add((weapon, new Vector3(x, y + 0.5f + 0.04f, z), facing));
             }
 
             /// <summary>A box of interior voxels (inclusive bounds). Touching modules open onto each other.</summary>
@@ -366,6 +462,13 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     floating.Add(Floating(nextPart, FluidTank, new Vector3(x, core.y0 - 0.5f + 0.04f, core.z1), 2, 4));
                     tanks.Add(string.Format(CultureInfo.InvariantCulture, "{{\"partId\":{0},\"fluidItemId\":{1},\"fluidQuantity\":{2:0.0}}}", nextPart, fluid, 10 + _random.Next(0, 40)));
                     nextPart++;
+                }
+
+                // Pirate batteries (the base's guns; only with the Arsenal mod, whose parts they are)
+                if (Spec != null && Spec.Pirate && Power.ArsenalShield.Installed)
+                {
+                    foreach ((ushort weapon, Vector3 at, int facing) in _batteries)
+                        floating.Add(Floating(nextPart++, weapon, at, facing, 4));
                 }
 
                 // Dead thrusters on the underside of the big modules

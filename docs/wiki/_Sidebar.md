@@ -15,6 +15,7 @@
 - [Thalassa](Thalassa.md)
 - [Mycélia](Mycelia.md)
 - [Cristallis](Cristallis.md)
+- [Bastion Écarlate](Bastion.md)
 
 **Guides**
 - [Ressources](Ressources.md)

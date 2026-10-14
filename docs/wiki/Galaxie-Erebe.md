@@ -10,6 +10,7 @@ Sur place, la lumière, le jour et la nuit et la carte stellaire suivent Érèbe
 | [Thalassa](Thalassa.md) | océanique  | 0,9 g | respirable | quartz, ambre, bois de palmier |
 | [Mycélia](Mycelia.md) | fongique  | 0,8 g | toxique (spores) | météorite, cryonite, bois de champignon |
 | [Cristallis](Cristallis.md) | cristalline  | 0,6 g | trop mince | quartz (beaucoup), cryonite, météorite |
+| [Bastion Écarlate](Bastion.md) | artificielle (forteresse pirate) | 1,3 g | aucun | uranium, météorite, bases pirates |
 
 ## L'Œil d'Érèbe
 

@@ -33,6 +33,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<string> DevNuclearMode { get; private set; }
         public static MelonPreferences_Entry<bool> Pirates { get; private set; }
         public static MelonPreferences_Entry<float> PirateIntervalMinutes { get; private set; }
+        public static MelonPreferences_Entry<float> PirateSafeRadiusKm { get; private set; }
         public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevDockingTest { get; private set; }
         public static MelonPreferences_Entry<string> DevSnapshotParts { get; private set; }
@@ -122,6 +123,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "Pirate ships (with the Arsenal mod only, whose weapons they use) now and then attack a player's ship flying in space.");
             PirateIntervalMinutes = _category.CreateEntry("PirateIntervalMinutes", 12f,
                 description: "Average time in space between two pirate attacks (minutes).");
+            PirateSafeRadiusKm = _category.CreateEntry("PirateSafeRadiusKm", 2000f,
+                description: "Safe zone around the home planet (442 Otrera b): no pirate attack within this distance of its centre, and pirates break off there (km, 0: none).");
             DevNuclearTest = _category.CreateEntry("DevNuclearTest", 0,
                 description: "For mod development: with DevWorld, an engine part id: a wired test ship with a centrifuge, a nuclear reactor and that engine.");
             DevMachineShield = _category.CreateEntry("DevMachineShield", 0,

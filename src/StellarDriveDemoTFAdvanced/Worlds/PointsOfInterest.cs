@@ -142,6 +142,35 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             });
         }
 
+        /// <summary>A pirate fortress district: towers and domes behind ramparts, gun turrets and bunkers.</summary>
+        public static void Fortress(PlanetShaper.Context planet, float frequency)
+        {
+            GameObject[] pieces = FutureCity.Fortress(planet);
+            AnimationCurve curve = TemplateCurve(planet);
+            if (pieces == null || curve == null)
+                return;
+            planet.AddHotspot(new PlanetHotspotsPlacementConfig
+            {
+                placementLevel = 4,
+                loadDistance = 3500f,
+                spawnProbability = Mathf.Clamp01(frequency * 0.2f),
+                avoidDenseEnvConstraint = true,
+                minElevationConstraint = false,
+                distributionSteps = new[]
+                {
+                    Step(pieces[0], curve, 1, 1, 0f, 1f, 24f),
+                    Step(pieces[1], curve, 2, 5, 30f, 110f, 20f),
+                    Step(pieces[2], curve, 1, 3, 35f, 110f, 28f),
+                    Step(pieces[3], curve, 2, 5, 20f, 120f, 12f),
+                    Step(pieces[4], curve, 1, 2, 50f, 120f, 26f),
+                    Step(pieces[5], curve, 2, 4, 15f, 110f, 10f),
+                    Step(pieces[6], curve, 3, 6, 40f, 140f, 18f),
+                    Step(pieces[7], curve, 2, 4, 30f, 130f, 16f),
+                    Step(pieces[8], curve, 4, 8, 60f, 150f, 26f)
+                }
+            });
+        }
+
         /// <summary>A field of the mod's ore deposits: a few big ones and smaller ones around.</summary>
         public static void Deposits(PlanetShaper.Context planet, OreKind kind, float frequency)
         {

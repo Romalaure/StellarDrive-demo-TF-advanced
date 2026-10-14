@@ -43,6 +43,14 @@ namespace StellarDriveDemoTFAdvanced.Combat
         public Vector3? PlanetCenter;
         /// <summary>Part id -> weapon kind (Arsenal part id) on this ship.</summary>
         public readonly Dictionary<ushort, ushort> Weapons = new Dictionary<ushort, ushort>();
+        /// <summary>A base: its guns that bear on the target now; when it launches its next fighters; the base that launched this one.</summary>
+        public readonly HashSet<ushort> Bearing = new HashSet<ushort>();
+        public float NextLaunch;
+        public uint LaunchedBy;
+        /// <summary>Since when it has been in the safe zone (0: not), before it jumps away.</summary>
+        public float SafeSince;
+
+        public bool IsBase => Design == PirateShips.Base;
     }
 
     /// <summary>
@@ -61,6 +69,8 @@ namespace StellarDriveDemoTFAdvanced.Combat
         private const float SpawnDistance = 1800f, LeaveDistance = 9000f;
 
         public static readonly Dictionary<uint, Pirate> All = new Dictionary<uint, Pirate>();
+        /// <summary>Bases destroyed in this world (their wreck stays, they must not come back).</summary>
+        private static readonly HashSet<uint> DeadBases = new HashSet<uint>();
         private static float _inSpaceSeconds;
         private static float _nextCheck;
         private static bool _loaded;
@@ -72,6 +82,8 @@ namespace StellarDriveDemoTFAdvanced.Combat
         public static void OnSceneLoaded(bool inGame)
         {
             All.Clear();
+            DeadBases.Clear();
+            Zones.Forget();
             _inSpaceSeconds = 0f;
             _loaded = false;
         }
@@ -88,13 +100,14 @@ namespace StellarDriveDemoTFAdvanced.Combat
             if (string.IsNullOrEmpty(worldDirectory))
                 return;
             string path = Path.Combine(worldDirectory, SaveFile);
-            if (All.Count == 0)
+            if (All.Count == 0 && DeadBases.Count == 0)
             {
                 if (File.Exists(path))
                     File.Delete(path);
                 return;
             }
-            File.WriteAllLines(path, All.Values.Select(p => string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} {1} {2:0}", p.ShipId, p.Design.Key, p.Health)));
+            File.WriteAllLines(path, All.Values.Select(p => string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} {1} {2:0}", p.ShipId, p.Design.Key, p.Health))
+                .Concat(DeadBases.Select(id => $"{id} dead 0")));
         }
 
         private static void Load(ShipsServerTracker ships)
@@ -106,13 +119,36 @@ namespace StellarDriveDemoTFAdvanced.Combat
             foreach (string line in File.ReadAllLines(path))
             {
                 string[] f = line.Split(' ');
-                if (f.Length < 3 || !uint.TryParse(f[0], out uint id) || ships.GetShip(id) == null)
+                if (f.Length < 3 || !uint.TryParse(f[0], out uint id))
+                    continue;
+                if (f[1] == "dead")
+                {
+                    DeadBases.Add(id);
+                    continue;
+                }
+                if (ships.GetShip(id) == null)
                     continue;
                 PirateDesign design = PirateShips.ByKey(f[1]);
                 float.TryParse(f[2], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float health);
                 All[id] = new Pirate { ShipId = id, Design = design, Health = health > 0f ? health : design.Health, LastNearPlayer = Time.time };
             }
-            AdvancedMod.Log.Msg($"pirates: {All.Count} pirate ship(s) back in this world");
+            // Bases already in the world but not in the list (a world saved before they were listed)
+            foreach (TrackedShipServer ship in ships.Ships)
+            {
+                if (All.ContainsKey(ship.Id) || DeadBases.Contains(ship.Id))
+                    continue;
+                string name = ship.GetAllStatefulParts<Ships.Interface.Model.Parts.State.BeaconState>().Select(p => ((Ships.Interface.Model.Parts.State.BeaconState)p.State).Name).FirstOrDefault();
+                if (name != null && Worlds.AbandonedStations.All.Any(s => s.Pirate && s.Name == name))
+                    AddBase(ship.Id);
+            }
+            AdvancedMod.Log.Msg($"pirates: {All.Count} pirate ship(s) and base(s) in this world");
+        }
+
+        /// <summary>A pirate base, just built (or found) in the world.</summary>
+        public static void AddBase(uint shipId)
+        {
+            if (!All.ContainsKey(shipId) && !DeadBases.Contains(shipId))
+                All[shipId] = new Pirate { ShipId = shipId, Design = PirateShips.Base, Health = PirateShips.Base.Health, LastNearPlayer = Time.time };
         }
 
         /// <summary>Host, every frame.</summary>
@@ -163,6 +199,9 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 }
                 if (ship == null || All.ContainsKey(ship.Id) || result.Contains(ship))
                     continue;
+                // Never in the safe zone around the home planet
+                if (Zones.InSafeZone(ship.PhysicsState.SpaceId, ship.PhysicsState.Position))
+                    continue;
                 if (spaces.TryGetSpace(ship.PhysicsState.SpaceId, out ISpace shipSpace) && (shipSpace is OrbitSpace || shipSpace is TrajectorySpace))
                     result.Add(ship);
             }
@@ -179,13 +218,16 @@ namespace StellarDriveDemoTFAdvanced.Combat
                         && (t.PhysicsState.Position - ship.PhysicsState.Position).sqrMagnitude < LeaveDistance * LeaveDistance))
                     pirate.LastNearPlayer = Time.time;
             }
-            // Pirates left far behind for long are gone
-            foreach (Pirate pirate in All.Values.Where(p => Time.time - p.LastNearPlayer > 600f).ToList())
+            // Pirates left far behind for long are gone (bases stay)
+            foreach (Pirate pirate in All.Values.Where(p => !p.IsBase && Time.time - p.LastNearPlayer > 600f).ToList())
                 Despawn(ships, pirate);
-            if (targets.Count == 0 || All.Count > 0)
+            if (targets.Count == 0 || All.Values.Any(p => !p.IsBase))
                 return;
             _inSpaceSeconds += 5f;
             float interval = Mathf.Max(1f, Settings.PirateIntervalMinutes.Value) * 60f;
+            // In their territory, around the Bastion, they come four times as often
+            if (targets.Any(t => Zones.NearBastion(t.PhysicsState.SpaceId, t.PhysicsState.Position)))
+                interval *= 0.25f;
             if (_inSpaceSeconds < interval * Random.Range(0.7f, 1.3f))
                 return;
             _inSpaceSeconds = 0f;
@@ -196,7 +238,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
         }
 
         /// <summary>Pirates jump in near this ship and attack it.</summary>
-        public static void SpawnNear(ShipsServerTracker ships, TrackedShipServer target, PirateDesign design, int count, float distance = SpawnDistance)
+        public static void SpawnNear(ShipsServerTracker ships, TrackedShipServer target, PirateDesign design, int count, float distance = SpawnDistance, TrackedShipServer from = null)
         {
             SpacesServer spaces = ServiceLocator.GetService<SpacesServer>();
             var ids = ServiceLocator.GetService<WorldObjectsIdsServerTracker>();
@@ -211,12 +253,19 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 state.SpaceId = target.PhysicsState.SpaceId;
                 Vector3 offset = Quaternion.AngleAxis(i * 25f, Vector3.Cross(side, Vector3.up).normalized + Vector3.forward * 0.01f) * side * distance;
                 state.Position = target.PhysicsState.Position + offset;
+                if (from != null)
+                {
+                    // Out of a base's hangar: beside it, heading for the target
+                    state.SpaceId = from.PhysicsState.SpaceId;
+                    state.Position = from.PhysicsState.Position + side * (40f + 25f * i);
+                    offset = state.Position - target.PhysicsState.Position;
+                }
                 state.Rotation = Quaternion.LookRotation(-offset.normalized, Vector3.up);
                 state.Velocity = target.PhysicsState.Velocity;
                 state.RelativeSpaceId = spaces.GetOrCreateShipRelativeSpace(state.Id);
                 ships.LoadShip(state);
                 All[state.Id] = new Pirate { ShipId = state.Id, Design = design, Health = design.Health, Target = target.Id, LastNearPlayer = Time.time,
-                    OrbitAxis = Random.onUnitSphere };
+                    OrbitAxis = Random.onUnitSphere, LaunchedBy = from?.Id ?? 0 };
                 AdvancedMod.Log.Msg($"pirates: {design.Name} {state.Id} jumps in {distance:0} m from ship {target.Id}");
             }
         }
@@ -249,17 +298,37 @@ namespace StellarDriveDemoTFAdvanced.Combat
                         pirate.Weapons[part.Id] = part.Settings.id;
                 }
             }
-            // Target: the nearest other ship in the same space (not a pirate), within reach
+            // Target: the nearest other ship in the same space (not a pirate), within reach (bases: 3 km)
+            float reach = pirate.IsBase ? 3000f : LeaveDistance;
             TrackedShipServer target = ships.GetShip(pirate.Target);
             if (target == null || All.ContainsKey(target.Id) || target.PhysicsState.SpaceId != self.PhysicsState.SpaceId
-                || (target.PhysicsState.Position - self.PhysicsState.Position).sqrMagnitude > LeaveDistance * LeaveDistance)
+                || (target.PhysicsState.Position - self.PhysicsState.Position).sqrMagnitude > reach * reach)
             {
                 target = ships.LoadedRootShips.Where(s => s.Id != self.Id && !All.ContainsKey(s.Id) && s.PhysicsState.SpaceId == self.PhysicsState.SpaceId && s.PartCount > 3)
                     .OrderBy(s => (s.PhysicsState.Position - self.PhysicsState.Position).sqrMagnitude)
-                    .FirstOrDefault(s => (s.PhysicsState.Position - self.PhysicsState.Position).sqrMagnitude < LeaveDistance * LeaveDistance);
+                    .FirstOrDefault(s => (s.PhysicsState.Position - self.PhysicsState.Position).sqrMagnitude < reach * reach);
                 pirate.Target = target?.Id ?? 0;
             }
             pirate.Guns = false;
+            pirate.Bearing.Clear();
+            // The safe zone: a fight that drifts into it is broken off, the pirates jump away
+            if (!pirate.IsBase && (Zones.InSafeZone(self.PhysicsState.SpaceId, self.PhysicsState.Position)
+                || (target != null && Zones.InSafeZone(target.PhysicsState.SpaceId, target.PhysicsState.Position))))
+            {
+                pirate.Target = 0;
+                if (pirate.SafeSince <= 0f)
+                    pirate.SafeSince = now;
+                else if (now - pirate.SafeSince > 15f)
+                    Despawn(ships, pirate);
+                return;
+            }
+            pirate.SafeSince = 0f;
+            if (pirate.IsBase)
+            {
+                if (target != null)
+                    BaseThink(ships, pirate, self, target, now);
+                return;
+            }
             SpacesServer spaces = ServiceLocator.GetService<SpacesServer>();
             pirate.PlanetCenter = spaces != null && spaces.TryGetSpace(self.PhysicsState.SpaceId, out ISpace space) && space is PlanetSurfaceSpace surface
                 ? -(Vector3)surface.Center : (Vector3?)null;
@@ -284,9 +353,91 @@ namespace StellarDriveDemoTFAdvanced.Combat
             }
         }
 
+        /// <summary>
+        /// A base: its guns that bear on the target fire in bursts, a salvo of homing missiles now
+        /// and then, and fighters out of its hangar when a ship comes near.
+        /// </summary>
+        private static void BaseThink(ShipsServerTracker ships, Pirate pirate, TrackedShipServer self, TrackedShipServer target, float now)
+        {
+            Vector3 to = target.PhysicsState.Position - self.PhysicsState.Position;
+            float distance = to.magnitude;
+            bool any = false;
+            foreach (StatefulPart part in self.StatefulParts)
+            {
+                if (part.Settings == null || !pirate.Weapons.ContainsKey(part.Id))
+                    continue;
+                Vector3 aim = self.PhysicsState.Rotation * (part.LocalRotation * Vector3.forward);
+                if (Vector3.Angle(aim, to) < 14f && distance < 900f)
+                {
+                    pirate.Bearing.Add(part.Id);
+                    any = true;
+                }
+            }
+            if (any && now >= pirate.ReloadUntil && now >= pirate.BurstUntil)
+            {
+                pirate.BurstUntil = now + pirate.Design.Burst;
+                pirate.ReloadUntil = pirate.BurstUntil + pirate.Design.Reload;
+            }
+            pirate.Guns = any && now < pirate.BurstUntil;
+            if (distance < 2500f && now >= pirate.NextPulse)
+            {
+                pirate.NextPulse = now + pirate.Design.MissileInterval;
+                Salvo(self, target, 2);
+            }
+            if (distance < 4000f && now >= pirate.NextLaunch && All.Values.Count(p => p.LaunchedBy == self.Id) < 3)
+            {
+                pirate.NextLaunch = now + 150f;
+                PirateDesign fighters = Random.value < 0.6f ? PirateShips.Scout : PirateShips.Corsair;
+                SpawnNear(ships, target, fighters, fighters == PirateShips.Scout ? 2 : 1, SpawnDistance, self);
+                AdvancedMod.Log.Msg($"pirates: base {self.Id} launches {fighters.Name}s at ship {target.Id}");
+            }
+        }
+
+        private static System.Reflection.MethodInfo _launch;
+
+        /// <summary>Homing Arsenal missiles from the base toward the target (fired where the base is seen, like the ships' own).</summary>
+        private static void Salvo(TrackedShipServer self, TrackedShipServer target, int count)
+        {
+            try
+            {
+                if (_launch == null)
+                    _launch = HarmonyLib.AccessTools.Method(HarmonyLib.AccessTools.TypeByName("Arsenal.Vehicles.Missiles"), "Launch");
+                Transform visual = UnityEngine.Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).FirstOrDefault(t => t.parent == null && t.name == $"ship {self.Id} visual");
+                Transform aimAt = UnityEngine.Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).FirstOrDefault(t => t.parent == null && t.name == $"ship {target.Id} visual");
+                if (_launch == null || visual == null || aimAt == null)
+                    return;
+                System.Reflection.ParameterInfo[] p = _launch.GetParameters();
+                for (int i = 0; i < count; i++)
+                {
+                    Vector3 dir = (aimAt.position - visual.position).normalized;
+                    Vector3 from = visual.position + dir * 25f + Random.insideUnitSphere * 6f;
+                    var args = new object[p.Length];
+                    args[0] = from;
+                    args[1] = dir * 35f;
+                    args[2] = target.Id;
+                    args[3] = self.Id;
+                    for (int k = 4; k < p.Length; k++)
+                        args[k] = k == 4 && p[k].ParameterType == typeof(bool) ? true : p[k].HasDefaultValue ? p[k].DefaultValue
+                            : p[k].ParameterType == typeof(int) ? (object)(-1) : p[k].ParameterType == typeof(uint) ? (object)0u : null;
+                    _launch.Invoke(null, args);
+                }
+            }
+            catch (System.Exception e)
+            {
+                ErrorLog.Report("pirate base missiles", e);
+            }
+        }
+
         /// <summary>Host physics: the pirate's pilot pushes and turns its ship (called each physics step for its root rigidbody).</summary>
         public static void Steer(Pirate pirate, TrackedShipServer self, Rigidbody body, float deltaTime)
         {
+            if (pirate.IsBase)
+            {
+                // A base keeps its station: blasts do not set it drifting or spinning
+                body.AddForce(Vector3.ClampMagnitude(-body.velocity * 1.5f, 6f), ForceMode.Acceleration);
+                body.AddTorque(Vector3.ClampMagnitude(-body.angularVelocity * 2f, 2f), ForceMode.Acceleration);
+                return;
+            }
             ShipsServerTracker ships = Ships;
             TrackedShipServer target = pirate.Target != 0 ? ships?.GetShip(pirate.Target) : null;
             PirateDesign d = pirate.Design;
@@ -353,7 +504,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
             else if (kind == PirateShips.Pdc || kind == 9219)
                 value = 1;
             else
-                value = pirate.Guns ? 1 : 0;
+                value = pirate.Guns && (!pirate.IsBase || pirate.Bearing.Contains(partId)) ? 1 : 0;
             // (machine guns, lasers and plasma cannons fire in its bursts)
             return true;
         }
@@ -430,6 +581,8 @@ namespace StellarDriveDemoTFAdvanced.Combat
         private static void Destroyed(ShipsServerTracker ships, Pirate pirate)
         {
             All.Remove(pirate.ShipId);
+            if (pirate.IsBase)
+                DeadBases.Add(pirate.ShipId);
             AdvancedMod.Log.Msg($"pirates: {pirate.Design.Name} {pirate.ShipId} destroyed");
             TrackedShipServer ship = ships?.GetShip(pirate.ShipId);
             Type explosives = AccessTools.TypeByName("Arsenal.Weapons.Explosives");

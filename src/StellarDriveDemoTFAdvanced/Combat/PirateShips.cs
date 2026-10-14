@@ -96,7 +96,16 @@ namespace StellarDriveDemoTFAdvanced.Combat
 
         public static readonly PirateDesign[] All = { Scout, Corsair, Raider, Cruiser };
 
-        public static PirateDesign ByKey(string key) => All.FirstOrDefault(d => d.Key == key) ?? Corsair;
+        /// <summary>A pirate base (a station in the Erebos galaxy): it does not move, fires what bears, launches missiles and fighters.</summary>
+        public static readonly PirateDesign Base = new PirateDesign
+        {
+            Key = "base", Name = "Base pirate", Level = 5, Health = 20000f, MaxSpeed = 0f, Accel = 4f, Turn = 2f, Standoff = 0f,
+            Burst = 2f, Reload = 3f, Wobble = 0f, MissileInterval = 5f, HalfWidth = 4, HalfLength = 6, Weight = 0f,
+            HullColor = new Vector3Int(60, 30, 30), Glow = new Color(1f, 0.15f, 0.05f), Weapons = new (ushort, float, bool, float)[0],
+            Loot = new[] { (ModItems.QuantumCore, 3), (ModItems.ExoticMatter, 2), (ModItems.NexoranAlloy, 12), (ModItems.Titanium, 30), (ModItems.Uranium, 20), (ModItems.Artifact, 2) }
+        };
+
+        public static PirateDesign ByKey(string key) => key == Base.Key ? Base : All.FirstOrDefault(d => d.Key == key) ?? Corsair;
 
         /// <summary>A design drawn at random by weight.</summary>
         public static PirateDesign Random()
