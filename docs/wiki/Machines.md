@@ -53,7 +53,7 @@ Entre l'énergie des artefacts et la matière noire. L'**uranium** se mine sur T
 | Propulseur nucléaire | **93 600 N** (12 propulseurs chimiques) pour 0,002 unité/s de combustible et 0,02 d'oxygène |
 | Moteur nucléaire lourd | **234 000 N** (30 propulseurs chimiques) pour 0,005 unité/s de combustible et 0,05 d'oxygène ; turbopompes et radiateurs |
 
-Les moteurs nucléaires et à matière noire se branchent comme le propulseur chimique (vannes sur les conduites), mais une prise reçoit leur combustible et l'autre l'**oxygène**, dans n'importe quel ordre. Un minerai d'uranium fait tourner un réacteur nucléaire 100 s.
+Les moteurs nucléaires et à matière noire se branchent comme le propulseur chimique, mais une prise reçoit leur combustible et l'autre l'**oxygène**, dans n'importe quel ordre. Ils **obéissent au siège de pilotage** : branchés et alimentés, ils restent éteints tant qu'un pilote, assis à un siège du vaisseau (ou d'un vaisseau amarré), ne demande pas de poussée dans leur direction (avancer, reculer, monter, descendre ; le siège avancé pilote aussi les côtés). Pas besoin de vannes. Réglage `EngineSeatControl = false` : ils poussent dès qu'ils sont alimentés, comme le propulseur chimique. Un minerai d'uranium fait tourner un réacteur nucléaire 100 s.
 
 ## Générateur de portail
 

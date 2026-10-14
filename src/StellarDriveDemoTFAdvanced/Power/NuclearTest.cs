@@ -47,6 +47,11 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             var players = ServiceLocator.GetService<Players.Services.PlayersServerTracker>();
             var player = players?.ActivePlayers.FirstOrDefault();
+            for (int wait = 0; player == null && players != null && wait < 30; wait++)
+            {
+                yield return Worlds.StationVisit.Wait(1f);
+                player = players.ActivePlayers.FirstOrDefault();
+            }
             SpacesServer spaces = ServiceLocator.GetService<SpacesServer>();
             ShipsServerTracker ships = ServiceLocator.GetService<ShipsServerTracker>();
             CablesServerTracker cables = ServiceLocator.GetService<CablesServerTracker>();
@@ -54,7 +59,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             if (player == null || spaces == null || ships == null || cables == null || ids == null
                 || !Propulsion.EngineCatalog.TryGet(engineId, out Propulsion.EngineSpec spec))
             {
-                AdvancedMod.Log.Warning("dev: nuclear test: services or engine missing");
+                AdvancedMod.Log.Warning($"dev: nuclear test: missing (player {player != null}, spaces {spaces != null}, ships {ships != null}, cables {cables != null}, ids {ids != null}, engine {engineId})");
                 yield break;
             }
             var data = JsonUtility.FromJson<ShipImportExportUtils.ShipImportExportData>(Json(spec));
@@ -97,6 +102,13 @@ namespace StellarDriveDemoTFAdvanced.Power
                     AdvancedMod.Log.Msg("dev: nuclear test ship gone");
                     yield break;
                 }
+                // From 12 s, a pilot at the seat asks for thrust upward (the engine's way)
+                if (i >= 5 && ship.TryGetStatefulPart(8, out StatefulPart seat) && seat.State is PilotSeatState pilot)
+                {
+                    ship.UpdatePartState(8, pilot with { IsInUse = true, MoveInputY = 1.0 });
+                    if (i == 5)
+                        AdvancedMod.Log.Msg("dev: nuclear test: pilot asks for thrust up");
+                }
                 if (i == 0)
                 {
                     foreach (CableState c in all.Skip(3))
@@ -135,7 +147,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             // The engine hangs under the hull's edge, nozzle down (thrust along -up of the part: up for the ship)
             string parts = string.Join(",", Part(1, PowerCatalog.CentrifugeId, -1.5f, -0.46f, 0f, 2, 4), Part(2, PowerCatalog.NuclearTankId, -1.5f, -0.46f, -1.8f, 2, 4),
                 Part(3, PowerCatalog.NuclearReactorId, 1.5f, -0.46f, 0f, 2, 4), Part(4, Tank, 1.5f, -0.46f, 1.8f, 2, 4),
-                Part(5, spec.Id, 3.4f, -0.6f, 0f, 0, 5), Part(6, Tank, 0f, -0.46f, 1.8f, 2, 4), Part(7, Tank, 0f, -0.46f, -1.8f, 2, 4));
+                Part(5, spec.Id, 3.4f, -0.6f, 0f, 0, 5), Part(6, Tank, 0f, -0.46f, 1.8f, 2, 4), Part(7, Tank, 0f, -0.46f, -1.8f, 2, 4),
+                Part(8, 3, 0f, -0.46f, 0f, 0, 4));
             string constants = "{\"partId\":3,\"constantValue\":0.0}";
             string tanks = $"{{\"partId\":2,\"fluidItemId\":0,\"fluidQuantity\":0.0}},{{\"partId\":4,\"fluidItemId\":{ModItems.NuclearFuel},\"fluidQuantity\":40.0}},"
                 + $"{{\"partId\":6,\"fluidItemId\":108,\"fluidQuantity\":40.0}},{{\"partId\":7,\"fluidItemId\":{spec.Fuel},\"fluidQuantity\":40.0}}";

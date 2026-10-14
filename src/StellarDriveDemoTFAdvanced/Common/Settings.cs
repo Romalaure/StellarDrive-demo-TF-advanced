@@ -28,6 +28,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<int> DevMachineShield { get; private set; }
         public static MelonPreferences_Entry<int> DevNuclearTest { get; private set; }
         public static MelonPreferences_Entry<int> DevPirateTest { get; private set; }
+        public static MelonPreferences_Entry<bool> EngineSeatControl { get; private set; }
         public static MelonPreferences_Entry<bool> Pirates { get; private set; }
         public static MelonPreferences_Entry<float> PirateIntervalMinutes { get; private set; }
         public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
@@ -107,6 +108,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevWorld, a planet id: a test ship opens a portal to that planet and flies through it.");
             DevMachineTest = _category.CreateEntry("DevMachineTest", false,
                 description: "For mod development: with DevWorld, drop a wired test ship with a reactor, a force field and a condenser above the player.");
+            EngineSeatControl = _category.CreateEntry("EngineSeatControl", true,
+                description: "Nuclear and dark matter engines push only while a pilot at a seat of the ship asks for thrust their way (false: like the Chemical Thruster, they push whenever fed).");
             DevPirateTest = _category.CreateEntry("DevPirateTest", 0,
                 description: "For mod development: with DevWorld, pirates attack the ship nearest the player (1: a corsair, 2: a cruiser, 3: two corsairs).");
             Pirates = _category.CreateEntry("Pirates", true,

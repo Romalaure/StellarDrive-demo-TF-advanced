@@ -103,7 +103,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             new EngineSpec
             {
                 Id = 7316, Key = "NuclearCompact", Label = "Propulseur nucléaire",
-                Description = "Un petit réacteur chauffe de l'oxygène et le rejette par une tuyère refroidie : 93 600 N (douze propulseurs chimiques) pour 0,002 unité/s de combustible nucléaire et 0,02 d'oxygène. Une prise de propergol reçoit le combustible nucléaire, l'autre l'oxygène (vannes comme le propulseur chimique). Montée en régime : 2 s.",
+                Description = "Un petit réacteur chauffe de l'oxygène et le rejette par une tuyère refroidie : 93 600 N (douze propulseurs chimiques) pour 0,002 unité/s de combustible nucléaire et 0,02 d'oxygène. Une prise de propergol reçoit le combustible nucléaire, l'autre l'oxygène. Commandé par le siège de pilotage. Montée en régime : 2 s.",
                 DefaultThrust = 12f, DefaultFuel = 0.04f, ReactionMass = 0.4f, Fuel = Items.ModItems.NuclearFuel, Mass = 110f, Scale = 1.3f, SpoolSeconds = 2f,
                 Tint = Color.white, Model = EngineModels.Nuclear, ModelGlow = Power.MachineModels.Green, ModelCore = new Color(1f, 0.55f, 0.15f), Flame = new Color(0.75f, 1f, 0.85f),
                 Cost = new[] { (Items.ModItems.Titanium, 15), (Items.ModItems.Uranium, 4), (Items.ModItems.NexoranAlloy, 4), (112u, 10) },
@@ -112,7 +112,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             new EngineSpec
             {
                 Id = 7317, Key = "NuclearHeavy", Label = "Moteur nucléaire lourd",
-                Description = "Moteur nucléaire thermique de grande taille, cœur à quatre turbopompes et radiateurs : 234 000 N (trente propulseurs chimiques) pour 0,005 unité/s de combustible nucléaire et 0,05 d'oxygène. Une prise de propergol reçoit le combustible nucléaire, l'autre l'oxygène. Montée en régime : 4 s.",
+                Description = "Moteur nucléaire thermique de grande taille, cœur à quatre turbopompes et radiateurs : 234 000 N (trente propulseurs chimiques) pour 0,005 unité/s de combustible nucléaire et 0,05 d'oxygène. Une prise de propergol reçoit le combustible nucléaire, l'autre l'oxygène. Commandé par le siège de pilotage. Montée en régime : 4 s.",
                 DefaultThrust = 30f, DefaultFuel = 0.1f, ReactionMass = 1f, Fuel = Items.ModItems.NuclearFuel, Mass = 320f, Scale = 2.2f, SpoolSeconds = 4f,
                 Tint = Color.white, Model = EngineModels.NuclearHeavy, ModelGlow = Power.MachineModels.Green, ModelCore = new Color(1f, 0.55f, 0.15f), Flame = new Color(0.75f, 1f, 0.85f),
                 Cost = new[] { (Items.ModItems.Titanium, 40), (Items.ModItems.Uranium, 10), (Items.ModItems.NexoranAlloy, 10), (Items.ModItems.QuantumCore, 1), (104u, 20) },
@@ -121,7 +121,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             new EngineSpec
             {
                 Id = 7318, Key = "DarkMatter", Label = "Moteur à matière noire",
-                Description = "Le moteur le plus puissant : la matière noire s'annihile dans une chambre de confinement et une tuyère magnétique en anneaux dirige le jet. 624 000 N (quatre-vingts propulseurs chimiques) pour 0,002 unité/s de matière noire et 0,03 d'oxygène. Une prise de propergol reçoit la matière noire, l'autre l'oxygène. Montée en régime : 3 s.",
+                Description = "Le moteur le plus puissant : la matière noire s'annihile dans une chambre de confinement et une tuyère magnétique en anneaux dirige le jet. 624 000 N (quatre-vingts propulseurs chimiques) pour 0,002 unité/s de matière noire et 0,03 d'oxygène. Une prise de propergol reçoit la matière noire, l'autre l'oxygène. Commandé par le siège de pilotage. Montée en régime : 3 s.",
                 DefaultThrust = 80f, DefaultFuel = 0.04f, ReactionMass = 0.6f, Fuel = Items.ModItems.DarkMatter, Mass = 260f, Scale = 2f, SpoolSeconds = 3f,
                 Tint = Color.white, Model = EngineModels.DarkMatter, ModelGlow = Power.MachineModels.Violet, ModelCore = new Color(1f, 0.65f, 1f), Flame = new Color(0.8f, 0.55f, 1f),
                 Cost = new[] { (Items.ModItems.Meteorite, 30), (Items.ModItems.QuantumCore, 3), (Items.ModItems.ExoticMatter, 4), (Items.ModItems.NexoranAlloy, 15), (Items.ModItems.Titanium, 25) },

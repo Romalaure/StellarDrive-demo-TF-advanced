@@ -69,7 +69,7 @@ Ce sont des clones du **propulseur chimique** du jeu. Ils ont le même modèle, 
 | 7317 | Moteur nucléaire lourd | 234 000 N | 0,005 combustible nucléaire + 0,05 oxygène | 320 kg | quatre turbopompes, radiateurs, montée en régime 4 s |
 | 7318 | Moteur à matière noire | 624 000 N | 0,002 matière noire + 0,03 oxygène | 260 kg | le plus puissant : chambre de confinement, tuyère magnétique en anneaux, montée en régime 3 s |
 
-Les moteurs 7316-7318 ont leur propre modèle 3D à la place de celui du propulseur chimique (sa flamme, teintée, et son son restent). Une de leurs prises d'ergols reçoit le combustible nucléaire ou la matière noire, l'autre l'oxygène.
+Les moteurs 7316-7318 **obéissent au siège de pilotage** : ils ne poussent que si un pilote assis à un siège du vaisseau (ou d'un vaisseau amarré) demande de la poussée dans leur direction, sans vannes (réglage `EngineSeatControl`). Ils ont leur propre modèle 3D à la place de celui du propulseur chimique (sa flamme, teintée, et son son restent). Une de leurs prises d'ergols reçoit le combustible nucléaire ou la matière noire, l'autre l'oxygène.
 
 Fonctionnement :
 - **Poussée et consommation** : trois patchs Harmony côté hôte corrigent la poussée, la demande d'ergols et la consommation, uniquement pour ces ids. Les propulseurs du jeu ne sont pas modifiés.
@@ -326,6 +326,7 @@ Réglage : `BlackHole` (section `[TFAdvanced]`, les deux trous noirs), identique
 | `CentrifugeWatts` / `CentrifugeOrePerSecond` / `CentrifugeFuelPerOre` (`[TFAdvancedPower]`) | `6000` / `0.05` / `0.2` | centrifugeuse d'enrichissement |
 | `DarkReactorWatts` / `DarkReactorBurnPerSecond` (`[TFAdvancedPower]`) | `150000` / `0.002` | réacteur à matière noire (une ancienne valeur de 40 000 passe à 150 000) |
 | `ShieldWatts` / `ShieldOxygenPerSecond` / `ShieldCapacity` / `ShieldRegenPerSecond` / `ShieldCooldownSeconds` (`[TFAdvancedPower]`) | `2000` / `0.02` / `150` / `0.5` / `300` | champ de force de base ; les autres modèles en sont des multiples (voir le wiki, Machines) |
+| `EngineSeatControl` | `true` | moteurs nucléaires et à matière noire commandés par le siège de pilotage (`false` : ils poussent dès qu'ils sont alimentés) |
 | `Pirates` / `PirateIntervalMinutes` | `true` / `12` | pirates (avec Arsenal) et temps moyen dans l'espace entre deux attaques (min) |
 | `CondenserWatts` / `CondenserOxygenPerSecond` (`[TFAdvancedPower]`) | `1500` / `0.05` | condenseur à cryonite |
 | `QuantumGyroFactor` (`[TFAdvancedPower]`) | `5` | couple du gyroscope quantique, en gyroscopes |
@@ -395,6 +396,7 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.10.1 : bulle du champ de force | ✅ en jeu (vaisseau de test câblé) : grille hexagonale, bord lumineux, bande de balayage, onde au choc (photo) ; le modèle du générateur ne change pas |
 | v0.10.1 : console de bord | ✅ écran relevé au-dessus du pied (photo) |
 | v0.10.1 : table de cartographie | ✅ les vaisseaux et coffres ne sont marqués que s'ils sont vraiment autour de la table (affichés, à moins de 300 m en hauteur comme à plat) : un vaisseau loin au-dessus ou en dessous n'apparaît plus en jaune |
+| v0.13.1 : moteurs au siège | ✅ en jeu (vaisseau de test, moteur à matière noire) : branché et alimenté, il reste éteint (0) ; un pilote au siège qui demande « monter » le fait passer à 1 en 2 s et le vaisseau décolle |
 | v0.13.0 : champ qui ne s'allume pas | ✅ cause trouvée dans la sauvegarde du joueur : un champ à matière noire (10 000 W) sur un réseau d'un seul générateur à bois (4 000 W). En jeu (vaisseau de test, champ réglé à 20 000 W sur 6 000 W) : état -3 affiché, le champ cesse de demander du courant 5 s entre deux essais ; anneaux clignotants (code) |
 | v0.13.0 : champs compact, réactif, nucléaire | ✅ en jeu : champ nucléaire monté, 0,01 combustible/s, explosion Arsenal de 1 400 : −9 % ; les six générateurs photographiés (le compact plus petit). Compact et réactif : valeurs non mesurées à part |
 | v0.13.0 : pirates | ✅ en jeu (`DevPirateTest`, sur une planète) : le corsaire s'approche de 500 à 175 m, garde le nez sur sa cible (1°), tire et la détruit (27 → 7 pièces) ; il reste en l'air au-dessus d'elle ; 4 missiles Arsenal le détruisent (2 500 → 0), il explose et laisse une capsule de butin (coffre à 4 piles). Croiseur : 8 armes, se bat à 250 m, sa défense rapprochée abat les missiles. ⏳ Apparition automatique en vol dans l'espace et combat en multijoueur **à voir en jeu** |

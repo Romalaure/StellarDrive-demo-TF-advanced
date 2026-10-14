@@ -90,7 +90,10 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                     // What the game just computed: the share of the demand the lines could feed
                     float fed = state.ThrusterStrength;
                     // Spool-up only slows rising thrust: an engine never burns more than its lines feed it
-                    float level = spec.SpoolSeconds > 0f && fed > previous ? Mathf.MoveTowards(previous, fed, deltaTime / spec.SpoolSeconds) : fed;
+                    // Nuclear and dark matter engines answer the pilot's seat: they push only while
+                    // someone at a seat of the ship asks for thrust their way
+                    float target = spec.Fuel != 0 && Settings.EngineSeatControl.Value ? Mathf.Min(fed, PilotControl.Command(____ship, ThrustMath.Direction(part))) : fed;
+                    float level = spec.SpoolSeconds > 0f && target > previous ? Mathf.MoveTowards(previous, target, deltaTime / spec.SpoolSeconds) : target;
                     if (FluidGroups.TryGet(__instance, part.Id, out FluidGroupServerState a, out FluidGroupServerState b))
                     {
                         // The game removed fed x 1x; the engine burns level x its own flow
@@ -211,6 +214,76 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             uint a = group0.FluidItemId, b = group1.FluidItemId;
             __result = (a == spec.Fuel && b == Oxygen) || (a == Oxygen && b == spec.Fuel);
             return false;
+        }
+    }
+
+    /// <summary>
+    /// The pilot's move input, from every seat in use on the ship or the ships docked to it, in
+    /// this ship's frame (basic seat: up/down and forward/back; advanced seat: all three axes).
+    /// </summary>
+    internal static class PilotControl
+    {
+        private static IShipsServerProvider _ships;
+        private static readonly System.Collections.Generic.List<Vector3> Inputs = new System.Collections.Generic.List<Vector3>();
+        private static uint _cachedShip;
+        private static int _cachedFrame = -1;
+
+        /// <summary>How much thrust (0-1) the pilots ask along this direction of the ship.</summary>
+        public static float Command(IShipStateWrite ship, Vector3 thrustDirection)
+        {
+            if (_cachedShip != ship.Id || _cachedFrame != Time.frameCount)
+            {
+                _cachedShip = ship.Id;
+                _cachedFrame = Time.frameCount;
+                Collect(ship);
+            }
+            float best = 0f;
+            foreach (Vector3 input in Inputs)
+                best = Mathf.Max(best, Vector3.Dot(input, thrustDirection));
+            return Mathf.Clamp01(best);
+        }
+
+        private static void Collect(IShipStateWrite ship)
+        {
+            Inputs.Clear();
+            if (_ships == null)
+                _ships = ServiceLocator.GetService<IShipsServerProvider>();
+            Quaternion mine = Quaternion.identity;
+            var assembly = _ships?.GetRootConnectedShips(ship.Id);
+            if (assembly != null)
+            {
+                foreach (RootRelativeShipData data in assembly)
+                {
+                    if (data.Ship != null && data.Ship.Id == ship.Id)
+                        mine = data.RotationRelativeToRoot;
+                }
+            }
+            if (assembly == null || assembly.Count == 0)
+            {
+                AddSeats(ship, Quaternion.identity);
+                return;
+            }
+            foreach (RootRelativeShipData data in assembly)
+            {
+                if (data.Ship != null)
+                    AddSeats(data.Ship, Quaternion.Inverse(mine) * data.RotationRelativeToRoot);
+            }
+        }
+
+        private static void AddSeats(IShipStateRead ship, Quaternion toShip)
+        {
+            foreach (StatefulPart seat in ship.GetAllStatefulParts<PilotSeatState>())
+            {
+                var state = (PilotSeatState)seat.State;
+                if (state.IsInUse)
+                    Inputs.Add(toShip * (seat.LocalRotation * new Vector3(0f, (float)state.MoveInputY, (float)state.MoveInputZ)));
+            }
+            foreach (StatefulPart seat in ship.GetAllStatefulParts<PilotSeatAdvState>())
+            {
+                var state = (PilotSeatAdvState)seat.State;
+                if (state.IsInUse)
+                    Inputs.Add(toShip * (seat.LocalRotation * state.MoveInput));
+            }
         }
     }
 
