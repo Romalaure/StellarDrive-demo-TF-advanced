@@ -15,7 +15,8 @@ using WorldTracking.Interface.Services;
 namespace StellarDriveDemoTFAdvanced.Power
 {
     /// <summary>
-    /// Dark matter (host simulation), the energy of the superior machines. It is a fluid item:
+    /// Dark matter (host simulation), the energy of the superior machines (the nuclear reactor
+    /// runs here too, on nuclear fuel). It is a fluid item:
     /// it flows in pipes and fills tanks like oxygen.
     ///  - The dark matter collector draws power and pulls dark matter out of space into the line
     ///    on its fluid socket: slowly anywhere, five times faster near a black hole, three times in
@@ -83,7 +84,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 foreach (StatefulPart part in ship.GetAllStatefulParts<ConstantState>())
                 {
                     ushort id = part.Settings.id;
-                    if (id != PowerCatalog.DarkCollectorId && id != PowerCatalog.DarkReactorId)
+                    if (id != PowerCatalog.DarkCollectorId && id != PowerCatalog.DarkReactorId && id != PowerCatalog.NuclearReactorId)
                         continue;
                     if (!Runtimes.TryGetValue((ship.Id, part.Id), out Runtime rt))
                         Runtimes[(ship.Id, part.Id)] = rt = new Runtime();
@@ -129,12 +130,15 @@ namespace StellarDriveDemoTFAdvanced.Power
             power.TryGetGroupFromSocket(new EntityPartSocket(entry.Ship.Id, entry.Part.Id, PowerCatalog.MachinePowerB), out PowerGroupServerState b);
             if (a == null && b == null)
                 return;
-            float burn = Mathf.Max(0f, PowerCatalog.DarkReactorBurnPerSecond.Value) * deltaTime;
+            // The nuclear reactor works the same way, on nuclear fuel, for less power
+            bool nuclear = entry.Part.Settings.id == PowerCatalog.NuclearReactorId;
+            uint fuel = nuclear ? ModItems.NuclearFuel : Fluid;
+            float burn = Mathf.Max(0f, (nuclear ? PowerCatalog.NuclearReactorBurnPerSecond : PowerCatalog.DarkReactorBurnPerSecond).Value) * deltaTime;
             if (!connections.TryGetFluidGroupCacheFromSocket(new EntityPartSocket(entry.Ship.Id, entry.Part.Id, FluidSocket), out FluidGroupServerState line)
-                || line.FluidItemId != Fluid || line.Available < burn)
+                || line.FluidItemId != fuel || line.Available < burn)
                 return;
             line.RemoveFluid(burn);
-            float output = Mathf.Max(0f, PowerCatalog.DarkReactorWatts.Value) * deltaTime;
+            float output = Mathf.Max(0f, (nuclear ? PowerCatalog.NuclearReactorWatts : PowerCatalog.DarkReactorWatts).Value) * deltaTime;
             if (a != null && b != null && a != b)
             {
                 a.TotalPowerProductionCapacity += output * 0.5f;

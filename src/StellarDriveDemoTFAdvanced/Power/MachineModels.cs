@@ -23,6 +23,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         public static readonly Color Red = new Color(1f, 0.12f, 0.1f);
         public static readonly Color Cyan = new Color(0.25f, 0.85f, 1f);
         public static readonly Color Violet = new Color(0.75f, 0.3f, 1f);
+        public static readonly Color Green = new Color(0.35f, 1f, 0.2f);
 
         internal sealed class Model
         {

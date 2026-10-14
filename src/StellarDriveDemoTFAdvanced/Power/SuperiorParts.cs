@@ -217,7 +217,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         }
 
         // Every socket in one row at the back: power, fluid, signal, power
-        private static void Sockets(GameObject prefab, float side, float face, float y)
+        internal static void Sockets(GameObject prefab, float side, float face, float y)
         {
             var bounds = prefab.GetComponent<ShipPartBounds>();
             PowerParts.GraftRow(prefab, bounds, y, -face, 0.2f,
@@ -227,7 +227,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static readonly int ColorId = Shader.PropertyToID("_Color");
         private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
 
-        private static void Recolor(GameObject prefab, Color color, Color glow)
+        internal static void Recolor(GameObject prefab, Color color, Color glow)
         {
             var copies = new System.Collections.Generic.Dictionary<Material, Material>();
             foreach (MeshRenderer renderer in prefab.GetComponentsInChildren<MeshRenderer>(true))

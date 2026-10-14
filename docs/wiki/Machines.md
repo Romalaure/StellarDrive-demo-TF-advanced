@@ -37,7 +37,22 @@ Même fonctionnement et mêmes prises que le champ de base ; la bulle prend la c
 | Collecteur de matière noire | 0,004 unité/s pour 8 000 W, ×5 près d'un trou noir, ×3 dans Érèbe ; la verse dans la conduite de sa prise de fluide |
 | Réservoir de matière noire | le réservoir du jeu blindé de météorite (prend tous les fluides) |
 | Réservoir de matière noire infini | toujours plein de matière noire : ce qu'on y puise se recrée, son contenu ne pèse rien |
-| Réacteur à matière noire | 40 000 W pour 0,002 unité/s de matière noire |
+| Réacteur à matière noire | **150 000 W** pour 0,002 unité/s de matière noire (le plus puissant) |
+| Moteur à matière noire | **624 000 N** (80 propulseurs chimiques) pour 0,002 unité/s de matière noire et 0,03 d'oxygène ; chambre de confinement et tuyère magnétique en anneaux |
+
+## Énergie nucléaire
+
+Entre l'énergie des artefacts et la matière noire. L'**uranium** se mine sur TF Aridia, TF Petra et Pyros (rochers verdâtres aux veines lumineuses).
+
+| Machine | Effet |
+|---|---|
+| Centrifugeuse d'enrichissement | prend le minerai d'uranium dans sa trappe (à la main ou par une ligne d'objets) et le change en **combustible nucléaire** (fluide) dans la conduite de sa prise de fluide : 0,05 minerai/s, 0,2 unité de combustible par minerai, 6 000 W. Branchement du distillateur d'éthanol du jeu |
+| Réservoir de combustible nucléaire | le réservoir du jeu blindé (prend tous les fluides) |
+| Réacteur nucléaire | **40 000 W** pour 0,002 unité/s de combustible nucléaire ; cuve sous pression, barres de contrôle, boucles de refroidissement |
+| Propulseur nucléaire | **93 600 N** (12 propulseurs chimiques) pour 0,002 unité/s de combustible et 0,02 d'oxygène |
+| Moteur nucléaire lourd | **234 000 N** (30 propulseurs chimiques) pour 0,005 unité/s de combustible et 0,05 d'oxygène ; turbopompes et radiateurs |
+
+Les moteurs nucléaires et à matière noire se branchent comme le propulseur chimique (vannes sur les conduites), mais une prise reçoit leur combustible et l'autre l'**oxygène**, dans n'importe quel ordre. Un minerai d'uranium fait tourner un réacteur nucléaire 100 s.
 
 ## Générateur de portail
 

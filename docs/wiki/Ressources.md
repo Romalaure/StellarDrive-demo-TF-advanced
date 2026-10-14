@@ -11,8 +11,10 @@
 | **Noyau quantique** | coffres des gratte-ciel de Nexora, stations, épaves | réacteur, champ de force, gyroscope, moteur exotique, machines à matière noire, portail |
 | **Alliage nexorien** | cité de Nexora, stations, épaves | réacteur, champ de force, gyroscope, moteur exotique, portail |
 | **Matière exotique** | Sonde Hadès, épaves d'Érèbe | moteur à matière exotique, portail |
-| **Matière noire** (fluide) | collecteur de matière noire ; réservoirs des épaves d'Érèbe | réacteur à matière noire, portail |
+| **Minerai d'uranium** | rochers verdâtres de TF Aridia, TF Petra, Pyros | combustible nucléaire (centrifugeuse), moteurs nucléaires, recherche |
+| **Combustible nucléaire** (fluide) | centrifugeuse d'enrichissement | réacteur nucléaire, moteurs nucléaires |
+| **Matière noire** (fluide) | collecteur de matière noire ; réservoirs des épaves d'Érèbe | réacteur à matière noire, moteur à matière noire, portail |
 
-La **matière noire** est un fluide : elle circule dans les conduites et se stocke dans les réservoirs, comme l'oxygène.
+La **matière noire** et le **combustible nucléaire** sont des fluides : elle circule dans les conduites et se stocke dans les réservoirs, comme l'oxygène.
 
 Les gisements se minent au laser comme les rochers du jeu. Les coffres des bâtiments (une fois chacun) et des stations contiennent aussi fer, verre, cuivre, aluminium, bois, lingots et clés.

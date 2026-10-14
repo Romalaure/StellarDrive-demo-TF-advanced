@@ -1,6 +1,6 @@
 # StellarDrive Demo — TF Advanced
 
-Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, constructions en bois, verre et fer, **stations spatiales** à construire, 7 nouvelles planètes autour d'Otrera et une **seconde galaxie, Érèbe** (4 planètes, un trou noir, des épaves) atteinte par **portail**, nouveaux minerais (dont la **météorite**) et une nouvelle énergie, la **matière noire**, pièces avancées (réacteur quantique, champ de force, condenseur, gyroscope quantique, moteur exotique, machines à matière noire, générateur de portail, table de cartographie), une branche de la **table de recherche**, 3 stations abandonnées, 3 trous noirs, champs d'astéroïdes, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Trois onglets de construction : **TF Avancé**, **TF Construction**, **TF Station**.
+Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, constructions en bois, verre et fer, **stations spatiales** à construire, 7 nouvelles planètes autour d'Otrera et une **seconde galaxie, Érèbe** (4 planètes, un trou noir, des épaves) atteinte par **portail**, nouveaux minerais (dont la **météorite** et l'**uranium**), l'**énergie nucléaire** (uranium, centrifugeuse, réacteur, moteurs) et une nouvelle énergie, la **matière noire**, pièces avancées (réacteur quantique, champ de force, condenseur, gyroscope quantique, moteur exotique, machines à matière noire, générateur de portail, table de cartographie), une branche de la **table de recherche**, 3 stations abandonnées, 3 trous noirs, champs d'astéroïdes, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Trois onglets de construction : **TF Avancé**, **TF Construction**, **TF Station**.
 
 **Wiki dans le jeu** : ouvrez le **Guide** (touche G), entrée **Wiki TF Avancé** en tête de liste : chaque planète, ses ressources et son utilité, machines, constructions, stations, recherche, avec des liens entre les pages. Les mêmes pages sont dans [docs/wiki](docs/wiki/Home.md) (le mod les embarque à la compilation). Résumé : [docs/PLANETES.md](docs/PLANETES.md).
 
@@ -65,6 +65,11 @@ Ce sont des clones du **propulseur chimique** du jeu. Ils ont le même modèle, 
 | 7312 | Moteur lourd | 23 400 N | 0,165 u/s | 75 kg | montée en régime 1,5 s, 10 % moins efficace |
 | 7313 | Moteur de précision | 624 N | 0,004 u/s | 4 kg | poussée décentrée, réponse immédiate |
 | 7314 | Moteur économe | 4 680 N | 0,0175 u/s | 28 kg | ~1,7× plus de poussée par unité, montée en régime 4 s |
+| 7316 | Propulseur nucléaire | 93 600 N | 0,002 u/s de combustible nucléaire + 0,02 u/s d'oxygène | 110 kg | modèle détaillé (réacteur, turbopompes, tuyère refroidie), montée en régime 2 s |
+| 7317 | Moteur nucléaire lourd | 234 000 N | 0,005 combustible nucléaire + 0,05 oxygène | 320 kg | quatre turbopompes, radiateurs, montée en régime 4 s |
+| 7318 | Moteur à matière noire | 624 000 N | 0,002 matière noire + 0,03 oxygène | 260 kg | le plus puissant : chambre de confinement, tuyère magnétique en anneaux, montée en régime 3 s |
+
+Les moteurs 7316-7318 ont leur propre modèle 3D à la place de celui du propulseur chimique (sa flamme, teintée, et son son restent). Une de leurs prises d'ergols reçoit le combustible nucléaire ou la matière noire, l'autre l'oxygène.
 
 Fonctionnement :
 - **Poussée et consommation** : trois patchs Harmony côté hôte corrigent la poussée, la demande d'ergols et la consommation, uniquement pour ces ids. Les propulseurs du jeu ne sont pas modifiés.
@@ -149,6 +154,8 @@ Sept planètes rejoignent le système 442 Otrera, en orbite autour de la même �
 | **Alliage nexorien** | coffres de la cité de TF Nexora, stations |
 | **Matière exotique** (rare) | coffres de la Sonde Hadès, épaves d'Érèbe |
 | **Météorite** | gisements sombres aux veines orange : TF Petra, Pyros, Mycélia, Cristallis ; épaves |
+| **Minerai d'uranium** | gisements verdâtres de TF Aridia, TF Petra, Pyros |
+| **Combustible nucléaire** (fluide) | centrifugeuse d'enrichissement |
 | **Matière noire** (fluide) | collecteur de matière noire ; réservoirs des épaves d'Érèbe |
 
 Ce sont de vrais objets du jeu : ils s'empilent, pèsent, vont dans l'inventaire et les coffres, tombent au sol, se sauvegardent, avec leur modèle 3D texturé (matériaux du jeu) et leur icône.
@@ -181,7 +188,7 @@ Comment ça marche : chaque planète est une copie de la planète de la démo (4
 
 ## Recherche
 
-Les pièces du mod se débloquent à la **table de recherche** : une branche de 11 techs rattachées aux techs du jeu (construction métallique après Iron Panels, propulsion avancée après Chemical Propulsion…), payées en ressources. Le mod place ses techs dans les cases libres de l'arbre sans déplacer celles du jeu ni des autres mods. Détail : [wiki, Recherche](docs/wiki/Recherche.md). `ResearchUnlocks = false` : tout est disponible d'emblée.
+Les pièces du mod se débloquent à la **table de recherche** : une branche de 12 techs rattachées aux techs du jeu (construction métallique après Iron Panels, propulsion avancée après Chemical Propulsion…), payées en ressources. Le mod place ses techs dans les cases libres de l'arbre sans déplacer celles du jeu ni des autres mods. Détail : [wiki, Recherche](docs/wiki/Recherche.md). `ResearchUnlocks = false` : tout est disponible d'emblée.
 
 ## Constructions en bois, verre et fer (onglet TF Construction)
 
@@ -222,9 +229,18 @@ Les pièces du mod se débloquent à la **table de recherche** : une branche de 
 
 ## Matière noire et portail
 
-- **Collecteur de matière noire** : 0,004 unité/s pour 8 000 W ; ×5 près d'un trou noir, ×3 dans Érèbe. **Réservoir** de matière noire. **Réacteur à matière noire** : 40 000 W pour 0,002 unité/s.
+- **Collecteur de matière noire** : 0,004 unité/s pour 8 000 W ; ×5 près d'un trou noir, ×3 dans Érèbe. **Réservoir** de matière noire. **Réacteur à matière noire** : 150 000 W pour 0,002 unité/s. **Moteur à matière noire** : 624 000 N.
 - **Générateur de portail** : un signal sur sa prise de commande ; 10 s de charge à 20 000 W, 5 matière noire, puis un portail de 18 m de rayon s'ouvre 45 m devant lui, fixe dans l'espace, 30 s. Le vaisseau qui le traverse ressort près de la **cible de son ordinateur de visée ou de sa carte stellaire** (planète : ~20 km d'altitude ; balise : 300 m). Le saut passe par l'espace de distorsion du jeu.
 - **Table de cartographie** : relief 3D du terrain sur 300 m (fonction d'altitude du jeu sur l'hôte), repères des gisements, coffres, bâtiments et vaisseaux, et la fiche de la planète.
+
+## Énergie nucléaire
+
+Le palier entre les artefacts et la matière noire (il reprend les valeurs qu'avait la matière noire ; la matière noire a été relevée pour rester la plus puissante).
+- **Minerai d'uranium** sur TF Aridia, TF Petra et Pyros.
+- **Centrifugeuse d'enrichissement** (clone du distillateur d'éthanol du jeu, nouveau modèle : trois rotors, trémie, pupitre) : minerai d'uranium dans sa trappe (main ou ligne d'objets), 6 000 W, 0,05 minerai/s, 0,2 unité de **combustible nucléaire** par minerai dans la conduite de sa prise 0.
+- **Réacteur nucléaire** : 40 000 W pour 0,002 unité/s de combustible nucléaire. **Réservoir de combustible nucléaire**.
+- **Propulseur nucléaire** (93 600 N) et **moteur nucléaire lourd** (234 000 N), voir le pack de propulsion.
+- Tech de recherche **Énergie nucléaire** (après Technologie des artefacts) ; la tech Matière noire vient maintenant après elle.
 
 ## Galaxie d'Érèbe
 
@@ -302,6 +318,9 @@ Réglage : `BlackHole` (section `[TFAdvanced]`, les deux trous noirs), identique
 | `AbandonedStations` | `true` | crée les 3 stations abandonnées dans un monde qui ne les a pas encore |
 | `TerrainChunkBuffer` | `1.5` | place pour les chunks de terrain sur la carte graphique, fois celle du jeu ; au-dessus de 1, les hautes montagnes ne laissent plus de trous dans le sol (environ 38 Mo de mémoire vidéo par 0,1 et par planète proche) |
 | `ReactorWatts` (section `[TFAdvancedPower]`) | `12000` | puissance d'un réacteur quantique (W) |
+| `NuclearReactorWatts` / `NuclearReactorBurnPerSecond` (`[TFAdvancedPower]`) | `40000` / `0.002` | réacteur nucléaire |
+| `CentrifugeWatts` / `CentrifugeOrePerSecond` / `CentrifugeFuelPerOre` (`[TFAdvancedPower]`) | `6000` / `0.05` / `0.2` | centrifugeuse d'enrichissement |
+| `DarkReactorWatts` / `DarkReactorBurnPerSecond` (`[TFAdvancedPower]`) | `150000` / `0.002` | réacteur à matière noire (une ancienne valeur de 40 000 passe à 150 000) |
 | `ShieldWatts` / `ShieldOxygenPerSecond` / `ShieldCapacity` / `ShieldRegenPerSecond` / `ShieldCooldownSeconds` (`[TFAdvancedPower]`) | `2000` / `0.02` / `150` / `0.5` / `300` | champ de force ; le champ renforcé en prend ×3 (fluide ×2,5), celui à matière noire ×8 (puissance ×5, fluide ×1) |
 | `CondenserWatts` / `CondenserOxygenPerSecond` (`[TFAdvancedPower]`) | `1500` / `0.05` | condenseur à cryonite |
 | `QuantumGyroFactor` (`[TFAdvancedPower]`) | `5` | couple du gyroscope quantique, en gyroscopes |
@@ -371,6 +390,8 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 | v0.10.1 : bulle du champ de force | ✅ en jeu (vaisseau de test câblé) : grille hexagonale, bord lumineux, bande de balayage, onde au choc (photo) ; le modèle du générateur ne change pas |
 | v0.10.1 : console de bord | ✅ écran relevé au-dessus du pied (photo) |
 | v0.10.1 : table de cartographie | ✅ les vaisseaux et coffres ne sont marqués que s'ils sont vraiment autour de la table (affichés, à moins de 300 m en hauteur comme à plat) : un vaisseau loin au-dessus ou en dessous n'apparaît plus en jaune |
+| v0.12.0 : énergie nucléaire | ✅ en jeu (vaisseau de test câblé, `DevNuclearTest`) : la centrifugeuse chargée de 20 minerais d'uranium tourne à plein, 0,05 minerai/s, et remplit un réservoir vide de combustible nucléaire à 0,01 unité/s ; le réacteur nucléaire reste allumé (100) et brûle 0,002 unité/s ; menu de construction : nouvelle rangée (photo). ⏳ Gisements d'uranium sur les planètes et chargement de la trappe à la main ou par ligne d'objets **à voir en jeu** |
+| v0.12.0 : moteurs nucléaires et à matière noire | ✅ en jeu : propulseur nucléaire à plein régime, 0,002 combustible + 0,02 oxygène/s, le vaisseau de test décolle et monte à 260 m/s ; moteur à matière noire, 0,002 matière noire + 0,03 oxygène/s, +430 m en 6 s en vol ; modèles des trois moteurs (photos). Moteur nucléaire lourd : modèle vérifié, poussée non mesurée à part |
 | v0.11.1 : champs renforcé et à matière noire | ✅ en jeu (vaisseau de test lâché de 40 m, Arsenal 1.4.0) : **renforcé** 6 000 W, 0,05 O₂/s, crash et explosion de 1 400 encaissés (−15 % pour l'explosion), 30 pièces sur 30, bulle dorée (photo) ; **matière noire** 10 000 W, 0,02 matière noire/s, explosion −6 %, missile −5 %, 30 pièces sur 30, bulle violette (photo). Un réacteur quantique partagé entre deux réseaux (6 000 W chacun) ne suffit pas au champ à matière noire |
 | v0.11.0 : champ de force contre Arsenal | ✅ en jeu (vaisseau de test sous champ, Arsenal 1.4.0) : explosion Arsenal de 1 400 absorbée, 30 pièces sur 30 gardées ; missile Arsenal tiré sur le vaisseau : il explose sur le champ, aucune pièce perdue. Souffle ramené à ÷ 20 ensuite |
 | v0.11.0 : prises en une rangée | ✅ toutes les prises des machines du mod sur la face arrière, en ligne (photo) |

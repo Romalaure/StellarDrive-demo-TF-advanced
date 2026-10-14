@@ -12,6 +12,7 @@
 ## Ressources
 
 - quartz
+- uranium
 - fer
 - cuivre
 - verre

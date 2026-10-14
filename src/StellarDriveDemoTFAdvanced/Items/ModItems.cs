@@ -45,6 +45,8 @@ namespace StellarDriveDemoTFAdvanced.Items
         public const uint NexoranAlloy = 7413;
         public const uint Meteorite = 7414;
         public const uint DarkMatter = 7415;
+        public const uint Uranium = 7416;
+        public const uint NuclearFuel = 7417;
 
         // Game items
         public const uint Iron = 101, Glass = 102, StellarShard = 103, Aluminum = 104, Wood = 110, Copper = 112, GoldBar = 158, Key = 151;
@@ -60,7 +62,9 @@ namespace StellarDriveDemoTFAdvanced.Items
             new ModItem { Id = ExoticMatter, Name = "Matière exotique", Mass = 0.5f, MaterialFrom = StellarShard, Tint = new Color(0.25f, 0.12f, 0.4f), Glow = new Color(0.55f, 0.1f, 0.35f), Model = m => Crystals(m, 4, 0.34f) },
             new ModItem { Id = NexoranAlloy, Name = "Alliage nexorien", Mass = 3f, MaterialFrom = Iron, Tint = new Color(0.55f, 0.85f, 0.9f), Model = Ingot },
             new ModItem { Id = Meteorite, Name = "Météorite", Mass = 4f, MaterialFrom = Iron, Tint = new Color(0.32f, 0.27f, 0.25f), Glow = new Color(0.55f, 0.18f, 0.02f), Model = MeteoriteChunk },
-            new ModItem { Id = DarkMatter, Name = "Matière noire", Mass = 0.2f, Fluid = true, FluidColor = new Color(0.22f, 0.05f, 0.35f) }
+            new ModItem { Id = DarkMatter, Name = "Matière noire", Mass = 0.2f, Fluid = true, FluidColor = new Color(0.22f, 0.05f, 0.35f) },
+            new ModItem { Id = Uranium, Name = "Minerai d'uranium", Mass = 5f, MaterialFrom = Iron, Tint = new Color(0.42f, 0.55f, 0.3f), Glow = new Color(0.12f, 0.45f, 0.04f), Model = OreChunk },
+            new ModItem { Id = NuclearFuel, Name = "Combustible nucléaire", Mass = 1f, Fluid = true, FluidColor = new Color(0.35f, 0.95f, 0.2f) }
         };
 
         private static readonly AccessTools.FieldRef<ItemSettingsList, ItemSettings[]> Items = AccessTools.FieldRefAccess<ItemSettingsList, ItemSettings[]>("items");

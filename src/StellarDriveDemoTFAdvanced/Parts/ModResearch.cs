@@ -52,9 +52,11 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 Parts = new ushort[] { 7381 }, Cost = new[] { (Copper, 10), (Glass, 10), (ModItems.Meteorite, 2) } },
             new Tech { Id = 7509, Name = "Modules de station", Requires = new ushort[] { 7501 }, Position = new Vector2Int(6, 6),
                 Parts = Range(7371, 7380).Concat(Range(7382, 7390)).ToArray(), Cost = new[] { (Iron, 40), (Glass, 15), (Aluminum, 10) } },
-            new Tech { Id = 7510, Name = "Matière noire", Requires = new ushort[] { 7507 }, Position = new Vector2Int(6, 1),
-                Parts = new ushort[] { 7391, 7392, 7393, 7394, 7329 }, Cost = new[] { (ModItems.Meteorite, 10), (ModItems.QuantumCore, 1), (ModItems.NexoranAlloy, 5) } },
-            new Tech { Id = 7511, Name = "Portail dimensionnel", Requires = new ushort[] { 7510 }, Position = new Vector2Int(7, 1),
+            new Tech { Id = 7512, Name = "Énergie nucléaire", Requires = new ushort[] { 7507 }, Position = new Vector2Int(6, 2),
+                Parts = new ushort[] { 7396, 7397, 7398, 7316, 7317 }, Cost = new[] { (ModItems.Uranium, 10), (ModItems.Titanium, 15), (Copper, 20) } },
+            new Tech { Id = 7510, Name = "Matière noire", Requires = new ushort[] { 7512 }, Position = new Vector2Int(7, 2),
+                Parts = new ushort[] { 7391, 7392, 7393, 7394, 7329, 7318 }, Cost = new[] { (ModItems.Meteorite, 10), (ModItems.QuantumCore, 1), (ModItems.NexoranAlloy, 5) } },
+            new Tech { Id = 7511, Name = "Portail dimensionnel", Requires = new ushort[] { 7510 }, Position = new Vector2Int(8, 2),
                 Parts = new ushort[] { 7395 }, Cost = new[] { (ModItems.Meteorite, 20), (ModItems.QuantumCore, 2), (ModItems.ExoticMatter, 3), (ModItems.Artifact, 2) } },
         };
 

@@ -33,22 +33,46 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
         {
             PartFactory.Describe(settings, spec.Label, spec.Description, spec.Mass, spec.Cost);
             Scale(prefab, spec.Scale);
+            if (spec.Model != null)
+            {
+                Detailed(prefab, spec);
+                return;
+            }
             Tint(prefab, spec);
             Shroud(prefab, spec);
         }
 
         /// <summary>
-        /// An armored collar around the engine's bell, in the machines' style: an octagonal band
-        /// with a white edge, and four fins on the diagonals (clear of the propellant plugs) with
-        /// glowing slats. Built in the model's own frame, so it follows the engine's scale.
+        /// The engine's own model in place of the game's thruster (hidden; its flame, sound and
+        /// plugs stay), sized on it so the flame still leaves the nozzle.
         /// </summary>
-        private static void Shroud(GameObject prefab, EngineSpec spec)
+        private static void Detailed(GameObject prefab, EngineSpec spec)
         {
             Transform visual = prefab.transform.Find("Visual");
-            if (visual == null)
+            if (visual == null || !BodyBounds(visual, out Bounds body))
                 return;
-            // The thruster's model, in its own (unscaled) frame: base plate at the bottom, bell above
-            Bounds body = new Bounds();
+            Power.NuclearParts.HideDonorModel(visual);
+            var model = new Power.MachineModels.Model();
+            spec.Model(model, body);
+            Power.MachineModels.Attach(visual, model, "Engine" + spec.Key, spec.ModelGlow, spec.ModelCore);
+            if (spec.Flame != Color.white)
+            {
+                foreach (ParticleSystem particles in prefab.GetComponentsInChildren<ParticleSystem>(true))
+                {
+                    ParticleSystem.MainModule main = particles.main;
+                    ParticleSystem.MinMaxGradient color = main.startColor;
+                    color.color *= spec.Flame;
+                    color.colorMin *= spec.Flame;
+                    color.colorMax *= spec.Flame;
+                    main.startColor = color;
+                }
+            }
+        }
+
+        /// <summary>The thruster's model, in the visual's frame: base plate at the bottom, bell above.</summary>
+        private static bool BodyBounds(Transform visual, out Bounds body)
+        {
+            body = new Bounds();
             bool any = false;
             foreach (MeshRenderer r in visual.GetComponentsInChildren<MeshRenderer>(true))
             {
@@ -64,7 +88,20 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                     else body.Encapsulate(p);
                 }
             }
-            if (!any)
+            return any;
+        }
+
+        /// <summary>
+        /// An armored collar around the engine's bell, in the machines' style: an octagonal band
+        /// with a white edge, and four fins on the diagonals (clear of the propellant plugs) with
+        /// glowing slats. Built in the model's own frame, so it follows the engine's scale.
+        /// </summary>
+        private static void Shroud(GameObject prefab, EngineSpec spec)
+        {
+            Transform visual = prefab.transform.Find("Visual");
+            if (visual == null)
+                return;
+            if (!BodyBounds(visual, out Bounds body))
                 return;
             // One unit = the game thruster's base half-width (0.5 m)
             float u = Mathf.Max(body.extents.x, body.extents.z) / 0.5f;

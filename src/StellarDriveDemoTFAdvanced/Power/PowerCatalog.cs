@@ -38,6 +38,12 @@ namespace StellarDriveDemoTFAdvanced.Power
         public const ushort DarkReactorId = 7393;
         /// <summary>Dark matter: opens a portal in front of the ship to its target.</summary>
         public const ushort PortalId = 7395;
+        /// <summary>Nuclear: turns uranium ore into nuclear fuel (a clone of the game's ethanol distiller).</summary>
+        public const ushort CentrifugeId = 7396;
+        /// <summary>Nuclear: burns nuclear fuel for power.</summary>
+        public const ushort NuclearReactorId = 7397;
+        /// <summary>Nuclear: a tank for nuclear fuel (the game's fluid tank, shielded).</summary>
+        public const ushort NuclearTankId = 7398;
 
         // Force field generator and condenser: ConstantState (one value, saved, synchronized, emitted on
         // socket 0), not FluidTankState, which the game would take for a tank on their fluid socket
@@ -75,6 +81,11 @@ namespace StellarDriveDemoTFAdvanced.Power
         public static MelonPreferences_Entry<float> DarkCollectorPerSecond { get; private set; }
         public static MelonPreferences_Entry<float> DarkReactorWatts { get; private set; }
         public static MelonPreferences_Entry<float> DarkReactorBurnPerSecond { get; private set; }
+        public static MelonPreferences_Entry<float> NuclearReactorWatts { get; private set; }
+        public static MelonPreferences_Entry<float> NuclearReactorBurnPerSecond { get; private set; }
+        public static MelonPreferences_Entry<float> CentrifugeWatts { get; private set; }
+        public static MelonPreferences_Entry<float> CentrifugeOrePerSecond { get; private set; }
+        public static MelonPreferences_Entry<float> CentrifugeFuelPerOre { get; private set; }
         public static MelonPreferences_Entry<float> PortalWatts { get; private set; }
         public static MelonPreferences_Entry<float> SolarWatts { get; private set; }
         public static MelonPreferences_Entry<float> PortalChargeSeconds { get; private set; }
@@ -92,7 +103,7 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         /// <summary>Parts whose FluidTankState carries a status, not fluid (no fluid mass).</summary>
         public static bool HoldsNoFluid(ushort partSettingsId) => IsPowerPart(partSettingsId) || ForceField.IsGenerator(partSettingsId) || partSettingsId == CondenserId
-            || partSettingsId == DarkCollectorId || partSettingsId == DarkReactorId || partSettingsId == PortalId;
+            || partSettingsId == DarkCollectorId || partSettingsId == DarkReactorId || partSettingsId == PortalId || partSettingsId == NuclearReactorId;
 
         public static bool IsPowerPart(ushort partSettingsId) =>
             partSettingsId == BatteryId || partSettingsId == BreakerId || partSettingsId == ReactorId || partSettingsId == CryoBatteryId;
@@ -127,10 +138,23 @@ namespace StellarDriveDemoTFAdvanced.Power
                 description: "Power a dark matter collector draws while it works (W).");
             DarkCollectorPerSecond = category.CreateEntry("DarkCollectorPerSecond", 0.004f,
                 description: "Dark matter a collector gathers (unit/s); five times more near a black hole, three times in the Erebos galaxy.");
-            DarkReactorWatts = category.CreateEntry("DarkReactorWatts", 40000f,
+            DarkReactorWatts = category.CreateEntry("DarkReactorWatts", 150000f,
                 description: "Power a dark matter reactor gives while it has fuel (W).");
+            // 40 000 W was the default before nuclear power took that place: dark matter is now well above it
+            if (Mathf.Approximately(DarkReactorWatts.Value, 40000f))
+                DarkReactorWatts.Value = 150000f;
             DarkReactorBurnPerSecond = category.CreateEntry("DarkReactorBurnPerSecond", 0.002f,
                 description: "Dark matter a reactor burns (unit/s).");
+            NuclearReactorWatts = category.CreateEntry("NuclearReactorWatts", 40000f,
+                description: "Power a nuclear reactor gives while it has fuel (W).");
+            NuclearReactorBurnPerSecond = category.CreateEntry("NuclearReactorBurnPerSecond", 0.002f,
+                description: "Nuclear fuel a reactor burns (unit/s).");
+            CentrifugeWatts = category.CreateEntry("CentrifugeWatts", 6000f,
+                description: "Power an enrichment centrifuge draws while it works (W).");
+            CentrifugeOrePerSecond = category.CreateEntry("CentrifugeOrePerSecond", 0.05f,
+                description: "Uranium ore an enrichment centrifuge processes (ore/s).");
+            CentrifugeFuelPerOre = category.CreateEntry("CentrifugeFuelPerOre", 0.2f,
+                description: "Nuclear fuel made from one uranium ore (units).");
             SolarWatts = category.CreateEntry("SolarWatts", 3000f,
                 description: "Power a solar panel support gives with its wings facing the star (W).");
             PortalWatts = category.CreateEntry("PortalWatts", 20000f,

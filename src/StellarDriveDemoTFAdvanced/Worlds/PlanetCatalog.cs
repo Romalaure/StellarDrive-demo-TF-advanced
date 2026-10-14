@@ -70,6 +70,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     PointsOfInterest.Village(p, RuinStyle.Sandstone, 0.5f);
                     PointsOfInterest.CargoWrecks(p, 0.5f);
                     PointsOfInterest.Deposits(p, OreKind.Quartz, 0.7f);
+                    // Uranium veins in the old desert rock
+                    PointsOfInterest.Deposits(p, OreKind.Uranium, 0.35f);
                 }
             },
             new PlanetSpec
@@ -98,6 +100,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     PointsOfInterest.Deposits(p, OreKind.Titanium, 0.8f);
                     // Meteorites fell on this airless world and were never worn away
                     PointsOfInterest.Deposits(p, OreKind.Meteorite, 0.35f);
+                    PointsOfInterest.Deposits(p, OreKind.Uranium, 0.5f);
                 }
             },
             new PlanetSpec
@@ -259,6 +262,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     PointsOfInterest.CargoWrecks(p, 0.4f);
                     PointsOfInterest.Deposits(p, OreKind.Meteorite, 1f);
                     PointsOfInterest.Deposits(p, OreKind.Titanium, 0.5f);
+                    PointsOfInterest.Deposits(p, OreKind.Uranium, 0.6f);
                 }
             },
             new PlanetSpec

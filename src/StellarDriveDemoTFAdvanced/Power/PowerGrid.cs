@@ -85,6 +85,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             ForceField.Forget();
             Condenser.Forget();
             DarkMatter.Forget();
+            Centrifuge.Forget();
             Portal.Forget();
             Solar.Forget();
             LifeSupport.Forget();

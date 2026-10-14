@@ -30,7 +30,7 @@ En jeu, la **[table de cartographie](Machines.md#table-de-cartographie)** affich
 
 - [Système 442 Otrera](Systeme-Otrera.md) et [galaxie d'Érèbe](Galaxie-Erebe.md)
 - [Ressources](Ressources.md) : où trouver chaque minerai et objet, à quoi il sert
-- [Machines](Machines.md) : énergie, champ de force, matière noire, portail, cartographie
+- [Machines](Machines.md) : énergie, champ de force, énergie nucléaire, matière noire, portail, cartographie
 - [Constructions](Constructions.md) : bois, verre, fer et structure
 - [Stations spatiales](Stations-spatiales.md) : modules, air, énergie solaire, amarrage
 - [Recherche](Recherche.md) : les technologies à débloquer à la table de recherche

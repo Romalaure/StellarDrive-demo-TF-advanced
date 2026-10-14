@@ -47,9 +47,8 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                     if (FluidGroups.TryGet(__instance, part.Id, out FluidGroupServerState a, out FluidGroupServerState b))
                     {
                         // The game already asked for 1x; add the difference (negative for frugal engines)
-                        float extra = baseQuantity * (spec.FuelMultiplier - 1f);
-                        a.AddConsumptionTarget(extra);
-                        b.AddConsumptionTarget(extra);
+                        a.AddConsumptionTarget(baseQuantity * (spec.FlowOn(a.FluidItemId) - 1f));
+                        b.AddConsumptionTarget(baseQuantity * (spec.FlowOn(b.FluidItemId) - 1f));
                     }
                 }
             }
@@ -95,9 +94,8 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                     if (FluidGroups.TryGet(__instance, part.Id, out FluidGroupServerState a, out FluidGroupServerState b))
                     {
                         // The game removed fed x 1x; the engine burns level x its own flow
-                        float correction = (level * spec.FuelMultiplier - fed) * baseQuantity;
-                        a.RemoveFluid(correction);
-                        b.RemoveFluid(correction);
+                        a.RemoveFluid((level * spec.FlowOn(a.FluidItemId) - fed) * baseQuantity);
+                        b.RemoveFluid((level * spec.FlowOn(b.FluidItemId) - fed) * baseQuantity);
                     }
                     if (!Mathf.Approximately(level, fed))
                         ____ship.UpdatePartState(part.Id, state with { ThrusterStrength = level });
@@ -187,6 +185,32 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             {
                 ErrorLog.Report("engine torque", e);
             }
+        }
+    }
+
+    /// <summary>
+    /// Nuclear and dark matter engines: their propellant sockets carry their special propellant
+    /// and oxygen (either way round) instead of oxygen and ethanol.
+    /// </summary>
+    [HarmonyPatch(typeof(ShipThrustersUpdater), "TryGetValidFluidGroups")]
+    internal static class EnginePropellantPatch
+    {
+        private const uint Oxygen = 108;
+
+        private static bool Prefix(ushort partID, out FluidGroupServerState group0, out FluidGroupServerState group1, ref bool __result,
+            IShipStateWrite ____ship, Ships.Cables.ConnectionsServerTracker ____connections)
+        {
+            group0 = null;
+            group1 = null;
+            if (____ship == null || !____ship.TryGetStatefulPart(partID, out StatefulPart part) || !EngineCatalog.TryGet(part.Settings.id, out EngineSpec spec) || spec.Fuel == 0)
+                return true;
+            __result = false;
+            if (!____connections.TryGetFluidGroupCacheFromSocket(new Ships.Interface.Model.Parts.Common.EntityPartSocket(____ship.Id, partID, 0), out group0)
+                || !____connections.TryGetFluidGroupCacheFromSocket(new Ships.Interface.Model.Parts.Common.EntityPartSocket(____ship.Id, partID, 1), out group1))
+                return false;
+            uint a = group0.FluidItemId, b = group1.FluidItemId;
+            __result = (a == spec.Fuel && b == Oxygen) || (a == Oxygen && b == spec.Fuel);
+            return false;
         }
     }
 

@@ -13,6 +13,7 @@
 
 - météorite (beaucoup)
 - titane
+- uranium
 
 ## Lieux
 

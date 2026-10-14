@@ -13,6 +13,7 @@
 
 - titane
 - météorite
+- uranium
 - cuivre
 - astéroïdes
 
