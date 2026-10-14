@@ -26,6 +26,8 @@ namespace StellarDriveDemoTFAdvanced.Parts
         public const int SuperiorRow = 3;
         /// <summary>Nuclear power: centrifuge, reactor, tank and engines.</summary>
         public const int NuclearRow = 4;
+        /// <summary>Every force field generator.</summary>
+        public const int ShieldRow = 5;
 
         public const string ConstructionName = "TF Construction";
         public const int ConstructionRow = 0;

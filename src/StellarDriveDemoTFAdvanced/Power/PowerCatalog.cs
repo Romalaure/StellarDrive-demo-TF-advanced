@@ -26,6 +26,12 @@ namespace StellarDriveDemoTFAdvanced.Power
         public const ushort ShieldMk2Id = 7328;
         /// <summary>Dark matter: dark matter force field generator.</summary>
         public const ushort ShieldMk3Id = 7329;
+        /// <summary>Small force field generator.</summary>
+        public const ushort ShieldCompactId = 7330;
+        /// <summary>Force field generator that recharges fast.</summary>
+        public const ushort ShieldRapidId = 7319;
+        /// <summary>Nuclear: force field generator on nuclear fuel.</summary>
+        public const ushort ShieldNuclearId = 7320;
         /// <summary>Artifacts: makes oxygen from power.</summary>
         public const ushort CondenserId = 7326;
         /// <summary>Artifacts: a gyroscope with several gyroscopes' torque.</summary>

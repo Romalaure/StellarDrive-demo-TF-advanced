@@ -138,6 +138,9 @@ namespace StellarDriveDemoTFAdvanced.Power
         private float _flash;
         private float _nextFit;
         private Color _glow = MachineModels.Cyan;
+        // Off: -1 no network, -2 no fuel, -3 not enough power, -10 and below restarting
+        private int _status = -1;
+        private bool _blinkOn;
 
         private void Awake()
         {
@@ -171,6 +174,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 _impact = Random.onUnitSphere;
             }
             _charge = value > 0f ? value : 0f;
+            _status = value > 0f ? 0 : Mathf.RoundToInt(value);
             Show(value > 0f);
         }
 
@@ -182,7 +186,12 @@ namespace StellarDriveDemoTFAdvanced.Power
         private void Show(bool up)
         {
             _up = up;
-            Color color = up ? _glow : new Color(0.1f, 0.12f, 0.14f);
+            _blinkOn = false;
+            Tint(up ? _glow : new Color(0.1f, 0.12f, 0.14f), up);
+        }
+
+        private void Tint(Color color, bool up)
+        {
             foreach (Renderer lit in new[] { _ring, _core })
             {
                 if (lit == null)
@@ -196,6 +205,17 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private void LateUpdate()
         {
+            // Off for want of fuel (orange) or power (red): the rings blink
+            if (!_up && (_status == -2 || _status == -3))
+            {
+                bool on = Mathf.Repeat(Time.time, 1f) < 0.5f;
+                if (on != _blinkOn)
+                {
+                    _blinkOn = on;
+                    Color warn = _status == -2 ? new Color(1f, 0.55f, 0.05f) : new Color(1f, 0.08f, 0.05f);
+                    Tint(on ? warn : new Color(0.1f, 0.12f, 0.14f), on);
+                }
+            }
             // The core turns and bobs while the field is up
             if (_core != null && _up)
             {

@@ -24,8 +24,10 @@ namespace StellarDriveDemoTFAdvanced.Power
     /// needs <see cref="PowerCatalog.ShieldCooldownSeconds"/> to restart, at full charge. While it
     /// runs undamaged it slowly regains charge.
     /// The state is one value in the part's ConstantState (saved, synchronized to every player and
-    /// emitted on its signal socket): the charge in percent (above 0) while the field is up, -1
-    /// while it is off (no power or no oxygen), -(seconds + 1) while it restarts.
+    /// emitted on its signal socket): the charge in percent (above 0) while the field is up; off:
+    /// -1 no power network, -2 no fuel (wrong fluid or empty line), -3 not enough power;
+    /// -(seconds + 10) while it restarts. A generator its network cannot power stops asking for
+    /// power for a few seconds before trying again, so it does not starve the rest of the ship.
     /// </summary>
     internal static class ForceField
     {
@@ -44,8 +46,16 @@ namespace StellarDriveDemoTFAdvanced.Power
             public ushort Id;
             public int Level;
             public float CapacityScale, RegenScale, WattsScale, FluidScale;
+            public float CooldownScale = 1f;
+            /// <summary>Model size (the compact generator is smaller).</summary>
+            public float ModelScale = 1f;
             public uint Fluid;
             public Color Glow;
+            public string Label, Flavor;
+            public float Mass;
+            public (uint Item, int Count)[] Cost;
+
+            public float Cooldown => Mathf.Max(1f, PowerCatalog.ShieldCooldownSeconds.Value * CooldownScale);
 
             public float Capacity => Mathf.Max(1f, PowerCatalog.ShieldCapacity.Value * CapacityScale);
             public float Regen => Mathf.Max(0f, PowerCatalog.ShieldRegenPerSecond.Value * RegenScale);
@@ -55,9 +65,24 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         public static readonly Tier[] Tiers =
         {
-            new Tier { Id = PowerCatalog.ShieldId, Level = 1, CapacityScale = 1f, RegenScale = 1f, WattsScale = 1f, FluidScale = 1f, Fluid = Oxygen, Glow = MachineModels.Cyan },
-            new Tier { Id = PowerCatalog.ShieldMk2Id, Level = 2, CapacityScale = 3f, RegenScale = 3f, WattsScale = 3f, FluidScale = 2.5f, Fluid = Oxygen, Glow = new Color(1f, 0.72f, 0.2f) },
-            new Tier { Id = PowerCatalog.ShieldMk3Id, Level = 3, CapacityScale = 8f, RegenScale = 8f, WattsScale = 5f, FluidScale = 1f, Fluid = Items.ModItems.DarkMatter, Glow = MachineModels.Violet },
+            new Tier { Id = PowerCatalog.ShieldId, Level = 1, CapacityScale = 1f, RegenScale = 1f, WattsScale = 1f, FluidScale = 1f, Fluid = Oxygen, Glow = MachineModels.Cyan,
+                Label = "Générateur de champ de force", Flavor = "Le champ de base (lueur cyan).", Mass = 120f,
+                Cost = new[] { (Items.ModItems.QuantumCore, 1), (Items.ModItems.Cryonite, 6), (Items.ModItems.NexoranAlloy, 4), (Items.ModItems.Titanium, 6), (112u, 8) } },
+            new Tier { Id = PowerCatalog.ShieldMk2Id, Level = 2, CapacityScale = 3f, RegenScale = 3f, WattsScale = 3f, FluidScale = 2.5f, Fluid = Oxygen, Glow = new Color(1f, 0.72f, 0.2f),
+                Label = "Générateur de champ renforcé", Flavor = "Le champ de force en plus solide (lueur dorée).", Mass = 260f,
+                Cost = new[] { (Items.ModItems.QuantumCore, 3), (Items.ModItems.Cryonite, 15), (Items.ModItems.NexoranAlloy, 12), (Items.ModItems.Titanium, 20), (112u, 20) } },
+            new Tier { Id = PowerCatalog.ShieldMk3Id, Level = 3, CapacityScale = 8f, RegenScale = 8f, WattsScale = 5f, FluidScale = 1f, Fluid = Items.ModItems.DarkMatter, Glow = MachineModels.Violet,
+                Label = "Générateur de champ à matière noire", Flavor = "Le champ le plus résistant (lueur violette).", Mass = 450f,
+                Cost = new[] { (Items.ModItems.QuantumCore, 6), (Items.ModItems.ExoticMatter, 6), (Items.ModItems.Meteorite, 25), (Items.ModItems.NexoranAlloy, 20), (Items.ModItems.Titanium, 30) } },
+            new Tier { Id = PowerCatalog.ShieldCompactId, Level = 4, CapacityScale = 0.4f, RegenScale = 0.6f, WattsScale = 0.3f, FluidScale = 0.5f, Fluid = Oxygen, Glow = new Color(0.75f, 0.95f, 1f), ModelScale = 0.6f,
+                Label = "Générateur de champ compact", Flavor = "Un petit champ pour les petits vaisseaux et les navettes (lueur blanc bleuté) : peu de points, presque pas de courant.", Mass = 45f,
+                Cost = new[] { (Items.ModItems.Cryonite, 3), (Items.ModItems.Titanium, 4), (112u, 6), (102u, 2) } },
+            new Tier { Id = PowerCatalog.ShieldRapidId, Level = 5, CapacityScale = 2f, RegenScale = 12f, WattsScale = 2.5f, FluidScale = 1.5f, CooldownScale = 0.2f, Fluid = Oxygen, Glow = new Color(1f, 0.45f, 0.12f),
+                Label = "Générateur de champ réactif", Flavor = "Un champ de combat (lueur orange) : moins de points que le renforcé, mais il se recharge très vite et redémarre en 1 min.", Mass = 200f,
+                Cost = new[] { (Items.ModItems.QuantumCore, 2), (Items.ModItems.Cryonite, 10), (Items.ModItems.NexoranAlloy, 8), (Items.ModItems.Titanium, 15), (112u, 25) } },
+            new Tier { Id = PowerCatalog.ShieldNuclearId, Level = 6, CapacityScale = 5f, RegenScale = 5f, WattsScale = 4f, FluidScale = 0.5f, Fluid = Items.ModItems.NuclearFuel, Glow = MachineModels.Green,
+                Label = "Générateur de champ nucléaire", Flavor = "Un champ lourd alimenté au combustible nucléaire (lueur verte), entre le renforcé et celui à matière noire.", Mass = 380f,
+                Cost = new[] { (Items.ModItems.Uranium, 12), (Items.ModItems.QuantumCore, 4), (Items.ModItems.NexoranAlloy, 15), (Items.ModItems.Titanium, 25), (112u, 20) } },
         };
 
         public static Tier TierOf(ushort partSettingsId)
@@ -78,6 +103,11 @@ namespace StellarDriveDemoTFAdvanced.Power
             public float Charge = -1f;
             public float CooldownUntil;
             public bool Up;
+            /// <summary>Why it is off (-1, -2, -3) when it is not up nor restarting.</summary>
+            public int Status = -1;
+            // Not enough power: how long so far, and until when it stops asking for it
+            public float LowPower;
+            public float RetryAt;
             public PowerGroupServerState Group;
             public float PendingPower;
             public float LastWrite = -10f;
@@ -125,9 +155,9 @@ namespace StellarDriveDemoTFAdvanced.Power
                     {
                         // From the save: the charge, or the time left before restarting
                         double saved = ((ConstantState)part.State).ConstantValue;
-                        rt.Charge = saved > 0 ? Mathf.Clamp01((float)saved / 100f) * capacity : saved <= -2 ? 0f : capacity;
-                        if (saved <= -2)
-                            rt.CooldownUntil = now + (float)(-saved - 1);
+                        rt.Charge = saved > 0 ? Mathf.Clamp01((float)saved / 100f) * capacity : saved <= -10 ? 0f : capacity;
+                        if (saved <= -10)
+                            rt.CooldownUntil = now + (float)(-saved - 10);
                     }
                     rt.Group = null;
                     rt.PendingPower = 0f;
@@ -152,12 +182,24 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
             if (!power.TryGetGroupFromSocket(new EntityPartSocket(entry.Ship.Id, entry.Part.Id, PowerCatalog.MachinePowerA), out PowerGroupServerState group)
                 && !power.TryGetGroupFromSocket(new EntityPartSocket(entry.Ship.Id, entry.Part.Id, PowerCatalog.MachinePowerB), out group))
+            {
+                rt.Status = -1;
                 return;
+            }
             var oxygenSocket = new EntityPartSocket(entry.Ship.Id, entry.Part.Id, OxygenSocket);
             float oxygen = rt.Tier.FluidPerSecond * deltaTime;
             if (!connections.TryGetFluidGroupCacheFromSocket(oxygenSocket, out FluidGroupServerState fluid) || fluid.FluidItemId != rt.Tier.Fluid || fluid.Available < oxygen)
+            {
+                rt.Status = -2;
                 return;
-            // It draws its power like a consumer; it runs if the network had it last tick
+            }
+            // Its network could not power it: it waits before asking again
+            if (now < rt.RetryAt)
+            {
+                rt.Status = -3;
+                return;
+            }
+            // It draws its power like a consumer; it runs if the network has it
             float watts = rt.Tier.Watts * deltaTime;
             group.TotalPowerNeeded += watts;
             rt.Group = group;
@@ -172,7 +214,21 @@ namespace StellarDriveDemoTFAdvanced.Power
             {
                 Runtime rt = entry.Runtime;
                 bool cooling = now < rt.CooldownUntil;
-                rt.Up = !cooling && rt.Group != null && rt.Group.NormalizedConsumerRate > 0.95f;
+                rt.Up = !cooling && rt.Group != null && rt.Group.NormalizedConsumerRate > 0.9f;
+                if (!cooling && rt.Group != null && !rt.Up)
+                {
+                    rt.Status = -3;
+                    rt.LowPower += deltaTime;
+                    if (rt.LowPower > 1.5f)
+                    {
+                        rt.LowPower = 0f;
+                        rt.RetryAt = now + 5f;
+                    }
+                }
+                else if (rt.Up)
+                {
+                    rt.LowPower = 0f;
+                }
                 if (rt.Up)
                 {
                     rt.Charge = Mathf.Min(rt.Tier.Capacity, rt.Charge + rt.Tier.Regen * deltaTime);
@@ -210,9 +266,9 @@ namespace StellarDriveDemoTFAdvanced.Power
             {
                 rt.Charge = 0f;
                 rt.Up = false;
-                rt.CooldownUntil = Time.unscaledTime + Mathf.Max(1f, PowerCatalog.ShieldCooldownSeconds.Value);
+                rt.CooldownUntil = Time.unscaledTime + rt.Tier.Cooldown;
                 ByShip[holder.Value.Ship.Id].Remove(holder.Value);
-                AdvancedMod.Log.Msg($"force field {holder.Value.Ship.Id}:{holder.Value.Part.Id} broke down, back in {PowerCatalog.ShieldCooldownSeconds.Value:0} s");
+                AdvancedMod.Log.Msg($"force field {holder.Value.Ship.Id}:{holder.Value.Part.Id} broke down, back in {rt.Tier.Cooldown:0} s");
             }
             Write(holder.Value, Time.unscaledTime, force: true);
             return true;
@@ -234,9 +290,9 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static void Write(Entry entry, float now, bool force = false)
         {
             Runtime rt = entry.Runtime;
-            double value = now < rt.CooldownUntil ? -Mathf.Ceil(rt.CooldownUntil - now) - 1
-                : rt.Up ? System.Math.Max(0.1, System.Math.Round(rt.Charge / rt.Tier.Capacity * 1000.0) / 10.0) : -1;
-            bool kindChanged = double.IsNaN(rt.Written) || System.Math.Sign(value) != System.Math.Sign(rt.Written) || (value == -1) != (rt.Written == -1);
+            double value = now < rt.CooldownUntil ? -Mathf.Ceil(rt.CooldownUntil - now) - 10
+                : rt.Up ? System.Math.Max(0.1, System.Math.Round(rt.Charge / rt.Tier.Capacity * 1000.0) / 10.0) : rt.Status;
+            bool kindChanged = double.IsNaN(rt.Written) || System.Math.Sign(value) != System.Math.Sign(rt.Written) || (value > -10 && value < 0 && value != rt.Written);
             if (!force && !kindChanged && (System.Math.Abs(value - rt.Written) < 0.5 || now - rt.LastWrite < WriteInterval))
                 return;
             rt.LastWrite = now;
