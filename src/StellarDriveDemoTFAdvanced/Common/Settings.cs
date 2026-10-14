@@ -28,6 +28,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<int> DevMachineShield { get; private set; }
         public static MelonPreferences_Entry<int> DevNuclearTest { get; private set; }
         public static MelonPreferences_Entry<int> DevPirateTest { get; private set; }
+        public static MelonPreferences_Entry<bool> DevPirateShowcase { get; private set; }
         public static MelonPreferences_Entry<bool> EngineSeatControl { get; private set; }
         public static MelonPreferences_Entry<string> DevNuclearMode { get; private set; }
         public static MelonPreferences_Entry<bool> Pirates { get; private set; }
@@ -113,8 +114,10 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevNuclearTest, how the engine is commanded: seat, valve, signal, transmitter, sharedvalve.");
             EngineSeatControl = _category.CreateEntry("EngineSeatControl", true,
                 description: "Nuclear and dark matter engines push only while a pilot at a seat of the ship asks for thrust their way (false: like the Chemical Thruster, they push whenever fed).");
+            DevPirateShowcase = _category.CreateEntry("DevPirateShowcase", false,
+                description: "For mod development: with DevWorld, each pirate design held beside the player and photographed.");
             DevPirateTest = _category.CreateEntry("DevPirateTest", 0,
-                description: "For mod development: with DevWorld, pirates attack the ship nearest the player (1: a corsair, 2: a cruiser, 3: two corsairs).");
+                description: "For mod development: with DevWorld, pirates attack the ship nearest the player (1 scout, 2 corsair, 3 raider, 4 cruiser, 5 random).");
             Pirates = _category.CreateEntry("Pirates", true,
                 description: "Pirate ships (with the Arsenal mod only, whose weapons they use) now and then attack a player's ship flying in space.");
             PirateIntervalMinutes = _category.CreateEntry("PirateIntervalMinutes", 12f,

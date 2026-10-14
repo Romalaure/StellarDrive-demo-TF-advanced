@@ -1,6 +1,10 @@
 using System.Collections;
 using System.Linq;
 using Core.Services;
+using Managers.Client.Utils;
+using Saving.Services.Converters;
+using Saving.Services.Model.State;
+using WorldTracking.Spaces;
 using HarmonyLib;
 using Ships;
 using Ships.Cables;
@@ -65,11 +69,45 @@ namespace StellarDriveDemoTFAdvanced.Combat
     {
         public static void Install()
         {
+            DevHarness.Steps.Add((24f, "pirate showcase", () =>
+            {
+                if (Settings.DevPirateShowcase.Value)
+                    MelonLoader.MelonCoroutines.Start(Showcase());
+            }));
             DevHarness.Steps.Add((26f, "pirate test", () =>
             {
                 if (Settings.DevPirateTest.Value > 0)
                     MelonLoader.MelonCoroutines.Start(Run(Settings.DevPirateTest.Value));
             }));
+        }
+
+        /// <summary>Each pirate design, held still beside the player, photographed (dev/pirate_{key}_*.png).</summary>
+        private static IEnumerator Showcase()
+        {
+            var players = ServiceLocator.GetService<Players.Services.PlayersServerTracker>();
+            var player = players?.ActivePlayers.FirstOrDefault();
+            for (int wait = 0; player == null && players != null && wait < 30; wait++)
+            {
+                yield return Worlds.StationVisit.Wait(1f);
+                player = players.ActivePlayers.FirstOrDefault();
+            }
+            SpacesServer spaces = ServiceLocator.GetService<SpacesServer>();
+            ShipsServerTracker ships = ServiceLocator.GetService<ShipsServerTracker>();
+            var ids = ServiceLocator.GetService<WorldTracking.Services.WorldObjectsIdsServerTracker>();
+            if (player == null || spaces == null || ships == null || ids == null)
+                yield break;
+            foreach (PirateDesign design in PirateShips.All)
+            {
+                uint id = Parts.Showcase.LoadShip(design.Json, player, spaces, ships, ids, 18f);
+                MelonLoader.MelonCoroutines.Start(Construction.SnapTest.Pin(spaces, ships, id, 14f));
+                yield return Worlds.StationVisit.Wait(4f);
+                TrackedShipServer ship = ships.GetShip(id);
+                AdvancedMod.Log.Msg($"dev: pirate showcase {design.Name}: {ship?.PartCount ?? 0} parts");
+                yield return Parts.Showcase.Photograph(id, "pirate_" + design.Key);
+                if (ship != null)
+                    ships.RemoveShip(ship.State);
+                yield return Worlds.StationVisit.Wait(1f);
+            }
         }
 
         private static IEnumerator Run(int which)
@@ -86,11 +124,35 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 .OrderBy(s => (s.PhysicsState.Position - player.Position).sqrMagnitude).FirstOrDefault();
             if (target == null)
             {
-                AdvancedMod.Log.Warning("dev: pirate test: no ship near the player");
-                yield break;
+                // No ship around: a target platform appears 30 m above the player
+                SpacesServer spaces = ServiceLocator.GetService<SpacesServer>();
+                var ids = ServiceLocator.GetService<WorldTracking.Services.WorldObjectsIdsServerTracker>();
+                var data = JsonUtility.FromJson<ShipImportExportUtils.ShipImportExportData>(PirateShips.Target());
+                SavedShipState state = new ShipsConverter().ConvertToState(data.ships).States.Cast<SavedShipState>().Single();
+                state.Id = ids.CreateUniqueIdForObject();
+                state.SpaceId = player.SpaceId;
+                state.Position = player.Position + player.Rotation * Vector3.up * 150f;
+                state.Rotation = player.Rotation;
+                // In the client's physics space: the Arsenal guns aim and hit there
+                uint physicsSpace = WorldTracking.Interface.Values.ClientOrigin.LocalPhysicsSpaceId;
+                var transpose = ServiceLocator.GetService<WorldTracking.Interface.Services.IWorldTransposeServer>();
+                if (physicsSpace != 0 && physicsSpace != state.SpaceId && transpose != null)
+                {
+                    state.Position = transpose.Position(state.SpaceId, physicsSpace, state.Position);
+                    state.SpaceId = physicsSpace;
+                }
+                state.RelativeSpaceId = spaces.GetOrCreateShipRelativeSpace(state.Id);
+                ships.LoadShip(state);
+                yield return Worlds.StationVisit.Wait(2f);
+                target = ships.GetShip(state.Id);
+                AdvancedMod.Log.Msg($"dev: pirate test: target platform {state.Id} made (space {state.SpaceId}, player {player.SpaceId})");
             }
+            if (target == null)
+                yield break;
             int startParts = target.PartCount;
-            Pirates.ForceSpawn(target, which == 2 ? PirateShips.Cruiser : PirateShips.Corsair, which == 3 ? 2 : 1, 500f);
+            // 1-4: that design (scout, corsair, raider, cruiser), 5: one at random
+            PirateDesign design = which >= 1 && which <= 4 ? PirateShips.All[which - 1] : PirateShips.Random();
+            Pirates.ForceSpawn(target, design, 1, 500f);
             uint[] spawned = Pirates.All.Keys.ToArray();
             for (int i = 0; i < 25; i++)
             {

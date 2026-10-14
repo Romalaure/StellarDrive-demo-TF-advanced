@@ -34,6 +34,10 @@ namespace StellarDriveDemoTFAdvanced.Combat
         /// <summary>Guns firing, and until when the missile pods' signal is on (they fire on its rise).</summary>
         public bool Guns;
         public float PulseUntil, NextPulse;
+        /// <summary>Guns fire in bursts: until when this one lasts, and until when they reload after it.</summary>
+        public float BurstUntil, ReloadUntil;
+        /// <summary>Seed of its wandering aim.</summary>
+        public float AimSeed = UnityEngine.Random.value * 100f;
         public float LastNearPlayer;
         /// <summary>Near a planet: the planet's centre in its space (it keeps above its target), else null.</summary>
         public Vector3? PlanetCenter;
@@ -186,11 +190,9 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 return;
             _inSpaceSeconds = 0f;
             TrackedShipServer target = targets[Random.Range(0, targets.Count)];
-            float roll = Random.value;
-            if (roll < 0.15f)
-                SpawnNear(ships, target, PirateShips.Cruiser, 1);
-            else
-                SpawnNear(ships, target, PirateShips.Corsair, roll < 0.45f ? 2 : 1);
+            // A difficulty drawn at random: scouts come in packs, cruisers alone
+            PirateDesign design = PirateShips.Random();
+            SpawnNear(ships, target, design, Random.Range(design.GroupMin, design.GroupMax + 1));
         }
 
         /// <summary>Pirates jump in near this ship and attack it.</summary>
@@ -267,11 +269,18 @@ namespace StellarDriveDemoTFAdvanced.Combat
             float distance = to.magnitude;
             Vector3 nose = self.PhysicsState.Rotation * Vector3.forward;
             float angle = Vector3.Angle(nose, to);
-            pirate.Guns = angle < 6f && distance < 650f;
-            if (angle < 18f && distance < 1300f && now >= pirate.NextPulse)
+            // Guns: a burst while lined up, then a reload before the next
+            bool aligned = angle < 6f && distance < 650f;
+            if (aligned && now >= pirate.ReloadUntil && now >= pirate.BurstUntil)
+            {
+                pirate.BurstUntil = now + pirate.Design.Burst;
+                pirate.ReloadUntil = pirate.BurstUntil + pirate.Design.Reload;
+            }
+            pirate.Guns = aligned && now < pirate.BurstUntil;
+            if (pirate.Design.MissileInterval > 0f && angle < 18f && distance < 1300f && now >= pirate.NextPulse)
             {
                 pirate.PulseUntil = now + 0.4f;
-                pirate.NextPulse = now + (pirate.Design == PirateShips.Cruiser ? 4f : 6f);
+                pirate.NextPulse = now + pirate.Design.MissileInterval;
             }
         }
 
@@ -309,7 +318,12 @@ namespace StellarDriveDemoTFAdvanced.Combat
                     relative += sky * Mathf.Clamp((70f - height) * 0.6f, -15f, 25f);
                 }
                 desired = target.PhysicsState.Velocity + Vector3.ClampMagnitude(relative, d.MaxSpeed);
-                aim = dir;
+                // Its aim wanders around the target: the easier the pirate, the more it misses
+                float t = Time.time * 0.6f;
+                float yaw = (Mathf.PerlinNoise(pirate.AimSeed, t) - 0.5f) * 2f * d.Wobble;
+                float pitch = (Mathf.PerlinNoise(t, pirate.AimSeed) - 0.5f) * 2f * d.Wobble;
+                Vector3 side = Vector3.Cross(Vector3.up, dir).sqrMagnitude > 1e-4f ? Vector3.Cross(Vector3.up, dir).normalized : Vector3.right;
+                aim = Quaternion.AngleAxis(yaw, Vector3.Cross(dir, side)) * Quaternion.AngleAxis(pitch, side) * dir;
             }
             Vector3 push = Vector3.ClampMagnitude((desired - velocity) * 1.2f, d.Accel);
             body.AddForce(push, ForceMode.Acceleration);
@@ -340,6 +354,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 value = 1;
             else
                 value = pirate.Guns ? 1 : 0;
+            // (machine guns, lasers and plasma cannons fire in its bursts)
             return true;
         }
 
@@ -423,7 +438,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 return;
             DropLoot(ships, ship, pirate.Design);
             ParameterInfo[] p = explode.GetParameters();
-            float length = pirate.Design == PirateShips.Cruiser ? 4f : 3f;
+            float length = pirate.Design.HalfLength + 0.5f;
             foreach (Vector3 local in new[] { new Vector3(0f, 0f, -length), new Vector3(-1.5f, 0f, -length + 1f), new Vector3(1.5f, 0f, -length + 1f) })
             {
                 Vector3 at = ship.PhysicsState.Position + ship.PhysicsState.Rotation * local;

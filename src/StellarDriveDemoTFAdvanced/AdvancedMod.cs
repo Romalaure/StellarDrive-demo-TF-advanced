@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.13.3", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.14.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -103,6 +103,7 @@ namespace StellarDriveDemoTFAdvanced
             Try("the battery and the circuit breaker", Power.PowerParts.Register);
             Try("the dark matter machines and the portal", Power.SuperiorParts.Register);
             Try("the nuclear machines", Power.NuclearParts.Register);
+            Try("the pirate fairings", Combat.PirateDecor.Register);
             Try("the structural parts", Construction.StructureParts.Register);
             Try("the wood, glass and iron parts", Construction.MaterialParts.Register);
             Try("the station modules", Construction.StationModules.Register);
