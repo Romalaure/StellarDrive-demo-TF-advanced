@@ -18,27 +18,28 @@ Onglet de construction **TF Avancé**. Les machines se débloquent à la [table 
 
 Enveloppe tout le vaisseau (et ce qui y est amarré) d'une bulle cyan qui encaisse les chocs et les forces de marée des trous noirs : **150 points** (un choc compte sa variation de vitesse en m/s). Consomme 2 000 W et 0,02 oxygène/s, se recharge de 0,5 point/s. À zéro il casse et redémarre **5 minutes** plus tard. La bulle est une coque d'énergie : presque invisible de face, lumineuse sur les bords, couverte d'une grille hexagonale, traversée par une bande de balayage qui monte ; chaque impact lance une onde qui s'étend sur la bulle. Elle rougit quand la charge baisse et vacille quand elle est presque vide.
 
-**Avec le mod Arsenal** : le champ encaisse aussi ses armes. Les balles et éclats qui touchent la coque, et le souffle des explosions sur les pièces, vident le champ au lieu d'abîmer le vaisseau (dégâts de plaque ÷ 4, puissance d'explosion ÷ 20 : la plus grosse explosion prend environ la moitié d'un champ plein). Tant qu'il tient, les explosions ne poussent plus le vaisseau. Les missiles et roquettes qui entrent dans la bulle explosent dessus, avec une onde à l'endroit de l'impact. Prise signal : charge en % (-1 éteint, négatif : secondes avant redémarrage).
+**Avec le mod Arsenal** : le champ encaisse aussi ses armes (et celles des [pirates](Pirates.md)). Les balles et éclats qui touchent la coque, et le souffle des explosions sur les pièces, vident le champ au lieu d'abîmer le vaisseau (dégâts de plaque ÷ 4, puissance d'explosion ÷ 20 : la plus grosse explosion prend environ la moitié d'un champ plein). Tant qu'il tient, les explosions ne poussent plus le vaisseau. Les missiles et roquettes qui entrent dans la bulle explosent dessus, avec une onde à l'endroit de l'impact. Prise signal : charge en % (-1 éteint, négatif : secondes avant redémarrage).
 
-### Modèles plus résistants
+### Les six générateurs
 
-| Générateur | Points | Recharge | Consommation | Fluide | Recherche |
-|---|---|---|---|---|---|
-| Champ de force (cyan) | 150 | 0,5 /s | 2 000 W | 0,02 oxygène/s | Technologie des artefacts |
-| **Champ renforcé** (doré) | 450 | 1,5 /s | 6 000 W | 0,05 oxygène/s | Technologie des artefacts |
-| **Champ à matière noire** (violet) | 1 200 | 4 /s | 10 000 W | 0,02 matière noire/s | Matière noire |
+| Générateur | Points | Recharge | Courant | Fluide | Redémarrage | Recherche |
+|---|---|---|---|---|---|---|
+| **Champ compact** (blanc bleuté, petit) | 60 | 0,3 /s | 600 W | 0,01 oxygène/s | 5 min | Technologie des artefacts |
+| Champ de force (cyan) | 150 | 0,5 /s | 2 000 W | 0,02 oxygène/s | 5 min | Technologie des artefacts |
+| **Champ réactif** (orange) | 300 | 6 /s | 5 000 W | 0,03 oxygène/s | **1 min** | Technologie des artefacts |
+| **Champ renforcé** (doré) | 450 | 1,5 /s | 6 000 W | 0,05 oxygène/s | 5 min | Technologie des artefacts |
+| **Champ nucléaire** (vert) | 750 | 2,5 /s | 8 000 W | 0,01 combustible nucléaire/s | 5 min | Énergie nucléaire |
+| **Champ à matière noire** (violet) | 1 200 | 4 /s | 10 000 W | 0,02 matière noire/s | 5 min | Matière noire |
 
-Même fonctionnement et mêmes prises que le champ de base ; la bulle prend la couleur du générateur. Le champ à matière noire se branche sur un réservoir de matière noire (pas d'oxygène) ; il lui faut un réacteur quantique entier : branché sur deux réseaux, le réacteur n'en donne que la moitié à chacun. Plusieurs générateurs sur un vaisseau : le plus chargé encaisse.
+Même fonctionnement et mêmes prises pour tous ; la bulle prend la couleur du générateur. Plusieurs générateurs sur un vaisseau : le plus chargé encaisse. Ils ont leur propre rangée dans l'onglet TF Avancé.
 
-## Matière noire
+### Il ne s'allume pas ?
 
-| Machine | Effet |
-|---|---|
-| Collecteur de matière noire | 0,004 unité/s pour 8 000 W, ×5 près d'un trou noir, ×3 dans Érèbe ; la verse dans la conduite de sa prise de fluide |
-| Réservoir de matière noire | le réservoir du jeu blindé de météorite (prend tous les fluides) |
-| Réservoir de matière noire infini | toujours plein de matière noire : ce qu'on y puise se recrée, son contenu ne pèse rien |
-| Réacteur à matière noire | **150 000 W** pour 0,002 unité/s de matière noire (le plus puissant) |
-| Moteur à matière noire | **624 000 N** (80 propulseurs chimiques) pour 0,002 unité/s de matière noire et 0,03 d'oxygène ; chambre de confinement et tuyère magnétique en anneaux |
+Le réseau électrique doit pouvoir lui donner **toute** sa puissance (avec les autres machines du réseau). Un générateur à bois donne 4 000 W, un réacteur quantique 12 000 W (6 000 W par prise s'il alimente deux réseaux), un réacteur nucléaire 40 000 W. Le générateur montre ce qui lui manque :
+- **anneaux rouges clignotants**, signal **-3** : pas assez de courant. Il cesse d'en demander pendant 5 s puis réessaie, pour ne pas priver le reste du vaisseau ;
+- **anneaux orange clignotants**, signal **-2** : pas de fluide (mauvais fluide, conduite vide ou débit trop faible) ;
+- anneaux éteints, signal **-1** : aucune prise électrique branchée ;
+- signal **-10 et moins** : il a cassé, il redémarre dans (−valeur − 10) secondes.
 
 ## Énergie nucléaire
 

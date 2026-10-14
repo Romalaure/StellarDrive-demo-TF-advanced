@@ -23,5 +23,6 @@
 - [Stations spatiales](Stations-spatiales.md)
 - [Recherche](Recherche.md)
 - [Trous noirs](Trous-noirs.md)
+- [Pirates](Pirates.md)
 - [Stations et épaves](Stations-abandonnees.md)
 - [Itinéraire](Itineraire.md)

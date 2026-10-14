@@ -27,6 +27,9 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> DevMachineTest { get; private set; }
         public static MelonPreferences_Entry<int> DevMachineShield { get; private set; }
         public static MelonPreferences_Entry<int> DevNuclearTest { get; private set; }
+        public static MelonPreferences_Entry<int> DevPirateTest { get; private set; }
+        public static MelonPreferences_Entry<bool> Pirates { get; private set; }
+        public static MelonPreferences_Entry<float> PirateIntervalMinutes { get; private set; }
         public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevDockingTest { get; private set; }
         public static MelonPreferences_Entry<string> DevSnapshotParts { get; private set; }
@@ -104,6 +107,12 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevWorld, a planet id: a test ship opens a portal to that planet and flies through it.");
             DevMachineTest = _category.CreateEntry("DevMachineTest", false,
                 description: "For mod development: with DevWorld, drop a wired test ship with a reactor, a force field and a condenser above the player.");
+            DevPirateTest = _category.CreateEntry("DevPirateTest", 0,
+                description: "For mod development: with DevWorld, pirates attack the ship nearest the player (1: a corsair, 2: a cruiser, 3: two corsairs).");
+            Pirates = _category.CreateEntry("Pirates", true,
+                description: "Pirate ships (with the Arsenal mod only, whose weapons they use) now and then attack a player's ship flying in space.");
+            PirateIntervalMinutes = _category.CreateEntry("PirateIntervalMinutes", 12f,
+                description: "Average time in space between two pirate attacks (minutes).");
             DevNuclearTest = _category.CreateEntry("DevNuclearTest", 0,
                 description: "For mod development: with DevWorld, an engine part id: a wired test ship with a centrifuge, a nuclear reactor and that engine.");
             DevMachineShield = _category.CreateEntry("DevMachineShield", 0,

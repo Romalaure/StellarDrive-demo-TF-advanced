@@ -315,6 +315,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             try
             {
                 LootCaches.SaveSites(worldDirectoryFullName);
+                Combat.Pirates.Save(worldDirectoryFullName);
             }
             catch (Exception e)
             {

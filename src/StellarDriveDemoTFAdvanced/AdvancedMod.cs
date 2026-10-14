@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.12.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.13.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -35,6 +35,7 @@ namespace StellarDriveDemoTFAdvanced
             Common.FpsProbe.Install();
             Power.MachineTest.Install();
             Power.NuclearTest.Install();
+            Combat.PirateTest.Install();
             Parts.Showcase.Install();
             Parts.BuildMenuDev.Install();
             Construction.SnapTest.Install();
@@ -80,6 +81,7 @@ namespace StellarDriveDemoTFAdvanced
             {
                 Parts.UpgradeTableGuard.Install(HarmonyInstance);
                 Power.ArsenalShield.Install(HarmonyInstance);
+                Combat.Pirates.Install(HarmonyInstance);
             }
             catch (Exception e)
             {
@@ -132,6 +134,7 @@ namespace StellarDriveDemoTFAdvanced
             _inGame = sceneName == "MainGame";
             Worlds.AbandonedStations.OnSceneLoaded(_inGame);
             Worlds.LootCaches.OnSceneLoaded(_inGame);
+            Combat.Pirates.OnSceneLoaded(_inGame);
             DevHarness.OnSceneLoaded(sceneName);
             if (_partsRegistered)
             {
@@ -153,6 +156,8 @@ namespace StellarDriveDemoTFAdvanced
                 Worlds.LootCaches.Update();
             if (_inGame && GameServices.IsServer)
                 UpdatePortals();
+            if (_inGame)
+                Combat.Pirates.Update();
             if (_partsRegistered && Settings.SelfTest.Value)
                 RunSelfTest();
             if (_partsRegistered && _inGame)
