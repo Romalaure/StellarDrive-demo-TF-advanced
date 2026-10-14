@@ -236,11 +236,20 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         public static void OnSceneLoaded(bool inGame)
         {
             _done = false;
+            _listed = false;
+            Pending.Clear();
             Shelters.Clear();
             _checkAt = inGame ? Time.unscaledTime + 8f : -1f;
         }
 
-        /// <summary>Host: once the world has loaded, creates the stations it does not have yet.</summary>
+        // Stations still to create in this world, one at a time
+        private static readonly Queue<StationSpec> Pending = new Queue<StationSpec>();
+        private static bool _listed;
+
+        /// <summary>
+        /// Host: once the world has loaded, creates the stations it does not have yet, one every
+        /// few seconds, to spread the work (see also <see cref="Common.SyncBatchFix"/>).
+        /// </summary>
         public static void Update()
         {
             if (_done || _checkAt < 0f || Time.unscaledTime < _checkAt || !Settings.AbandonedStations.Value)
@@ -250,26 +259,37 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 _done = true;
                 return;
             }
-            _done = true;
             ShipsServerTracker ships = ServiceLocator.GetService<ShipsServerTracker>();
             if (ships == null)
                 return;
-            var existing = new HashSet<string>(ships.Ships.SelectMany(s => s.GetAllStatefulParts<BeaconState>()).Select(p => ((BeaconState)p.State).Name));
-            foreach (StationSpec spec in All)
+            if (!_listed)
             {
-                if (existing.Contains(spec.Name))
-                    continue;
-                // Pirate bases need the Arsenal mod (their guns are its parts)
-                if (spec.Pirate && (!Power.ArsenalShield.Installed || !Settings.Pirates.Value))
-                    continue;
-                try
+                _listed = true;
+                var existing = new HashSet<string>(ships.Ships.SelectMany(s => s.GetAllStatefulParts<BeaconState>()).Select(p => ((BeaconState)p.State).Name));
+                foreach (StationSpec spec in All)
                 {
-                    Spawn(spec, ships);
+                    if (existing.Contains(spec.Name))
+                        continue;
+                    // Pirate bases need the Arsenal mod (their guns are its parts)
+                    if (spec.Pirate && (!Power.ArsenalShield.Installed || !Settings.Pirates.Value))
+                        continue;
+                    Pending.Enqueue(spec);
                 }
-                catch (Exception e)
-                {
-                    AdvancedMod.Log.Error($"stations: could not create {spec.Name}: {e}");
-                }
+            }
+            if (Pending.Count == 0)
+            {
+                _done = true;
+                return;
+            }
+            StationSpec next = Pending.Dequeue();
+            _checkAt = Time.unscaledTime + 3f;
+            try
+            {
+                Spawn(next, ships);
+            }
+            catch (Exception e)
+            {
+                AdvancedMod.Log.Error($"stations: could not create {next.Name}: {e}");
             }
         }
 
@@ -335,7 +355,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
             var ids = ServiceLocator.GetService<WorldObjectsIdsServerTracker>();
             SpacesServer spaces = ServiceLocator.GetService<SpacesServer>();
-            (uint spaceId, ISpace _) = spaces.GetOrCreateSpaceForPosition(new FixedWorldSpace { Position = position });
+            (uint spaceId, ISpace space) = spaces.GetOrCreateSpaceForPosition(new FixedWorldSpace { Position = position });
+            AdvancedMod.Log.Msg($"stations: {spec.Name} in space {spaceId} ({space?.GetType().Name})");
             state.Id = ids.CreateUniqueIdForObject();
             state.SpaceId = spaceId;
             state.Position = Vector3.zero;
