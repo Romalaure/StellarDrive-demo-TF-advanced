@@ -75,7 +75,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             }
         }
 
-        private static void Postfix(ShipThrustersUpdater __instance, float deltaTime, IShipStateWrite ____ship)
+        private static void Postfix(ShipThrustersUpdater __instance, float deltaTime, IShipStateWrite ____ship, Ships.Cables.ConnectionsServerTracker ____connections)
         {
             if (PreviousLevels.Count == 0)
                 return;
@@ -90,9 +90,17 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                     // What the game just computed: the share of the demand the lines could feed
                     float fed = state.ThrusterStrength;
                     // Spool-up only slows rising thrust: an engine never burns more than its lines feed it
-                    // Nuclear and dark matter engines answer the pilot's seat: they push only while
-                    // someone at a seat of the ship asks for thrust their way
-                    float target = spec.Fuel != 0 && Settings.EngineSeatControl.Value ? Mathf.Min(fed, PilotControl.Command(____ship, ThrustMath.Direction(part))) : fed;
+                    // Nuclear and dark matter engines fed straight from their tanks answer the pilot's
+                    // seat: they push only while someone at a seat of the ship asks for thrust their
+                    // way. Fed through a valve or a pump, the valve (a seat, a transmitter...) rules
+                    // A signal wired to their command socket sets their thrust instead
+                    float target = fed;
+                    var command = new Ships.Interface.Model.Parts.Common.EntityPartSocket(____ship.Id, part.Id, EngineCatalog.CommandSocket);
+                    bool groups = FluidGroups.TryGet(__instance, part.Id, out FluidGroupServerState ga, out FluidGroupServerState gb);
+                    if (spec.Fuel != 0 && ____connections != null && ____connections.TryGetSocketCable(command, Ships.Interface.Model.Parts.CableType.Signal, out _))
+                        target = Mathf.Min(fed, Mathf.Clamp01((float)____connections.GetSignalValue(command)));
+                    else if (spec.Fuel != 0 && Settings.EngineSeatControl.Value && !(groups && ValveLines.Feeds(____ship, ____connections, ga, gb)))
+                        target = Mathf.Min(fed, PilotControl.Command(____ship, ThrustMath.Direction(part)));
                     float level = spec.SpoolSeconds > 0f && target > previous ? Mathf.MoveTowards(previous, target, deltaTime / spec.SpoolSeconds) : target;
                     if (FluidGroups.TryGet(__instance, part.Id, out FluidGroupServerState a, out FluidGroupServerState b))
                     {
@@ -283,6 +291,43 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                 var state = (PilotSeatAdvState)seat.State;
                 if (state.IsInUse)
                     Inputs.Add(toShip * (seat.LocalRotation * state.MoveInput));
+            }
+        }
+    }
+
+    /// <summary>The lines on the far side of the ship's valves and pumps: a line there is fed only when they let fluid through.</summary>
+    internal static class ValveLines
+    {
+        private static readonly System.Collections.Generic.HashSet<FluidGroupServerState> Groups = new System.Collections.Generic.HashSet<FluidGroupServerState>();
+        private static uint _cachedShip;
+        private static int _cachedFrame = -1;
+
+        public static bool Feeds(IShipStateWrite ship, Ships.Cables.ConnectionsServerTracker connections, FluidGroupServerState a, FluidGroupServerState b)
+        {
+            if (_cachedShip != ship.Id || _cachedFrame != Time.frameCount)
+            {
+                _cachedShip = ship.Id;
+                _cachedFrame = Time.frameCount;
+                Groups.Clear();
+                if (connections != null)
+                {
+                    Collect<FluidValveState>(ship, connections);
+                    Collect<FluidPumpState>(ship, connections);
+                }
+            }
+            return Groups.Contains(a) || Groups.Contains(b);
+        }
+
+        // Valves and pumps join two lines on their sockets 2 and 3
+        private static void Collect<T>(IShipStateWrite ship, Ships.Cables.ConnectionsServerTracker connections) where T : Ships.Interface.Model.Parts.StateTypes.IStatefulPartState
+        {
+            foreach (StatefulPart part in ship.GetAllStatefulParts<T>())
+            {
+                for (byte socket = 2; socket <= 3; socket++)
+                {
+                    if (connections.TryGetFluidGroupCacheFromSocket(new Ships.Interface.Model.Parts.Common.EntityPartSocket(ship.Id, part.Id, socket), out FluidGroupServerState group))
+                        Groups.Add(group);
+                }
             }
         }
     }

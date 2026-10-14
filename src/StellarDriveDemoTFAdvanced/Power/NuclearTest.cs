@@ -38,12 +38,13 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             DevHarness.Steps.Add((26f, "nuclear test", () =>
             {
-                if (Settings.DevNuclearTest.Value > 0)
-                    MelonLoader.MelonCoroutines.Start(Run((ushort)Settings.DevNuclearTest.Value));
+                // Negative: the engine's fuel goes through a valve opened by the reactor's signal, no pilot
+                if (Settings.DevNuclearTest.Value != 0)
+                    MelonLoader.MelonCoroutines.Start(Run((ushort)Mathf.Abs(Settings.DevNuclearTest.Value), Settings.DevNuclearTest.Value < 0));
             }));
         }
 
-        private static IEnumerator Run(ushort engineId)
+        private static IEnumerator Run(ushort engineId, bool valve)
         {
             var players = ServiceLocator.GetService<Players.Services.PlayersServerTracker>();
             var player = players?.ActivePlayers.FirstOrDefault();
@@ -62,7 +63,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 AdvancedMod.Log.Warning($"dev: nuclear test: missing (player {player != null}, spaces {spaces != null}, ships {ships != null}, cables {cables != null}, ids {ids != null}, engine {engineId})");
                 yield break;
             }
-            var data = JsonUtility.FromJson<ShipImportExportUtils.ShipImportExportData>(Json(spec));
+            var data = JsonUtility.FromJson<ShipImportExportUtils.ShipImportExportData>(Json(spec, valve, Settings.DevNuclearSignal.Value));
             SavedShipState state = new ShipsConverter().ConvertToState(data.ships).States.Cast<SavedShipState>().Single();
             state.Id = ids.CreateUniqueIdForObject();
             state.SpaceId = player.SpaceId;
@@ -103,7 +104,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                     yield break;
                 }
                 // From 12 s, a pilot at the seat asks for thrust upward (the engine's way)
-                if (i >= 5 && ship.TryGetStatefulPart(8, out StatefulPart seat) && seat.State is PilotSeatState pilot)
+                if (!valve && !Settings.DevNuclearSignal.Value && i >= 5 && ship.TryGetStatefulPart(8, out StatefulPart seat) && seat.State is PilotSeatState pilot)
                 {
                     ship.UpdatePartState(8, pilot with { IsInUse = true, MoveInputY = 1.0 });
                     if (i == 5)
@@ -130,7 +131,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
         }
 
-        private static string Json(Propulsion.EngineSpec spec)
+        private static string Json(Propulsion.EngineSpec spec, bool valve, bool signal)
         {
             var hull = new StringBuilder();
             for (int x = -2; x <= 2; x++)
@@ -148,7 +149,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             string parts = string.Join(",", Part(1, PowerCatalog.CentrifugeId, -1.5f, -0.46f, 0f, 2, 4), Part(2, PowerCatalog.NuclearTankId, -1.5f, -0.46f, -1.8f, 2, 4),
                 Part(3, PowerCatalog.NuclearReactorId, 1.5f, -0.46f, 0f, 2, 4), Part(4, Tank, 1.5f, -0.46f, 1.8f, 2, 4),
                 Part(5, spec.Id, 3.4f, -0.6f, 0f, 0, 5), Part(6, Tank, 0f, -0.46f, 1.8f, 2, 4), Part(7, Tank, 0f, -0.46f, -1.8f, 2, 4),
-                Part(8, 3, 0f, -0.46f, 0f, 0, 4));
+                Part(8, 3, 0f, -0.46f, 0f, 0, 4), Part(9, 50, 0.8f, -0.46f, -0.8f, 0, 4), Part(10, 81, 0.8f, -0.46f, -1.8f, 0, 4));
             string constants = "{\"partId\":3,\"constantValue\":0.0}";
             string tanks = $"{{\"partId\":2,\"fluidItemId\":0,\"fluidQuantity\":0.0}},{{\"partId\":4,\"fluidItemId\":{ModItems.NuclearFuel},\"fluidQuantity\":40.0}},"
                 + $"{{\"partId\":6,\"fluidItemId\":108,\"fluidQuantity\":40.0}},{{\"partId\":7,\"fluidItemId\":{spec.Fuel},\"fluidQuantity\":40.0}}";
@@ -156,7 +157,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             string Cable(int id, int type, int partA, int socketA, int partB, int socketB) =>
                 $"{{\"id\":{id},\"type\":{type},\"plugA\":{{\"shipId\":1,\"partId\":{partA},\"socketId\":{socketA}}},\"plugB\":{{\"shipId\":1,\"partId\":{partB},\"socketId\":{socketB}}}}}";
             string cablesJson = string.Join(",", Cable(1, 1, 1, 0, 2, 0), Cable(2, 2, 3, 1, 1, 2), Cable(3, 1, 4, 0, 3, 3),
-                Cable(10, 1, 7, 0, 5, 0), Cable(11, 1, 6, 0, 5, 1));
+                valve ? Cable(10, 1, 7, 0, 10, 2) + "," + Cable(12, 1, 10, 3, 5, 0) + "," + Cable(13, 0, 3, 0, 10, 0) : Cable(10, 1, 7, 0, 5, 0), Cable(11, 1, 6, 0, 5, 1)
+                + (signal ? "," + Cable(14, 0, 3, 0, 5, Propulsion.EngineCatalog.CommandSocket) : ""));
             var sb = new StringBuilder();
             sb.Append("{\"rootShipId\":1,\"cables\":[").Append(cablesJson).Append("],\"ships\":[{");
             sb.Append("\"id\":1,\"relativeSpaceId\":0,\"spaceId\":0,\"position\":{\"x\":0,\"y\":0,\"z\":0},\"velocity\":{\"x\":0,\"y\":0,\"z\":0},\"rotation\":{\"x\":0,\"y\":0,\"z\":0,\"w\":1},");

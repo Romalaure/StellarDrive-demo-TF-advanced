@@ -33,6 +33,12 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
         {
             PartFactory.Describe(settings, spec.Label, spec.Description, spec.Mass, spec.Cost);
             Scale(prefab, spec.Scale);
+            if (spec.Fuel != 0)
+            {
+                // Command socket at the back of the mount plate: a signal there sets the thrust (0-1)
+                Power.PowerParts.GraftSeated(prefab, prefab.GetComponent<ShipPartBounds>(), EngineCatalog.CommandSocket, CableType.Signal,
+                    new Vector3(0f, 0.07f * spec.Scale, -0.47f * spec.Scale), Vector3.back);
+            }
             if (spec.Model != null)
             {
                 Detailed(prefab, spec);
