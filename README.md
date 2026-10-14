@@ -1,5 +1,7 @@
 # StellarDrive Demo — TF Advanced
 
+*[English version](README.en.md)*
+
 Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, constructions en bois, verre et fer, **stations spatiales** à construire, 7 nouvelles planètes autour d'Otrera et une **seconde galaxie, Érèbe** (4 planètes et une planète artificielle pirate, un trou noir, des épaves) atteinte par **portail**, nouveaux minerais (dont la **météorite** et l'**uranium**), l'**énergie nucléaire** (uranium, centrifugeuse, réacteur, moteurs) et une nouvelle énergie, la **matière noire**, pièces avancées (réacteur quantique, champ de force, condenseur, gyroscope quantique, moteur exotique, machines à matière noire, générateur de portail, table de cartographie), une branche de la **table de recherche**, 3 stations abandonnées, 3 trous noirs, champs d'astéroïdes, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Trois onglets de construction : **TF Avancé**, **TF Construction**, **TF Station**.
 
 **Wiki dans le jeu** : ouvrez le **Guide** (touche G), entrée **Wiki TF Avancé** en tête de liste : chaque planète, ses ressources et son utilité, machines, constructions, stations, recherche, avec des liens entre les pages. Les mêmes pages sont dans [docs/wiki](docs/wiki/Home.md) (le mod les embarque à la compilation). Résumé : [docs/PLANETES.md](docs/PLANETES.md).
@@ -311,6 +313,7 @@ Réglage : `BlackHole` (section `[TFAdvanced]`, les deux trous noirs), identique
 
 | Clé | Défaut | Rôle |
 |---|---|---|
+| `Language` | `auto` | langue des textes du mod : `auto` (celle du jeu : français si le jeu est en français, anglais sinon), `fr` ou `en` ; noms et descriptions des pièces au prochain démarrage, wiki tout de suite |
 | `ComputerRefreshRate` | `4` | rafraîchissements des écrans par seconde (1-20) |
 | `ComputerViewDistance` | `40` | au-delà (m), un écran ne se rafraîchit plus |
 | `TrafficRange` | `3000` | portée de la liste de trafic (m) |

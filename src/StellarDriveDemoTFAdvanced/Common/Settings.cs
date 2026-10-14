@@ -16,6 +16,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<float> SpinWarningRate { get; private set; }
         public static MelonPreferences_Entry<bool> SelfTest { get; private set; }
         public static MelonPreferences_Entry<bool> NewPlanets { get; private set; }
+        public static MelonPreferences_Entry<string> Language { get; private set; }
         public static MelonPreferences_Entry<bool> Erebos { get; private set; }
         public static MelonPreferences_Entry<bool> ResearchUnlocks { get; private set; }
         public static MelonPreferences_Entry<bool> BlackHoleEnabled { get; private set; }
@@ -75,6 +76,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "The mod's parts are unlocked at the research table (its own branch of techs). Off: every part is available from the start. In multiplayer every player needs the same setting.");
             Erebos = _category.CreateEntry("Erebos", true,
                 description: "The Erebos galaxy: a second star system with four planets, a black hole and wrecks, reached through a portal. Needs NewPlanets. In multiplayer every player needs the same setting.");
+            Language = _category.CreateEntry("Language", "auto",
+                description: "Language of the mod's texts: auto (the game's language), fr or en. Part names and descriptions change on the next start.");
             NewPlanets = _category.CreateEntry("NewPlanets", true,
                 description: "Add the mod's planets to the star system. In multiplayer every player needs the same setting.");
             BlackHoleEnabled = _category.CreateEntry("BlackHole", true,

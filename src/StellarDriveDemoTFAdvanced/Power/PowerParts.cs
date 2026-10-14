@@ -40,8 +40,8 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private static void ConfigureBattery(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Batterie",
-                $"Stocke l'énergie du réseau électrique branché sur ses prises. Se recharge avec la puissance que les générateurs ont en réserve (ils brûlent alors plus de bois) et la rend quand le réseau en manque. {PowerCatalog.BatteryCapacityKJ.Value:0} kJ, charge {PowerCatalog.BatteryChargeWatts.Value:0} W, décharge {PowerCatalog.BatteryDischargeWatts.Value:0} W, rendement {PowerCatalog.BatteryEfficiency.Value:P0}. Sa prise signal donne la charge en %.",
+            PartFactory.Describe(settings, Loc.Pick("Batterie", "Battery"),
+                Loc.Pick($"Stocke l'énergie du réseau électrique branché sur ses prises. Se recharge avec la puissance que les générateurs ont en réserve (ils brûlent alors plus de bois) et la rend quand le réseau en manque. {PowerCatalog.BatteryCapacityKJ.Value:0} kJ, charge {PowerCatalog.BatteryChargeWatts.Value:0} W, décharge {PowerCatalog.BatteryDischargeWatts.Value:0} W, rendement {PowerCatalog.BatteryEfficiency.Value:P0}. Sa prise signal donne la charge en %.", $"Stores the energy of the power network on its sockets. Charges from the power the generators have to spare (they then burn more wood) and gives it back when the network runs short. {PowerCatalog.BatteryCapacityKJ.Value:0} kJ, charge {PowerCatalog.BatteryChargeWatts.Value:0} W, discharge {PowerCatalog.BatteryDischargeWatts.Value:0} W, efficiency {PowerCatalog.BatteryEfficiency.Value:P0}. Its signal socket gives the charge in %."),
                 100f, new[] { (101u, 6), (112u, 6), (104u, 2) });
             settings.internalStateClass = StateClass;
             BuildCell(prefab, "Battery", 0.9f, 0.8f, 0.7f, MachineModels.Red, false);
@@ -73,8 +73,8 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private static void ConfigureReactor(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Réacteur quantique",
-                $"Un noyau quantique tenu dans une cage d'alliage nexorien : fournit {PowerCatalog.ReactorWatts.Value:0} W en continu au réseau branché sur ses prises, sans carburant et sans fin (trois générateurs à bois). Sa prise signal vaut 100 quand il alimente un réseau. Fabriqué avec les trouvailles rares de la cité abandonnée de TF Nexora et des ruines.",
+            PartFactory.Describe(settings, Loc.Pick("Réacteur quantique", "Quantum reactor"),
+                Loc.Pick($"Un noyau quantique tenu dans une cage d'alliage nexorien : fournit {PowerCatalog.ReactorWatts.Value:0} W en continu au réseau branché sur ses prises, sans carburant et sans fin (trois générateurs à bois). Sa prise signal vaut 100 quand il alimente un réseau. Fabriqué avec les trouvailles rares de la cité abandonnée de TF Nexora et des ruines.", $"A quantum core held in a Nexoran alloy cage: gives {PowerCatalog.ReactorWatts.Value:0} W, steadily, to the network on its sockets, with no fuel and no end (three wood generators). Its signal socket reads 100 while it powers a network. Built with the rare finds of the abandoned city of TF Nexora and of the ruins."),
                 180f, new[] { (Items.ModItems.QuantumCore, 2), (Items.ModItems.NexoranAlloy, 6), (Items.ModItems.Titanium, 8), (Items.ModItems.Artifact, 2), (112u, 10) });
             settings.internalStateClass = StateClass;
             const float width = 1f, height = 1.05f, depth = 1f;
@@ -107,8 +107,8 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static void ConfigureCryoBattery(PartSettings settings, GameObject prefab)
         {
             float capacity = PowerCatalog.BatteryCapacityKJ.Value * PowerCatalog.CryoBatteryScale;
-            PartFactory.Describe(settings, "Batterie à cryonite",
-                $"Les cristaux de cryonite de TF Glacia gardent l'énergie presque sans perte : {capacity:0} kJ (huit batteries), charge {PowerCatalog.BatteryChargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W, décharge {PowerCatalog.BatteryDischargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W. Branchement et prise signal comme la batterie.",
+            PartFactory.Describe(settings, Loc.Pick("Batterie à cryonite", "Cryonite battery"),
+                Loc.Pick($"Les cristaux de cryonite de TF Glacia gardent l'énergie presque sans perte : {capacity:0} kJ (huit batteries), charge {PowerCatalog.BatteryChargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W, décharge {PowerCatalog.BatteryDischargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W. Branchement et prise signal comme la batterie.", $"The cryonite crystals of TF Glacia hold energy almost without loss: {capacity:0} kJ (eight batteries), charge {PowerCatalog.BatteryChargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W, discharge {PowerCatalog.BatteryDischargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W. Wiring and signal socket as the battery."),
                 160f, new[] { (Items.ModItems.Cryonite, 8), (Items.ModItems.Titanium, 4), (112u, 8), (104u, 4) });
             settings.internalStateClass = StateClass;
             BuildCell(prefab, "CryoBattery", 1.1f, 0.9f, 0.8f, MachineModels.Cyan, true);
@@ -116,8 +116,8 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private static void ConfigureCondenser(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Condenseur à cryonite",
-                $"Des cristaux de cryonite refroidis par l'électricité du vaisseau libèrent de l'oxygène : {PowerCatalog.CondenserOxygenPerSecond.Value:0.###} unité/s dans la conduite branchée sur sa prise de fluide (vide ou déjà d'oxygène), pour {PowerCatalog.CondenserWatts.Value:0} W. Sa prise signal donne sa production en millièmes d'unité/s.",
+            PartFactory.Describe(settings, Loc.Pick("Condenseur à cryonite", "Cryonite condenser"),
+                Loc.Pick($"Des cristaux de cryonite refroidis par l'électricité du vaisseau libèrent de l'oxygène : {PowerCatalog.CondenserOxygenPerSecond.Value:0.###} unité/s dans la conduite branchée sur sa prise de fluide (vide ou déjà d'oxygène), pour {PowerCatalog.CondenserWatts.Value:0} W. Sa prise signal donne sa production en millièmes d'unité/s.", $"Cryonite crystals cooled by the ship's power release oxygen: {PowerCatalog.CondenserOxygenPerSecond.Value:0.###} unit/s into the line on its fluid socket (empty or already oxygen), for {PowerCatalog.CondenserWatts.Value:0} W. Its signal socket gives its output in thousandths of a unit/s."),
                 90f, new[] { (Items.ModItems.Cryonite, 6), (Items.ModItems.Titanium, 3), (112u, 6), (102u, 4) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             const float width = 0.8f, height = 0.75f, depth = 0.7f;
@@ -145,8 +145,8 @@ namespace StellarDriveDemoTFAdvanced.Power
         // The game's gyroscope, its body in violet with a lit quantum ring; torque from QuantumGyroscopePatch
         private static void ConfigureQuantumGyro(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Gyroscope quantique",
-                $"Un noyau quantique en rotation dans une cage d'alliage : le couple de {PowerCatalog.QuantumGyroFactor.Value:0} gyroscopes, branché et commandé comme le gyroscope du jeu.",
+            PartFactory.Describe(settings, Loc.Pick("Gyroscope quantique", "Quantum gyroscope"),
+                Loc.Pick($"Un noyau quantique en rotation dans une cage d'alliage : le couple de {PowerCatalog.QuantumGyroFactor.Value:0} gyroscopes, branché et commandé comme le gyroscope du jeu.", $"A quantum core spinning in an alloy cage: the torque of {PowerCatalog.QuantumGyroFactor.Value:0} gyroscopes, wired and controlled like the game's gyroscope."),
                 60f, new[] { (Items.ModItems.QuantumCore, 1), (Items.ModItems.NexoranAlloy, 4), (Items.ModItems.Titanium, 4), (112u, 4) });
             Tint(prefab, "QuantumGyro", new Color(0.7f, 0.55f, 1f), new Color(0.15f, 0.05f, 0.3f));
             var bounds = prefab.GetComponent<ShipPartBounds>();
@@ -163,10 +163,10 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private static void ConfigureShield(ForceField.Tier tier, PartSettings settings, GameObject prefab)
         {
-            string fluid = tier.Fluid == Items.ModItems.DarkMatter ? "de matière noire" : tier.Fluid == Items.ModItems.NuclearFuel ? "de combustible nucléaire" : "d'oxygène";
+            string fluid = tier.Fluid == Items.ModItems.DarkMatter ? Loc.Pick("de matière noire", "of dark matter") : tier.Fluid == Items.ModItems.NuclearFuel ? Loc.Pick("de combustible nucléaire", "of nuclear fuel") : Loc.Pick("d'oxygène", "of oxygen");
             float cooldown = tier.Cooldown;
             PartFactory.Describe(settings, tier.Label,
-                $"{tier.Flavor} Enveloppe tout le vaisseau (et ce qui y est amarré) dans un champ qui encaisse les chocs, les forces de marée et les armes à la place de la coque : {tier.Capacity:0} points (un choc compte sa variation de vitesse en m/s), {tier.Regen:0.#} points/s de recharge. Il lui faut {tier.Watts:0} W sur ses prises électriques (le réseau doit pouvoir les fournir en entier) et {tier.FluidPerSecond:0.###} unité/s {fluid} sur sa prise de fluide. À zéro, il se casse et redémarre rechargé au bout de {(cooldown >= 120f ? $"{cooldown / 60f:0} min" : $"{cooldown:0} s")}. Sa prise signal donne la charge en % ; éteint : -1 pas de réseau électrique, -2 pas de {fluid.Substring(fluid.IndexOf(' ') + 1)}, -3 pas assez de courant (il réessaie toutes les 5 s) ; -10 et moins : secondes avant redémarrage. Les anneaux clignotent en orange ou en rouge quand il lui manque du fluide ou du courant.",
+                Loc.Pick($"{tier.Flavor} Enveloppe tout le vaisseau (et ce qui y est amarré) dans un champ qui encaisse les chocs, les forces de marée et les armes à la place de la coque : {tier.Capacity:0} points (un choc compte sa variation de vitesse en m/s), {tier.Regen:0.#} points/s de recharge. Il lui faut {tier.Watts:0} W sur ses prises électriques (le réseau doit pouvoir les fournir en entier) et {tier.FluidPerSecond:0.###} unité/s {fluid} sur sa prise de fluide. À zéro, il se casse et redémarre rechargé au bout de {(cooldown >= 120f ? $"{cooldown / 60f:0} min" : $"{cooldown:0} s")}. Sa prise signal donne la charge en % ; éteint : -1 pas de réseau électrique, -2 pas de {fluid.Substring(fluid.IndexOf(' ') + 1)}, -3 pas assez de courant (il réessaie toutes les 5 s) ; -10 et moins : secondes avant redémarrage. Les anneaux clignotent en orange ou en rouge quand il lui manque du fluide ou du courant.", $"{tier.Flavor} Wraps the whole ship (and what is docked to it) in a field that takes impacts, tidal forces and weapons instead of the hull: {tier.Capacity:0} points (an impact counts its change of speed in m/s), {tier.Regen:0.#} points/s of recharge. It needs {tier.Watts:0} W on its power sockets (the grid must be able to supply all of it) and {tier.FluidPerSecond:0.###} unit/s {fluid} on its fluid socket. At zero, it breaks and restarts recharged after {(cooldown >= 120f ? $"{cooldown / 60f:0} min" : $"{cooldown:0} s")}. Its signal socket gives the charge in %; off: -1 no power grid, -2 no {fluid.Substring(fluid.IndexOf(' ') + 1)}, -3 not enough power (it retries every 5 s); -10 and below: seconds before restart. The rings blink orange or red when it lacks fluid or power."),
                 tier.Mass, tier.Cost);
             BuildShield(settings, prefab, tier);
         }
@@ -294,8 +294,8 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private static void ConfigureBreaker(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Disjoncteur",
-                $"Relie deux réseaux électriques : prise d'entrée (côté générateurs) et prise de sortie (côté consommateurs). Fait passer jusqu'à {PowerCatalog.BreakerRatingWatts.Value:0} W. Au-delà pendant {PowerCatalog.BreakerTripSeconds.Value:0.#} s, il disjoncte. Prise de commande : sans câble il est fermé ; avec un câble, un signal > 0 le ferme et 0 l'ouvre, et repasser à 0 puis > 0 le réarme. Sa prise d'état donne 0 fermé, 1 ouvert, 2 disjoncté.",
+            PartFactory.Describe(settings, Loc.Pick("Disjoncteur", "Circuit breaker"),
+                Loc.Pick($"Relie deux réseaux électriques : prise d'entrée (côté générateurs) et prise de sortie (côté consommateurs). Fait passer jusqu'à {PowerCatalog.BreakerRatingWatts.Value:0} W. Au-delà pendant {PowerCatalog.BreakerTripSeconds.Value:0.#} s, il disjoncte. Prise de commande : sans câble il est fermé ; avec un câble, un signal > 0 le ferme et 0 l'ouvre, et repasser à 0 puis > 0 le réarme. Sa prise d'état donne 0 fermé, 1 ouvert, 2 disjoncté.", $"Links two power networks: input socket (generators side) and output socket (consumers side). Lets through up to {PowerCatalog.BreakerRatingWatts.Value:0} W. Above that for {PowerCatalog.BreakerTripSeconds.Value:0.#} s, it trips. Control socket: without a cable it is closed; with one, a signal > 0 closes it and 0 opens it, and going back to 0 then > 0 resets it. Its status socket gives 0 closed, 1 open, 2 tripped."),
                 4f, new[] { (101u, 2), (112u, 3) });
             settings.internalStateClass = StateClass;
 

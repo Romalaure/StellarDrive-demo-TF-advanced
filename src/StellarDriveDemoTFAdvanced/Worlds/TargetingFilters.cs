@@ -25,7 +25,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
         private static readonly (Filter Filter, string Label)[] Filters =
         {
-            (Filter.All, "Tout"), (Filter.Planets, "Planètes"), (Filter.Stations, "Stations"), (Filter.Beacons, "Balises")
+            (Filter.All, Loc.Pick("Tout", "All")), (Filter.Planets, Loc.Pick("Planètes", "Planets")), (Filter.Stations, "Stations"), (Filter.Beacons, Loc.Pick("Balises", "Beacons"))
         };
 
         private static readonly AccessTools.FieldRef<TargetingComputerCanvas, List<TargetingComputerButton>> Buttons =
@@ -116,8 +116,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             if (NameText(button) == null)
                 return;
-            string shown = MapSystemFilter.ShowsErebos ? "Érèbe" : "442 Otrera";
-            NameText(button).text = "Galaxie : " + shown + (MapSystemFilter.View == null ? " (où est le vaisseau)" : "") + "  »";
+            string shown = MapSystemFilter.ShowsErebos ? PlanetWiki.SystemName(PlanetWiki.Erebos) : "442 Otrera";
+            NameText(button).text = Loc.Pick("Galaxie : ", "Galaxy: ") + shown + (MapSystemFilter.View == null ? Loc.Pick(" (où est le vaisseau)", " (where the ship is)") : "") + "  »";
         }
 
         private static void Apply(TargetingComputerCanvas canvas, List<(Filter Filter, TargetingComputerButton Button)> filterButtons)

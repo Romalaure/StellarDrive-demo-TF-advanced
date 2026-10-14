@@ -35,7 +35,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             messages.Clear();
             if (!snap.HasShip)
             {
-                messages.Add(new DiagnosticMessage(Severity.Info, snap.NoShipReason ?? "Aucun vaisseau actif."));
+                messages.Add(new DiagnosticMessage(Severity.Info, snap.NoShipReason ?? Loc.Pick("Aucun vaisseau actif.", "No active ship.")));
                 return;
             }
 
@@ -45,13 +45,13 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             CheckTraffic(snap, messages);
 
             if (!snap.SurfaceSpeed.HasValue && !snap.SpaceSpeed.HasValue)
-                messages.Add(new DiagnosticMessage(Severity.Info, "Vitesse indisponible (visuels du vaisseau non chargés ou espace non pris en charge)."));
+                messages.Add(new DiagnosticMessage(Severity.Info, Loc.Pick("Vitesse indisponible (visuels du vaisseau non chargés ou espace non pris en charge).", "Speed unavailable (ship visuals not loaded or space not supported).")));
             if (!snap.Altitude.HasValue)
-                messages.Add(new DiagnosticMessage(Severity.Info, "Altitude indisponible : aucune planète de référence."));
+                messages.Add(new DiagnosticMessage(Severity.Info, Loc.Pick("Altitude indisponible : aucune planète de référence.", "Altitude unavailable: no reference planet.")));
             if (snap.DecorativeBatteries > 0)
-                messages.Add(new DiagnosticMessage(Severity.Info, $"{snap.DecorativeBatteries} Battery Bank du jeu à bord : décorative dans la démo. La Batterie de l'onglet TF Avancé stocke réellement."));
+                messages.Add(new DiagnosticMessage(Severity.Info, Loc.Pick($"{snap.DecorativeBatteries} Battery Bank du jeu à bord : décorative dans la démo. La Batterie de l'onglet TF Avancé stocke réellement.", $"{snap.DecorativeBatteries} game Battery Bank(s) on board: decorative in the demo. The Battery from the TF Avancé tab really stores power.")));
             if (messages.Count == 0)
-                messages.Add(new DiagnosticMessage(Severity.Info, "Aucune anomalie détectée dans les données disponibles."));
+                messages.Add(new DiagnosticMessage(Severity.Info, Loc.Pick("Aucune anomalie détectée dans les données disponibles.", "No fault found in the available data.")));
         }
 
         private static void CheckFlight(TelemetrySnapshot snap, List<DiagnosticMessage> messages)
@@ -61,28 +61,28 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                 && snap.Altitude.Value < Settings.DescentWarningAltitude.Value)
             {
                 messages.Add(new DiagnosticMessage(Severity.Warning,
-                    $"Descente rapide : {-snap.VerticalSpeed.Value:0} m/s à {snap.Altitude.Value:0} m (seuils {Settings.DescentWarningSpeed.Value:0} m/s, {Settings.DescentWarningAltitude.Value:0} m)."));
+                    Loc.Pick($"Descente rapide : {-snap.VerticalSpeed.Value:0} m/s à {snap.Altitude.Value:0} m (seuils {Settings.DescentWarningSpeed.Value:0} m/s, {Settings.DescentWarningAltitude.Value:0} m).", $"Fast descent: {-snap.VerticalSpeed.Value:0} m/s at {snap.Altitude.Value:0} m (thresholds {Settings.DescentWarningSpeed.Value:0} m/s, {Settings.DescentWarningAltitude.Value:0} m).")));
             }
             if (snap.BlackHoleDistance.HasValue)
             {
                 float distance = snap.BlackHoleDistance.Value;
                 Worlds.Hole hole = snap.BlackHole;
                 if (distance < hole.TidalRadius)
-                    messages.Add(new DiagnosticMessage(Severity.Error, $"Forces de marée : {hole.Name} arrache des pièces ({distance / 1000f:0.0} km, horizon à {hole.Horizon / 1000f:0} km)."));
+                    messages.Add(new DiagnosticMessage(Severity.Error, Loc.Pick($"Forces de marée : {hole.Name} arrache des pièces ({distance / 1000f:0.0} km, horizon à {hole.Horizon / 1000f:0} km).", $"Tidal forces: {hole.Name} is tearing parts off ({distance / 1000f:0.0} km, horizon at {hole.Horizon / 1000f:0} km).")));
                 else if (distance < hole.TidalRadius * 4f)
-                    messages.Add(new DiagnosticMessage(Severity.Warning, $"{hole.Name} proche : {distance / 1000f:0} km, zone de marée à {hole.TidalRadius / 1000f:0} km. Attraction {snap.BlackHoleGravity:0.0} m/s²."));
+                    messages.Add(new DiagnosticMessage(Severity.Warning, Loc.Pick($"{hole.Name} proche : {distance / 1000f:0} km, zone de marée à {hole.TidalRadius / 1000f:0} km. Attraction {snap.BlackHoleGravity:0.0} m/s².", $"{hole.Name} near: {distance / 1000f:0} km, tidal zone at {hole.TidalRadius / 1000f:0} km. Pull {snap.BlackHoleGravity:0.0} m/s².")));
             }
             if (snap.AngularVelocity.HasValue && snap.AngularVelocity.Value.magnitude > Settings.SpinWarningRate.Value)
             {
                 messages.Add(new DiagnosticMessage(Severity.Warning,
-                    $"Rotation rapide : {snap.AngularVelocity.Value.magnitude:0} °/s (seuil {Settings.SpinWarningRate.Value:0} °/s)."));
+                    Loc.Pick($"Rotation rapide : {snap.AngularVelocity.Value.magnitude:0} °/s (seuil {Settings.SpinWarningRate.Value:0} °/s).", $"Fast spin: {snap.AngularVelocity.Value.magnitude:0} °/s (threshold {Settings.SpinWarningRate.Value:0} °/s).")));
             }
         }
 
         private static void CheckPropulsion(TelemetrySnapshot snap, List<DiagnosticMessage> messages)
         {
             if (snap.Thrusters.Count == 0)
-                messages.Add(new DiagnosticMessage(Severity.Warning, "Propulseur non détecté sur le vaisseau."));
+                messages.Add(new DiagnosticMessage(Severity.Warning, Loc.Pick("Propulseur non détecté sur le vaisseau.", "No thruster found on the ship.")));
 
             foreach (ThrusterReading thruster in snap.Thrusters)
             {
@@ -90,25 +90,25 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                 {
                     if (!thruster.FuelSocketsConnected)
                     {
-                        messages.Add(new DiagnosticMessage(Severity.Warning, $"Propulseur chimique #{thruster.PartId} : prises d'ergols 1 et 2 pas toutes les deux branchées."));
+                        messages.Add(new DiagnosticMessage(Severity.Warning, Loc.Pick($"Propulseur chimique #{thruster.PartId} : prises d'ergols 1 et 2 pas toutes les deux branchées.", $"Chemical thruster #{thruster.PartId}: propellant sockets 1 and 2 are not both plugged.")));
                     }
                     else if (IsPropellant(thruster.FluidA) && IsPropellant(thruster.FluidB) && thruster.FluidA == thruster.FluidB)
                     {
-                        messages.Add(new DiagnosticMessage(Severity.Error, $"Propulseur chimique #{thruster.PartId} : les deux conduites portent le même fluide ({FluidName(thruster.FluidA)}), il faut oxygène ET éthanol."));
+                        messages.Add(new DiagnosticMessage(Severity.Error, Loc.Pick($"Propulseur chimique #{thruster.PartId} : les deux conduites portent le même fluide ({FluidName(thruster.FluidA)}), il faut oxygène ET éthanol.", $"Chemical thruster #{thruster.PartId}: both lines carry the same fluid ({FluidName(thruster.FluidA)}), it needs oxygen AND ethanol.")));
                     }
                 }
                 else if (thruster.TroubleStarting)
                 {
-                    messages.Add(new DiagnosticMessage(Severity.Warning, $"Propulseur à bois #{thruster.PartId} : commandé mais à court de bois."));
+                    messages.Add(new DiagnosticMessage(Severity.Warning, Loc.Pick($"Propulseur à bois #{thruster.PartId} : commandé mais à court de bois.", $"Wood thruster #{thruster.PartId}: commanded but out of wood.")));
                 }
             }
 
             foreach (GyroReading gyro in snap.Gyros)
             {
                 if (!gyro.IsSeat && !gyro.PowerConnected)
-                    messages.Add(new DiagnosticMessage(Severity.Warning, $"Gyroscope #{gyro.PartId} non alimenté : prise électrique non branchée."));
+                    messages.Add(new DiagnosticMessage(Severity.Warning, Loc.Pick($"Gyroscope #{gyro.PartId} non alimenté : prise électrique non branchée.", $"Gyroscope #{gyro.PartId} unpowered: power socket not plugged.")));
                 else if (gyro.PowerSatisfaction.HasValue && gyro.PowerSatisfaction.Value < 0.999f)
-                    messages.Add(new DiagnosticMessage(Severity.Warning, $"Gyroscope #{gyro.PartId} sous-alimenté : {gyro.PowerSatisfaction.Value:P0} de la puissance demandée."));
+                    messages.Add(new DiagnosticMessage(Severity.Warning, Loc.Pick($"Gyroscope #{gyro.PartId} sous-alimenté : {gyro.PowerSatisfaction.Value:P0} de la puissance demandée.", $"Gyroscope #{gyro.PartId} underpowered: {gyro.PowerSatisfaction.Value:P0} of the power asked.")));
             }
         }
 
@@ -117,32 +117,32 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             foreach (GeneratorReading generator in snap.Generators)
             {
                 if (!generator.Connected)
-                    messages.Add(new DiagnosticMessage(Severity.Info, $"Générateur #{generator.PartId} : sortie électrique non branchée."));
+                    messages.Add(new DiagnosticMessage(Severity.Info, Loc.Pick($"Générateur #{generator.PartId} : sortie électrique non branchée.", $"Generator #{generator.PartId}: power output not plugged.")));
                 else if (!generator.Quantum && generator.Wood <= 0f)
-                    messages.Add(new DiagnosticMessage(Severity.Warning, $"Générateur #{generator.PartId} : plus de bois."));
+                    messages.Add(new DiagnosticMessage(Severity.Warning, Loc.Pick($"Générateur #{generator.PartId} : plus de bois.", $"Generator #{generator.PartId}: out of wood.")));
             }
             foreach (ConsumerReading consumer in snap.Consumers)
             {
                 if (consumer.Name != "Gyroscope" && !consumer.Connected)
-                    messages.Add(new DiagnosticMessage(Severity.Info, $"{consumer.Name} #{consumer.PartId} non alimenté : prise électrique non branchée."));
+                    messages.Add(new DiagnosticMessage(Severity.Info, Loc.Pick($"{consumer.Name} #{consumer.PartId} non alimenté : prise électrique non branchée.", $"{consumer.Name} #{consumer.PartId} unpowered: power socket not plugged.")));
             }
             foreach (BatteryReading battery in snap.Batteries)
             {
                 if (!battery.Connected)
-                    messages.Add(new DiagnosticMessage(Severity.Info, $"Batterie #{battery.PartId} non branchée."));
+                    messages.Add(new DiagnosticMessage(Severity.Info, Loc.Pick($"Batterie #{battery.PartId} non branchée.", $"Battery #{battery.PartId} not plugged.")));
                 else if (battery.Percent < 5f && battery.Flow < -1f)
-                    messages.Add(new DiagnosticMessage(Severity.Warning, $"Batterie #{battery.PartId} presque vide ({battery.Percent:0} %) et en décharge."));
+                    messages.Add(new DiagnosticMessage(Severity.Warning, Loc.Pick($"Batterie #{battery.PartId} presque vide ({battery.Percent:0} %) et en décharge.", $"Battery #{battery.PartId} almost empty ({battery.Percent:0}%) and discharging.")));
             }
             foreach (BreakerReading breaker in snap.Breakers)
             {
                 if (breaker.Status == Power.PowerCatalog.BreakerTripped)
                     messages.Add(new DiagnosticMessage(Severity.Error, breaker.ControlWired
-                        ? $"Disjoncteur #{breaker.PartId} disjoncté (surcharge) : repasser sa commande à 0 puis > 0 pour le réarmer."
-                        : $"Disjoncteur #{breaker.PartId} disjoncté (surcharge) : réarmement automatique dans {Power.PowerCatalog.BreakerAutoResetSeconds.Value:0} s."));
+                        ? Loc.Pick($"Disjoncteur #{breaker.PartId} disjoncté (surcharge) : repasser sa commande à 0 puis > 0 pour le réarmer.", $"Breaker #{breaker.PartId} tripped (overload): set its command back to 0 then > 0 to reset it.")
+                        : Loc.Pick($"Disjoncteur #{breaker.PartId} disjoncté (surcharge) : réarmement automatique dans {Power.PowerCatalog.BreakerAutoResetSeconds.Value:0} s.", $"Breaker #{breaker.PartId} tripped (overload): automatic reset in {Power.PowerCatalog.BreakerAutoResetSeconds.Value:0} s.")));
                 else if (breaker.Status == Power.PowerCatalog.BreakerOpen)
-                    messages.Add(new DiagnosticMessage(Severity.Info, $"Disjoncteur #{breaker.PartId} ouvert par sa commande."));
+                    messages.Add(new DiagnosticMessage(Severity.Info, Loc.Pick($"Disjoncteur #{breaker.PartId} ouvert par sa commande.", $"Breaker #{breaker.PartId} opened by its command.")));
                 if (!breaker.InputConnected || !breaker.OutputConnected)
-                    messages.Add(new DiagnosticMessage(Severity.Info, $"Disjoncteur #{breaker.PartId} : entrée et sortie doivent être branchées sur deux réseaux différents."));
+                    messages.Add(new DiagnosticMessage(Severity.Info, Loc.Pick($"Disjoncteur #{breaker.PartId} : entrée et sortie doivent être branchées sur deux réseaux différents.", $"Breaker #{breaker.PartId}: input and output must be plugged into two different grids.")));
             }
             if (snap.IsHost)
             {
@@ -151,7 +151,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                     float ago = UnityEngine.Time.unscaledTime - trip.Time;
                     if (ago > 300f)
                         break;
-                    messages.Add(new DiagnosticMessage(Severity.Info, $"Journal : disjoncteur {trip.ShipId}:{trip.PartId} déclenché il y a {ago:0} s ({trip.DemandWatts:0} W demandés)."));
+                    messages.Add(new DiagnosticMessage(Severity.Info, Loc.Pick($"Journal : disjoncteur {trip.ShipId}:{trip.PartId} déclenché il y a {ago:0} s ({trip.DemandWatts:0} W demandés).", $"Log: breaker {trip.ShipId}:{trip.PartId} tripped {ago:0} s ago ({trip.DemandWatts:0} W asked).")));
                 }
             }
             foreach (PowerNetworkReading network in snap.Networks)
@@ -159,7 +159,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                 if (network.Satisfaction.HasValue && network.Satisfaction.Value < 0.999f)
                 {
                     messages.Add(new DiagnosticMessage(network.Satisfaction.Value < 0.5f ? Severity.Error : Severity.Warning,
-                        $"Réseau électrique sous-alimenté : {network.Demand:0} W demandés, {network.Capacity:0} W disponibles ({network.Satisfaction.Value:P0})."));
+                        Loc.Pick($"Réseau électrique sous-alimenté : {network.Demand:0} W demandés, {network.Capacity:0} W disponibles ({network.Satisfaction.Value:P0}).", $"Underpowered grid: {network.Demand:0} W asked, {network.Capacity:0} W available ({network.Satisfaction.Value:P0}).")));
                 }
             }
         }
@@ -172,7 +172,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                     && contact.ClosestDistance < Settings.CollisionWarningDistance.Value)
                 {
                     messages.Add(new DiagnosticMessage(Severity.Error,
-                        $"Rapprochement : vaisseau #{contact.ShipId} à {contact.ClosestDistance:0} m (centre à centre) dans {contact.TimeToClosest.Value:0.0} s."));
+                        Loc.Pick($"Rapprochement : vaisseau #{contact.ShipId} à {contact.ClosestDistance:0} m (centre à centre) dans {contact.TimeToClosest.Value:0.0} s.", $"Closing: ship #{contact.ShipId} at {contact.ClosestDistance:0} m (centre to centre) in {contact.TimeToClosest.Value:0.0} s.")));
                 }
             }
         }
@@ -185,12 +185,12 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
         public static string FluidName(uint itemId)
         {
             if (itemId == 0)
-                return "vide";
+                return Loc.Pick("vide", "empty");
             if (itemId == ItemsConstants.OxygenItemId)
-                return "oxygène";
+                return Loc.Pick("oxygène", "oxygen");
             if (itemId == ItemsConstants.EthanolItemId)
-                return "éthanol";
-            return "fluide " + itemId;
+                return Loc.Pick("éthanol", "ethanol");
+            return Loc.Pick("fluide ", "fluid ") + itemId;
         }
 
         public static Color ColorOf(Severity severity)

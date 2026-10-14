@@ -3,6 +3,7 @@ using Ships.Interface.Settings;
 using StellarDriveDemoTFAdvanced.Items;
 using StellarDriveDemoTFAdvanced.Parts;
 using UnityEngine;
+using StellarDriveDemoTFAdvanced.Common;
 
 namespace StellarDriveDemoTFAdvanced.Power
 {
@@ -36,8 +37,8 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static void ConfigureCentrifuge(PartSettings settings, GameObject prefab)
         {
             float oreRate = PowerCatalog.CentrifugeOrePerSecond.Value;
-            PartFactory.Describe(settings, "Centrifugeuse d'enrichissement",
-                $"Enrichit le minerai d'uranium placé dans sa trappe (à la main ou par une ligne d'objets) en combustible nucléaire, envoyé dans la conduite de sa prise de fluide (vide ou déjà de combustible) : {oreRate:0.###} minerai/s, {PowerCatalog.CentrifugeFuelPerOre.Value:0.##} unité de combustible par minerai. Consomme {PowerCatalog.CentrifugeWatts.Value:0} W. Branchement comme le distillateur d'éthanol du jeu.",
+            PartFactory.Describe(settings, Loc.Pick("Centrifugeuse d'enrichissement", "Enrichment centrifuge"),
+                Loc.Pick($"Enrichit le minerai d'uranium placé dans sa trappe (à la main ou par une ligne d'objets) en combustible nucléaire, envoyé dans la conduite de sa prise de fluide (vide ou déjà de combustible) : {oreRate:0.###} minerai/s, {PowerCatalog.CentrifugeFuelPerOre.Value:0.##} unité de combustible par minerai. Consomme {PowerCatalog.CentrifugeWatts.Value:0} W. Branchement comme le distillateur d'éthanol du jeu.", $"Enriches the uranium ore put in its hatch (by hand or by an item line) into nuclear fuel, sent into the line on its fluid socket (empty or already nuclear fuel): {oreRate:0.###} ore/s, {PowerCatalog.CentrifugeFuelPerOre.Value:0.##} unit of fuel per ore. Uses {PowerCatalog.CentrifugeWatts.Value:0} W. Wired like the game's ethanol distiller."),
                 180f, new[] { (ModItems.Titanium, 12), ((uint)Aluminum, 10), ((uint)Copper, 12), ((uint)Glass, 6), (ModItems.NexoranAlloy, 2) });
             Transform visual = prefab.transform.Find("Visual");
             if (visual == null)
@@ -95,16 +96,16 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private static void ConfigureTank(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Réservoir de combustible nucléaire",
-                "Le réservoir de fluide du jeu, blindé de plomb et de titane pour le combustible nucléaire (il prend aussi les autres fluides). Branchement et prise signal comme le réservoir du jeu.",
+            PartFactory.Describe(settings, Loc.Pick("Réservoir de combustible nucléaire", "Nuclear fuel tank"),
+                Loc.Pick("Le réservoir de fluide du jeu, blindé de plomb et de titane pour le combustible nucléaire (il prend aussi les autres fluides). Branchement et prise signal comme le réservoir du jeu.", "The game's fluid tank, shielded with lead and titanium for nuclear fuel (it takes the other fluids too). Wiring and signal socket as the game's tank."),
                 40f, new[] { (ModItems.Titanium, 4), ((uint)Iron, 8), ((uint)Glass, 4) });
             SuperiorParts.Recolor(prefab, new Color(0.5f, 0.62f, 0.42f), new Color(0.05f, 0.25f, 0.02f));
         }
 
         private static void ConfigureReactor(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Réacteur nucléaire",
-                $"Une cuve sous pression où le combustible nucléaire chauffe l'eau d'un circuit de turbines : brûle {PowerCatalog.NuclearReactorBurnPerSecond.Value:0.###} unité/s de combustible nucléaire prise sur sa prise de fluide et donne {PowerCatalog.NuclearReactorWatts.Value:0} W aux réseaux branchés sur ses deux prises électriques (partagés s'il y en a deux). Sa prise signal vaut 100 quand il tourne, 0 à sec.",
+            PartFactory.Describe(settings, Loc.Pick("Réacteur nucléaire", "Nuclear reactor"),
+                Loc.Pick($"Une cuve sous pression où le combustible nucléaire chauffe l'eau d'un circuit de turbines : brûle {PowerCatalog.NuclearReactorBurnPerSecond.Value:0.###} unité/s de combustible nucléaire prise sur sa prise de fluide et donne {PowerCatalog.NuclearReactorWatts.Value:0} W aux réseaux branchés sur ses deux prises électriques (partagés s'il y en a deux). Sa prise signal vaut 100 quand il tourne, 0 à sec.", $"A pressure vessel where nuclear fuel heats the water of a turbine loop: burns {PowerCatalog.NuclearReactorBurnPerSecond.Value:0.###} unit/s of nuclear fuel from its fluid socket and gives {PowerCatalog.NuclearReactorWatts.Value:0} W to the networks on its two power sockets (shared if there are two). Its signal socket reads 100 while it runs, 0 when dry."),
                 320f, new[] { (ModItems.Titanium, 20), ((uint)Iron, 30), ((uint)Copper, 20), (ModItems.QuantumCore, 1), (ModItems.NexoranAlloy, 4) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             const float width = 1.2f, depth = 1.2f;

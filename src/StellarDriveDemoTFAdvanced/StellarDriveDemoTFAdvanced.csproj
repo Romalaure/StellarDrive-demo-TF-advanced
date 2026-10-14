@@ -6,7 +6,7 @@
     <Nullable>disable</Nullable>
     <AssemblyName>StellarDriveDemoTFAdvanced</AssemblyName>
     <RootNamespace>StellarDriveDemoTFAdvanced</RootNamespace>
-    <Version>0.15.1</Version>
+    <Version>0.16.0</Version>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <!-- Game assemblies reference netstandard facades; silence the resulting version-conflict noise -->
@@ -53,6 +53,7 @@
   <!-- The wiki's pages, shown in the game's guide -->
   <ItemGroup>
     <EmbeddedResource Include="..\..\docs\wiki\*.md" Exclude="..\..\docs\wiki\_Sidebar.md" LogicalName="Wiki.%(Filename).md" />
+    <EmbeddedResource Include="..\..\docs\wiki\en\*.md" Exclude="..\..\docs\wiki\en\_Sidebar.md" LogicalName="Wiki.en.%(Filename).md" />
   </ItemGroup>
 
   <Target Name="DeployToGameMods" AfterTargets="Build" Condition="'$(DeployToGame)' == 'true' And Exists('$(GamePath)\Mods')">

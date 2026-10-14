@@ -66,22 +66,22 @@ namespace StellarDriveDemoTFAdvanced.Power
         public static readonly Tier[] Tiers =
         {
             new Tier { Id = PowerCatalog.ShieldId, Level = 1, CapacityScale = 1f, RegenScale = 1f, WattsScale = 1f, FluidScale = 1f, Fluid = Oxygen, Glow = MachineModels.Cyan,
-                Label = "Générateur de champ de force", Flavor = "Le champ de base (lueur cyan).", Mass = 120f,
+                Label = Loc.Pick("Générateur de champ de force", "Force field generator"), Flavor = Loc.Pick("Le champ de base (lueur cyan).", "The basic field (cyan glow)."), Mass = 120f,
                 Cost = new[] { (Items.ModItems.QuantumCore, 1), (Items.ModItems.Cryonite, 6), (Items.ModItems.NexoranAlloy, 4), (Items.ModItems.Titanium, 6), (112u, 8) } },
             new Tier { Id = PowerCatalog.ShieldMk2Id, Level = 2, CapacityScale = 3f, RegenScale = 3f, WattsScale = 3f, FluidScale = 2.5f, Fluid = Oxygen, Glow = new Color(1f, 0.72f, 0.2f),
-                Label = "Générateur de champ renforcé", Flavor = "Le champ de force en plus solide (lueur dorée).", Mass = 260f,
+                Label = Loc.Pick("Générateur de champ renforcé", "Reinforced field generator"), Flavor = Loc.Pick("Le champ de force en plus solide (lueur dorée).", "A sturdier force field (golden glow)."), Mass = 260f,
                 Cost = new[] { (Items.ModItems.QuantumCore, 3), (Items.ModItems.Cryonite, 15), (Items.ModItems.NexoranAlloy, 12), (Items.ModItems.Titanium, 20), (112u, 20) } },
             new Tier { Id = PowerCatalog.ShieldMk3Id, Level = 3, CapacityScale = 8f, RegenScale = 8f, WattsScale = 5f, FluidScale = 1f, Fluid = Items.ModItems.DarkMatter, Glow = MachineModels.Violet,
-                Label = "Générateur de champ à matière noire", Flavor = "Le champ le plus résistant (lueur violette).", Mass = 450f,
+                Label = Loc.Pick("Générateur de champ à matière noire", "Dark matter field generator"), Flavor = Loc.Pick("Le champ le plus résistant (lueur violette).", "The toughest field (violet glow)."), Mass = 450f,
                 Cost = new[] { (Items.ModItems.QuantumCore, 6), (Items.ModItems.ExoticMatter, 6), (Items.ModItems.Meteorite, 25), (Items.ModItems.NexoranAlloy, 20), (Items.ModItems.Titanium, 30) } },
             new Tier { Id = PowerCatalog.ShieldCompactId, Level = 4, CapacityScale = 0.4f, RegenScale = 0.6f, WattsScale = 0.3f, FluidScale = 0.5f, Fluid = Oxygen, Glow = new Color(0.75f, 0.95f, 1f), ModelScale = 0.6f,
-                Label = "Générateur de champ compact", Flavor = "Un petit champ pour les petits vaisseaux et les navettes (lueur blanc bleuté) : peu de points, presque pas de courant.", Mass = 45f,
+                Label = Loc.Pick("Générateur de champ compact", "Compact field generator"), Flavor = Loc.Pick("Un petit champ pour les petits vaisseaux et les navettes (lueur blanc bleuté) : peu de points, presque pas de courant.", "A small field for small ships and shuttles (bluish-white glow): few points, hardly any power."), Mass = 45f,
                 Cost = new[] { (Items.ModItems.Cryonite, 3), (Items.ModItems.Titanium, 4), (112u, 6), (102u, 2) } },
             new Tier { Id = PowerCatalog.ShieldRapidId, Level = 5, CapacityScale = 2f, RegenScale = 12f, WattsScale = 2.5f, FluidScale = 1.5f, CooldownScale = 0.2f, Fluid = Oxygen, Glow = new Color(1f, 0.45f, 0.12f),
-                Label = "Générateur de champ réactif", Flavor = "Un champ de combat (lueur orange) : moins de points que le renforcé, mais il se recharge très vite et redémarre en 1 min.", Mass = 200f,
+                Label = Loc.Pick("Générateur de champ réactif", "Rapid field generator"), Flavor = Loc.Pick("Un champ de combat (lueur orange) : moins de points que le renforcé, mais il se recharge très vite et redémarre en 1 min.", "A combat field (orange glow): fewer points than the reinforced one, but it recharges very fast and restarts in 1 min."), Mass = 200f,
                 Cost = new[] { (Items.ModItems.QuantumCore, 2), (Items.ModItems.Cryonite, 10), (Items.ModItems.NexoranAlloy, 8), (Items.ModItems.Titanium, 15), (112u, 25) } },
             new Tier { Id = PowerCatalog.ShieldNuclearId, Level = 6, CapacityScale = 5f, RegenScale = 5f, WattsScale = 4f, FluidScale = 0.5f, Fluid = Items.ModItems.NuclearFuel, Glow = MachineModels.Green,
-                Label = "Générateur de champ nucléaire", Flavor = "Un champ lourd alimenté au combustible nucléaire (lueur verte), entre le renforcé et celui à matière noire.", Mass = 380f,
+                Label = Loc.Pick("Générateur de champ nucléaire", "Nuclear field generator"), Flavor = Loc.Pick("Un champ lourd alimenté au combustible nucléaire (lueur verte), entre le renforcé et celui à matière noire.", "A heavy field running on nuclear fuel (green glow), between the reinforced and the dark matter ones."), Mass = 380f,
                 Cost = new[] { (Items.ModItems.Uranium, 12), (Items.ModItems.QuantumCore, 4), (Items.ModItems.NexoranAlloy, 15), (Items.ModItems.Titanium, 25), (112u, 20) } },
         };
 

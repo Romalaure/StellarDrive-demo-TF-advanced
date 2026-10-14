@@ -25,7 +25,7 @@ namespace StellarDriveDemoTFAdvanced.Wiki
     internal static class WikiGuide
     {
         public const uint EntryId = 74001;
-        public const string Title = "Wiki TF Avancé";
+        public static string Title => Loc.Pick("Wiki TF Avancé", "TF Advanced Wiki");
 
         private static readonly AccessTools.FieldRef<GuideCanvas, GuideEntryButton> ButtonPrefab = AccessTools.FieldRefAccess<GuideCanvas, GuideEntryButton>("entrySelectButtonPrefab");
         private static readonly AccessTools.FieldRef<GuideCanvas, Transform> ButtonContainer = AccessTools.FieldRefAccess<GuideCanvas, Transform>("entriesButtonContainer");
@@ -150,7 +150,7 @@ namespace StellarDriveDemoTFAdvanced.Wiki
                 ? "<b>" + WikiPages.Title(p) + "</b>"
                 : $"<link=\"{p}\"><color=#5fc8ff>{WikiPages.Title(p)}</color></link>")));
             if (History.Count > 0)
-                text.Append("    <link=\"back\"><color=#ffb060>« Retour</color></link>");
+                text.Append("    <link=\"back\"><color=#ffb060>« " + Loc.Pick("Retour", "Back") + "</color></link>");
             text.Append("</size>\n\n");
             text.Append(WikiPages.Render(Current));
             _text.text = text.ToString();
@@ -186,20 +186,25 @@ namespace StellarDriveDemoTFAdvanced.Wiki
     internal static class WikiPages
     {
         private static Dictionary<string, string> _pages;
+        private static bool _pagesEnglish;
 
         private static Dictionary<string, string> Pages
         {
             get
             {
-                if (_pages != null)
+                bool english = Loc.English;
+                if (_pages != null && _pagesEnglish == english)
                     return _pages;
                 _pages = new Dictionary<string, string>();
+                _pagesEnglish = english;
                 var assembly = typeof(WikiPages).Assembly;
-                foreach (string name in assembly.GetManifestResourceNames().Where(n => n.StartsWith("Wiki.") && n.EndsWith(".md")))
+                // French pages are "Wiki.<page>.md", English ones "Wiki.en.<page>.md"
+                string prefix = english ? "Wiki.en." : "Wiki.";
+                foreach (string name in assembly.GetManifestResourceNames().Where(n => n.StartsWith(prefix) && n.EndsWith(".md") && (english || !n.StartsWith("Wiki.en."))))
                 {
                     using (Stream stream = assembly.GetManifestResourceStream(name))
                     using (var reader = new StreamReader(stream, Encoding.UTF8))
-                        _pages[name.Substring(5, name.Length - 8)] = reader.ReadToEnd();
+                        _pages[name.Substring(prefix.Length, name.Length - prefix.Length - 3)] = reader.ReadToEnd();
                 }
                 return _pages;
             }
@@ -213,7 +218,7 @@ namespace StellarDriveDemoTFAdvanced.Wiki
         public static string Title(string page)
         {
             if (page == "Home")
-                return "Accueil";
+                return Loc.Pick("Accueil", "Home");
             string first = Pages.TryGetValue(page, out string md) ? md.Split('\n').FirstOrDefault(l => l.StartsWith("# ")) : null;
             return first != null ? first.Substring(2).Trim() : page;
         }
@@ -251,7 +256,7 @@ namespace StellarDriveDemoTFAdvanced.Wiki
                         string column = i < header.Length ? header[i] : "";
                         text.Append(i == 1 ? " — " : " · ");
                         if (!string.IsNullOrEmpty(column) && header.Length > 2)
-                            text.Append("<color=#9ab0c0>").Append(column).Append(" :</color> ");
+                            text.Append("<color=#9ab0c0>").Append(column).Append(Loc.Pick(" :", ":")).Append("</color> ");
                         text.Append(cells[i]);
                     }
                     text.Append('\n');

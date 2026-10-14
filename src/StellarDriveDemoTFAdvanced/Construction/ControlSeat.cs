@@ -26,8 +26,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         public static void Configure(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Siège de commande à leviers",
-                "Le poste de pilotage avancé du jeu (on s'y assoit, il pilote et sort six signaux sur ses six prises) avec deux consoles d'accoudoir de trois leviers chacune. Les leviers suivent les commandes envoyées : à gauche les déplacements (latéral, vertical, avant), à droite les rotations (tangage, lacet, roulis). Pour piloter une station, une grue ou des portes depuis un fauteuil.",
+            PartFactory.Describe(settings, Loc.Pick("Siège de commande à leviers", "Lever control seat"),
+                Loc.Pick("Le poste de pilotage avancé du jeu (on s'y assoit, il pilote et sort six signaux sur ses six prises) avec deux consoles d'accoudoir de trois leviers chacune. Les leviers suivent les commandes envoyées : à gauche les déplacements (latéral, vertical, avant), à droite les rotations (tangage, lacet, roulis). Pour piloter une station, une grue ou des portes depuis un fauteuil.", "The game's advanced pilot station (you sit in it, it flies and sends six signals on its six sockets) with two armrest consoles of three levers each. The levers follow the commands sent: on the left the moves (sideways, vertical, forward), on the right the rotations (pitch, yaw, roll). To drive a station, a crane or doors from an armchair."),
                 40f, new[] { (Iron, 10), (Copper, 6), (Aluminum, 4) });
             GameSkin.Capture(prefab);
             Transform visuals = prefab.GetComponentInChildren<IShipPartVisual>(true)?.GameObject.transform;

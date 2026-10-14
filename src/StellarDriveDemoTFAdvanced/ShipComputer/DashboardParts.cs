@@ -31,21 +31,21 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
         {
             PartFactory.Register(WallScreenId, Donor, AdvancedTab.ComputersRow, ConfigureWallScreen);
             PartFactory.Register(ConsoleId, Donor, AdvancedTab.ComputersRow, ConfigureConsole);
-            RegisterSmall(FlightScreenId, "flight", "Écran de vol",
-                "Petit écran FLIGHT : vitesses, altitude au-dessus du rayon moyen, assiette, rotation et trafic du vaisseau où il est posé.");
-            RegisterSmall(PropulsionScreenId, "propulsion", "Écran de propulsion",
-                "Petit écran PROPULSION : poussée et débit de chaque propulseur, poussée nette, gyroscopes, cœur stellaire.");
-            RegisterSmall(PowerScreenId, "power", "Écran d'énergie",
-                "Petit écran POWER : générateurs, consommateurs et réseaux électriques du vaisseau.");
-            RegisterSmall(DiagnosticsScreenId, "diagnostics", "Écran de diagnostic",
-                "Petit écran DIAGNOSTICS : alertes vérifiées à partir des données du jeu (propulseur mal alimenté, gyroscope non branché, réseau sous-alimenté, rapprochement…).");
+            RegisterSmall(FlightScreenId, "flight", Loc.Pick("Écran de vol", "Flight screen"),
+                Loc.Pick("Petit écran FLIGHT : vitesses, altitude au-dessus du rayon moyen, assiette, rotation et trafic du vaisseau où il est posé.", "Small FLIGHT screen: speeds, altitude above the mean radius, attitude, rotation and traffic of the ship it is mounted on."));
+            RegisterSmall(PropulsionScreenId, "propulsion", Loc.Pick("Écran de propulsion", "Propulsion screen"),
+                Loc.Pick("Petit écran PROPULSION : poussée et débit de chaque propulseur, poussée nette, gyroscopes, cœur stellaire.", "Small PROPULSION screen: thrust and flow of each thruster, net thrust, gyroscopes, stellar core."));
+            RegisterSmall(PowerScreenId, "power", Loc.Pick("Écran d'énergie", "Power screen"),
+                Loc.Pick("Petit écran POWER : générateurs, consommateurs et réseaux électriques du vaisseau.", "Small POWER screen: the ship's generators, consumers and power grids."));
+            RegisterSmall(DiagnosticsScreenId, "diagnostics", Loc.Pick("Écran de diagnostic", "Diagnostics screen"),
+                Loc.Pick("Petit écran DIAGNOSTICS : alertes vérifiées à partir des données du jeu (propulseur mal alimenté, gyroscope non branché, réseau sous-alimenté, rapprochement…).", "Small DIAGNOSTICS screen: alerts checked against the game's data (badly fed thruster, unplugged gyroscope, underpowered grid, closing ship…)."));
             AdvancedMod.Log.Msg("registered 6 ship computer screens");
         }
 
         private static void ConfigureWallScreen(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Ordinateur de bord (mural)",
-                "Écran d'ingénierie à fixer sur un mur, un plafond ou la coque. Affiche en continu les quatre sections FLIGHT, PROPULSION, POWER et DIAGNOSTICS du vaisseau où il est posé, à partir des données réelles du jeu. Aucune prise ni touche : tourne-le en le posant pour l'orienter.",
+            PartFactory.Describe(settings, Loc.Pick("Ordinateur de bord (mural)", "Ship computer (wall)"),
+                Loc.Pick("Écran d'ingénierie à fixer sur un mur, un plafond ou la coque. Affiche en continu les quatre sections FLIGHT, PROPULSION, POWER et DIAGNOSTICS du vaisseau où il est posé, à partir des données réelles du jeu. Aucune prise ni touche : tourne-le en le posant pour l'orienter.", "Engineering screen for a wall, a ceiling or the hull. Shows the four sections FLIGHT, PROPULSION, POWER and DIAGNOSTICS of the ship it is mounted on, live from the game's real data. No socket or key: rotate it while placing it to aim it."),
                 8f, LargeCost);
             var size = new Vector3(1.04f, 0.07f, 0.66f);
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, size.y * 0.5f, 0f), size);
@@ -65,8 +65,8 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
 
         private static void ConfigureConsole(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Console de bord",
-                "Pupitre à poser au sol, écran incliné vers le pilote. Affiche les quatre sections FLIGHT, PROPULSION, POWER et DIAGNOSTICS du vaisseau où il est posé. Aucune prise ni touche.",
+            PartFactory.Describe(settings, Loc.Pick("Console de bord", "Ship console"),
+                Loc.Pick("Pupitre à poser au sol, écran incliné vers le pilote. Affiche les quatre sections FLIGHT, PROPULSION, POWER et DIAGNOSTICS du vaisseau où il est posé. Aucune prise ni touche.", "Desk for the floor, its screen tilted towards the pilot. Shows the four sections FLIGHT, PROPULSION, POWER and DIAGNOSTICS of the ship it is mounted on. No socket or key."),
                 30f, new[] { (101u, 6), (102u, 3), (112u, 3) });
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, 0.8f, 0.06f), new Vector3(1.04f, 1.6f, 0.72f));
 
@@ -92,7 +92,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
         {
             PartFactory.Register(id, Donor, AdvancedTab.ComputersRow, (settings, prefab) =>
             {
-                PartFactory.Describe(settings, label, description + " Aucune prise ni touche.", 3f, SmallCost);
+                PartFactory.Describe(settings, label, description + Loc.Pick(" Aucune prise ni touche.", " No socket or key."), 3f, SmallCost);
                 var size = new Vector3(0.56f, 0.06f, 0.38f);
                 Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, size.y * 0.5f, 0f), size);
                 var frame = new MeshBuilder { Panel = GameSkin.PlainPanel };

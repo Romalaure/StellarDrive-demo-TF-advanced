@@ -29,8 +29,8 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private static void ConfigureCollector(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Collecteur de matière noire",
-                $"Une antenne de météorite qui capte la matière noire du vide et la condense dans la conduite branchée sur sa prise de fluide (vide ou déjà de matière noire) : {PowerCatalog.DarkCollectorPerSecond.Value:0.###} unité/s, cinq fois plus près d'un trou noir, trois fois plus dans la galaxie d'Érèbe. Consomme {PowerCatalog.DarkCollectorWatts.Value:0} W. Sa prise signal donne sa production en dix-millièmes d'unité/s.",
+            PartFactory.Describe(settings, Loc.Pick("Collecteur de matière noire", "Dark matter collector"),
+                Loc.Pick($"Une antenne de météorite qui capte la matière noire du vide et la condense dans la conduite branchée sur sa prise de fluide (vide ou déjà de matière noire) : {PowerCatalog.DarkCollectorPerSecond.Value:0.###} unité/s, cinq fois plus près d'un trou noir, trois fois plus dans la galaxie d'Érèbe. Consomme {PowerCatalog.DarkCollectorWatts.Value:0} W. Sa prise signal donne sa production en dix-millièmes d'unité/s.", $"A meteorite antenna that catches dark matter out of the void and condenses it into the line on its fluid socket (empty or already dark matter): {PowerCatalog.DarkCollectorPerSecond.Value:0.###} unit/s, five times more near a black hole, three times more in the Erebos galaxy. Uses {PowerCatalog.DarkCollectorWatts.Value:0} W. Its signal socket gives its output in ten-thousandths of a unit/s."),
                 150f, new[] { (ModItems.Meteorite, 8), (ModItems.QuantumCore, 1), (ModItems.Titanium, 6), (Copper, 10) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             const float width = 1f, height = 0.6f, depth = 1f;
@@ -63,16 +63,16 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private static void ConfigureTank(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Réservoir de matière noire",
-                "Le réservoir de fluide du jeu, blindé de météorite pour garder la matière noire (il prend aussi les autres fluides). Branchement et prise signal comme le réservoir du jeu.",
+            PartFactory.Describe(settings, Loc.Pick("Réservoir de matière noire", "Dark matter tank"),
+                Loc.Pick("Le réservoir de fluide du jeu, blindé de météorite pour garder la matière noire (il prend aussi les autres fluides). Branchement et prise signal comme le réservoir du jeu.", "The game's fluid tank, armoured with meteorite to hold dark matter (it takes the other fluids too). Wiring and signal socket as the game's tank."),
                 30f, new[] { (ModItems.Meteorite, 2), (ModItems.Titanium, 4), (Glass, 4) });
             Recolor(prefab, new Color(0.45f, 0.38f, 0.6f), new Color(0.08f, 0.02f, 0.14f));
         }
 
         private static void ConfigureInfiniteTank(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Réservoir de matière noire infini",
-                "Un réservoir de fluide toujours plein de matière noire : ce que les conduites y puisent se recrée aussitôt, et son contenu ne pèse rien. Pour alimenter sans fin un réacteur à matière noire ou un générateur de portail. Branchement et prise signal comme le réservoir du jeu.",
+            PartFactory.Describe(settings, Loc.Pick("Réservoir de matière noire infini", "Infinite dark matter tank"),
+                Loc.Pick("Un réservoir de fluide toujours plein de matière noire : ce que les conduites y puisent se recrée aussitôt, et son contenu ne pèse rien. Pour alimenter sans fin un réacteur à matière noire ou un générateur de portail. Branchement et prise signal comme le réservoir du jeu.", "A fluid tank always full of dark matter: whatever the lines draw from it is made again at once, and its contents weigh nothing. To feed a dark matter reactor or a portal generator without end. Wiring and signal socket as the game's tank."),
                 30f, new[] { (ModItems.Meteorite, 20), (ModItems.QuantumCore, 2), (ModItems.ExoticMatter, 2), (ModItems.Titanium, 8) });
             // Darker shell, a stronger violet glow than the plain dark matter tank
             Recolor(prefab, new Color(0.3f, 0.22f, 0.45f), new Color(0.35f, 0.08f, 0.6f));
@@ -80,8 +80,8 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private static void ConfigureReactor(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Réacteur à matière noire",
-                $"Brûle {PowerCatalog.DarkReactorBurnPerSecond.Value:0.###} unité/s de matière noire prise sur sa prise de fluide et donne {PowerCatalog.DarkReactorWatts.Value:0} W aux réseaux branchés sur ses deux prises électriques (partagés s'il y en a deux). Sa prise signal vaut 100 quand il tourne, 0 à sec.",
+            PartFactory.Describe(settings, Loc.Pick("Réacteur à matière noire", "Dark matter reactor"),
+                Loc.Pick($"Brûle {PowerCatalog.DarkReactorBurnPerSecond.Value:0.###} unité/s de matière noire prise sur sa prise de fluide et donne {PowerCatalog.DarkReactorWatts.Value:0} W aux réseaux branchés sur ses deux prises électriques (partagés s'il y en a deux). Sa prise signal vaut 100 quand il tourne, 0 à sec.", $"Burns {PowerCatalog.DarkReactorBurnPerSecond.Value:0.###} unit/s of dark matter from its fluid socket and gives {PowerCatalog.DarkReactorWatts.Value:0} W to the networks on its two power sockets (shared if there are two). Its signal socket reads 100 while it runs, 0 when dry."),
                 260f, new[] { (ModItems.Meteorite, 12), (ModItems.QuantumCore, 2), (ModItems.NexoranAlloy, 6), (ModItems.Titanium, 10) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             const float width = 1.2f, height = 1.1f, depth = 1.2f;
@@ -116,8 +116,8 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private static void ConfigurePortal(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, "Générateur de portail",
-                $"Ouvre un portail droit devant lui, à {PowerCatalog.PortalDistance.Value:0} m : le vaisseau qui le traverse ressort à côté de la cible choisie sur son ordinateur de visée ou sa carte stellaire (au-dessus d'une planète, ou près d'une balise). Un signal > 0 sur la prise de commande le lance : il charge {PowerCatalog.PortalChargeSeconds.Value:0} s à {PowerCatalog.PortalWatts.Value:0} W, brûle {PowerCatalog.PortalDarkMatter.Value:0} unités de matière noire (prise de fluide) et le portail reste ouvert {PowerCatalog.PortalOpenSeconds.Value:0} s, puis {PowerCatalog.PortalCooldownSeconds.Value:0} s de recharge. Prise d'état : 0 prêt, 1-99 charge %, 100 ouvert, -1 pas de cible, -2 pas assez de matière noire, -3 pas de courant, -10 et moins : secondes de recharge.",
+            PartFactory.Describe(settings, Loc.Pick("Générateur de portail", "Portal generator"),
+                Loc.Pick($"Ouvre un portail droit devant lui, à {PowerCatalog.PortalDistance.Value:0} m : le vaisseau qui le traverse ressort à côté de la cible choisie sur son ordinateur de visée ou sa carte stellaire (au-dessus d'une planète, ou près d'une balise). Un signal > 0 sur la prise de commande le lance : il charge {PowerCatalog.PortalChargeSeconds.Value:0} s à {PowerCatalog.PortalWatts.Value:0} W, brûle {PowerCatalog.PortalDarkMatter.Value:0} unités de matière noire (prise de fluide) et le portail reste ouvert {PowerCatalog.PortalOpenSeconds.Value:0} s, puis {PowerCatalog.PortalCooldownSeconds.Value:0} s de recharge. Prise d'état : 0 prêt, 1-99 charge %, 100 ouvert, -1 pas de cible, -2 pas assez de matière noire, -3 pas de courant, -10 et moins : secondes de recharge.", $"Opens a portal straight ahead, {PowerCatalog.PortalDistance.Value:0} m away: the ship that goes through comes out beside the target picked on its targeting computer or star map (above a planet, or near a beacon). A signal > 0 on the control socket starts it: it charges {PowerCatalog.PortalChargeSeconds.Value:0} s at {PowerCatalog.PortalWatts.Value:0} W, burns {PowerCatalog.PortalDarkMatter.Value:0} units of dark matter (fluid socket) and the portal stays open {PowerCatalog.PortalOpenSeconds.Value:0} s, then {PowerCatalog.PortalCooldownSeconds.Value:0} s to recharge. Status socket: 0 ready, 1-99 charge %, 100 open, -1 no target, -2 not enough dark matter, -3 no power, -10 and below: seconds of recharge."),
                 400f, new[] { (ModItems.Meteorite, 25), (ModItems.QuantumCore, 3), (ModItems.ExoticMatter, 5), (ModItems.Artifact, 3), (ModItems.NexoranAlloy, 10) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             const float width = 1.6f, height = 0.4f, depth = 0.9f;

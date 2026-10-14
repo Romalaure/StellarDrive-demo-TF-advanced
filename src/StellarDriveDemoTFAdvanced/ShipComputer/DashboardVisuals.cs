@@ -123,7 +123,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             ApplyColors();
             TelemetrySnapshot snap = reading.Snapshot;
             string ship = snap.HasShip ? $"  <color={ComputerStyle.Hex(ComputerStyle.TextDim)}>#{snap.ShipId} · {snap.ShipSource}</color>" : "";
-            _header.text = "<b>ORDINATEUR DE BORD</b>" + ship + AlertBadge(reading);
+            _header.text = Loc.Pick("<b>ORDINATEUR DE BORD</b>", "<b>SHIP COMPUTER</b>") + ship + AlertBadge(reading);
             for (int i = 0; i < _panels.Length; i++)
             {
                 string title = $"<color={ComputerStyle.Hex(ComputerStyle.Line)}><b>{SectionTitle(_sections[i])}</b></color>\n";
@@ -137,10 +137,10 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                 return;
             _showingIdle = true;
             ApplyColors();
-            _header.text = "<b>ORDINATEUR DE BORD</b>";
+            _header.text = Loc.Pick("<b>ORDINATEUR DE BORD</b>", "<b>SHIP COMPUTER</b>");
             string dim = ComputerStyle.Hex(ComputerStyle.TextDim);
             for (int i = 0; i < _panels.Length; i++)
-                _panels[i].text = $"<color={ComputerStyle.Hex(ComputerStyle.Line)}><b>{SectionTitle(_sections[i])}</b></color>\n<color={dim}>en attente du vaisseau</color>";
+                _panels[i].text = $"<color={ComputerStyle.Hex(ComputerStyle.Line)}><b>{SectionTitle(_sections[i])}</b></color>\n<color={dim}>{Loc.Pick("en attente du vaisseau", "waiting for the ship")}</color>";
         }
 
         // Shown in the header, so alerts are seen even on a screen without the DIAGNOSTICS section
@@ -155,9 +155,9 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                     warnings++;
             }
             if (errors > 0)
-                return $"   <color={ComputerStyle.Hex(ComputerStyle.Error)}>● {errors} erreur(s)</color>";
+                return $"   <color={ComputerStyle.Hex(ComputerStyle.Error)}>● {errors} {Loc.Pick("erreur(s)", "error(s)")}</color>";
             if (warnings > 0)
-                return $"   <color={ComputerStyle.Hex(ComputerStyle.Warning)}>● {warnings} alerte(s)</color>";
+                return $"   <color={ComputerStyle.Hex(ComputerStyle.Warning)}>● {warnings} {Loc.Pick("alerte(s)", "warning(s)")}</color>";
             return "";
         }
 

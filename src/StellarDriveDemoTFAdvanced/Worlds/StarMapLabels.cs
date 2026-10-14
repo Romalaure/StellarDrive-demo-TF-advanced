@@ -58,7 +58,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 PlanetSpec spec = PlanetCatalog.All.FirstOrDefault(p => p.Id == hologram.Id);
                 if (spec != null)
                     Tint(hologram.HologramObject, spec.MapColor);
-                string name = hologram.Id == PlanetFactory.TemplateId ? hologram.Planet.Name + " (départ)" : hologram.Planet.Name;
+                string name = hologram.Id == PlanetFactory.TemplateId ? hologram.Planet.Name + Loc.Pick(" (départ)", " (start)") : hologram.Planet.Name;
                 GameObject label = Label(map.transform, layer, name, hologram.Position + Vector3.up * (hologram.Radius + 0.025f), spec != null ? Color.Lerp(spec.MapColor, Color.white, 0.4f) : Color.white);
                 // The planet, the orbit drawn right after it, and its label belong to its star system
                 bool erebos = spec != null && spec.System == PlanetWiki.Erebos;

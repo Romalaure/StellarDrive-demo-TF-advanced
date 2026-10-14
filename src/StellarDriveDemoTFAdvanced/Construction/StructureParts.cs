@@ -32,37 +32,37 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         private static readonly Spec[] All =
         {
-            Beam(7331, "Poutre 1 m", 1f, 6f, 1),
-            Beam(7332, "Poutre 2 m", 2f, 12f, 2),
-            Beam(7333, "Poutre 4 m", 4f, 24f, 4),
+            Beam(7331, Loc.Pick("Poutre 1 m", "Beam 1 m"), 1f, 6f, 1),
+            Beam(7332, Loc.Pick("Poutre 2 m", "Beam 2 m"), 2f, 12f, 2),
+            Beam(7333, Loc.Pick("Poutre 4 m", "Beam 4 m"), 4f, 24f, 4),
             new Spec
             {
-                Id = 7334, Label = "Poutre renforcée 2 m", Mass = 20f, Iron = 3, Size = new Vector3(0.2f, 2f, 0.2f),
-                Description = "Profilé en I de 2 m, plus large et plus lourd, pour les ossatures porteuses. Sort perpendiculairement à la surface où on la pose.",
+                Id = 7334, Label = Loc.Pick("Poutre renforcée 2 m", "Reinforced beam 2 m"), Mass = 20f, Iron = 3, Size = new Vector3(0.2f, 2f, 0.2f),
+                Description = Loc.Pick("Profilé en I de 2 m, plus large et plus lourd, pour les ossatures porteuses. Sort perpendiculairement à la surface où on la pose.", "2 m I-beam, wider and heavier, for load-bearing frames. Stands out perpendicular to the surface it is placed on."),
                 Build = m => IBeam(m, 2f)
             },
             new Spec
             {
-                Id = 7335, Label = "Plaque 1 × 1", Mass = 10f, Iron = 2, Size = new Vector3(1f, 0.05f, 1f),
-                Description = "Plaque d'acier boulonnée de 1 × 1 m pour planchers, cloisons et ailes. Se pose à plat sur toute surface.",
+                Id = 7335, Label = Loc.Pick("Plaque 1 × 1", "Plate 1 × 1"), Mass = 10f, Iron = 2, Size = new Vector3(1f, 0.05f, 1f),
+                Description = Loc.Pick("Plaque d'acier boulonnée de 1 × 1 m pour planchers, cloisons et ailes. Se pose à plat sur toute surface.", "Bolted 1 × 1 m steel plate for floors, walls and wings. Lies flat on any surface."),
                 Build = m => Plate(m, 1f, 1f)
             },
             new Spec
             {
-                Id = 7336, Label = "Plaque 2 × 1", Mass = 20f, Iron = 4, Size = new Vector3(2f, 0.05f, 1f),
-                Description = "Plaque d'acier boulonnée de 2 × 1 m. Se pose à plat sur toute surface.",
+                Id = 7336, Label = Loc.Pick("Plaque 2 × 1", "Plate 2 × 1"), Mass = 20f, Iron = 4, Size = new Vector3(2f, 0.05f, 1f),
+                Description = Loc.Pick("Plaque d'acier boulonnée de 2 × 1 m. Se pose à plat sur toute surface.", "Bolted 2 × 1 m steel plate. Lies flat on any surface."),
                 Build = m => Plate(m, 2f, 1f)
             },
             new Spec
             {
-                Id = 7337, Label = "Cadre 1 × 1", Mass = 6f, Iron = 2, Size = new Vector3(1f, 0.06f, 1f),
-                Description = "Cadre carré ouvert de 1 × 1 m pour les ossatures. Le vide est visuel : la collision du jeu reste une boîte pleine.",
+                Id = 7337, Label = Loc.Pick("Cadre 1 × 1", "Frame 1 × 1"), Mass = 6f, Iron = 2, Size = new Vector3(1f, 0.06f, 1f),
+                Description = Loc.Pick("Cadre carré ouvert de 1 × 1 m pour les ossatures. Le vide est visuel : la collision du jeu reste une boîte pleine.", "Open 1 × 1 m square frame for structures. The gap is only visual: the game's collision stays a solid box."),
                 Build = m => Frame(m, 1f, 0.08f, 0.06f)
             },
             new Spec
             {
-                Id = 7338, Label = "Jonction", Mass = 3f, Iron = 1, Size = new Vector3(0.36f, 0.3f, 0.36f),
-                Description = "Nœud d'assemblage à cinq départs pour raccorder des poutres.",
+                Id = 7338, Label = Loc.Pick("Jonction", "Junction"), Mass = 3f, Iron = 1, Size = new Vector3(0.36f, 0.3f, 0.36f),
+                Description = Loc.Pick("Nœud d'assemblage à cinq départs pour raccorder des poutres.", "Five-way node to join beams."),
                 Build = Junction
             }
         };
@@ -97,7 +97,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             return new Spec
             {
                 Id = id, Label = label, Mass = mass, Iron = iron, Size = new Vector3(0.14f, length, 0.14f),
-                Description = $"Poutre-caisson de {length:0} m (12 cm de section) avec platines aux deux bouts. Sort perpendiculairement à la surface où on la pose : verticale au sol, horizontale sur un mur.",
+                Description = Loc.Pick($"Poutre-caisson de {length:0} m (12 cm de section) avec platines aux deux bouts. Sort perpendiculairement à la surface où on la pose : verticale au sol, horizontale sur un mur.", $"{length:0} m box beam (12 cm section) with end plates at both ends. Stands out perpendicular to the surface it is placed on: upright on the ground, level on a wall."),
                 Build = m => SquareBeam(m, length)
             };
         }
