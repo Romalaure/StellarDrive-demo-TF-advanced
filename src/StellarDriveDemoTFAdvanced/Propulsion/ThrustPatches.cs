@@ -97,8 +97,9 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                     float target = fed;
                     var command = new Ships.Interface.Model.Parts.Common.EntityPartSocket(____ship.Id, part.Id, EngineCatalog.CommandSocket);
                     bool groups = FluidGroups.TryGet(__instance, part.Id, out FluidGroupServerState ga, out FluidGroupServerState gb);
-                    if (spec.Fuel != 0 && ____connections != null && ____connections.TryGetSocketCable(command, Ships.Interface.Model.Parts.CableType.Signal, out _))
-                        target = Mathf.Min(fed, Mathf.Clamp01((float)____connections.GetSignalValue(command)));
+                    // (a cable, or a part plugged straight into the socket like a small transmitter)
+                    if (spec.Fuel != 0 && ____connections != null && ____connections.TryGetSignalConnectionGroupWithSocket(command, out Ships.Cables.Model.ConnectionGroup commandGroup))
+                        target = Mathf.Min(fed, Mathf.Clamp01((float)System.Math.Max(____connections.GetSignalValue(command), Channels.Relayed(____ship, ____connections, commandGroup))));
                     else if (spec.Fuel != 0 && Settings.EngineSeatControl.Value && !(groups && ValveLines.Feeds(____ship, ____connections, ga, gb)))
                         target = Mathf.Min(fed, PilotControl.Command(____ship, ThrustMath.Direction(part)));
                     float level = spec.SpoolSeconds > 0f && target > previous ? Mathf.MoveTowards(previous, target, deltaTime / spec.SpoolSeconds) : target;
@@ -295,10 +296,55 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
         }
     }
 
-    /// <summary>The lines on the far side of the ship's valves and pumps: a line there is fed only when they let fluid through.</summary>
+    /// <summary>
+    /// The game links small transmitters of one channel only within a ship: a transmitter on an
+    /// engine pod (a ship of its own on a rotor) never hears the main ship's. For an engine's
+    /// command line, a transmitter on it also hears its channel on every ship of the assembly.
+    /// </summary>
+    internal static class Channels
+    {
+        private static IShipsServerProvider _ships;
+
+        public static double Relayed(IShipStateWrite ship, Ships.Cables.ConnectionsServerTracker connections, Ships.Cables.Model.ConnectionGroup commandGroup)
+        {
+            double best = 0;
+            foreach (StatefulPart part in ship.GetAllStatefulParts<SignalTransmitterState>())
+            {
+                var state = (SignalTransmitterState)part.State;
+                if (string.IsNullOrEmpty(state.Channel)
+                    || !connections.TryGetSignalConnectionGroupWithSocket(new Ships.Interface.Model.Parts.Common.EntityPartSocket(ship.Id, part.Id, 0), out Ships.Cables.Model.ConnectionGroup group)
+                    || group.Id != commandGroup.Id)
+                    continue;
+                if (_ships == null)
+                    _ships = ServiceLocator.GetService<IShipsServerProvider>();
+                var assembly = _ships?.GetRootConnectedShips(ship.Id);
+                if (assembly == null)
+                    continue;
+                foreach (RootRelativeShipData data in assembly)
+                {
+                    if (data.Ship == null || data.Ship.Id == ship.Id)
+                        continue;
+                    foreach (StatefulPart other in data.Ship.GetAllStatefulParts<SignalTransmitterState>())
+                    {
+                        var sender = (SignalTransmitterState)other.State;
+                        if (sender.Channel == state.Channel && System.Math.Abs(sender.SignalValue) > System.Math.Abs(best))
+                            best = sender.SignalValue;
+                    }
+                }
+            }
+            return best;
+        }
+    }
+
+    /// <summary>
+    /// Lines fed only through a valve or a pump: no tank on the line itself, but a valve or a pump
+    /// on it. An engine on such a line gets fuel only when the valve lets it through.
+    /// </summary>
     internal static class ValveLines
     {
-        private static readonly System.Collections.Generic.HashSet<FluidGroupServerState> Groups = new System.Collections.Generic.HashSet<FluidGroupServerState>();
+        private static readonly System.Collections.Generic.HashSet<FluidGroupServerState> Valved = new System.Collections.Generic.HashSet<FluidGroupServerState>();
+        private static readonly System.Collections.Generic.HashSet<FluidGroupServerState> Tanked = new System.Collections.Generic.HashSet<FluidGroupServerState>();
+        private static IShipsServerProvider _ships;
         private static uint _cachedShip;
         private static int _cachedFrame = -1;
 
@@ -308,25 +354,47 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             {
                 _cachedShip = ship.Id;
                 _cachedFrame = Time.frameCount;
-                Groups.Clear();
+                Valved.Clear();
+                Tanked.Clear();
                 if (connections != null)
                 {
-                    Collect<FluidValveState>(ship, connections);
-                    Collect<FluidPumpState>(ship, connections);
+                    if (_ships == null)
+                        _ships = ServiceLocator.GetService<IShipsServerProvider>();
+                    var assembly = _ships?.GetRootConnectedShips(ship.Id);
+                    if (assembly == null || assembly.Count == 0)
+                        Collect(ship, connections);
+                    else
+                    {
+                        foreach (RootRelativeShipData data in assembly)
+                        {
+                            if (data.Ship != null)
+                                Collect(data.Ship, connections);
+                        }
+                    }
                 }
             }
-            return Groups.Contains(a) || Groups.Contains(b);
+            return Only(a) || Only(b);
         }
 
-        // Valves and pumps join two lines on their sockets 2 and 3
-        private static void Collect<T>(IShipStateWrite ship, Ships.Cables.ConnectionsServerTracker connections) where T : Ships.Interface.Model.Parts.StateTypes.IStatefulPartState
+        private static bool Only(FluidGroupServerState group) => group != null && Valved.Contains(group) && !Tanked.Contains(group);
+
+        private static void Collect(IShipStateRead ship, Ships.Cables.ConnectionsServerTracker connections)
+        {
+            // Valves and pumps join two lines on their sockets 2 and 3; tanks sit on a line by sockets 0 and 1
+            Add<FluidValveState>(ship, connections, Valved, 2, 3);
+            Add<FluidPumpState>(ship, connections, Valved, 2, 3);
+            Add<FluidTankState>(ship, connections, Tanked, 0, 1);
+        }
+
+        private static void Add<T>(IShipStateRead ship, Ships.Cables.ConnectionsServerTracker connections, System.Collections.Generic.HashSet<FluidGroupServerState> into, byte first, byte last)
+            where T : Ships.Interface.Model.Parts.StateTypes.IStatefulPartState
         {
             foreach (StatefulPart part in ship.GetAllStatefulParts<T>())
             {
-                for (byte socket = 2; socket <= 3; socket++)
+                for (byte socket = first; socket <= last; socket++)
                 {
                     if (connections.TryGetFluidGroupCacheFromSocket(new Ships.Interface.Model.Parts.Common.EntityPartSocket(ship.Id, part.Id, socket), out FluidGroupServerState group))
-                        Groups.Add(group);
+                        into.Add(group);
                 }
             }
         }
