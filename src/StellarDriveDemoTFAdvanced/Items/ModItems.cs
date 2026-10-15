@@ -267,16 +267,56 @@ namespace StellarDriveDemoTFAdvanced.Items
     [HarmonyPatch(typeof(ItemSettingsList), nameof(ItemSettingsList.GetItemSettingsById))]
     internal static class ModItemsListPatch
     {
-        private static void Prefix(ItemSettingsList __instance)
+        private static readonly AccessTools.FieldRef<ItemSettingsList, Dictionary<uint, ItemSettings>> Dict =
+            AccessTools.FieldRefAccess<ItemSettingsList, Dictionary<uint, ItemSettings>>("_dict");
+
+        private static readonly System.Reflection.MethodInfo ResetDict = AccessTools.Method(typeof(ItemSettingsList), "ResetDict");
+
+        private static void Prefix(ItemSettingsList __instance, uint id)
         {
             try
             {
                 ModItems.Merge(__instance);
+                Dictionary<uint, ItemSettings> dict = Dict(__instance);
+                if (dict == null)
+                {
+                    // (the game builds it on its first lookup, after this prefix)
+                    ResetDict?.Invoke(__instance, null);
+                    dict = Dict(__instance);
+                }
+                if (dict != null && !dict.ContainsKey(id))
+                    MissingItems.Stand(__instance, dict, id);
             }
             catch (Exception e)
             {
                 ErrorLog.Report("items", e);
             }
+        }
+    }
+
+    /// <summary>
+    /// An item of a mod that was removed (say the TF mod's schematic tablet, 7201) left in an
+    /// inventory or a chest: the game throws at every lookup of an unknown id, and the inventory
+    /// mass is looked up at every physics step, so the world froze. Such an id gets a stand-in
+    /// (a copy of the game's iron, weightless, named after it) in the lookup only: the item stays
+    /// in the save as it was and comes back as itself when its mod is installed again.
+    /// </summary>
+    internal static class MissingItems
+    {
+        private const uint Template = 101;
+
+        public static void Stand(ItemSettingsList list, Dictionary<uint, ItemSettings> dict, uint id)
+        {
+            if (!dict.TryGetValue(Template, out ItemSettings template) || template == null)
+                return;
+            ItemSettings stand = UnityEngine.Object.Instantiate(template);
+            stand.name = "TFA_MissingItem_" + id;
+            stand.hideFlags = HideFlags.DontUnloadUnusedAsset;
+            stand.id = id;
+            stand.itemName = Loc.Pick($"Objet inconnu {id} (mod retiré)", $"Unknown item {id} (removed mod)");
+            stand.mass = 0f;
+            dict[id] = stand;
+            AdvancedMod.Log.Warning($"item {id} belongs to no installed mod (a removed mod's item in an inventory or a chest): a weightless stand-in keeps the game running");
         }
     }
 }
