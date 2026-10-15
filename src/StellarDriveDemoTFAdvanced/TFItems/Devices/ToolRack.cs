@@ -45,8 +45,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
         private static void Configure(PartSettings settings, GameObject prefab)
         {
-            Transform visuals = DeviceModels.Build(settings, prefab, "Râtelier à outils",
-                StellarDriveDemoTFAdvanced.Common.Loc.Pick("Panneau à fixer au mur : regarde-le et appuie sur la touche d'utilisation (T) pour reprendre un outil de base perdu (et, avec le mod TF, un pistolet à peinture ou une tablette schématique).", "Wall panel: look at it and press the use key (T) to take back a lost base tool (and, with the TF mod, a paint gun or a schematic tablet)."),
+            Transform visuals = DeviceModels.Build(settings, prefab, Loc.Pick("Râtelier à outils", "Tool rack", "Soporte de herramientas"),
+                Loc.Pick("Panneau à fixer au mur : regarde-le et appuie sur la touche d'utilisation (T) pour reprendre un outil de base perdu (et, avec le mod TF, un pistolet à peinture ou une tablette schématique).", "Wall panel: look at it and press the use key (T) to take back a lost base tool (and, with the TF mod, a paint gun or a schematic tablet).", "Panel de pared: míralo y pulsa la tecla de uso (T) para recuperar una herramienta básica perdida (y, con el mod TF, una pistola de pintura o una tableta esquemática)."),
                 4f, new[] { (101u, 2), (110u, 2) }, BoundsCenter, BoundsSize, Shapes(), Materials());
             UsablePart.AddBox(visuals, BoundsCenter, BoundsSize + new Vector3(0f, 0.2f, 0f));
             visuals.gameObject.AddComponent<ToolRackVisuals>();
@@ -242,7 +242,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
     internal sealed class ToolRackVisuals : UsablePart
     {
-        public override string Label => Loc.Pick("Râtelier à outils", "Tool rack");
+        public override string Label => Loc.Pick(Loc.Pick("Râtelier à outils", "Tool rack", "Soporte de herramientas"), "Tool rack", "Soporte de herramientas");
 
         public override void Use() => ToolRackMenu.Show();
     }
@@ -264,26 +264,26 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             float scale = Mathf.Clamp(Screen.height / 1080f, 0.7f, 2.5f);
             Matrix4x4 previous = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
-            Rect area = DeviceUi.Window(Screen.width / scale, Screen.height / scale, 480f, 520f, Loc.Pick("RÂTELIER À OUTILS", "TOOL RACK"));
+            Rect area = DeviceUi.Window(Screen.width / scale, Screen.height / scale, 480f, 520f, Loc.Pick("RÂTELIER À OUTILS", "TOOL RACK", "SOPORTE DE HERRAMIENTAS"));
             GUILayout.BeginArea(area);
-            GUILayout.Label(Loc.Pick("Prends un outil : il va dans ton inventaire (un de chaque par joueur).", "Take a tool: it goes to your inventory (one of each per player)."), DeviceUi.Text);
+            GUILayout.Label(Loc.Pick("Prends un outil : il va dans ton inventaire (un de chaque par joueur).", "Take a tool: it goes to your inventory (one of each per player).", "Coge una herramienta: va a tu inventario (una de cada por jugador)."), DeviceUi.Text);
             GUILayout.Space(10f);
             if (TfTools.Available)
             {
-                if (GUILayout.Button(Loc.Pick("Pistolet à peinture  (mod TF)", "Paint gun  (TF mod)"), DeviceUi.Button, GUILayout.Height(44f)))
+                if (GUILayout.Button(Loc.Pick("Pistolet à peinture  (mod TF)", "Paint gun  (TF mod)", "Pistola de pintura  (mod TF)"), DeviceUi.Button, GUILayout.Height(44f)))
                 {
                     TfTools.PaintGun();
                     ModMenu.Close();
                 }
                 GUILayout.Space(6f);
-                if (TfTools.HasTablet && GUILayout.Button(Loc.Pick("Tablette schématique  (mod TF)", "Schematic tablet  (TF mod)"), DeviceUi.Button, GUILayout.Height(44f)))
+                if (TfTools.HasTablet && GUILayout.Button(Loc.Pick("Tablette schématique  (mod TF)", "Schematic tablet  (TF mod)", "Tableta esquemática  (mod TF)"), DeviceUi.Button, GUILayout.Height(44f)))
                 {
                     TfTools.Tablet();
                     ModMenu.Close();
                 }
                 GUILayout.Space(12f);
             }
-            GUILayout.Label(Loc.Pick("Outils de base (si tu les as perdus) :", "Base tools (if you lost them):"), DeviceUi.Text);
+            GUILayout.Label(Loc.Pick("Outils de base (si tu les as perdus) :", "Base tools (if you lost them):", "Herramientas básicas (si las perdiste):"), DeviceUi.Text);
             GUILayout.Space(4f);
             foreach (uint tool in ToolRack.BaseTools)
             {
@@ -295,7 +295,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 GUILayout.Space(4f);
             }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button(Loc.Pick("Fermer (Échap)", "Close (Esc)"), DeviceUi.Button, GUILayout.Height(34f)))
+            if (GUILayout.Button(Loc.Pick("Fermer (Échap)", "Close (Esc)", "Cerrar (Esc)"), DeviceUi.Button, GUILayout.Height(34f)))
                 ModMenu.Close();
             GUILayout.EndArea();
             GUI.matrix = previous;
@@ -310,7 +310,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             {
                 name = Resources.FindObjectsOfTypeAll<ItemSettings>().FirstOrDefault(i => i != null && i.id == itemId)?.itemName;
                 if (string.IsNullOrEmpty(name))
-                    return Loc.Pick("Outil ", "Tool ") + itemId;
+                    return Loc.Pick("Outil ", "Tool ", "Herramienta ") + itemId;
                 Names[itemId] = name;
             }
             return name;

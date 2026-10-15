@@ -11,6 +11,7 @@ using Ships.Interface.Services;
 using Ships.Interface.Settings;
 using StellarDriveDemoTFAdvanced.TFItems.Common;
 using UnityEngine;
+using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
 
 namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 {
@@ -58,7 +59,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         private static void Configure(PartSettings settings, GameObject prefab)
         {
             Transform visuals = DeviceModels.Build(settings, prefab, "Radio",
-                "Radio rétro : regarde-la et appuie sur la touche d'utilisation (T) pour écouter les musiques du jeu ou coller un lien YouTube. Tous les joueurs proches l'entendent.",
+                Loc.Pick("Radio rétro : regarde-la et appuie sur la touche d'utilisation (T) pour écouter les musiques du jeu ou coller un lien YouTube. Tous les joueurs proches l'entendent.", "Retro radio: look at it and press the use key (T) to play the game's music or paste a YouTube link. Every nearby player hears it.", "Radio retro: mírala y pulsa la tecla de uso (T) para escuchar la música del juego o pegar un enlace de YouTube. Todos los jugadores cercanos la oyen."),
                 3f, new[] { (110u, 3), (112u, 2), (102u, 1) }, BoundsCenter, BoundsSize, Shapes(), Materials());
             UsablePart.AddBox(visuals, BoundsCenter, BoundsSize + Vector3.one * 0.06f);
             visuals.gameObject.AddComponent<RadioVisuals>();
@@ -241,23 +242,23 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             Rect area = DeviceUi.Window(width, height, 600f, 640f, "RADIO");
             GUILayout.BeginArea(area);
 
-            GUILayout.Label("En cours : " + Describe(state), DeviceUi.Text);
+            GUILayout.Label(Loc.Pick("En cours : ", "Now playing: ", "Sonando: ") + Describe(state), DeviceUi.Text);
             string status = RadioSound.Status(_radio);
             if (!string.IsNullOrEmpty(status))
                 GUILayout.Label(status, DeviceUi.Muted);
             GUILayout.Space(10f);
 
-            GUILayout.Label("LIEN YOUTUBE", DeviceUi.Muted);
+            GUILayout.Label(Loc.Pick("LIEN YOUTUBE", "YOUTUBE LINK", "ENLACE DE YOUTUBE"), DeviceUi.Muted);
             GUILayout.BeginHorizontal();
             _link = GUILayout.TextField(_link ?? "", 300, DeviceUi.Field, GUILayout.Height(34f), GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("Coller", DeviceUi.Button, GUILayout.Width(80f), GUILayout.Height(34f)))
+            if (GUILayout.Button(Loc.Pick("Coller", "Paste", "Pegar"), DeviceUi.Button, GUILayout.Width(80f), GUILayout.Height(34f)))
                 _link = GUIUtility.systemCopyBuffer ?? "";
-            if (GUILayout.Button("Lire", DeviceUi.Button, GUILayout.Width(70f), GUILayout.Height(34f)))
+            if (GUILayout.Button(Loc.Pick("Lire", "Play", "Reproducir"), DeviceUi.Button, GUILayout.Width(70f), GUILayout.Height(34f)))
             {
                 string id = YouTubeAudio.VideoId(_link);
                 if (id == null)
                 {
-                    _error = "Ce n'est pas un lien YouTube (youtube.com/watch?v=..., youtu.be/..., shorts/...).";
+                    _error = Loc.Pick("Ce n'est pas un lien YouTube (youtube.com/watch?v=..., youtu.be/..., shorts/...).", "This is not a YouTube link (youtube.com/watch?v=..., youtu.be/..., shorts/...).", "No es un enlace de YouTube (youtube.com/watch?v=..., youtu.be/..., shorts/...).");
                 }
                 else
                 {
@@ -270,11 +271,11 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 GUILayout.Label(_error, DeviceUi.Muted);
             GUILayout.Space(10f);
 
-            GUILayout.Label("MUSIQUES DU JEU", DeviceUi.Muted);
+            GUILayout.Label(Loc.Pick("MUSIQUES DU JEU", "GAME MUSIC", "MÚSICA DEL JUEGO"), DeviceUi.Muted);
             List<string> tracks = Radio.GameTracks();
             _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.Height(220f));
             if (tracks.Count == 0)
-                GUILayout.Label("Aucune musique trouvée dans les banques de son du jeu.", DeviceUi.Muted);
+                GUILayout.Label(Loc.Pick("Aucune musique trouvée dans les banques de son du jeu.", "No music found in the game's sound banks.", "No se encontró música en los bancos de sonido del juego."), DeviceUi.Muted);
             foreach (string track in tracks)
             {
                 string value = "game|" + track;
@@ -295,9 +296,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             GUILayout.FlexibleSpace();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Éteindre", DeviceUi.Button, GUILayout.Height(34f)))
+            if (GUILayout.Button(Loc.Pick("Éteindre", "Turn off", "Apagar"), DeviceUi.Button, GUILayout.Height(34f)))
                 Radio.Request(_radio, "");
-            if (GUILayout.Button("Fermer (Échap)", DeviceUi.Button, GUILayout.Height(34f)))
+            if (GUILayout.Button(Loc.Pick("Fermer (Échap)", "Close (Esc)", "Cerrar (Esc)"), DeviceUi.Button, GUILayout.Height(34f)))
             {
                 MelonLoader.MelonPreferences.Save();
                 ModMenu.Close();
@@ -310,7 +311,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         public static string Describe(string state)
         {
             if (string.IsNullOrEmpty(state))
-                return "éteinte";
+                return Loc.Pick("éteinte", "off", "apagada");
             if (state.StartsWith("game|"))
                 return Radio.TrackName(state.Substring(5));
             if (state.StartsWith("yt|"))
@@ -349,8 +350,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             switch (playing.Job.Status)
             {
                 case YouTubeAudio.State.Working: return playing.Job.Step + "...";
-                case YouTubeAudio.State.Failed: return "Échec : " + playing.Job.Error;
-                default: return playing.HasChannel ? "Lecture (en boucle)" : null;
+                case YouTubeAudio.State.Failed: return Loc.Pick("Échec : ", "Failed: ", "Error: ") + playing.Job.Error;
+                default: return playing.HasChannel ? Loc.Pick("Lecture (en boucle)", "Playing (looped)", "Reproduciendo (en bucle)") : null;
             }
         }
 
@@ -442,7 +443,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             FMOD.RESULT result = core.createSound(playing.Job.WavPath, FMOD.MODE.CREATESTREAM | FMOD.MODE.LOOP_NORMAL | FMOD.MODE._2D, out FMOD.Sound sound);
             if (result != FMOD.RESULT.OK)
             {
-                playing.Job.Error = "le son n'a pas pu être ouvert (" + result + ")";
+                playing.Job.Error = Loc.Pick("le son n'a pas pu être ouvert (", "the sound could not be opened (", "no se pudo abrir el sonido (") + result + ")";
                 playing.Job.Status = YouTubeAudio.State.Failed;
                 return;
             }
@@ -451,7 +452,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             if (result != FMOD.RESULT.OK)
             {
                 sound.release();
-                playing.Job.Error = "le son n'a pas pu démarrer (" + result + ")";
+                playing.Job.Error = Loc.Pick("le son n'a pas pu démarrer (", "the sound could not start (", "no se pudo iniciar el sonido (") + result + ")";
                 playing.Job.Status = YouTubeAudio.State.Failed;
                 return;
             }

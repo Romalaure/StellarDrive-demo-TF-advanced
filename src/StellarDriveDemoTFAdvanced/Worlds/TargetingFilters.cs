@@ -25,7 +25,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
         private static readonly (Filter Filter, string Label)[] Filters =
         {
-            (Filter.All, Loc.Pick("Tout", "All")), (Filter.Planets, Loc.Pick("Planètes", "Planets")), (Filter.Stations, "Stations"), (Filter.Beacons, Loc.Pick("Balises", "Beacons"))
+            (Filter.All, Loc.Pick("Tout", "All", "Todo")), (Filter.Planets, Loc.Pick("Planètes", "Planets", "Planetas")), (Filter.Stations, "Stations"), (Filter.Beacons, Loc.Pick("Balises", "Beacons", "Balizas"))
         };
 
         private static readonly AccessTools.FieldRef<TargetingComputerCanvas, List<TargetingComputerButton>> Buttons =
@@ -117,7 +117,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             if (NameText(button) == null)
                 return;
             string shown = MapSystemFilter.ShowsErebos ? PlanetWiki.SystemName(PlanetWiki.Erebos) : "442 Otrera";
-            NameText(button).text = Loc.Pick("Galaxie : ", "Galaxy: ") + shown + (MapSystemFilter.View == null ? Loc.Pick(" (où est le vaisseau)", " (where the ship is)") : "") + "  »";
+            NameText(button).text = Loc.Pick("Galaxie : ", "Galaxy: ", "Galaxia: ") + shown + (MapSystemFilter.View == null ? Loc.Pick(" (où est le vaisseau)", " (where the ship is)", " (donde está la nave)") : "") + "  »";
         }
 
         private static void Apply(TargetingComputerCanvas canvas, List<(Filter Filter, TargetingComputerButton Button)> filterButtons)

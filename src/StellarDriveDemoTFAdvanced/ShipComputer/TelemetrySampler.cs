@@ -65,7 +65,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             ShipsClientTracker ships = GameServices.ShipsClient;
             if (ships == null || !ships.TryGetTrackedRootShip(rootId, out TrackedShipClient root) || root.IsShipDestroyed)
             {
-                snap.NoShipReason = Loc.Pick("Vaisseau introuvable.", "Ship not found.");
+                snap.NoShipReason = Loc.Pick("Vaisseau introuvable.", "Ship not found.", "Nave no encontrada.");
                 _lastTime = -1f;
                 return;
             }
@@ -74,7 +74,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             snap.ShipId = root.Id;
             CollectConnected(root);
             LocalPilotSeat(out uint shipId, out ushort? seatId);
-            snap.ShipSource = seatId.HasValue ? Loc.Pick("piloté", "piloted") : Loc.Pick("au repos", "idle");
+            snap.ShipSource = seatId.HasValue ? Loc.Pick("piloté", "piloted", "pilotada") : Loc.Pick("au repos", "idle", "en reposo");
             snap.PartCount = root.PartCount;
             snap.Mass = root.GetMassIncludingConnectedShips();
             snap.ConnectedShipCount = _connected.Count - 1;
@@ -147,7 +147,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
 
             if (!TryPlanetUp(space, physics.Position, out IPlanetProperties planet, out Vector3 up, out double distance, out bool nearest))
                 return;
-            snap.PlanetName = nearest ? planet.Name + Loc.Pick(" (la plus proche)", " (nearest)") : planet.Name;
+            snap.PlanetName = nearest ? planet.Name + Loc.Pick(" (la plus proche)", " (nearest)", " (la más cercana)") : planet.Name;
             snap.Altitude = (float)(distance - planet.Radius);
             if (surfaceVelocity.HasValue)
                 snap.VerticalSpeed = Vector3.Dot(surfaceVelocity.Value, up);
@@ -193,7 +193,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             {
                 if (seatId.HasValue && data.Ship.Id == shipId && data.Ship.TryGetStatefulPart(seatId.Value, out StatefulPart seat))
                 {
-                    label = Loc.Pick("siège utilisé", "seat in use");
+                    label = Loc.Pick("siège utilisé", "seat in use", "asiento ocupado");
                     return data.RotationRelativeToRoot * seat.LocalRotation;
                 }
             }
@@ -201,16 +201,16 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             {
                 foreach (StatefulPart seat in data.Ship.GetAllStatefulParts<PilotSeatState>())
                 {
-                    label = Loc.Pick("siège pilote", "pilot seat");
+                    label = Loc.Pick("siège pilote", "pilot seat", "asiento de piloto");
                     return data.RotationRelativeToRoot * seat.LocalRotation;
                 }
                 foreach (StatefulPart seat in data.Ship.GetAllStatefulParts<PilotSeatAdvState>())
                 {
-                    label = Loc.Pick("commandes avancées", "advanced controls");
+                    label = Loc.Pick("commandes avancées", "advanced controls", "controles avanzados");
                     return data.RotationRelativeToRoot * seat.LocalRotation;
                 }
             }
-            label = Loc.Pick("grille du vaisseau", "ship grid");
+            label = Loc.Pick("grille du vaisseau", "ship grid", "red de la nave");
             return Quaternion.identity;
         }
 
@@ -227,7 +227,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                     float strength = Mathf.Max(0f, ((ThrusterState)part.State).ThrusterStrength);
                     // Propulsion Pack engines are Chemical Thrusters for the game, with their own thrust and flow
                     float thrustScale = 1f, flowScale = 1f;
-                    string name = Loc.Pick("Chimique", "Chemical");
+                    string name = Loc.Pick("Chimique", "Chemical", "Químico");
                     if (Propulsion.EngineCatalog.TryGet(part.Settings.id, out Propulsion.EngineSpec engine))
                     {
                         thrustScale = engine.ThrustMultiplier;
@@ -262,7 +262,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                     AddThruster(snap, new ThrusterReading
                     {
                         Kind = ThrusterKind.Wood,
-                        Name = Loc.Pick("Bois", "Wood"),
+                        Name = Loc.Pick("Bois", "Wood", "Madera"),
                         ShipId = ship.Id,
                         PartId = part.Id,
                         Direction = data.RotationRelativeToRoot * -part.Placement.UpOrientation.GetVector3(),
@@ -355,7 +355,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                     var socket = new EntityPartSocket(ship.Id, part.Id, ElectrolyzerPowerSocket);
                     snap.Consumers.Add(new ConsumerReading
                     {
-                        Name = Loc.Pick("Électrolyseur", "Electrolyzer"),
+                        Name = Loc.Pick("Électrolyseur", "Electrolyzer", "Electrolizador"),
                         PartId = part.Id,
                         Connected = Plugged(connections, socket),
                         Level = state.NormalizedProductionRate,
@@ -369,7 +369,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                     var socket = new EntityPartSocket(ship.Id, part.Id, DistillerPowerSocket);
                     snap.Consumers.Add(new ConsumerReading
                     {
-                        Name = Loc.Pick("Distillateur", "Distiller"),
+                        Name = Loc.Pick("Distillateur", "Distiller", "Destilador"),
                         PartId = part.Id,
                         Connected = Plugged(connections, socket),
                         Level = state.NormalizedProductionRate,
@@ -574,11 +574,11 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
         {
             switch (space)
             {
-                case PlanetSurfaceSpace _: return Loc.Pick("Surface planétaire", "Planet surface");
-                case OrbitSpace _: return Loc.Pick("Orbite", "Orbit");
-                case TrajectorySpace _: return Loc.Pick("Trajectoire libre", "Free trajectory");
-                case WarpSpace _: return Loc.Pick("Distorsion (warp)", "Warp");
-                case PlanetRingSpace _: return Loc.Pick("Anneau planétaire", "Planetary ring");
+                case PlanetSurfaceSpace _: return Loc.Pick("Surface planétaire", "Planet surface", "Superficie de planeta");
+                case OrbitSpace _: return Loc.Pick("Orbite", "Orbit", "Órbita");
+                case TrajectorySpace _: return Loc.Pick("Trajectoire libre", "Free trajectory", "Trayectoria libre");
+                case WarpSpace _: return Loc.Pick("Distorsion (warp)", "Warp", "Salto");
+                case PlanetRingSpace _: return Loc.Pick("Anneau planétaire", "Planetary ring", "Anillo planetario");
                 case null: return null;
                 default: return space.GetType().Name;
             }
@@ -588,11 +588,11 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
         {
             switch (state)
             {
-                case WarpDriveStateType.Idle: return Loc.Pick("Repos", "Idle");
-                case WarpDriveStateType.WarmingUp: return Loc.Pick("Préchauffage", "Warming up");
-                case WarpDriveStateType.Warping: return Loc.Pick("En distorsion", "Warping");
-                case WarpDriveStateType.WarpInterrupted: return Loc.Pick("Interrompu", "Interrupted");
-                case WarpDriveStateType.CantWarpFromHere: return Loc.Pick("Impossible ici", "Not possible here");
+                case WarpDriveStateType.Idle: return Loc.Pick("Repos", "Idle", "Inactivo");
+                case WarpDriveStateType.WarmingUp: return Loc.Pick("Préchauffage", "Warming up", "Calentando");
+                case WarpDriveStateType.Warping: return Loc.Pick("En distorsion", "Warping", "Saltando");
+                case WarpDriveStateType.WarpInterrupted: return Loc.Pick("Interrompu", "Interrupted", "Interrumpido");
+                case WarpDriveStateType.CantWarpFromHere: return Loc.Pick("Impossible ici", "Not possible here", "Imposible aquí");
                 default: return state.ToString();
             }
         }

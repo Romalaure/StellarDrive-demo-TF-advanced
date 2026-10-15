@@ -56,7 +56,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
 
         public static readonly PirateDesign Scout = new PirateDesign
         {
-            Key = "scout", Name = Loc.Pick("Éclaireur pirate", "Pirate scout"), Level = 1, Health = 1200f, MaxSpeed = 95f, Accel = 34f, Turn = 7f, Standoff = 150f,
+            Key = "scout", Name = Loc.Pick("Éclaireur pirate", "Pirate scout", "Explorador pirata"), Level = 1, Health = 1200f, MaxSpeed = 95f, Accel = 34f, Turn = 7f, Standoff = 150f,
             Burst = 1.2f, Reload = 4f, Wobble = 4f, MissileInterval = 0f,
             HalfWidth = 0, HalfLength = 2, HullColor = new Vector3Int(90, 96, 104), Glow = new Color(1f, 0.75f, 0.2f), DecorId = PirateDecor.ScoutId,
             Weight = 0.35f, GroupMin = 2, GroupMax = 3,
@@ -66,7 +66,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
 
         public static readonly PirateDesign Corsair = new PirateDesign
         {
-            Key = "corsair", Name = Loc.Pick("Corsaire pirate", "Pirate corsair"), Level = 2, Health = 2500f, MaxSpeed = 80f, Accel = 30f, Turn = 8f, Standoff = 170f,
+            Key = "corsair", Name = Loc.Pick("Corsaire pirate", "Pirate corsair", "Corsario pirata"), Level = 2, Health = 2500f, MaxSpeed = 80f, Accel = 30f, Turn = 8f, Standoff = 170f,
             Burst = 1.5f, Reload = 3.5f, Wobble = 2.5f, MissileInterval = 8f,
             HalfWidth = 1, HalfLength = 3, HullColor = new Vector3Int(110, 40, 36), Glow = new Color(1f, 0.25f, 0.15f), DecorId = PirateDecor.CorsairId,
             Weight = 0.35f, GroupMin = 1, GroupMax = 2,
@@ -76,7 +76,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
 
         public static readonly PirateDesign Raider = new PirateDesign
         {
-            Key = "raider", Name = Loc.Pick("Pillard pirate", "Pirate raider"), Level = 3, Health = 4200f, MaxSpeed = 70f, Accel = 22f, Turn = 6f, Standoff = 210f,
+            Key = "raider", Name = Loc.Pick("Pillard pirate", "Pirate raider", "Saqueador pirata"), Level = 3, Health = 4200f, MaxSpeed = 70f, Accel = 22f, Turn = 6f, Standoff = 210f,
             Burst = 2f, Reload = 3f, Wobble = 1.5f, MissileInterval = 6f,
             HalfWidth = 1, HalfLength = 4, HullColor = new Vector3Int(34, 32, 30), Glow = new Color(1f, 0.5f, 0.05f), DecorId = PirateDecor.RaiderId,
             Weight = 0.2f, GroupMin = 1, GroupMax = 1,
@@ -86,7 +86,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
 
         public static readonly PirateDesign Cruiser = new PirateDesign
         {
-            Key = "cruiser", Name = Loc.Pick("Croiseur pirate", "Pirate cruiser"), Level = 4, Health = 7000f, MaxSpeed = 50f, Accel = 14f, Turn = 4f, Standoff = 260f,
+            Key = "cruiser", Name = Loc.Pick("Croiseur pirate", "Pirate cruiser", "Crucero pirata"), Level = 4, Health = 7000f, MaxSpeed = 50f, Accel = 14f, Turn = 4f, Standoff = 260f,
             Burst = 2.5f, Reload = 3f, Wobble = 1f, MissileInterval = 4f,
             HalfWidth = 2, HalfLength = 4, HullColor = new Vector3Int(30, 24, 40), Glow = new Color(0.8f, 0.3f, 1f), DecorId = PirateDecor.CruiserId,
             Weight = 0.1f, GroupMin = 1, GroupMax = 1,
@@ -100,7 +100,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
         /// <summary>A pirate base (a station in the Erebos galaxy): it does not move, fires what bears, launches missiles and fighters.</summary>
         public static readonly PirateDesign Base = new PirateDesign
         {
-            Key = "base", Name = Loc.Pick("Base pirate", "Pirate base"), Level = 5, Health = 20000f, MaxSpeed = 0f, Accel = 4f, Turn = 2f, Standoff = 0f,
+            Key = "base", Name = Loc.Pick("Base pirate", "Pirate base", "Base pirata"), Level = 5, Health = 20000f, MaxSpeed = 0f, Accel = 4f, Turn = 2f, Standoff = 0f,
             Burst = 2f, Reload = 3f, Wobble = 0f, MissileInterval = 5f, HalfWidth = 4, HalfLength = 6, Weight = 0f,
             HullColor = new Vector3Int(60, 30, 30), Glow = new Color(1f, 0.15f, 0.05f), Weapons = new (ushort, float, bool, float)[0],
             Loot = new[] { (ModItems.QuantumCore, 3), (ModItems.ExoticMatter, 2), (ModItems.NexoranAlloy, 12), (ModItems.Titanium, 30), (ModItems.Uranium, 20), (ModItems.Artifact, 2) }

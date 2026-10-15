@@ -198,15 +198,15 @@ namespace StellarDriveDemoTFAdvanced.Combat
             if (!Powered)
             {
                 _builder.Append("<b>RADAR</b> ").Append(range).Append('\n')
-                    .Append("<color=#ff6050>").Append(_value <= -3 ? Loc.Pick("COURANT INSUFFISANT", "NOT ENOUGH POWER") : Loc.Pick("HORS TENSION", "NO POWER")).Append("</color>");
+                    .Append("<color=#ff6050>").Append(_value <= -3 ? Loc.Pick("COURANT INSUFFISANT", "NOT ENOUGH POWER", "ENERGÍA INSUFICIENTE") : Loc.Pick("HORS TENSION", "NO POWER", "SIN ENERGÍA")).Append("</color>");
             }
             else
             {
                 Quaternion toPart = PartFrame(root);
                 int count = contacts?.Count ?? 0;
-                _builder.Append("<b>RADAR</b> ").Append(range).Append("  ").Append(count).Append(Loc.Pick(" contact(s)", " contact(s)")).Append('\n');
+                _builder.Append("<b>RADAR</b> ").Append(range).Append("  ").Append(count).Append(Loc.Pick(" contact(s)", " contact(s)", " contacto(s)")).Append('\n');
                 if (count == 0)
-                    _builder.Append("<color=#7fa0a0>").Append(Loc.Pick("Aucun pirate détecté", "No pirate detected")).Append("</color>");
+                    _builder.Append("<color=#7fa0a0>").Append(Loc.Pick("Aucun pirate détecté", "No pirate detected", "Ningún pirata detectado")).Append("</color>");
                 float sweep = Mathf.Repeat(Time.time * 120f, 360f);
                 for (int i = 0; i < count; i++)
                 {
@@ -225,9 +225,9 @@ namespace StellarDriveDemoTFAdvanced.Combat
                         string hex = c.Kind == Radar.Kind.Base ? "#ff9020" : "#ff4040";
                         _builder.Append("<color=").Append(hex).Append(">■</color> ").Append(Radar.NameOf(c)).Append("  ").Append(Radar.Distance(d));
                         if (Mathf.Abs(c.Local.y) > d * 0.2f)
-                            _builder.Append(c.Local.y > 0f ? Loc.Pick(" (dessus)", " (above)") : Loc.Pick(" (dessous)", " (below)"));
+                            _builder.Append(c.Local.y > 0f ? Loc.Pick(" (dessus)", " (above)", " (arriba)") : Loc.Pick(" (dessous)", " (below)", " (abajo)"));
                         if (c.Kind == Radar.Kind.Raid)
-                            _builder.Append("  <color=#ffd040>").Append(Loc.Pick("contact ", "contact ")).Append(c.Eta.ToString("0")).Append(" s</color>");
+                            _builder.Append("  <color=#ffd040>").Append(Loc.Pick("contact ", "contact ", "contacto ")).Append(c.Eta.ToString("0")).Append(" s</color>");
                         _builder.Append('\n');
                     }
                     if (alarm && c.Kind == Radar.Kind.Raid)

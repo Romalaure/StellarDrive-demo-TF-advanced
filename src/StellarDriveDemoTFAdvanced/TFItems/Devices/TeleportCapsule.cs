@@ -17,6 +17,7 @@ using StellarDriveDemoTFAdvanced.TFItems.Common;
 using UnityEngine;
 using WorldTracking.Interface.Model;
 using WorldTracking.Interface.Services;
+using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
 
 namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 {
@@ -104,8 +105,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
         private static void Configure(PartSettings settings, GameObject prefab)
         {
-            Transform visuals = DeviceModels.Build(settings, prefab, "Capsule de téléportation",
-                "Entre dans la capsule, regarde-la et appuie sur la touche d'utilisation (T) pour choisir une autre capsule et t'y téléporter, sur ce vaisseau ou un autre. Il faut au moins deux capsules.",
+            Transform visuals = DeviceModels.Build(settings, prefab, Loc.Pick("Capsule de téléportation", "Teleport capsule", "Cápsula de teletransporte"),
+                Loc.Pick("Entre dans la capsule, regarde-la et appuie sur la touche d'utilisation (T) pour choisir une autre capsule et t'y téléporter, sur ce vaisseau ou un autre. Il faut au moins deux capsules.", "Step into the capsule, look at it and press the use key (T) to pick another capsule and teleport there, on this ship or another. Needs at least two capsules.", "Entra en la cápsula, mírala y pulsa la tecla de uso (T) para elegir otra cápsula y teletransportarte allí, en esta nave o en otra. Hacen falta al menos dos cápsulas."),
                 60f, new[] { (101u, 10), (112u, 6), (102u, 4), (103u, 2) }, BoundsCenter, BoundsSize, Shapes(), Materials());
             DeviceModels.FlattenColliders(prefab, new Vector3(1.2f, 0.1f, 1.2f));
             UsablePart.AddBox(visuals, BoundsCenter, BoundsSize);
@@ -199,7 +200,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             PlayerStateType state = player.StateVal;
             if (state != PlayerStateType.Walking && state != PlayerStateType.CheatFlying)
             {
-                Refuse(sender, "Lâche ce que tu tiens avant de te téléporter.");
+                Refuse(sender, "hands");
                 return;
             }
 
@@ -211,13 +212,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             int capsules = shipsTracker.Ships.Sum(s => s.StatefulParts.Count(p => p.Settings != null && p.Settings.id == CapsuleId));
             if (capsules < MinCapsules)
             {
-                Refuse(sender, "Il faut au moins deux capsules pour se téléporter.");
+                Refuse(sender, "two");
                 return;
             }
             if (!ships.TryGetShip(shipId, out IShipStateRead ship) || !ship.TryGetStatefulPart(partId, out StatefulPart part)
                 || part.Settings == null || part.Settings.id != CapsuleId || !ship.TryGetPartPlacement(partId, out IPartPlacement placement))
             {
-                Refuse(sender, "Cette capsule n'existe plus.");
+                Refuse(sender, "gone");
                 return;
             }
 
@@ -246,7 +247,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
     internal sealed class TeleportCapsuleVisuals : UsablePart
     {
-        public override string Label => "Capsule de téléportation";
+        public override string Label => Loc.Pick("Capsule de téléportation", "Teleport capsule", "Cápsula de teletransporte");
 
         public override void Use() => TeleportMenu.Show(Key);
     }
@@ -274,6 +275,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
         public static void Refused(string reason)
         {
+            switch (reason)
+            {
+                case "hands": reason = Loc.Pick("Lâche ce que tu tiens avant de te téléporter.", "Put down what you hold before teleporting.", "Suelta lo que llevas antes de teletransportarte."); break;
+                case "two": reason = Loc.Pick("Il faut au moins deux capsules pour se téléporter.", "Teleporting needs at least two capsules.", "Hacen falta al menos dos cápsulas para teletransportarse."); break;
+                case "gone": reason = Loc.Pick("Cette capsule n'existe plus.", "This capsule no longer exists.", "Esta cápsula ya no existe."); break;
+            }
             _message = reason;
             _messageUntil = Time.unscaledTime + 5f;
             _flashUntil = 0f;
@@ -302,12 +309,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         private static void DrawWindow(float width, float height)
         {
             List<PartKey> capsules = TeleportCapsule.KnownCapsules();
-            Rect area = DeviceUi.Window(width, height, 540f, 560f, "CAPSULE DE TÉLÉPORTATION");
+            Rect area = DeviceUi.Window(width, height, 540f, 560f, Loc.Pick("CAPSULE DE TÉLÉPORTATION", "TELEPORT CAPSULE", "CÁPSULA DE TELETRANSPORTE"));
             GUILayout.BeginArea(area);
-            GUILayout.Label("NOM DE CETTE CAPSULE", DeviceUi.Muted);
+            GUILayout.Label(Loc.Pick("NOM DE CETTE CAPSULE", "NAME OF THIS CAPSULE", "NOMBRE DE ESTA CÁPSULA"), DeviceUi.Muted);
             GUILayout.BeginHorizontal();
             _nameField = GUILayout.TextField(_nameField ?? "", TeleportCapsule.MaxNameLength, DeviceUi.Field, GUILayout.Height(34f), GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("Renommer", DeviceUi.Button, GUILayout.Width(110f), GUILayout.Height(34f)))
+            if (GUILayout.Button(Loc.Pick("Renommer", "Rename", "Renombrar"), DeviceUi.Button, GUILayout.Width(110f), GUILayout.Height(34f)))
             {
                 _nameField = TeleportCapsule.CleanName(_nameField);
                 TFNet.SendToServer(TFMessageKind.CapsuleName, _from.ShipId, _from.PartId, _nameField);
@@ -316,13 +323,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             GUILayout.Space(12f);
             if (capsules.Count < TeleportCapsule.MinCapsules)
             {
-                GUILayout.Label("Il faut au moins deux capsules pour se téléporter.", DeviceUi.Text);
+                GUILayout.Label(Loc.Pick("Il faut au moins deux capsules pour se téléporter.", "Teleporting needs at least two capsules.", "Hacen falta al menos dos cápsulas para teletransportarse."), DeviceUi.Text);
                 GUILayout.Space(6f);
-                GUILayout.Label("Pose une autre capsule (onglet TF, ligne Équipements) sur ce vaisseau ou un autre, puis reviens ici.", DeviceUi.Muted);
+                GUILayout.Label(Loc.Pick("Pose une autre capsule (onglet TF, ligne Équipements) sur ce vaisseau ou un autre, puis reviens ici.", "Place another capsule (TF Équipement tab) on this ship or another, then come back here.", "Coloca otra cápsula (pestaña TF Équipement) en esta nave o en otra, y vuelve aquí."), DeviceUi.Muted);
             }
             else
             {
-                GUILayout.Label("Choisis ta destination :", DeviceUi.Text);
+                GUILayout.Label(Loc.Pick("Choisis ta destination :", "Pick your destination:", "Elige tu destino:"), DeviceUi.Text);
                 GUILayout.Space(6f);
                 _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.Height(290f));
                 int number = 0;
@@ -330,8 +337,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 {
                     number++;
                     bool here = capsule.Equals(_from);
-                    string where = capsule.ShipId == _from.ShipId ? "ce vaisseau" : "vaisseau n°" + capsule.ShipId;
-                    string label = $"{TeleportCapsule.NameOf(capsule, number)}   ·   {where}" + (here ? "   ·   tu es ici" : "");
+                    string where = capsule.ShipId == _from.ShipId ? Loc.Pick("ce vaisseau", "this ship", "esta nave") : Loc.Pick("vaisseau n°", "ship #", "nave n.º") + capsule.ShipId;
+                    string label = $"{TeleportCapsule.NameOf(capsule, number)}   ·   {where}" + (here ? Loc.Pick("   ·   tu es ici", "   ·   you are here", "   ·   estás aquí") : "");
                     GUI.enabled = !here;
                     if (GUILayout.Button(label, DeviceUi.Button, GUILayout.Height(40f)))
                         Go(capsule);
@@ -341,7 +348,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 GUILayout.EndScrollView();
             }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Fermer (Échap)", DeviceUi.Button, GUILayout.Height(34f)))
+            if (GUILayout.Button(Loc.Pick("Fermer (Échap)", "Close (Esc)", "Cerrar (Esc)"), DeviceUi.Button, GUILayout.Height(34f)))
                 ModMenu.Close();
             GUILayout.EndArea();
         }

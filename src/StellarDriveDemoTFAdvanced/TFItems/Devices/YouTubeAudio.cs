@@ -7,6 +7,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using MelonLoader.Utils;
+using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
 
 namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 {
@@ -24,7 +25,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         {
             public string VideoId;
             public volatile State Status = State.Working;
-            public volatile string Step = "En attente";
+            public readonly Loc.Language Language = Loc.Current;
+            public volatile string Step;
+
+            public Job() => Step = Text("En attente", "Waiting", "En espera");
+
+            public string Text(string french, string english, string spanish) =>
+                Language == Loc.Language.French ? french : Language == Loc.Language.Spanish ? spanish : english;
             public string WavPath;
             public string Error;
         }
@@ -82,9 +89,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 }
 
                 string ytDlp = EnsureYtDlp(job);
-                job.Step = "Téléchargement de la musique";
-                string downloaded = Download(ytDlp, job.VideoId);
-                job.Step = "Préparation du son";
+                job.Step = job.Text("Téléchargement de la musique", "Downloading the music", "Descargando la música");
+                string downloaded = Download(ytDlp, job);
+                job.Step = job.Text("Préparation du son", "Preparing the sound", "Preparando el sonido");
                 string partial = wav + ".tmp";
                 Mp4Fixup.StripEditLists(downloaded);
                 MediaFoundationDecoder.ToWav(downloaded, partial, MaxSeconds);
@@ -106,7 +113,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         private static void Finish(Job job, string wav)
         {
             job.WavPath = wav;
-            job.Step = "Prêt";
+            job.Step = job.Text("Prêt", "Ready", "Listo");
             job.Status = State.Ready;
         }
 
@@ -118,7 +125,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 string path = Path.Combine(ToolsDir, "yt-dlp.exe");
                 if (File.Exists(path) && new FileInfo(path).Length > 1_000_000)
                     return path;
-                job.Step = "Installation de yt-dlp (une seule fois)";
+                job.Step = job.Text("Installation de yt-dlp (une seule fois)", "Installing yt-dlp (once)", "Instalando yt-dlp (una sola vez)");
                 TFMod.Log.Msg("radio: downloading yt-dlp from " + YtDlpUrl);
                 ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
                 string partial = path + ".part";
@@ -134,8 +141,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             }
         }
 
-        private static string Download(string ytDlp, string videoId)
+        private static string Download(string ytDlp, Job job)
         {
+            string videoId = job.VideoId;
             foreach (string old in Directory.GetFiles(CacheDir, videoId + ".*").Where(f => !f.EndsWith(".wav")))
                 TryDelete(old);
             string output = Path.Combine(CacheDir, videoId + ".%(ext)s");
@@ -165,7 +173,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 if (!process.WaitForExit(240_000))
                 {
                     try { process.Kill(); } catch (Exception) { }
-                    throw new TimeoutException("yt-dlp n'a pas fini à temps");
+                    throw new TimeoutException(job.Text("yt-dlp n'a pas fini à temps", "yt-dlp did not finish in time", "yt-dlp no terminó a tiempo"));
                 }
                 if (process.ExitCode != 0)
                 {
@@ -176,7 +184,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             string file = Directory.GetFiles(CacheDir, videoId + ".*")
                 .FirstOrDefault(f => !f.EndsWith(".wav") && !f.EndsWith(".tmp"));
             if (file == null)
-                throw new FileNotFoundException("yt-dlp n'a rien téléchargé");
+                throw new FileNotFoundException(job.Text("yt-dlp n'a rien téléchargé", "yt-dlp downloaded nothing", "yt-dlp no descargó nada"));
             return file;
         }
 

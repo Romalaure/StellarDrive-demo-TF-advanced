@@ -40,8 +40,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         private static void Configure(PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, Loc.Pick("Table de cartographie", "Cartography table"),
-                Loc.Pick($"Une table holographique qui cartographie le terrain sur {Range:0} m autour du vaisseau (relief en 3D), signale les gisements, rochers, coffres, bâtiments et vaisseaux, et affiche la fiche de la planète : biome, gravité, air, ressources, lieux et utilité. S'allume quand un joueur s'en approche.", $"A holographic table that maps the ground {Range:0} m around the ship (3D relief), marks deposits, rocks, chests, buildings and ships, and shows the planet's card: biome, gravity, air, resources, places and use. Lights up when a player comes near."),
+            PartFactory.Describe(settings, Loc.Pick("Table de cartographie", "Cartography table", "Mesa de cartografía"),
+                Loc.Pick($"Une table holographique qui cartographie le terrain sur {Range:0} m autour du vaisseau (relief en 3D), signale les gisements, rochers, coffres, bâtiments et vaisseaux, et affiche la fiche de la planète : biome, gravité, air, ressources, lieux et utilité. S'allume quand un joueur s'en approche.", $"A holographic table that maps the ground {Range:0} m around the ship (3D relief), marks deposits, rocks, chests, buildings and ships, and shows the planet's card: biome, gravity, air, resources, places and use. Lights up when a player comes near.", $"Una mesa holográfica que cartografía el terreno {Range:0} m alrededor de la nave (relieve 3D), marca yacimientos, rocas, cofres, edificios y naves, y muestra la ficha del planeta: bioma, gravedad, aire, recursos, lugares y utilidad. Se ilumina cuando un jugador se acerca."),
                 60f, new[] { (112u, 10), (102u, 10), (101u, 6), (Items.ModItems.Meteorite, 2) });
             settings.internalStateClass = null;
             const float width = Size, height = 0.95f, depth = Size;
@@ -439,18 +439,18 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 text.Append("<b>").Append(entry.Name.ToUpperInvariant()).Append("</b>  <size=70%>").Append(PlanetWiki.SystemName(entry.System)).Append("</size>\n");
                 text.Append("<size=75%>").Append(entry.Biome).Append(" · ").Append(entry.Gravity).Append(" · air ").Append(entry.Air).Append('\n');
-                text.Append(Loc.Pick("Ressources : ", "Resources: ")).Append(string.Join(", ", entry.Resources)).Append('\n');
-                text.Append(Loc.Pick("Lieux : ", "Places: ")).Append(string.Join(", ", entry.Places)).Append('\n');
+                text.Append(Loc.Pick("Ressources : ", "Resources: ", "Recursos: ")).Append(string.Join(", ", entry.Resources)).Append('\n');
+                text.Append(Loc.Pick("Lieux : ", "Places: ", "Lugares: ")).Append(string.Join(", ", entry.Places)).Append('\n');
                 text.Append(entry.Use);
                 if (!string.IsNullOrEmpty(entry.Danger))
                     text.Append("\n<color=#ff9a6a>").Append(entry.Danger).Append("</color>");
                 text.Append("</size>\n");
             }
-            text.Append("<size=70%><color=#ffb060>■</color> ").Append(ores).Append(Loc.Pick(" gisements", " deposits")).Append("  <color=#ffe040>■</color> ").Append(chests)
-                .Append(Loc.Pick(" coffres", " chests")).Append("  <color=#c080ff>■</color> ").Append(buildings).Append(Loc.Pick(" bâtiments", " buildings"))
-                .Append("  <color=#ffffff>■</color> ").Append(ships).Append(Loc.Pick(" vaisseaux", " ships"));
+            text.Append("<size=70%><color=#ffb060>■</color> ").Append(ores).Append(Loc.Pick(" gisements", " deposits", " yacimientos")).Append("  <color=#ffe040>■</color> ").Append(chests)
+                .Append(Loc.Pick(" coffres", " chests", " cofres")).Append("  <color=#c080ff>■</color> ").Append(buildings).Append(Loc.Pick(" bâtiments", " buildings", " edificios"))
+                .Append("  <color=#ffffff>■</color> ").Append(ships).Append(Loc.Pick(" vaisseaux", " ships", " naves"));
             if (!ground)
-                text.Append(Loc.Pick("\nAucun sol à portée : scan de l'espace", "\nNo ground in range: scanning space"));
+                text.Append(Loc.Pick("\nAucun sol à portée : scan de l'espace", "\nNo ground in range: scanning space", "\nSin terreno al alcance: escaneando el espacio"));
             text.Append("</size>");
             return text.ToString();
         }

@@ -18,6 +18,7 @@ using Ships.Physics;
 using StellarDriveDemoTFAdvanced.TFItems.Common;
 using StellarDriveDemoTFAdvanced.TFItems.Lights;
 using UnityEngine;
+using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
 
 namespace StellarDriveDemoTFAdvanced.TFItems.Infinite
 {
@@ -57,17 +58,18 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Infinite
 
         public static void Register()
         {
-            Add(Generator, "WoodPowerGenerator", "Générateur infini",
-                $"Générateur électrique qui tourne sans bois, pour toujours : {4 * GeneratorMultiplier:0} kW en continu sur son réseau électrique.",
+            Add(Generator, "WoodPowerGenerator", Loc.Pick("Générateur infini", "Infinite generator", "Generador infinito"),
+                Loc.Pick($"Générateur électrique qui tourne sans bois, pour toujours : {4 * GeneratorMultiplier:0} kW en continu sur son réseau électrique.",
+                    $"Power generator that runs without wood, forever: {4 * GeneratorMultiplier:0} kW nonstop on its power grid.", $"Generador eléctrico que funciona sin madera, para siempre: {4 * GeneratorMultiplier:0} kW continuos en su red eléctrica."),
                 HardCost(Iron, 200, Copper, 150), new Color(0.55f, 0.85f, 1f));
-            Add(OxygenTank, "FluidTank", "Réservoir d'oxygène infini",
-                "Réservoir toujours plein d'oxygène : il alimente sans fin les tuyaux branchés (propulseurs, autres réservoirs...).",
+            Add(OxygenTank, "FluidTank", Loc.Pick("Réservoir d'oxygène infini", "Infinite oxygen tank", "Tanque de oxígeno infinito"),
+                Loc.Pick("Réservoir toujours plein d'oxygène : il alimente sans fin les tuyaux branchés (propulseurs, autres réservoirs...).", "Tank always full of oxygen: it endlessly feeds the connected pipes (thrusters, other tanks...).", "Tanque siempre lleno de oxígeno: alimenta sin fin las tuberías conectadas (propulsores, otros tanques...)."),
                 HardCost(Iron, 150, Glass, 120), new Color(0.55f, 0.8f, 1f));
-            Add(EthanolTank, "FluidTank", "Réservoir d'éthanol infini",
-                "Réservoir toujours plein d'éthanol : il alimente sans fin les tuyaux branchés (propulseurs, autres réservoirs...).",
+            Add(EthanolTank, "FluidTank", Loc.Pick("Réservoir d'éthanol infini", "Infinite ethanol tank", "Tanque de etanol infinito"),
+                Loc.Pick("Réservoir toujours plein d'éthanol : il alimente sans fin les tuyaux branchés (propulseurs, autres réservoirs...).", "Tank always full of ethanol: it endlessly feeds the connected pipes (thrusters, other tanks...).", "Tanque siempre lleno de etanol: alimenta sin fin las tuberías conectadas (propulsores, otros tanques...)."),
                 HardCost(Iron, 150, Glass, 120), new Color(1f, 0.75f, 0.4f));
-            Add(ResourceChest, "StorageChest", "Coffre de ressources infini",
-                "Coffre qui se remplit tout seul : fer, verre, cuivre, aluminium, bois, glace, biocarburant, eau et éclats stellaires à volonté. La dernière case est une poubelle : ce que tu y poses disparaît.",
+            Add(ResourceChest, "StorageChest", Loc.Pick("Coffre de ressources infini", "Infinite resource chest", "Cofre de recursos infinito"),
+                Loc.Pick("Coffre qui se remplit tout seul : fer, verre, cuivre, aluminium, bois, glace, biocarburant, eau et éclats stellaires à volonté. La dernière case est une poubelle : ce que tu y poses disparaît.", "Chest that fills itself: iron, glass, copper, aluminum, wood, ice, biofuel, water and stellar shards at will. The last slot is a bin: what you put there disappears.", "Cofre que se llena solo: hierro, vidrio, cobre, aluminio, madera, hielo, biocombustible, agua y fragmentos estelares a voluntad. La última casilla es una papelera: lo que pongas en ella desaparece."),
                 HardCost(Iron, 300, Copper, 200), new Color(1f, 0.85f, 0.35f));
 
             TFMod.Log.Msg($"registered {Ids.Count} infinite parts");

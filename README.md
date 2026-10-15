@@ -267,6 +267,12 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Español, traduction complète (v0.19)
+
+Le mod parle maintenant **espagnol** : réglage `Language = "es"` (ou `auto` avec le jeu en espagnol). Pièces, machines, recherche, écrans de l'ordinateur de bord, radars, planètes, table de cartographie et **wiki dans le jeu** (27 pages) sont traduits. L'équipement TF (lampes, caméra et tablette, capsule, radio, râtelier, objets infinis), resté en français seulement depuis le mod TF, est maintenant en français, anglais et espagnol.
+
+**Lampes** : les réglages `[TFAdvancedObjects]` n'étaient jamais chargés depuis la v0.18. Chaque lampe levait une erreur à chaque image (des milliers par minute, moins d'images/s), et la tablette, la radio et la touche d'utilisation ne lisaient pas leurs réglages. C'est corrigé.
+
 ## Équipement TF et stabilité (v0.18)
 
 Les **luminaires, la caméra et sa tablette, la capsule de téléportation, la radio, le râtelier à outils et les objets infinis** du mod TF sont maintenant dans TF Advanced (onglet **TF Équipement**, mêmes numéros de pièces : ce qui est construit reste). Les objets infinis sont devenus **extrêmement chers**. Le mod TF 0.15 les lui cède. Détail : [wiki, Équipement TF](docs/wiki/Equipement-TF.md).
@@ -338,7 +344,7 @@ Réglage : `BlackHole` (section `[TFAdvanced]`, les deux trous noirs), identique
 
 | Clé | Défaut | Rôle |
 |---|---|---|
-| `Language` | `auto` | langue des textes du mod : `auto` (celle du jeu : français si le jeu est en français, anglais sinon), `fr` ou `en` ; noms et descriptions des pièces au prochain démarrage, wiki tout de suite |
+| `Language` | `auto` | langue des textes du mod : `auto` (celle du jeu : français ou espagnol si le jeu est en français ou en espagnol, anglais sinon), `fr`, `en` ou `es` ; noms et descriptions des pièces au prochain démarrage, wiki tout de suite |
 | `ComputerRefreshRate` | `4` | rafraîchissements des écrans par seconde (1-20) |
 | `ComputerViewDistance` | `40` | au-delà (m), un écran ne se rafraîchit plus |
 | `TrafficRange` | `3000` | portée de la liste de trafic (m) |

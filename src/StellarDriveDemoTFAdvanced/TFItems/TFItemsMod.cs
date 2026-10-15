@@ -39,6 +39,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems
 
         public static void Initialize()
         {
+            // The [TFAdvancedObjects] settings: every lamp, the tablet, the radio and the use key read them
+            Common.Settings.Load();
             if (!Active)
                 return;
             Common.TFNet.InstallSerializers();

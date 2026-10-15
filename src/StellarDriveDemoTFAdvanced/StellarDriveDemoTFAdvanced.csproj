@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
@@ -54,6 +54,7 @@
   <ItemGroup>
     <EmbeddedResource Include="..\..\docs\wiki\*.md" Exclude="..\..\docs\wiki\_Sidebar.md" LogicalName="Wiki.%(Filename).md" />
     <EmbeddedResource Include="..\..\docs\wiki\en\*.md" Exclude="..\..\docs\wiki\en\_Sidebar.md" LogicalName="Wiki.en.%(Filename).md" />
+    <EmbeddedResource Include="..\..\docs\wiki\es\*.md" Exclude="..\..\docs\wiki\es\_Sidebar.md" LogicalName="Wiki.es.%(Filename).md" />
   </ItemGroup>
 
   <Target Name="DeployToGameMods" AfterTargets="Build" Condition="'$(DeployToGame)' == 'true' And Exists('$(GamePath)\Mods')">

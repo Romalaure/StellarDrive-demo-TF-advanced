@@ -31,7 +31,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
 
         private static void Configure(PirateDesign d, PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, Loc.Pick("Carénage de " + d.Name.ToLowerInvariant(), d.Name + " fairing"), Loc.Pick("Le carénage d'un vaisseau pirate.", "The fairing of a pirate ship."), 40f + 25f * d.Level, new (uint, int)[0]);
+            PartFactory.Describe(settings, Loc.Pick("Carénage de " + d.Name.ToLowerInvariant(), d.Name + " fairing", "Carenado de " + d.Name.ToLowerInvariant()), Loc.Pick("Le carénage d'un vaisseau pirate.", "The fairing of a pirate ship.", "El carenado de una nave pirata."), 40f + 25f * d.Level, new (uint, int)[0]);
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, Vector3.zero, Vector3.one * 0.3f);
             foreach (Collider collider in prefab.GetComponentsInChildren<Collider>(true))

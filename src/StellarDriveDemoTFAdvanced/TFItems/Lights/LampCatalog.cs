@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using StellarDriveDemoTFAdvanced.TFItems.Common;
 using UnityEngine;
+using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
 
 namespace StellarDriveDemoTFAdvanced.TFItems.Lights
 {
@@ -64,8 +65,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7101,
-                Label = "Plafonnier",
-                Description = "Lampe ronde à fixer au plafond. Peins-la pour changer la couleur de la lumière.",
+                Label = Loc.Pick("Plafonnier", "Ceiling light", "Plafón de techo"),
+                Description = Loc.Pick("Lampe ronde à fixer au plafond. Peins-la pour changer la couleur de la lumière.", "Round lamp for the ceiling. Paint it to change the light's color.", "Lámpara redonda para el techo. Píntala para cambiar el color de la luz."),
                 Mass = 2f,
                 Cost = new[] { (Iron, 2), (Glass, 1), (Copper, 1) },
                 BoundsCenter = new Vector3(0f, 0.035f, 0f),
@@ -85,8 +86,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7102,
-                Label = "Applique murale",
-                Description = "Petite lampe cubique pour les murs. Peins-la pour changer la couleur de la lumière.",
+                Label = Loc.Pick("Applique murale", "Wall light", "Aplique de pared"),
+                Description = Loc.Pick("Petite lampe cubique pour les murs. Peins-la pour changer la couleur de la lumière.", "Small cubic lamp for walls. Paint it to change the light's color.", "Pequeña lámpara cúbica para paredes. Píntala para cambiar el color de la luz."),
                 Mass = 1.5f,
                 Cost = new[] { (Iron, 1), (Glass, 1), (Copper, 1) },
                 BoundsCenter = new Vector3(0f, 0.055f, 0f),
@@ -110,8 +111,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7103,
-                Label = "Projecteur",
-                Description = "Phare puissant qui éclaire droit devant lui, à poser sur la coque extérieure, un mur ou le sol. Peins-le pour changer la couleur du faisceau.",
+                Label = Loc.Pick("Projecteur", "Floodlight", "Foco"),
+                Description = Loc.Pick("Phare puissant qui éclaire droit devant lui, à poser sur la coque extérieure, un mur ou le sol. Peins-le pour changer la couleur du faisceau.", "Powerful light shining straight ahead, for the outer hull, a wall or the floor. Paint it to change the beam's color.", "Foco potente que ilumina justo delante, para el casco exterior, una pared o el suelo. Píntalo para cambiar el color del haz."),
                 Mass = 4f,
                 Cost = new[] { (Iron, 3), (Glass, 2), (Copper, 2) },
                 BoundsCenter = new Vector3(0f, 0.15f, 0f),
@@ -139,8 +140,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7104,
-                Label = "Tube néon",
-                Description = "Réglette lumineuse d'un mètre pour couloirs, plafonds et coques. Peins-la pour changer la couleur du néon.",
+                Label = Loc.Pick("Tube néon", "Neon tube", "Tubo de neón"),
+                Description = Loc.Pick("Réglette lumineuse d'un mètre pour couloirs, plafonds et coques. Peins-la pour changer la couleur du néon.", "One-meter light strip for corridors, ceilings and hulls. Paint it to change the neon's color.", "Regleta luminosa de un metro para pasillos, techos y cascos. Píntala para cambiar el color del neón."),
                 Mass = 1.5f,
                 Cost = new[] { (Iron, 1), (Glass, 2), (Copper, 1) },
                 BoundsCenter = new Vector3(0f, 0.035f, 0f),
@@ -165,8 +166,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7105,
-                Label = "Lampe d'angle",
-                Description = "Lampe en biseau qui s'emboîte dans un coin, entre le plafond (ou le sol) et un mur : pose-la contre le mur, dos au mur, et elle éclaire la pièce en diagonale. Peins-la pour changer la couleur de la lumière.",
+                Label = Loc.Pick("Lampe d'angle", "Corner lamp", "Lámpara de esquina"),
+                Description = Loc.Pick("Lampe en biseau qui s'emboîte dans un coin, entre le plafond (ou le sol) et un mur : pose-la contre le mur, dos au mur, et elle éclaire la pièce en diagonale. Peins-la pour changer la couleur de la lumière.", "Beveled lamp that fits a corner between the ceiling (or floor) and a wall: place it against the wall, back to the wall, and it lights the room diagonally. Paint it to change the light's color.", "Lámpara biselada que encaja en una esquina, entre el techo (o el suelo) y una pared: colócala contra la pared, de espaldas a la pared, e ilumina la sala en diagonal. Píntala para cambiar el color de la luz."),
                 Mass = 1.5f,
                 Cost = new[] { (Iron, 1), (Glass, 1), (Copper, 1) },
                 BoundsCenter = new Vector3(0f, 0.07f, 0f),
@@ -180,8 +181,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7106,
-                Label = "Néon d'angle",
-                Description = "Réglette d'un mètre en biseau pour les coins entre plafond et mur ou entre sol et mur : pose-la dos au mur. Idéale pour éclairer un couloir sans lampe qui dépasse. Peins-la pour changer la couleur du néon.",
+                Label = Loc.Pick("Néon d'angle", "Corner neon", "Neón de esquina"),
+                Description = Loc.Pick("Réglette d'un mètre en biseau pour les coins entre plafond et mur ou entre sol et mur : pose-la dos au mur. Idéale pour éclairer un couloir sans lampe qui dépasse. Peins-la pour changer la couleur du néon.", "One-meter beveled strip for the corners between ceiling and wall or floor and wall: place it back to the wall. Ideal to light a corridor with no lamp sticking out. Paint it to change the neon's color.", "Regleta biselada de un metro para las esquinas entre techo y pared o entre suelo y pared: colócala de espaldas a la pared. Ideal para iluminar un pasillo sin lámparas que sobresalgan. Píntala para cambiar el color del neón."),
                 Mass = 1.5f,
                 Cost = new[] { (Iron, 1), (Glass, 2), (Copper, 1) },
                 BoundsCenter = new Vector3(0f, 0.045f, 0f),
@@ -195,8 +196,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7107,
-                Label = "Projecteur d'angle",
-                Description = "Projecteur fixé dans un coin, dos au mur, qui éclaire en diagonale vers le centre de la pièce ou le long de la coque. Peins-le pour changer la couleur du faisceau.",
+                Label = Loc.Pick("Projecteur d'angle", "Corner floodlight", "Foco de esquina"),
+                Description = Loc.Pick("Projecteur fixé dans un coin, dos au mur, qui éclaire en diagonale vers le centre de la pièce ou le long de la coque. Peins-le pour changer la couleur du faisceau.", "Floodlight fixed in a corner, back to the wall, shining diagonally toward the middle of the room or along the hull. Paint it to change the beam's color.", "Foco fijado en una esquina, de espaldas a la pared, que ilumina en diagonal hacia el centro de la sala o a lo largo del casco. Píntalo para cambiar el color del haz."),
                 Mass = 3f,
                 Cost = new[] { (Iron, 2), (Glass, 2), (Copper, 2) },
                 BoundsCenter = new Vector3(0f, 0.12f, -0.04f),
@@ -223,8 +224,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7108,
-                Label = "Spot encastré",
-                Description = "Petit spot rond presque plat, qui affleure le plafond ou le mur. Éclaire en large cône. Peins-le pour changer la couleur de la lumière.",
+                Label = Loc.Pick("Spot encastré", "Recessed spot", "Foco empotrado"),
+                Description = Loc.Pick("Petit spot rond presque plat, qui affleure le plafond ou le mur. Éclaire en large cône. Peins-le pour changer la couleur de la lumière.", "Small round, nearly flat spot, flush with the ceiling or wall. Lights in a wide cone. Paint it to change the light's color.", "Pequeño foco redondo casi plano, a ras del techo o de la pared. Ilumina en un cono ancho. Píntalo para cambiar el color de la luz."),
                 Mass = 0.5f,
                 Cost = new[] { (Iron, 1), (Glass, 1) },
                 BoundsCenter = new Vector3(0f, 0.0075f, 0f),
@@ -243,8 +244,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7109,
-                Label = "Lanterne industrielle",
-                Description = "Lampe ronde protégée par une cage métallique, pour les murs, plafonds, soutes et coursives. Peins-la pour changer la couleur de la lumière.",
+                Label = Loc.Pick("Lanterne industrielle", "Industrial lantern", "Farol industrial"),
+                Description = Loc.Pick("Lampe ronde protégée par une cage métallique, pour les murs, plafonds, soutes et coursives. Peins-la pour changer la couleur de la lumière.", "Round lamp guarded by a metal cage, for walls, ceilings, holds and gangways. Paint it to change the light's color.", "Lámpara redonda protegida por una jaula metálica, para paredes, techos, bodegas y pasarelas. Píntala para cambiar el color de la luz."),
                 Mass = 1.5f,
                 Cost = new[] { (Iron, 2), (Glass, 1), (Copper, 1) },
                 BoundsCenter = new Vector3(0f, 0.095f, 0f),
@@ -270,8 +271,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7110,
-                Label = "Panneau lumineux",
-                Description = "Grande dalle carrée et plate de 60 cm : lumière douce et large pour éclairer toute une pièce. Peins-la pour changer la couleur de la lumière.",
+                Label = Loc.Pick("Panneau lumineux", "Light panel", "Panel luminoso"),
+                Description = Loc.Pick("Grande dalle carrée et plate de 60 cm : lumière douce et large pour éclairer toute une pièce. Peins-la pour changer la couleur de la lumière.", "Large flat 60 cm square panel: soft, wide light for a whole room. Paint it to change the light's color.", "Gran placa cuadrada y plana de 60 cm: luz suave y amplia para iluminar toda una sala. Píntala para cambiar el color de la luz."),
                 Mass = 2f,
                 Cost = new[] { (Iron, 2), (Glass, 2), (Copper, 1) },
                 BoundsCenter = new Vector3(0f, 0.0125f, 0f),
@@ -290,8 +291,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7113,
-                Label = "Suspension",
-                Description = "Lampe suspendue à un fil sous le plafond, avec abat-jour. Parfaite au-dessus d'une table ou du poste de pilotage. Peins-la pour changer la couleur de la lumière.",
+                Label = Loc.Pick("Suspension", "Pendant lamp", "Lámpara colgante"),
+                Description = Loc.Pick("Lampe suspendue à un fil sous le plafond, avec abat-jour. Parfaite au-dessus d'une table ou du poste de pilotage. Peins-la pour changer la couleur de la lumière.", "Lamp hanging from the ceiling on a cord, with a shade. Perfect above a table or the cockpit. Paint it to change the light's color.", "Lámpara colgada del techo por un cable, con pantalla. Perfecta sobre una mesa o el puesto de pilotaje. Píntala para cambiar el color de la luz."),
                 Mass = 1.5f,
                 Cost = new[] { (Iron, 1), (Glass, 1), (Copper, 2) },
                 BoundsCenter = new Vector3(0f, 0.3f, 0f),
@@ -312,8 +313,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7114,
-                Label = "Balise clignotante",
-                Description = "Petit feu qui clignote, rouge par défaut : feux de position sur la coque, signalisation d'un sas ou d'un quai. Peins-la pour changer sa couleur.",
+                Label = Loc.Pick("Balise clignotante", "Flashing beacon", "Baliza intermitente"),
+                Description = Loc.Pick("Petit feu qui clignote, rouge par défaut : feux de position sur la coque, signalisation d'un sas ou d'un quai. Peins-la pour changer sa couleur.", "Small flashing light, red by default: navigation lights on the hull, marking an airlock or a dock. Paint it to change its color.", "Pequeña luz que parpadea, roja por defecto: luces de posición en el casco, señalización de una esclusa o un muelle. Píntala para cambiar su color."),
                 Mass = 0.8f,
                 Cost = new[] { (Iron, 1), (Glass, 1), (Copper, 1) },
                 BoundsCenter = new Vector3(0f, 0.045f, 0f),
@@ -335,8 +336,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7115,
-                Label = "Gyrophare",
-                Description = "Feu tournant orange dont le faisceau balaie tout autour de lui : alerte, zone de chargement, engin de chantier. Peins-le pour changer sa couleur.",
+                Label = Loc.Pick("Gyrophare", "Rotating beacon", "Girofaro"),
+                Description = Loc.Pick("Feu tournant orange dont le faisceau balaie tout autour de lui : alerte, zone de chargement, engin de chantier. Peins-le pour changer sa couleur.", "Orange rotating light whose beam sweeps all around: alert, loading area, work vehicle. Paint it to change its color.", "Luz giratoria naranja cuyo haz barre todo a su alrededor: alerta, zona de carga, vehículo de obra. Píntalo para cambiar su color."),
                 Mass = 1.2f,
                 Cost = new[] { (Iron, 1), (Glass, 2), (Copper, 2) },
                 BoundsCenter = new Vector3(0f, 0.085f, 0f),
@@ -360,8 +361,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7116,
-                Label = "Bande LED",
-                Description = "Ruban lumineux très fin de deux mètres, pour souligner un plafond, un sol, une marche ou le contour de la coque. Peins-la pour changer sa couleur.",
+                Label = Loc.Pick("Bande LED", "LED strip", "Tira LED"),
+                Description = Loc.Pick("Ruban lumineux très fin de deux mètres, pour souligner un plafond, un sol, une marche ou le contour de la coque. Peins-la pour changer sa couleur.", "Very thin two-meter light strip, to outline a ceiling, a floor, a step or the hull's edge. Paint it to change its color.", "Cinta luminosa muy fina de dos metros, para resaltar un techo, un suelo, un escalón o el contorno del casco. Píntala para cambiar su color."),
                 Mass = 0.6f,
                 Cost = new[] { (Glass, 1), (Copper, 1) },
                 BoundsCenter = new Vector3(0f, 0.006f, 0f),
@@ -379,8 +380,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             new LampSpec
             {
                 Id = 7117,
-                Label = "Lampadaire",
-                Description = "Lampe sur pied d'1,70 m à poser au sol, avec abat-jour : coin salon, cabine, poste d'équipage. Peins-la pour changer la couleur de la lumière.",
+                Label = Loc.Pick("Lampadaire", "Floor lamp", "Lámpara de pie"),
+                Description = Loc.Pick("Lampe sur pied d'1,70 m à poser au sol, avec abat-jour : coin salon, cabine, poste d'équipage. Peins-la pour changer la couleur de la lumière.", "1.70 m standing lamp with a shade: lounge corner, cabin, crew station. Paint it to change the light's color.", "Lámpara de pie de 1,70 m con pantalla: rincón de salón, camarote, puesto de tripulación. Píntala para cambiar el color de la luz."),
                 Mass = 3f,
                 Cost = new[] { (Iron, 3), (Glass, 1), (Copper, 1) },
                 BoundsCenter = new Vector3(0f, 0.85f, 0f),

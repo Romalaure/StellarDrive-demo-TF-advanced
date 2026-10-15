@@ -7,6 +7,7 @@ using StellarDriveDemoTFAdvanced.TFItems.Common;
 using StellarDriveDemoTFAdvanced.TFItems.Lights;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
 
 namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
 {
@@ -37,8 +38,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
 
         private static void Configure(PartSettings settings, GameObject prefab)
         {
-            Transform visuals = LampParts.PrepareDonor(settings, prefab, "Caméra de surveillance",
-                "Caméra à fixer sur un mur, un plafond ou la coque. Elle regarde à l'opposé de sa surface, inclinée de 30° : tourne-la en la posant pour viser. Ouvre la tablette (F9) pour voir ce qu'elle filme ; dans la tablette, P permet d'en poser une nouvelle.",
+            Transform visuals = LampParts.PrepareDonor(settings, prefab, Loc.Pick("Caméra de surveillance", "Surveillance camera", "Cámara de vigilancia"),
+                Loc.Pick("Caméra à fixer sur un mur, un plafond ou la coque. Elle regarde à l'opposé de sa surface, inclinée de 30° : tourne-la en la posant pour viser. Ouvre la tablette (F9) pour voir ce qu'elle filme ; dans la tablette, P permet d'en poser une nouvelle.", "Camera for a wall, a ceiling or the hull. It looks away from its surface, tilted 30°: turn it while placing it to aim. Open the tablet (F9) to see what it films; in the tablet, P places a new one.", "Cámara para una pared, un techo o el casco. Mira en dirección opuesta a su superficie, inclinada 30°: gírala al colocarla para apuntar. Abre la tableta (F9) para ver lo que graba; en la tableta, P coloca una nueva."),
                 1f, new[] { (101u, 1), (102u, 1), (112u, 1) },
                 new Vector3(0f, 0.11f, -0.04f), new Vector3(0.14f, 0.22f, 0.22f));
             int layer = visuals.gameObject.layer;

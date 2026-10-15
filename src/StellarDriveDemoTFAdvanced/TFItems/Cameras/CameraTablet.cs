@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
 
 namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
 {
@@ -137,7 +138,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
         {
             if (!CameraParts.Registered)
             {
-                ShowMessage("La caméra a besoin de SDModKit.");
+                ShowMessage(Loc.Pick("La caméra a besoin de SDModKit.", "The camera needs SDModKit.", "La cámara necesita SDModKit."));
                 return;
             }
             var parts = ServiceLocator.GetService<ILocalSelectedPartProvider>();
@@ -148,7 +149,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             if (belt != null && SelectedTool(belt).Get() != 1)
                 belt.SelectTool(1);
             Close();
-            ShowMessage("Caméra sélectionnée dans l'outil de construction : vise et clique pour la poser.");
+            ShowMessage(Loc.Pick("Caméra sélectionnée dans l'outil de construction : vise et clique pour la poser.", "Camera selected in the build tool: aim and click to place it.", "Cámara seleccionada en la herramienta de construcción: apunta y haz clic para colocarla."));
         }
 
         private static void ShowMessage(string text)
@@ -299,13 +300,15 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             }
             else
             {
-                GUI.Label(new Rect(screen.x, screen.y + screenHeight / 2f - 40f, screenWidth, 30f), "AUCUNE CAMÉRA", _text);
+                GUI.Label(new Rect(screen.x, screen.y + screenHeight / 2f - 40f, screenWidth, 30f), Loc.Pick("AUCUNE CAMÉRA", "NO CAMERA", "NINGUNA CÁMARA"), _text);
                 GUI.Label(new Rect(screen.x + 40f, screen.y + screenHeight / 2f - 4f, screenWidth - 80f, 50f),
-                    "Appuie sur P pour en poser une avec l'outil de construction (elle est aussi dans l'onglet TF).", _text);
+                    Loc.Pick("Appuie sur P pour en poser une avec l'outil de construction (elle est aussi dans l'onglet TF).", "Press P to place one with the build tool (it is also in the TF tab).", "Pulsa P para colocar una con la herramienta de construcción (también está en la pestaña TF)."), _text);
             }
 
             GUI.Label(new Rect(tablet.x + border, screen.yMax + 8f, screenWidth, 24f),
-                "<  >  changer de caméra     Z  " + (size == 2 ? "réduire" : "agrandir") + "     P  poser une caméra     " + TabletKey.Label + " / Échap  fermer", _hint);
+                Loc.Pick("<  >  changer de caméra     Z  " + (size == 2 ? "réduire" : "agrandir") + "     P  poser une caméra     " + TabletKey.Label + " / Échap  fermer",
+                    "<  >  switch camera     Z  " + (size == 2 ? "shrink" : "enlarge") + "     P  place a camera     " + TabletKey.Label + " / Esc  close",
+                    "<  >  cambiar de cámara     Z  " + (size == 2 ? "reducir" : "ampliar") + "     P  colocar una cámara     " + TabletKey.Label + " / Esc  cerrar"), _hint);
             // Front camera dot and home button, for the tablet look
             Fill(new Rect(tablet.center.x - 3f, tablet.y + 8f, 6f, 6f), new Color(0.25f, 0.27f, 0.3f));
         }

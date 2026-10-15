@@ -39,13 +39,13 @@ namespace StellarDriveDemoTFAdvanced.Combat
         public static readonly Tier[] Tiers =
         {
             new Tier { Id = PowerCatalog.RadarShortId, Level = 1, RangeKm = 1000f, WattsScale = 1f, Glow = MachineModels.Green, Mass = 60f,
-                Label = Loc.Pick("Radar courte portée", "Short range radar"), Flavor = Loc.Pick("Un petit radar de patrouille (lueur verte).", "A small patrol radar (green glow)."),
+                Label = Loc.Pick("Radar courte portée", "Short range radar", "Radar de corto alcance"), Flavor = Loc.Pick("Un petit radar de patrouille (lueur verte).", "A small patrol radar (green glow).", "Un pequeño radar de patrulla (brillo verde)."),
                 Cost = new[] { (112u, 10), (102u, 6), (101u, 6) } },
             new Tier { Id = PowerCatalog.RadarLongId, Level = 2, RangeKm = 5000f, WattsScale = 3f, Glow = new Color(1f, 0.72f, 0.2f), Mass = 140f,
-                Label = Loc.Pick("Radar longue portée", "Long range radar"), Flavor = Loc.Pick("Un radar à grande antenne (lueur dorée).", "A radar with a big dish (golden glow)."),
+                Label = Loc.Pick("Radar longue portée", "Long range radar", "Radar de largo alcance"), Flavor = Loc.Pick("Un radar à grande antenne (lueur dorée).", "A radar with a big dish (golden glow).", "Un radar con una gran antena parabólica (brillo dorado)."),
                 Cost = new[] { (112u, 20), (102u, 10), (Items.ModItems.Titanium, 8), (Items.ModItems.Quartz, 4) } },
             new Tier { Id = PowerCatalog.RadarDeepId, Level = 3, RangeKm = 20000f, WattsScale = 8f, Glow = MachineModels.Violet, Mass = 260f,
-                Label = Loc.Pick("Radar de l'espace profond", "Deep space radar"), Flavor = Loc.Pick("Un mât d'écoute de l'espace profond (lueur violette).", "A deep space listening mast (violet glow)."),
+                Label = Loc.Pick("Radar de l'espace profond", "Deep space radar", "Radar de espacio profundo"), Flavor = Loc.Pick("Un mât d'écoute de l'espace profond (lueur violette).", "A deep space listening mast (violet glow).", "Un mástil de escucha del espacio profundo (brillo violeta)."),
                 Cost = new[] { (112u, 30), (Items.ModItems.Titanium, 15), (Items.ModItems.Quartz, 8), (Items.ModItems.Cryonite, 6), (Items.ModItems.QuantumCore, 1) } },
         };
 
@@ -251,10 +251,10 @@ namespace StellarDriveDemoTFAdvanced.Combat
         public static string NameOf(Contact c)
         {
             if (c.Kind == Kind.Base)
-                return Loc.Pick("Base pirate", "Pirate base");
+                return Loc.Pick("Base pirate", "Pirate base", "Base pirata");
             PirateDesign design = PirateShips.ByKey(c.Key);
-            string name = design != null ? design.Name : Loc.Pick("Pirate", "Pirate");
-            return c.Kind == Kind.Raid ? Loc.Pick("Raid ", "Raid ") + c.Count + " × " + name : name;
+            string name = design != null ? design.Name : Loc.Pick("Pirate", "Pirate", "Pirata");
+            return c.Kind == Kind.Raid ? Loc.Pick("Raid ", "Raid ", "Incursión ") + c.Count + " × " + name : name;
         }
 
         public static string Distance(float meters) =>
@@ -276,7 +276,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
             if (!_alarmKnown.Add(key))
                 return;
             _alarm = Loc.Pick($"ALERTE RADAR : {NameOf(raid)} en approche, {Distance(raid.Local.magnitude)}, contact dans {raid.Eta:0} s",
-                $"RADAR ALERT: {NameOf(raid)} incoming, {Distance(raid.Local.magnitude)}, contact in {raid.Eta:0} s");
+                $"RADAR ALERT: {NameOf(raid)} incoming, {Distance(raid.Local.magnitude)}, contact in {raid.Eta:0} s", $"ALERTA RADAR: {NameOf(raid)} se acerca, {Distance(raid.Local.magnitude)}, contacto en {raid.Eta:0} s");
             _alarmUntil = Time.unscaledTime + 8f;
         }
 
@@ -309,7 +309,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
             float watts = Mathf.Max(0f, PowerCatalog.RadarWatts.Value) * tier.WattsScale;
             PartFactory.Describe(settings, tier.Label,
                 Loc.Pick($"{tier.Flavor} Détecte les pirates autour du vaisseau sur {tier.RangeKm:#,0} km : leurs vaisseaux, leurs bases et les raids en approche (vus dès qu'ils entrent dans sa portée, avec le temps avant contact). L'écran rond montre les contacts vus du dessus, l'avant du radar en haut, la distance en échelle logarithmique (anneaux à 10, 100, 1 000, 10 000 km), et la liste des plus proches. Il lui faut {watts:0} W sur ses prises électriques. Sa prise signal donne le nombre de contacts ; éteint : -1 pas de réseau électrique, -3 pas assez de courant.",
-                    $"{tier.Flavor} Detects the pirates around the ship within {tier.RangeKm:#,0} km: their ships, their bases and the incoming raids (seen as soon as they enter its range, with the time before contact). The round screen shows the contacts seen from above, the radar's front at the top, distance on a log scale (rings at 10, 100, 1,000, 10,000 km), and the list of the nearest. It needs {watts:0} W on its power sockets. Its signal socket gives the number of contacts; off: -1 no power grid, -3 not enough power.").Replace(" ", " ").Replace(" ", " "),
+                    $"{tier.Flavor} Detects the pirates around the ship within {tier.RangeKm:#,0} km: their ships, their bases and the incoming raids (seen as soon as they enter its range, with the time before contact). The round screen shows the contacts seen from above, the radar's front at the top, distance on a log scale (rings at 10, 100, 1,000, 10,000 km), and the list of the nearest. It needs {watts:0} W on its power sockets. Its signal socket gives the number of contacts; off: -1 no power grid, -3 not enough power.", $"{tier.Flavor} Detecta a los piratas alrededor de la nave a menos de {tier.RangeKm:#,0} km: sus naves, sus bases y las incursiones que llegan (vistas en cuanto entran en su alcance, con el tiempo antes del contacto). La pantalla redonda muestra los contactos vistos desde arriba, el frente del radar arriba, la distancia en escala logarítmica (anillos a 10, 100, 1.000 y 10.000 km), y la lista de los más cercanos. Necesita {watts:0} W en sus tomas de energía. Su toma de señal da el número de contactos; apagado: -1 sin red eléctrica, -3 energía insuficiente.").Replace(" ", " ").Replace(" ", " "),
                 tier.Mass, tier.Cost);
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             const float width = 1f, height = 0.95f, depth = 0.7f;

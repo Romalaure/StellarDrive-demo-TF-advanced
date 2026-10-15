@@ -53,18 +53,18 @@ namespace StellarDriveDemoTFAdvanced.Items
 
         public static readonly ModItem[] All =
         {
-            new ModItem { Id = Titanium, Name = Loc.Pick("Minerai de titane", "Titanium ore"), Mass = 2.5f, MaterialFrom = Iron, Tint = new Color(0.72f, 0.8f, 0.95f), Model = OreChunk },
-            new ModItem { Id = Quartz, Name = Loc.Pick("Cristal de quartz", "Quartz crystal"), Mass = 1.5f, MaterialFrom = Glass, Tint = new Color(1f, 0.68f, 0.86f), Model = m => Crystals(m, 5, 0.3f) },
+            new ModItem { Id = Titanium, Name = Loc.Pick("Minerai de titane", "Titanium ore", "Mineral de titanio"), Mass = 2.5f, MaterialFrom = Iron, Tint = new Color(0.72f, 0.8f, 0.95f), Model = OreChunk },
+            new ModItem { Id = Quartz, Name = Loc.Pick("Cristal de quartz", "Quartz crystal", "Cristal de cuarzo"), Mass = 1.5f, MaterialFrom = Glass, Tint = new Color(1f, 0.68f, 0.86f), Model = m => Crystals(m, 5, 0.3f) },
             new ModItem { Id = Cryonite, Name = "Cryonite", Mass = 1.5f, MaterialFrom = StellarShard, Tint = new Color(0.45f, 0.9f, 1.2f), Glow = new Color(0.1f, 0.5f, 0.8f), Model = m => Crystals(m, 3, 0.38f) },
-            new ModItem { Id = Amber, Name = Loc.Pick("Ambre fossile", "Fossil amber"), Mass = 1f, MaterialFrom = Glass, Tint = new Color(1f, 0.55f, 0.12f), Model = Nugget },
-            new ModItem { Id = Artifact, Name = Loc.Pick("Fragment d'artefact ancien", "Ancient artifact fragment"), Mass = 3f, MaterialFrom = StellarShard, Tint = new Color(1f, 0.82f, 0.45f), Glow = new Color(0.35f, 0.22f, 0.05f), Model = Tablet },
-            new ModItem { Id = QuantumCore, Name = Loc.Pick("Noyau quantique", "Quantum core"), Mass = 4f, MaterialFrom = StellarShard, Tint = new Color(0.75f, 0.5f, 1.2f), Glow = new Color(0.4f, 0.15f, 0.9f), Model = Core },
-            new ModItem { Id = ExoticMatter, Name = Loc.Pick("Matière exotique", "Exotic matter"), Mass = 0.5f, MaterialFrom = StellarShard, Tint = new Color(0.25f, 0.12f, 0.4f), Glow = new Color(0.55f, 0.1f, 0.35f), Model = m => Crystals(m, 4, 0.34f) },
-            new ModItem { Id = NexoranAlloy, Name = Loc.Pick("Alliage nexorien", "Nexoran alloy"), Mass = 3f, MaterialFrom = Iron, Tint = new Color(0.55f, 0.85f, 0.9f), Model = Ingot },
-            new ModItem { Id = Meteorite, Name = Loc.Pick("Météorite", "Meteorite"), Mass = 4f, MaterialFrom = Iron, Tint = new Color(0.32f, 0.27f, 0.25f), Glow = new Color(0.55f, 0.18f, 0.02f), Model = MeteoriteChunk },
-            new ModItem { Id = DarkMatter, Name = Loc.Pick("Matière noire", "Dark matter"), Mass = 0.2f, Fluid = true, FluidColor = new Color(0.22f, 0.05f, 0.35f) },
-            new ModItem { Id = Uranium, Name = Loc.Pick("Minerai d'uranium", "Uranium ore"), Mass = 5f, MaterialFrom = Iron, Tint = new Color(0.42f, 0.55f, 0.3f), Glow = new Color(0.12f, 0.45f, 0.04f), Model = OreChunk },
-            new ModItem { Id = NuclearFuel, Name = Loc.Pick("Combustible nucléaire", "Nuclear fuel"), Mass = 1f, Fluid = true, FluidColor = new Color(0.35f, 0.95f, 0.2f) }
+            new ModItem { Id = Amber, Name = Loc.Pick("Ambre fossile", "Fossil amber", "Ámbar fósil"), Mass = 1f, MaterialFrom = Glass, Tint = new Color(1f, 0.55f, 0.12f), Model = Nugget },
+            new ModItem { Id = Artifact, Name = Loc.Pick("Fragment d'artefact ancien", "Ancient artifact fragment", "Fragmento de artefacto antiguo"), Mass = 3f, MaterialFrom = StellarShard, Tint = new Color(1f, 0.82f, 0.45f), Glow = new Color(0.35f, 0.22f, 0.05f), Model = Tablet },
+            new ModItem { Id = QuantumCore, Name = Loc.Pick("Noyau quantique", "Quantum core", "Núcleo cuántico"), Mass = 4f, MaterialFrom = StellarShard, Tint = new Color(0.75f, 0.5f, 1.2f), Glow = new Color(0.4f, 0.15f, 0.9f), Model = Core },
+            new ModItem { Id = ExoticMatter, Name = Loc.Pick("Matière exotique", "Exotic matter", "Materia exótica"), Mass = 0.5f, MaterialFrom = StellarShard, Tint = new Color(0.25f, 0.12f, 0.4f), Glow = new Color(0.55f, 0.1f, 0.35f), Model = m => Crystals(m, 4, 0.34f) },
+            new ModItem { Id = NexoranAlloy, Name = Loc.Pick("Alliage nexorien", "Nexoran alloy", "Aleación nexoriana"), Mass = 3f, MaterialFrom = Iron, Tint = new Color(0.55f, 0.85f, 0.9f), Model = Ingot },
+            new ModItem { Id = Meteorite, Name = Loc.Pick("Météorite", "Meteorite", "Meteorito"), Mass = 4f, MaterialFrom = Iron, Tint = new Color(0.32f, 0.27f, 0.25f), Glow = new Color(0.55f, 0.18f, 0.02f), Model = MeteoriteChunk },
+            new ModItem { Id = DarkMatter, Name = Loc.Pick("Matière noire", "Dark matter", "Materia oscura"), Mass = 0.2f, Fluid = true, FluidColor = new Color(0.22f, 0.05f, 0.35f) },
+            new ModItem { Id = Uranium, Name = Loc.Pick("Minerai d'uranium", "Uranium ore", "Mineral de uranio"), Mass = 5f, MaterialFrom = Iron, Tint = new Color(0.42f, 0.55f, 0.3f), Glow = new Color(0.12f, 0.45f, 0.04f), Model = OreChunk },
+            new ModItem { Id = NuclearFuel, Name = Loc.Pick("Combustible nucléaire", "Nuclear fuel", "Combustible nuclear"), Mass = 1f, Fluid = true, FluidColor = new Color(0.35f, 0.95f, 0.2f) }
         };
 
         private static readonly AccessTools.FieldRef<ItemSettingsList, ItemSettings[]> Items = AccessTools.FieldRefAccess<ItemSettingsList, ItemSettings[]>("items");
@@ -313,7 +313,7 @@ namespace StellarDriveDemoTFAdvanced.Items
             stand.name = "TFA_MissingItem_" + id;
             stand.hideFlags = HideFlags.DontUnloadUnusedAsset;
             stand.id = id;
-            stand.itemName = Loc.Pick($"Objet inconnu {id} (mod retiré)", $"Unknown item {id} (removed mod)");
+            stand.itemName = Loc.Pick($"Objet inconnu {id} (mod retiré)", $"Unknown item {id} (removed mod)", $"Objeto desconocido {id} (mod eliminado)");
             stand.mass = 0f;
             dict[id] = stand;
             AdvancedMod.Log.Warning($"item {id} belongs to no installed mod (a removed mod's item in an inventory or a chest): a weightless stand-in keeps the game running");

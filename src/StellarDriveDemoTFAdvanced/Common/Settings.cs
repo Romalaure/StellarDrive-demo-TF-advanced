@@ -82,7 +82,7 @@ namespace StellarDriveDemoTFAdvanced.Common
             Erebos = _category.CreateEntry("Erebos", true,
                 description: "The Erebos galaxy: a second star system with four planets, a black hole and wrecks, reached through a portal. Needs NewPlanets. In multiplayer every player needs the same setting.");
             Language = _category.CreateEntry("Language", "auto",
-                description: "Language of the mod's texts: auto (the game's language), fr or en. Part names and descriptions change on the next start.");
+                description: "Language of the mod's texts: auto (the game's language), fr, en or es. Part names and descriptions change on the next start.");
             NewPlanets = _category.CreateEntry("NewPlanets", true,
                 description: "Add the mod's planets to the star system. In multiplayer every player needs the same setting.");
             BlackHoleEnabled = _category.CreateEntry("BlackHole", true,
