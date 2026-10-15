@@ -89,7 +89,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             float start = Time.unscaledTime;
             bool pushed = false;
             float nextLog = 0f;
-            while (Time.unscaledTime - start < 40f)
+            while (Time.unscaledTime - start < 70f)
             {
                 ship = ships.GetShip(state.Id);
                 if (ship == null)
@@ -101,14 +101,20 @@ namespace StellarDriveDemoTFAdvanced.Power
                 if (ship.SpaceId != space)
                 {
                     AdvancedMod.Log.Msg($"dev: portal test: ship left its space ({space} -> {ship.SpaceId}), portal state {portal}");
+                    yield return Worlds.StationVisit.Wait(0.4f);
+                    Photograph("portal_closing");
                     break;
                 }
                 if (portal >= Portal.Open && !pushed)
                 {
                     pushed = true;
-                    // Let the portal grow, then photograph it from behind the ship
-                    yield return Worlds.StationVisit.Wait(1.6f);
-                    Photograph();
+                    // The portal opening: segments flying in, the flash as they lock, then open
+                    yield return Worlds.StationVisit.Wait(0.45f);
+                    Photograph("portal_opening");
+                    yield return Worlds.StationVisit.Wait(0.75f);
+                    Photograph("portal_locking");
+                    yield return Worlds.StationVisit.Wait(1.4f);
+                    Photograph("portal_open");
                 }
                 // Held in place while charging, then flown forward through the portal
                 Vector3 velocity = pushed ? forward * 20f : Vector3.zero;
@@ -135,7 +141,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
         }
 
-        private static void Photograph()
+        private static void Photograph(string name)
         {
             GameObject portal = GameObject.Find("TFA_Portal");
             if (portal == null)
@@ -143,16 +149,23 @@ namespace StellarDriveDemoTFAdvanced.Power
                 AdvancedMod.Log.Warning("dev: portal test: no portal visual on this client");
                 return;
             }
+            Transform t = portal.transform;
+            Shoot(name, t.position - t.forward * 45f + t.right * 55f + t.up * 18f, t.position, t.up);
+            AdvancedMod.Log.Msg($"dev: portal photographed ({name}), scale {portal.transform.localScale.x:0.0}, active {portal.activeSelf}");
+        }
+
+        private static void Shoot(string name, Vector3 from, Vector3 look, Vector3 up)
+        {
             var cameraObject = new GameObject("TFA_PortalCamera");
             var camera = cameraObject.AddComponent<Camera>();
             if (Camera.main != null)
                 camera.CopyFrom(Camera.main);
             camera.enabled = false;
             camera.fieldOfView = 55f;
+            camera.nearClipPlane = 0.05f;
             camera.farClipPlane = 5000f;
-            Transform t = portal.transform;
-            camera.transform.position = t.position - t.forward * 45f + t.right * 55f + t.up * 18f;
-            camera.transform.rotation = Quaternion.LookRotation(t.position - camera.transform.position, t.up);
+            camera.transform.position = from;
+            camera.transform.rotation = Quaternion.LookRotation(look - from, up);
             var target = RenderTexture.GetTemporary(1600, 900, 24, RenderTextureFormat.ARGB32);
             camera.targetTexture = target;
             camera.Render();
@@ -163,12 +176,11 @@ namespace StellarDriveDemoTFAdvanced.Power
             sheet.Apply();
             RenderTexture.active = previous;
             System.IO.Directory.CreateDirectory(DevHarness.Folder);
-            System.IO.File.WriteAllBytes(System.IO.Path.Combine(DevHarness.Folder, "portal_open.png"), sheet.EncodeToPNG());
+            System.IO.File.WriteAllBytes(System.IO.Path.Combine(DevHarness.Folder, name + ".png"), sheet.EncodeToPNG());
             camera.targetTexture = null;
             RenderTexture.ReleaseTemporary(target);
             Object.Destroy(sheet);
             Object.Destroy(cameraObject);
-            AdvancedMod.Log.Msg($"dev: portal photographed, scale {portal.transform.localScale.x:0.0}");
         }
 
         private static string Json()

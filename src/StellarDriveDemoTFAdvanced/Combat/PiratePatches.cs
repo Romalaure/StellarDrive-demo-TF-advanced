@@ -153,7 +153,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 yield break;
             int startParts = target.PartCount;
             float home = Zones.TryOffset(Zones.HomePlanet, target.PhysicsState.SpaceId, target.PhysicsState.Position, out Vector3 toHome) ? toHome.magnitude / 1000f : -1f;
-            AdvancedMod.Log.Msg($"dev: pirate test: target {home:0} km from the home planet, safe zone {Zones.InSafeZone(target.PhysicsState.SpaceId, target.PhysicsState.Position)}");
+            AdvancedMod.Log.Msg($"dev: pirate test: target {home:0} km from the home planet, safe zone {Zones.InSafeZone(target.PhysicsState.SpaceId, target.PhysicsState.Position)}, danger {Zones.Danger(target.PhysicsState.SpaceId, target.PhysicsState.Position)}");
             if (which == 6)
             {
                 // A pirate base 700 m away
@@ -175,8 +175,24 @@ namespace StellarDriveDemoTFAdvanced.Combat
             }
             else
             {
-                // 1-4: that design (scout, corsair, raider, cruiser), 5: one at random
-                PirateDesign design = which >= 1 && which <= 4 ? PirateShips.All[which - 1] : PirateShips.Random();
+                // 1-4: scout, corsair, raider, cruiser; 5: one at random; 7-10: hornet, lancer, torpedo boat, dreadnought;
+                // 11-15: a raid as drawn for danger 1 to 5
+                if (which >= 11 && which <= 15)
+                {
+                    for (int danger = 1; danger <= Zones.MaxDanger; danger++)
+                    {
+                        var counts = new System.Collections.Generic.Dictionary<string, int>();
+                        for (int k = 0; k < 200; k++)
+                        {
+                            string drawn = PirateShips.Random(danger).Key;
+                            counts[drawn] = counts.TryGetValue(drawn, out int n) ? n + 1 : 1;
+                        }
+                        AdvancedMod.Log.Msg($"dev: pirate test: danger {danger} draws {string.Join(", ", counts.Select(kv => kv.Key + " " + kv.Value))}");
+                    }
+                }
+                PirateDesign design = which >= 1 && which <= 4 ? PirateShips.All[which - 1]
+                    : which >= 7 && which <= 10 ? PirateShips.All[which - 3]
+                    : which >= 11 && which <= 15 ? PirateShips.Random(which - 10) : PirateShips.Random();
                 Pirates.ForceSpawn(target, design, 1, 500f);
             }
             uint[] spawned = Pirates.All.Keys.ToArray();

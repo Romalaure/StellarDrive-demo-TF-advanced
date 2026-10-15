@@ -17,6 +17,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
     internal static class PirateDecor
     {
         public const ushort ScoutId = 7451, CorsairId = 7452, RaiderId = 7453, CruiserId = 7454;
+        public const ushort HornetId = 7455, LancerId = 7456, TorpedoId = 7457, DreadnoughtId = 7458;
 
         public static void Register()
         {
@@ -68,7 +69,8 @@ namespace StellarDriveDemoTFAdvanced.Combat
         {
             float w = d.HalfWidth + 0.5f, front = d.HalfLength + 0.5f, back = -front;
             bool heavy = d.Level >= 3;
-            float span = 1.4f + 0.55f * d.Level;
+            // (the dreadnought's wide hull carries shorter wings)
+            float span = d.Level >= 5 ? 2.6f : 1.4f + 0.55f * d.Level;
 
             // Chin under the cockpit glass, drooping to a ram
             float nose = 1.1f + 0.35f * w;
@@ -137,8 +139,9 @@ namespace StellarDriveDemoTFAdvanced.Combat
             }
 
             // Engine nacelles at the stern, exhausts glowing
-            float[] engines = d.Level >= 4 ? new[] { -w * 0.6f, 0f, w * 0.6f } : d.Level == 1 ? new[] { 0f } : new[] { -w * 0.5f, w * 0.5f };
-            float r = d.Level == 1 ? 0.35f : 0.45f;
+            float[] engines = d.Level >= 5 ? new[] { -w * 0.72f, -w * 0.25f, w * 0.25f, w * 0.72f }
+                : d.Level >= 4 ? new[] { -w * 0.6f, 0f, w * 0.6f } : d.Level == 1 || d.HalfWidth == 0 ? new[] { 0f } : new[] { -w * 0.5f, w * 0.5f };
+            float r = d.Level >= 5 ? 0.6f : d.Level == 1 || d.HalfWidth == 0 ? 0.35f : 0.45f;
             foreach (float x in engines)
             {
                 var c0 = new Vector3(x, -0.05f, back + 0.3f);
@@ -158,6 +161,102 @@ namespace StellarDriveDemoTFAdvanced.Combat
             // Antenna mast with a lit tip
             m.Dark.Cylinder(new Vector3(0f, 0.75f, back + 0.6f), new Vector3(0f, 1.6f + 0.2f * d.Level, back + 0.4f), 0.03f, 0.015f, 6);
             m.Core.Cylinder(new Vector3(0f, 1.6f + 0.2f * d.Level, back + 0.4f), new Vector3(0f, 1.68f + 0.2f * d.Level, back + 0.4f), 0.05f, 0.05f, 6);
+
+            switch (d.Key)
+            {
+                case "hornet": Hornet(m, w, front, back, nose); break;
+                case "lancer": Lancer(m, w, front, back); break;
+                case "torpedo": TorpedoBoat(m, w, front, back); break;
+                case "dreadnought": Dreadnought(m, w, front, back); break;
+            }
+        }
+
+        /// <summary>The hornet: dark wasp stripes across its yellow hull, mandibles at the nose, a stinger under the tail.</summary>
+        private static void Hornet(MachineModels.Model m, float w, float front, float back, float nose)
+        {
+            for (float z = back + 0.5f; z < front - 0.4f; z += 0.9f)
+            {
+                foreach (float s in new[] { -1f, 1f })
+                    m.Dark.Box(new Vector3(s * (w + 0.085f), 0.08f, z), new Vector3(0.02f, 0.64f, 0.32f));
+                m.Dark.Box(new Vector3(0f, 0.505f, z), new Vector3(2f * w + 0.1f, 0.02f, 0.32f));
+            }
+            foreach (float s in new[] { -1f, 1f })
+            {
+                m.Dark.Cylinder(new Vector3(s * 0.3f, -0.36f, front + nose * 0.5f), new Vector3(s * 0.42f, -0.34f, front + nose + 0.3f), 0.06f, 0.04f, 6);
+                m.Dark.Cylinder(new Vector3(s * 0.42f, -0.34f, front + nose + 0.3f), new Vector3(s * 0.12f, -0.32f, front + nose + 0.95f), 0.04f, 0.01f, 6);
+            }
+            m.Armor.Cylinder(new Vector3(0f, -0.5f, back + 1.2f), new Vector3(0f, -0.62f, back - 0.6f), 0.18f, 0.12f, 8);
+            m.Dark.Cylinder(new Vector3(0f, -0.62f, back - 0.6f), new Vector3(0f, -0.78f, back - 2.3f), 0.12f, 0.005f, 8);
+            m.Core.Cylinder(new Vector3(0f, -0.62f, back - 0.55f), new Vector3(0f, -0.63f, back - 0.7f), 0.13f, 0.13f, 8);
+        }
+
+        /// <summary>The lancer: a long charged lance under its nose, ringed with coils, and sensor vanes.</summary>
+        private static void Lancer(MachineModels.Model m, float w, float front, float back)
+        {
+            Vector3 a = new Vector3(0f, -0.62f, front - 1.5f), b = new Vector3(0f, -0.58f, front + 4.2f);
+            m.Armor.Cylinder(a, a + Vector3.forward * 1.4f, 0.26f, 0.2f, 12);
+            m.Dark.Cylinder(a + Vector3.forward * 1.4f, b, 0.12f, 0.09f, 10);
+            for (int i = 0; i < 6; i++)
+            {
+                Vector3 c = Vector3.Lerp(a + Vector3.forward * 1.6f, b - Vector3.forward * 0.4f, i / 5f);
+                m.Glow.Cylinder(c, c + Vector3.forward * 0.12f, 0.15f, 0.15f, 10);
+            }
+            m.Core.Cylinder(b, b + Vector3.forward * 0.25f, 0.08f, 0.02f, 10);
+            foreach (float s in new[] { -1f, 1f })
+            {
+                m.Armor.Box(new Vector3(s * (w + 0.35f), 0.35f, front - 0.8f), new Vector3(0.6f, 0.04f, 0.9f), Quaternion.Euler(0f, 0f, s * 25f));
+                m.Glow.Box(new Vector3(s * (w + 0.6f), 0.47f, front - 0.8f), new Vector3(0.03f, 0.03f, 0.85f));
+            }
+        }
+
+        /// <summary>The torpedo boat: two heavy tubes slung under its belly, a radar dish on a mast.</summary>
+        private static void TorpedoBoat(MachineModels.Model m, float w, float front, float back)
+        {
+            foreach (float s in new[] { -1f, 1f })
+            {
+                float x = s * w * 0.55f;
+                Vector3 a = new Vector3(x, -0.95f, back + 1.2f), b = new Vector3(x, -0.95f, front - 0.2f);
+                m.Armor.Cylinder(a, b, 0.3f, 0.3f, 12);
+                m.Dark.Cylinder(b, b + Vector3.forward * 0.05f, 0.24f, 0.24f, 12);
+                m.Core.Cylinder(b + Vector3.back * 0.02f, b + Vector3.forward * 0.03f, 0.12f, 0.08f, 10);
+                m.Glow.Cylinder(Vector3.Lerp(a, b, 0.7f), Vector3.Lerp(a, b, 0.7f) + Vector3.forward * 0.06f, 0.315f, 0.315f, 12);
+                m.Dark.Box(new Vector3(x, -0.66f, (back + front) * 0.5f), new Vector3(0.12f, 0.2f, front - back - 3f));
+            }
+            Vector3 mast = new Vector3(w * 0.5f, 0.5f, back + 1.6f);
+            m.Dark.Cylinder(mast, mast + Vector3.up * 0.9f, 0.05f, 0.04f, 6);
+            Quaternion tilt = Quaternion.Euler(-30f, 20f, 0f);
+            Vector3 dish = mast + Vector3.up * 0.95f;
+            m.Armor.Cylinder(dish - tilt * Vector3.forward * 0.05f, dish + tilt * Vector3.forward * 0.12f, 0.12f, 0.55f, 14, capA: true, capB: false);
+            m.Core.Cylinder(dish + tilt * Vector3.forward * 0.12f, dish + tilt * Vector3.forward * 0.3f, 0.03f, 0.02f, 6);
+        }
+
+        /// <summary>The dreadnought: a command tower with lit bridge windows, armour ribs, a heavy ram and running lights.</summary>
+        private static void Dreadnought(MachineModels.Model m, float w, float front, float back)
+        {
+            float tb = back + 0.6f, tf = back + 2.6f;
+            Hex(m.Armor,
+                new Vector3(-1.1f, 0.5f, tb), new Vector3(1.1f, 0.5f, tb), new Vector3(-1.1f, 0.5f, tf), new Vector3(1.1f, 0.5f, tf),
+                new Vector3(-0.8f, 2.1f, tb + 0.3f), new Vector3(0.8f, 2.1f, tb + 0.3f), new Vector3(-0.8f, 2.1f, tf - 0.5f), new Vector3(0.8f, 2.1f, tf - 0.5f));
+            Hex(m.Dark,
+                new Vector3(-1f, 2.1f, tb + 0.2f), new Vector3(1f, 2.1f, tb + 0.2f), new Vector3(-1f, 2.1f, tf - 0.2f), new Vector3(1f, 2.1f, tf - 0.2f),
+                new Vector3(-0.85f, 2.55f, tb + 0.35f), new Vector3(0.85f, 2.55f, tb + 0.35f), new Vector3(-0.85f, 2.55f, tf - 0.45f), new Vector3(0.85f, 2.55f, tf - 0.45f));
+            m.Glow.Box(new Vector3(0f, 2.33f, tf - 0.31f), new Vector3(1.5f, 0.12f, 0.02f), Quaternion.Euler(-28f, 0f, 0f));
+            for (int i = 0; i < 3; i++)
+                m.Glow.Box(new Vector3(0f, 1.0f + i * 0.35f, tf - 0.06f - i * 0.065f), new Vector3(1.4f - i * 0.15f, 0.05f, 0.02f), Quaternion.Euler(-11f, 0f, 0f));
+            foreach (float s in new[] { -1f, 1f })
+            {
+                m.Dark.Cylinder(new Vector3(s * 0.5f, 2.55f, tb + 0.8f), new Vector3(s * 0.55f, 3.6f, tb + 0.7f), 0.03f, 0.015f, 6);
+                m.Core.Cylinder(new Vector3(s * 0.55f, 3.6f, tb + 0.7f), new Vector3(s * 0.55f, 3.68f, tb + 0.7f), 0.05f, 0.05f, 6);
+                // Armour ribs down the flanks, and a line of running lights
+                for (float z = back + 0.8f; z < front - 0.5f; z += 1.3f)
+                    m.Armor.Box(new Vector3(s * (w + 0.12f), 0f, z), new Vector3(0.14f, 1.1f, 0.3f));
+                for (float z = back + 1.4f; z < front - 0.5f; z += 1.3f)
+                    m.Core.Box(new Vector3(s * (w + 0.1f), -0.42f, z), new Vector3(0.04f, 0.06f, 0.12f));
+            }
+            // A heavy ram in front of the chin
+            Hex(m.Dark,
+                new Vector3(-0.9f, -0.62f, front + 0.6f), new Vector3(0.9f, -0.62f, front + 0.6f), new Vector3(-0.15f, -0.5f, front + 3.4f), new Vector3(0.15f, -0.5f, front + 3.4f),
+                new Vector3(-0.9f, -0.32f, front + 0.6f), new Vector3(0.9f, -0.32f, front + 0.6f), new Vector3(-0.1f, -0.42f, front + 3.4f), new Vector3(0.1f, -0.42f, front + 3.4f));
         }
     }
 }

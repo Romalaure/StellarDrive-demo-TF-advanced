@@ -33,6 +33,20 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Tougher pirates the farther you go, new portal (v0.20)
+
+**Danger grows with distance**: near the home planet, only scouts, one or two at a time, and less often. One danger level more every 5 million km (setting `PirateDangerStepKm`): corsairs and hornets around TF Aridia, raiders and lancers around TF Verdance and TF Glacia, escorted cruisers and torpedo boats past TF Nexora, and dreadnoughts in the Erebos galaxy.
+
+**Four new pirates**, armed with the Arsenal weapons they did not use yet:
+- **Hornet** (level 2): yellow with black stripes, the fastest, looses 9 rockets in a row;
+- **Lancer** (level 3): railgun and two ion cannons that jam your weapons, fires from afar;
+- **Torpedo boat** (level 4): two torpedo launchers, a SAM battery and a point defense;
+- **Dreadnought** (level 5, Erebos only): 14,000 hull points, 14 weapons, command tower.
+
+Each has its own fairing. Pirate bases now launch hornets too.
+
+**Dimensional portal reworked**: the generator has a ring in sections with glowing seams and two gimbal rings turning like a gyroscope around a floating crystal, faster and faster while it charges. The portal opens in steps: sixteen segments fly in and lock with a flash, then the horizon opens with two swirls turning against each other, ripples, sparks drawn in, a rune ring and a violet light. When it closes it collapses into a flash, even after the ship has gone through.
+
 ## Spanish, full translation (v0.19)
 
 The mod now speaks **Spanish**: setting `Language = "es"` (or `auto` with the game in Spanish). Parts, machines, research, ship computer screens, radars, planets, cartography table and the **in-game wiki** (27 pages) are translated. The TF equipment (lamps, camera and tablet, capsule, radio, tool rack, infinite parts), French only since it came from the TF mod, now speaks French, English and Spanish.

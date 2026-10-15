@@ -68,7 +68,9 @@ Abre un portal violeta **45 m delante de él** (en la dirección de su cara fron
 
 Funcionamiento: una señal > 0 en la **toma de mando** lo activa; se carga durante **10 s** a 20.000 W, quema **5 de materia oscura** (toma de fluido), luego el portal queda abierto **30 s**, y el generador se recarga durante 60 s. Toma de estado: 0 listo, 1 a 99 % de carga, 100 abierto, -1 sin objetivo, -2 materia oscura insuficiente, -3 sin energía, -10 y menos: segundos de recarga.
 
-El modelo: un anillo vertical entre dos pilones rodeados de bobinas y aletas luminosas, chevrones luminosos alrededor del anillo, una lente emisora debajo, bancos de condensadores y un pupitre de mando detrás.
+El modelo: un anillo vertical en doce secciones blindadas con juntas luminosas y cuatro emisores de enfoque, entre dos pilones rodeados de bobinas y aletas. En el centro, dos **anillos cardán** encajados giran como un giroscopio alrededor de un **cristal flotante**: aceleran con la carga, el cristal late y todo se vuelve violeta, y parpadea cuando la carga está casi llena. Debajo, una lente emisora; detrás, bancos de condensadores y un pupitre de mando.
+
+**Apertura del portal**: dieciséis segmentos del marco llegan desde todos lados y se encajan en un anillo con un destello; luego el horizonte se abre desde el centro: dos espirales que giran en sentidos opuestos, ondas que corren hacia el borde, chispas aspiradas en espiral, un anillo de runas y un halo violeta que ilumina los alrededores. Al cerrarse (tiempo agotado o nave pasada), el horizonte se derrumba en un destello y los segmentos se separan.
 
 Es la única forma razonable de llegar a la [galaxia de Érebo](Galaxie-Erebe.md).
 

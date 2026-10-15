@@ -62,5 +62,39 @@ namespace StellarDriveDemoTFAdvanced.Combat
         /// <summary>In the pirates' territory around the Bastion.</summary>
         public static bool NearBastion(uint spaceId, Vector3 position) =>
             TryOffset(Worlds.PlanetCatalog.BastionId, spaceId, position, out Vector3 offset) && offset.magnitude < BastionRadius;
+
+        public const int MaxDanger = 5;
+
+        /// <summary>
+        /// How dangerous the pirates are here, 1 to <see cref="MaxDanger"/>: 1 just outside the safe
+        /// zone, one more every Settings.PirateDangerStepKm farther from the home planet (4 at most in
+        /// the Otrera system), 5 in the Erebos galaxy, their home.
+        /// </summary>
+        public static int Danger(uint spaceId, Vector3 position)
+        {
+            var transpose = ServiceLocator.GetService<IWorldTransposeServer>();
+            if (Worlds.Galaxy.IsInErebos(transpose, spaceId, position) || NearBastion(spaceId, position))
+                return MaxDanger;
+            if (!TryOffset(HomePlanet, spaceId, position, out Vector3 offset))
+                return 2;
+            float beyond = offset.magnitude / 1000f - Mathf.Max(0f, Settings.PirateSafeRadiusKm.Value);
+            float step = Mathf.Max(1f, Settings.PirateDangerStepKm.Value);
+            return Mathf.Clamp(1 + Mathf.FloorToInt(Mathf.Max(0f, beyond) / step), 1, MaxDanger - 1);
+        }
+
+        /// <summary>Development: how far each planet is from the home planet, and its danger.</summary>
+        public static void LogPlanets()
+        {
+            IPlanetsProvider planets = ServiceLocator.GetService<IPlanetsServerProvider>();
+            IPlanetProperties home = planets?.Planets.FirstOrDefault(p => p.Id == HomePlanet);
+            if (home == null)
+                return;
+            var origin = new PreciseWorldPosition(home.WorldCell, Vector3.zero);
+            foreach (IPlanetProperties planet in planets.Planets.OrderBy(p => new PreciseWorldPosition(p.WorldCell, Vector3.zero).DeltaDouble(origin).Magnitude))
+            {
+                double km = new PreciseWorldPosition(planet.WorldCell, Vector3.zero).DeltaDouble(origin).Magnitude / 1000.0;
+                AdvancedMod.Log.Msg($"dev: planet {planet.Id} {km:0} km from home, radius {planet.Radius / 1000f:0} km");
+            }
+        }
     }
 }

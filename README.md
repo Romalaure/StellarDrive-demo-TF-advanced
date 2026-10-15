@@ -267,6 +267,20 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Pirates de plus en plus durs, nouveau portail (v0.20)
+
+**Le danger monte avec la distance** : près de la planète de départ, seuls des éclaireurs, un ou deux à la fois, et plus rarement. Un niveau de danger de plus tous les 5 millions de km (réglage `PirateDangerStepKm`) : corsaires et frelons vers TF Aridia, pillards et lanciers vers TF Verdance et TF Glacia, croiseurs et torpilleurs escortés au-delà de TF Nexora, et les cuirassés dans la galaxie d'Érèbe.
+
+**Quatre nouveaux pirates**, armés des armes d'Arsenal qu'ils n'utilisaient pas encore :
+- **Frelon** (niveau 2) : jaune rayé de noir, le plus rapide, lâche 9 roquettes d'affilée ;
+- **Lancier** (niveau 3) : canon électrique et deux canons ioniques qui brouillent vos armes, il tire de loin ;
+- **Torpilleur** (niveau 4) : deux lance-torpilles, une batterie sol-air et une défense rapprochée ;
+- **Cuirassé** (niveau 5, Érèbe seulement) : 14 000 points de coque, 14 armes, tour de commandement.
+
+Chacun a son propre carénage. Les bases pirates sortent maintenant aussi des frelons.
+
+**Portail dimensionnel retravaillé** : le générateur a un anneau en sections aux joints lumineux, deux anneaux de cardan qui tournent comme un gyroscope autour d'un cristal flottant, de plus en plus vite pendant la charge. Le portail s'ouvre en étapes : seize segments arrivent et se verrouillent dans un éclair, l'horizon s'ouvre avec deux spirales qui tournent en sens contraire, des ondes, des étincelles aspirées, un anneau de runes et une lumière violette. À la fermeture, il s'effondre dans un éclair, même après le passage du vaisseau.
+
 ## Español, traduction complète (v0.19)
 
 Le mod parle maintenant **espagnol** : réglage `Language = "es"` (ou `auto` avec le jeu en espagnol). Pièces, machines, recherche, écrans de l'ordinateur de bord, radars, planètes, table de cartographie et **wiki dans le jeu** (27 pages) sont traduits. L'équipement TF (lampes, caméra et tablette, capsule, radio, râtelier, objets infinis), resté en français seulement depuis le mod TF, est maintenant en français, anglais et espagnol.

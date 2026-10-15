@@ -68,7 +68,9 @@ Ouvre un portail violet **45 m devant lui** (dans la direction de sa face avant)
 
 Fonctionnement : un signal > 0 sur la **prise de commande** le lance ; il charge **10 s** à 20 000 W, brûle **5 matière noire** (prise de fluide) puis le portail reste ouvert **30 s**, et le générateur se recharge 60 s. Prise d'état : 0 prêt, 1 à 99 charge %, 100 ouvert, -1 pas de cible, -2 pas assez de matière noire, -3 pas de courant, -10 et moins : secondes de recharge.
 
-Le modèle : un anneau dressé entre deux pylônes cerclés de bobines lumineuses et d'ailettes, des chevrons lumineux autour de l'anneau, une lentille d'émission dessous, des bancs de condensateurs et un pupitre de commande à l'arrière.
+Le modèle : un anneau dressé en douze sections blindées aux joints lumineux, avec quatre émetteurs de focalisation, entre deux pylônes cerclés de bobines et d'ailettes. Au centre, deux **anneaux de cardan** imbriqués comme un gyroscope tournent autour d'un **cristal flottant** : ils accélèrent avec la charge, le cristal pulse et tout vire au violet, puis ça clignote quand la charge est presque pleine. Dessous, une lentille d'émission ; à l'arrière, des bancs de condensateurs et un pupitre de commande.
+
+**Ouverture du portail** : seize segments de cadre arrivent de tous côtés et se verrouillent en anneau dans un éclair, puis l'horizon s'ouvre depuis le centre : deux spirales qui tournent en sens contraire, des ondes qui courent vers le bord, des étincelles aspirées en spirale, un anneau de runes et un halo violet qui éclaire les alentours. À la fermeture (temps écoulé ou vaisseau passé), l'horizon s'effondre dans un éclair et les segments s'écartent.
 
 C'est le seul moyen raisonnable d'atteindre la [galaxie d'Érèbe](Galaxie-Erebe.md).
 

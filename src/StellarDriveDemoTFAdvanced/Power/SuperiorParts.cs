@@ -136,31 +136,103 @@ namespace StellarDriveDemoTFAdvanced.Power
                 model.Light.Box(new Vector3(x, height + 0.38f, 0.155f), new Vector3(0.012f, 0.7f, 0.012f));
                 model.Armor.Box(new Vector3(x * 0.92f, ringY, 0f), new Vector3(0.18f, 0.16f, 0.22f));
             }
+            // The outer ring: twelve armoured sections, a seam lit with the charge between each, clamps outside
             var ring = new MeshBuilder();
-            const int segments = 28;
+            const int segments = 36;
             for (int i = 0; i < segments; i++)
             {
                 float a = i * Mathf.PI * 2f / segments, b = (i + 1) * Mathf.PI * 2f / segments;
                 Vector3 pa = new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * ringR + Vector3.up * ringY;
                 Vector3 pb = new Vector3(Mathf.Cos(b), Mathf.Sin(b), 0f) * ringR + Vector3.up * ringY;
-                model.Armor.Cylinder(pa, pb, 0.07f, 0.07f, 8, capA: false, capB: false);
-                ring.Cylinder(pa + Vector3.forward * 0.06f, pb + Vector3.forward * 0.06f, 0.025f, 0.025f, 6, capA: false, capB: false);
-                if (i % 4 == 0)
-                    model.Dark.Box(pa * 1f + new Vector3(0f, 0f, -0.02f), new Vector3(0.1f, 0.1f, 0.18f), Quaternion.Euler(0f, 0f, a * Mathf.Rad2Deg));
+                if (i % 3 == 2)
+                    ring.Cylinder(pa, pb, 0.062f, 0.062f, 10, capA: false, capB: false);
+                else
+                    model.Armor.Cylinder(pa, pb, 0.078f, 0.078f, 10, capA: false, capB: false);
+                ring.Cylinder(pa + Vector3.forward * 0.07f, pb + Vector3.forward * 0.07f, 0.02f, 0.02f, 6, capA: false, capB: false);
+                ring.Cylinder(pa - Vector3.forward * 0.07f, pb - Vector3.forward * 0.07f, 0.014f, 0.014f, 6, capA: false, capB: false);
+                if (i % 3 == 0)
+                {
+                    Vector3 outward = new Vector3(Mathf.Cos(a + 0.087f), Mathf.Sin(a + 0.087f), 0f);
+                    model.Dark.Box(outward * (ringR + 0.075f) + Vector3.up * ringY, new Vector3(0.1f, 0.06f, 0.2f), Quaternion.Euler(0f, 0f, (a + 0.087f) * Mathf.Rad2Deg));
+                }
             }
-            // A faint violet heart inside the ring
-            model.Core.Cylinder(new Vector3(0f, ringY, -0.01f), new Vector3(0f, ringY, 0.01f), ringR * 0.25f, ringR * 0.25f, 16);
+            // Four focusing emitters on the ring's front, aimed at the middle
+            for (int k = 0; k < 4; k++)
+            {
+                float a = (45f + k * 90f) * Mathf.Deg2Rad;
+                Vector3 dir = new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f);
+                Vector3 root = dir * (ringR - 0.02f) + new Vector3(0f, ringY, 0.09f);
+                model.Dark.Cylinder(root, root - dir * 0.12f + Vector3.forward * 0.02f, 0.045f, 0.02f, 8);
+                model.Core.Cylinder(root - dir * 0.12f + Vector3.forward * 0.02f, root - dir * 0.14f + Vector3.forward * 0.02f, 0.02f, 0.012f, 8);
+            }
+            // The gimbal's pivots, top and bottom of the ring
+            foreach (float s in new[] { -1f, 1f })
+                model.Dark.Cylinder(new Vector3(0f, ringY + s * ringR, 0f), new Vector3(0f, ringY + s * ringR * 0.8f, 0f), 0.025f, 0.025f, 8);
             PortalDetails(model, width, height, depth, ringY, ringR);
             MachineModels.Attach(visuals, model, "Portal", MachineModels.Violet, MachineModels.Violet);
-            var ringObject = new GameObject(PortalVisuals.RingName) { layer = visuals.gameObject.layer };
+            int layer = visuals.gameObject.layer;
+            Material glow = LitMaterials.Get("TFA_PortalRingPart", Color.white, 0f, 0.8f, Color.white);
+            Material metal = LitMaterials.Get("TFA_PortalGimbal", new Color(0.2f, 0.18f, 0.24f), 0.85f, 0.6f);
+            var ringObject = new GameObject(PortalVisuals.RingName) { layer = layer };
             ringObject.transform.SetParent(visuals, false);
             ringObject.AddComponent<MeshFilter>().sharedMesh = ring.Build(PortalVisuals.RingName);
-            ringObject.AddComponent<MeshRenderer>().sharedMaterial = LitMaterials.Get("TFA_PortalRingPart", Color.white, 0f, 0.8f, Color.white);
+            ringObject.AddComponent<MeshRenderer>().sharedMaterial = glow;
+            // Two gimbal rings, the inner one turning inside the outer (a gyroscope), and a floating crystal
+            Transform gimbalA = Gimbal(visuals, PortalVisuals.GimbalAName, new Vector3(0f, ringY, 0f), ringR * 0.8f, ringR * 0.64f, metal, glow, layer);
+            Gimbal(gimbalA, PortalVisuals.GimbalBName, Vector3.zero, ringR * 0.64f, 0f, metal, glow, layer);
+            var crystal = new MeshBuilder();
+            crystal.Cylinder(new Vector3(0f, -0.17f, 0f), Vector3.zero, 0.002f, 0.085f, 6, capA: false, capB: false);
+            crystal.Cylinder(Vector3.zero, new Vector3(0f, 0.17f, 0f), 0.085f, 0.002f, 6, capA: false, capB: false);
+            Transform crystalObject = Piece(visuals, PortalVisuals.CrystalName, new Vector3(0f, ringY, 0f), layer);
+            Renderer crystalGlow = Piece(crystalObject, "CrystalGlow", Vector3.zero, layer, crystal.Build("TFA_PortalCrystal"), glow);
             visuals.gameObject.AddComponent<PortalVisuals>();
             var bounds = prefab.GetComponent<ShipPartBounds>();
             PowerParts.GraftRow(prefab, bounds, 0.17f, -face, 0.24f,
                 (PowerCatalog.MachinePowerA, CableType.Power), (PowerCatalog.MachineFluid, CableType.Fluid), (Portal.CommandSocket, CableType.Signal),
                 (PowerCatalog.MachineSignal, CableType.Signal), (PowerCatalog.MachinePowerB, CableType.Power));
+        }
+
+        /// <summary>A gimbal ring facing forward: armoured band, lit runes on its faces, axles out to the next ring at ±X.</summary>
+        private static Transform Gimbal(Transform parent, string name, Vector3 at, float radius, float inner, Material metal, Material glow, int layer)
+        {
+            var band = new MeshBuilder { DoubleSided = true };
+            var runes = new MeshBuilder { DoubleSided = true };
+            const int sides = 32;
+            for (int i = 0; i < sides; i++)
+            {
+                float a = i * Mathf.PI * 2f / sides, b = (i + 1) * Mathf.PI * 2f / sides;
+                Vector3 pa = new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * radius, pb = new Vector3(Mathf.Cos(b), Mathf.Sin(b), 0f) * radius;
+                band.Box((pa + pb) * 0.5f, new Vector3((pb - pa).magnitude + 0.004f, 0.026f, 0.05f), Quaternion.Euler(0f, 0f, (a + b) * 0.5f * Mathf.Rad2Deg + 90f));
+                if (i % 2 == 0)
+                    foreach (float z in new[] { -0.027f, 0.027f })
+                        runes.Box((pa + pb) * 0.5f + Vector3.forward * z, new Vector3(i % 8 == 0 ? 0.035f : 0.016f, 0.01f, 0.003f), Quaternion.Euler(0f, 0f, (a + b) * 0.5f * Mathf.Rad2Deg + 90f));
+            }
+            // Axles out to the outer ring (at ±Y for the outer gimbal, ±X inside it)
+            if (inner > 0f)
+                foreach (float s in new[] { -1f, 1f })
+                    band.Cylinder(new Vector3(s * inner, 0f, 0f), new Vector3(s * radius, 0f, 0f), 0.016f, 0.016f, 8);
+            Transform holder = Piece(parent, name, at, layer);
+            Piece(holder, "Band", Vector3.zero, layer, band.Build(name + "Band"), metal);
+            Piece(holder, "Glow", Vector3.zero, layer, runes.Build(name + "Glow"), glow);
+            return holder;
+        }
+
+        private static Transform Piece(Transform parent, string name, Vector3 at, int layer)
+        {
+            var child = new GameObject(name) { layer = layer };
+            child.transform.SetParent(parent, false);
+            child.transform.localPosition = at;
+            return child.transform;
+        }
+
+        private static Renderer Piece(Transform parent, string name, Vector3 at, int layer, Mesh mesh, Material material)
+        {
+            Transform child = Piece(parent, name, at, layer);
+            child.gameObject.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var renderer = child.gameObject.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = material;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            return renderer;
         }
 
         /// <summary>

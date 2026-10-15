@@ -18,11 +18,13 @@ namespace StellarDriveDemoTFAdvanced.Combat
     {
         public string Key;
         public string Name;
-        /// <summary>Difficulty shown in the log and the wiki: 1 easy to 4 very hard.</summary>
+        /// <summary>Difficulty: 1 easy to 5 deadly. It meets the players where the danger (Zones.Danger) is this or one more.</summary>
         public int Level;
         public float Health;
         /// <summary>Most speed relative to its target (m/s), push (m/s²), turn gain, and the range it fights at (m).</summary>
         public float MaxSpeed, Accel, Turn, Standoff;
+        /// <summary>How far its guns open fire (m).</summary>
+        public float Range = 650f;
         /// <summary>Guns fire in bursts: seconds of fire, then seconds to reload.</summary>
         public float Burst, Reload;
         /// <summary>How far its aim wanders off the target (degrees): the easier, the worse it shoots.</summary>
@@ -53,6 +55,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
         private const int IronFloor = 1, IronWall = 2, GlassWall = 7, PilotSeat = 3, Chest = 30;
         // Arsenal mod's ship weapons
         public const ushort MachineGun = 9210, MissilePod = 9211, Laser = 9212, Pdc = 9213, Plasma = 9214;
+        public const ushort Ion = 9215, Railgun = 9216, Torpedo = 9217, RocketPod = 9218, Sam = 9219;
 
         public static readonly PirateDesign Scout = new PirateDesign
         {
@@ -95,7 +98,56 @@ namespace StellarDriveDemoTFAdvanced.Combat
             Loot = new[] { (ModItems.Titanium, 25), (ModItems.Uranium, 12), (ModItems.NexoranAlloy, 8), (ModItems.QuantumCore, 2), (ModItems.Meteorite, 6), (ModItems.Artifact, 1) }
         };
 
-        public static readonly PirateDesign[] All = { Scout, Corsair, Raider, Cruiser };
+        /// <summary>A fast striker: a pod of nine rockets loosed in a stream, and a machine gun.</summary>
+        public static readonly PirateDesign Hornet = new PirateDesign
+        {
+            Key = "hornet", Name = Loc.Pick("Frelon pirate", "Pirate hornet", "Avispón pirata"), Level = 2, Health = 1800f, MaxSpeed = 105f, Accel = 40f, Turn = 9f, Standoff = 140f,
+            Burst = 1.4f, Reload = 3.5f, Wobble = 3f, MissileInterval = 0f,
+            HalfWidth = 0, HalfLength = 3, HullColor = new Vector3Int(150, 115, 20), Glow = new Color(1f, 0.85f, 0.1f), DecorId = PirateDecor.HornetId,
+            Weight = 0.3f, GroupMin = 2, GroupMax = 3,
+            Weapons = new[] { (RocketPod, 0f, true, 1f), (MachineGun, 0f, true, -1.5f) },
+            Loot = new[] { (ModItems.Titanium, 8), (ModItems.Uranium, 3), (ModItems.Cryonite, 3) }
+        };
+
+        /// <summary>A sniper: a railgun along its spine and two ion cannons whose hits jam the target's weapons; it keeps far.</summary>
+        public static readonly PirateDesign Lancer = new PirateDesign
+        {
+            Key = "lancer", Name = Loc.Pick("Lancier pirate", "Pirate lancer", "Lancero pirata"), Level = 3, Health = 3600f, MaxSpeed = 75f, Accel = 24f, Turn = 6f, Standoff = 520f, Range = 900f,
+            Burst = 2.5f, Reload = 2.5f, Wobble = 1.2f, MissileInterval = 0f,
+            HalfWidth = 1, HalfLength = 4, HullColor = new Vector3Int(40, 70, 115), Glow = new Color(0.35f, 0.8f, 1f), DecorId = PirateDecor.LancerId,
+            Weight = 0.2f, GroupMin = 1, GroupMax = 2,
+            Weapons = new[] { (Railgun, 0f, true, 2f), (Ion, -1f, true, -0.5f), (Ion, 1f, true, -0.5f) },
+            Loot = new[] { (ModItems.Titanium, 16), (ModItems.Uranium, 6), (ModItems.NexoranAlloy, 5), (ModItems.QuantumCore, 1), (ModItems.Cryonite, 4) }
+        };
+
+        /// <summary>A torpedo boat: heavy homing torpedoes, a SAM battery against fighters and missiles, a point defence.</summary>
+        public static readonly PirateDesign TorpedoBoat = new PirateDesign
+        {
+            Key = "torpedo", Name = Loc.Pick("Torpilleur pirate", "Pirate torpedo boat", "Torpedero pirata"), Level = 4, Health = 6000f, MaxSpeed = 60f, Accel = 18f, Turn = 4.5f, Standoff = 320f,
+            Burst = 2f, Reload = 3f, Wobble = 1f, MissileInterval = 7f,
+            HalfWidth = 1, HalfLength = 5, HullColor = new Vector3Int(62, 72, 40), Glow = new Color(0.6f, 1f, 0.3f), DecorId = PirateDecor.TorpedoId,
+            Weight = 0.15f, GroupMin = 1, GroupMax = 1,
+            Weapons = new[] { (Torpedo, -1f, true, 1.5f), (Torpedo, 1f, true, 1.5f), (MachineGun, -1f, true, 4f), (MachineGun, 1f, true, 4f),
+                (Sam, 0f, true, -1.5f), (Pdc, 0f, true, -4f) },
+            Loot = new[] { (ModItems.Titanium, 22), (ModItems.Uranium, 10), (ModItems.NexoranAlloy, 7), (ModItems.QuantumCore, 2), (ModItems.Meteorite, 4) }
+        };
+
+        /// <summary>The pirates' flagship, only in their own galaxy: plasma, railgun, ion cannons, torpedoes, missiles and every defence.</summary>
+        public static readonly PirateDesign Dreadnought = new PirateDesign
+        {
+            Key = "dreadnought", Name = Loc.Pick("Cuirassé pirate", "Pirate dreadnought", "Acorazado pirata"), Level = 5, Health = 14000f, MaxSpeed = 40f, Accel = 10f, Turn = 3f, Standoff = 340f, Range = 800f,
+            Burst = 3f, Reload = 2.5f, Wobble = 0.7f, MissileInterval = 5f,
+            HalfWidth = 3, HalfLength = 6, HullColor = new Vector3Int(80, 16, 16), Glow = new Color(1f, 0.12f, 0.05f), DecorId = PirateDecor.DreadnoughtId,
+            Weight = 0.1f, GroupMin = 1, GroupMax = 1,
+            Weapons = new[] { (Plasma, -2f, true, 4f), (Plasma, 2f, true, 4f), (Railgun, 0f, true, 5f), (Ion, -3f, true, 1f), (Ion, 3f, true, 1f),
+                (MachineGun, -3f, true, 4.5f), (MachineGun, 3f, true, 4.5f), (Torpedo, -1.5f, true, 0f), (Torpedo, 1.5f, true, 0f),
+                (MissilePod, -2.5f, true, -3f), (MissilePod, 2.5f, true, -3f), (Sam, 0f, true, -2f), (Pdc, -2f, true, -5.5f), (Pdc, 2f, true, -5.5f) },
+            Loot = new[] { (ModItems.Titanium, 35), (ModItems.Uranium, 18), (ModItems.NexoranAlloy, 14), (ModItems.QuantumCore, 3), (ModItems.Meteorite, 8),
+                (ModItems.Artifact, 2), (ModItems.ExoticMatter, 1) }
+        };
+
+        /// <summary>Every design (the first four keep their DevPirateTest numbers).</summary>
+        public static readonly PirateDesign[] All = { Scout, Corsair, Raider, Cruiser, Hornet, Lancer, TorpedoBoat, Dreadnought };
 
         /// <summary>A pirate base (a station in the Erebos galaxy): it does not move, fires what bears, launches missiles and fighters.</summary>
         public static readonly PirateDesign Base = new PirateDesign
@@ -109,16 +161,35 @@ namespace StellarDriveDemoTFAdvanced.Combat
         public static PirateDesign ByKey(string key) => key == Base.Key ? Base : All.FirstOrDefault(d => d.Key == key) ?? Corsair;
 
         /// <summary>A design drawn at random by weight.</summary>
-        public static PirateDesign Random()
+        public static PirateDesign Random() => Draw(All);
+
+        /// <summary>
+        /// A design for this danger (1-5): mostly the ones of its level, now and then the level
+        /// below (danger 1: scouts only).
+        /// </summary>
+        public static PirateDesign Random(int danger)
         {
-            float roll = UnityEngine.Random.value * All.Sum(d => d.Weight);
-            foreach (PirateDesign design in All)
+            danger = Mathf.Clamp(danger, 1, Zones.MaxDanger);
+            var pool = All.Where(d => d.Level == danger || d.Level == danger - 1).ToList();
+            return Draw(pool, d => d.Level == danger ? 2f : 1f);
+        }
+
+        /// <summary>The escort of a big ship (danger 4 and 5): scouts or hornets, corsairs or hornets in Erebos.</summary>
+        public static PirateDesign Escort(int danger) => danger >= Zones.MaxDanger
+            ? (UnityEngine.Random.value < 0.5f ? Corsair : Hornet)
+            : (UnityEngine.Random.value < 0.6f ? Scout : Hornet);
+
+        private static PirateDesign Draw(IList<PirateDesign> pool, System.Func<PirateDesign, float> bias = null)
+        {
+            float Weight(PirateDesign d) => d.Weight * (bias?.Invoke(d) ?? 1f);
+            float roll = UnityEngine.Random.value * pool.Sum(Weight);
+            foreach (PirateDesign design in pool)
             {
-                roll -= design.Weight;
+                roll -= Weight(design);
                 if (roll <= 0f)
                     return design;
             }
-            return Corsair;
+            return pool.Count > 0 ? pool[pool.Count - 1] : Corsair;
         }
 
         /// <summary>A box hull one deck high, glass cockpit at the nose, its fairing, seat and weapons.</summary>

@@ -63,6 +63,11 @@ namespace StellarDriveDemoTFAdvanced.Combat
         public uint Target;
         public PirateDesign Design;
         public int Count;
+        /// <summary>Lighter ships flying with a big one (danger 4 and 5), or null.</summary>
+        public PirateDesign Escort;
+        public int EscortCount;
+        /// <summary>The danger where its target was when it set off (1-5).</summary>
+        public int Danger;
         /// <summary>Where it comes from, seen from the target (in the target's space).</summary>
         public Vector3 Direction;
         /// <summary>Its distance to the target (m).</summary>
@@ -140,6 +145,8 @@ namespace StellarDriveDemoTFAdvanced.Combat
         private static void Load(ShipsServerTracker ships)
         {
             _loaded = true;
+            if (DevHarness.Active)
+                Zones.LogPlanets();
             string path = SavePath();
             if (path == null || !File.Exists(path))
                 return;
@@ -261,7 +268,9 @@ namespace StellarDriveDemoTFAdvanced.Combat
             // Hidden ships are found three times less often
             List<TrackedShipServer> visible = targets.Where(t => !Cloaked(t.Id)).ToList();
             _inSpaceSeconds += visible.Count > 0 ? 5f : 5f / 3f;
-            float interval = Mathf.Max(1f, Settings.PirateIntervalMinutes.Value) * 60f;
+            // The farther from home, the more often they come: a third less often near home, a third more in Erebos
+            int danger = targets.Max(t => Zones.Danger(t.PhysicsState.SpaceId, t.PhysicsState.Position));
+            float interval = Mathf.Max(1f, Settings.PirateIntervalMinutes.Value) * 60f * DangerInterval[danger];
             // In their territory, around the Bastion, they come four times as often
             if (targets.Any(t => Zones.NearBastion(t.PhysicsState.SpaceId, t.PhysicsState.Position)))
                 interval *= 0.25f;
@@ -270,12 +279,34 @@ namespace StellarDriveDemoTFAdvanced.Combat
             _inSpaceSeconds = 0f;
             List<TrackedShipServer> pool = visible.Count > 0 ? visible : targets;
             TrackedShipServer target = pool[Random.Range(0, pool.Count)];
-            // A difficulty drawn at random: scouts come in packs, cruisers alone
-            PirateDesign design = PirateShips.Random();
+            Raid raid = NewRaid(target, Zones.Danger(target.PhysicsState.SpaceId, target.PhysicsState.Position));
+            Raids.Add(raid);
+            AdvancedMod.Log.Msg($"pirates: danger {raid.Danger}: {raid.Count} {raid.Design.Name}(s){(raid.Escort != null ? $" and {raid.EscortCount} {raid.Escort.Name}(s)" : "")} on their way to ship {target.Id}, {raid.Distance / 1000f:0} km out");
+        }
+
+        /// <summary>Time between two attacks for each danger (times PirateIntervalMinutes).</summary>
+        private static readonly float[] DangerInterval = { 1f, 1.5f, 1.2f, 1f, 0.85f, 0.75f };
+
+        /// <summary>
+        /// A raid as tough as the danger where its target flies: scouts alone near home, then
+        /// corsairs and hornets, raiders and lancers, cruisers and torpedo boats with an escort,
+        /// and the dreadnoughts of Erebos.
+        /// </summary>
+        private static Raid NewRaid(TrackedShipServer target, int danger)
+        {
+            PirateDesign design = PirateShips.Random(danger);
             int count = Random.Range(design.GroupMin, design.GroupMax + 1);
-            float start = Mathf.Max(SpawnDistance * 2f, Settings.PirateRaidStartKm.Value * 1000f);
-            Raids.Add(new Raid { Target = target.Id, Design = design, Count = count, Direction = Random.onUnitSphere, Distance = start });
-            AdvancedMod.Log.Msg($"pirates: {count} {design.Name}(s) on their way to ship {target.Id}, {start / 1000f:0} km out");
+            // The first pirates met, near home, come one or two at a time
+            if (danger <= 1)
+                count = Random.Range(1, 3);
+            var raid = new Raid { Target = target.Id, Design = design, Count = count, Danger = danger, Direction = Random.onUnitSphere,
+                Distance = Mathf.Max(SpawnDistance * 2f, Settings.PirateRaidStartKm.Value * 1000f) };
+            if (design.Level >= 4 && Random.value < (danger >= Zones.MaxDanger ? 0.8f : 0.5f))
+            {
+                raid.Escort = PirateShips.Escort(danger);
+                raid.EscortCount = Random.Range(1, 3);
+            }
+            return raid;
         }
 
         /// <summary>Raids close in; one that arrives jumps in beside its target.</summary>
@@ -293,7 +324,10 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 if (target == null)
                     continue;
                 // A hidden ship: they only know roughly where it is, they jump in farther out
-                SpawnNear(ships, target, raid.Design, raid.Count, Cloaked(target.Id) ? SpawnDistance * 2f : SpawnDistance);
+                float distance = Cloaked(target.Id) ? SpawnDistance * 2f : SpawnDistance;
+                SpawnNear(ships, target, raid.Design, raid.Count, distance);
+                if (raid.Escort != null)
+                    SpawnNear(ships, target, raid.Escort, raid.EscortCount, distance * 1.1f);
             }
         }
 
@@ -395,7 +429,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
             {
                 foreach (StatefulPart part in self.StatefulParts)
                 {
-                    if (part.Settings != null && part.Settings.id >= PirateShips.MachineGun && part.Settings.id <= 9219)
+                    if (part.Settings != null && part.Settings.id >= PirateShips.MachineGun && part.Settings.id <= PirateShips.Sam)
                         pirate.Weapons[part.Id] = part.Settings.id;
                 }
             }
@@ -453,7 +487,8 @@ namespace StellarDriveDemoTFAdvanced.Combat
             // Guns: a burst while lined up, then a reload before the next. A hidden ship is a blurred
             // target: they must come closer to fire, and their missiles lock on later
             bool hidden = Cloaked(target.Id);
-            bool aligned = angle < 6f && distance < (hidden ? 400f : 650f);
+            float range = pirate.Design.Range;
+            bool aligned = angle < 6f && distance < (hidden ? range * 0.6f : range);
             if (aligned && now >= pirate.ReloadUntil && now >= pirate.BurstUntil)
             {
                 pirate.BurstUntil = now + pirate.Design.Burst;
@@ -502,8 +537,9 @@ namespace StellarDriveDemoTFAdvanced.Combat
             if (distance < (hidden ? 1500f : 4000f) && now >= pirate.NextLaunch && All.Values.Count(p => p.LaunchedBy == self.Id) < 3)
             {
                 pirate.NextLaunch = now + 150f;
-                PirateDesign fighters = Random.value < 0.6f ? PirateShips.Scout : PirateShips.Corsair;
-                SpawnNear(ships, target, fighters, fighters == PirateShips.Scout ? 2 : 1, SpawnDistance, self);
+                float roll = Random.value;
+                PirateDesign fighters = roll < 0.4f ? PirateShips.Scout : roll < 0.7f ? PirateShips.Hornet : PirateShips.Corsair;
+                SpawnNear(ships, target, fighters, fighters == PirateShips.Corsair ? 1 : 2, SpawnDistance, self);
                 AdvancedMod.Log.Msg($"pirates: base {self.Id} launches {fighters.Name}s at ship {target.Id}");
             }
         }
@@ -616,13 +652,13 @@ namespace StellarDriveDemoTFAdvanced.Combat
             value = 0;
             if (!All.TryGetValue(shipId, out Pirate pirate) || !pirate.Weapons.TryGetValue(partId, out ushort kind))
                 return false;
-            if (kind == PirateShips.MissilePod || kind == 9217 || kind == 9218)
+            if (kind == PirateShips.MissilePod || kind == PirateShips.Torpedo)
                 value = Time.time < pirate.PulseUntil ? 1 : 0;
-            else if (kind == PirateShips.Pdc || kind == 9219)
+            else if (kind == PirateShips.Pdc || kind == PirateShips.Sam)
                 value = 1;
             else
                 value = pirate.Guns && (!pirate.IsBase || pirate.Bearing.Contains(partId)) ? 1 : 0;
-            // (machine guns, lasers and plasma cannons fire in its bursts)
+            // (machine guns, lasers, plasma and ion cannons, railguns and rocket pods fire in its bursts)
             return true;
         }
 

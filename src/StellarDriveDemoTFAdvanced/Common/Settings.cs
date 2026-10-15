@@ -35,6 +35,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> Pirates { get; private set; }
         public static MelonPreferences_Entry<float> PirateIntervalMinutes { get; private set; }
         public static MelonPreferences_Entry<float> PirateSafeRadiusKm { get; private set; }
+        public static MelonPreferences_Entry<float> PirateDangerStepKm { get; private set; }
         public static MelonPreferences_Entry<float> PirateRaidStartKm { get; private set; }
         public static MelonPreferences_Entry<float> PirateApproachKmPerSecond { get; private set; }
         public static MelonPreferences_Entry<bool> RadarAlarm { get; private set; }
@@ -126,13 +127,15 @@ namespace StellarDriveDemoTFAdvanced.Common
             DevPirateShowcase = _category.CreateEntry("DevPirateShowcase", false,
                 description: "For mod development: with DevWorld, each pirate design held beside the player and photographed.");
             DevPirateTest = _category.CreateEntry("DevPirateTest", 0,
-                description: "For mod development: with DevWorld, pirates attack the ship nearest the player (1 scout, 2 corsair, 3 raider, 4 cruiser, 5 random).");
+                description: "For mod development: with DevWorld, pirates attack the ship nearest the player (1 scout, 2 corsair, 3 raider, 4 cruiser, 5 random, 6 base, 7 hornet, 8 lancer, 9 torpedo boat, 10 dreadnought, 11-15 drawn for danger 1-5).");
             Pirates = _category.CreateEntry("Pirates", true,
                 description: "Pirate ships (with the Arsenal mod only, whose weapons they use) now and then attack a player's ship flying in space.");
             PirateIntervalMinutes = _category.CreateEntry("PirateIntervalMinutes", 12f,
                 description: "Average time in space between two pirate attacks (minutes).");
             PirateSafeRadiusKm = _category.CreateEntry("PirateSafeRadiusKm", 2000f,
                 description: "Safe zone around the home planet (442 Otrera b): no pirate attack within this distance of its centre, and pirates break off there (km, 0: none).");
+            PirateDangerStepKm = _category.CreateEntry("PirateDangerStepKm", 5000000f,
+                description: "Pirates get tougher the farther you fly from the home planet: danger 1 (scouts only) just outside the safe zone, one level more every this many km, 4 at most in the Otrera system, 5 in the Erebos galaxy.");
             PirateRaidStartKm = _category.CreateEntry("PirateRaidStartKm", 25000f,
                 description: "Pirate raids are detected this far away (km) and close in before attacking: a radar sees them coming from its range.");
             PirateApproachKmPerSecond = _category.CreateEntry("PirateApproachKmPerSecond", 250f,
