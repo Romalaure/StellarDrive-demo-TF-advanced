@@ -77,7 +77,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
 
         private static void Postfix(ShipThrustersUpdater __instance, float deltaTime, IShipStateWrite ____ship, Ships.Cables.ConnectionsServerTracker ____connections)
         {
-            if (PreviousLevels.Count == 0)
+            if (PreviousLevels.Count == 0 || DevHarness.Off("engines"))
                 return;
             try
             {
@@ -162,7 +162,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
         {
             try
             {
-                if (____ship == null || ____shipRigidbody == null)
+                if (____ship == null || ____shipRigidbody == null || DevHarness.Off("torque"))
                     return;
                 if (_ships == null)
                     _ships = ServiceLocator.GetService<IShipsServerProvider>();

@@ -105,6 +105,22 @@ namespace StellarDriveDemoTFAdvanced.Power
         }
     }
 
+    /// <summary>
+    /// The game's gyroscope controller asks each gyroscope for exactly the torque that brings the
+    /// ship to the wanted turn rate in one step. It must know that a quantum gyroscope is
+    /// several times stronger, or it asks for several times too much: the ship overshoots, swings
+    /// back at the next step and so on (the ship shook while turning and after).
+    /// </summary>
+    [HarmonyPatch(typeof(Ships.Parts.Gyroscope.GyroscopesUpdater), "CalculateGyroStrength")]
+    internal static class QuantumGyroscopeControlPatch
+    {
+        private static void Prefix(StatefulPart part, ref float angularVelGainImpactOnShip)
+        {
+            if (part?.Settings != null && part.Settings.id == PowerCatalog.QuantumGyroId && !DevHarness.Off("gyrofix"))
+                angularVelGainImpactOnShip *= Mathf.Max(1f, PowerCatalog.QuantumGyroFactor.Value);
+        }
+    }
+
     /// <summary>The quantum gyroscope turns the ship with several gyroscopes' torque.</summary>
     [HarmonyPatch(typeof(ShipRotation), "CalculateShipRotationForce")]
     internal static class QuantumGyroscopePatch
@@ -116,7 +132,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             try
             {
                 float extra = Mathf.Max(0f, PowerCatalog.QuantumGyroFactor.Value) - 1f;
-                if (extra == 0f)
+                if (extra == 0f || DevHarness.Off("gyro"))
                     return;
                 foreach (StatefulPart part in stateRead.GetAllStatefulParts<GyroscopeState>())
                 {

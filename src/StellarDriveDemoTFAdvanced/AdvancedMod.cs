@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using MelonLoader;
@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.17.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.18.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -36,6 +36,7 @@ namespace StellarDriveDemoTFAdvanced
             Power.MachineTest.Install();
             Power.NuclearTest.Install();
             Combat.PirateTest.Install();
+            TFItems.TFItemsMod.Initialize();
             Parts.Showcase.Install();
             Parts.BuildMenuDev.Install();
             Construction.SnapTest.Install();
@@ -61,6 +62,8 @@ namespace StellarDriveDemoTFAdvanced
             int applied = 0, failed = 0;
             foreach (Type type in types.Where(t => t.GetCustomAttributes(typeof(HarmonyLib.HarmonyPatch), false).Length > 0))
             {
+                if (type.Namespace != null && type.Namespace.StartsWith("StellarDriveDemoTFAdvanced.TFItems") && !TFItems.TFItemsMod.Active)
+                    continue;
                 try
                 {
                     HarmonyInstance.CreateClassProcessor(type).Patch();
@@ -110,6 +113,7 @@ namespace StellarDriveDemoTFAdvanced
             Try("the cartography table", Construction.ScannerTable.Register);
             Try("the radars", Combat.Radar.Register);
             Try("the stealth generator", Combat.Cloak.Register);
+            TFItems.TFItemsMod.RegisterParts(Try);
             _partsRegistered = true;
             ScheduleSelfTest();
         }
@@ -139,6 +143,7 @@ namespace StellarDriveDemoTFAdvanced
             Worlds.LootCaches.OnSceneLoaded(_inGame);
             Combat.Pirates.OnSceneLoaded(_inGame);
             Combat.Radar.OnSceneLoaded();
+            TFItems.TFItemsMod.OnSceneLoaded();
             DevHarness.OnSceneLoaded(sceneName);
             if (_partsRegistered)
             {
@@ -152,6 +157,8 @@ namespace StellarDriveDemoTFAdvanced
         public override void OnUpdate()
         {
             DevHarness.Update();
+            if (_inGame)
+                StabilityProbe.Update();
             if (_inGame && Worlds.BlackHole.EnsureAnchor())
                 Worlds.BlackHole.ServerUpdate();
             if (_inGame)
@@ -164,6 +171,8 @@ namespace StellarDriveDemoTFAdvanced
                 Combat.Pirates.Update();
             if (_inGame && _partsRegistered)
                 UpdateRadars();
+            if (_partsRegistered)
+                TFItems.TFItemsMod.Update();
             if (_partsRegistered && Settings.SelfTest.Value)
                 RunSelfTest();
             if (_partsRegistered && _inGame)
@@ -174,6 +183,8 @@ namespace StellarDriveDemoTFAdvanced
         {
             if (_inGame)
                 Worlds.BlackHoleVisuals.LateUpdate();
+            if (_partsRegistered)
+                TFItems.TFItemsMod.LateUpdate();
         }
 
         private static bool _partsRegistered;
@@ -182,6 +193,8 @@ namespace StellarDriveDemoTFAdvanced
         {
             if (_inGame)
                 Combat.Radar.OnGUI();
+            if (_partsRegistered)
+                TFItems.TFItemsMod.OnGUI();
         }
 
         private static void UpdateRadars()

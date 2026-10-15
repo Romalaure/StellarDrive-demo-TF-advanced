@@ -16,7 +16,7 @@ namespace StellarDriveDemoTFAdvanced.Common
     {
         private static void Postfix(UnreliableSyncData __instance, ref int __result)
         {
-            if (__result > 0)
+            if (__result > 0 && !DevHarness.Off("sync"))
                 __result = __instance.Spaces.Count * 72 + __instance.ShipPhysicsUpdates.Count * 64 + __instance.WorldObjectPhysicsUpdates.Count * 48;
         }
     }

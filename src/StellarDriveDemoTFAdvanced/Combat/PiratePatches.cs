@@ -43,6 +43,8 @@ namespace StellarDriveDemoTFAdvanced.Combat
 
         private static void Postfix(float deltaTime, IShipStateWrite ____ship, ShipRigidbody ____shipRigidbody)
         {
+            if (DevHarness.Active && ____ship != null && ____shipRigidbody != null)
+                StabilityProbe.Physics(____ship.Id, Body(____shipRigidbody));
             if (Pirates.All.Count == 0 || ____ship == null || !Pirates.All.TryGetValue(____ship.Id, out Pirate pirate))
                 return;
             try

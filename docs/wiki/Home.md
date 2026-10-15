@@ -37,4 +37,5 @@ En jeu, la **[table de cartographie](Machines.md#table-de-cartographie)** affich
 - [Recherche](Recherche.md) : les technologies à débloquer à la table de recherche
 - [Trous noirs](Trous-noirs.md) et [stations abandonnées et épaves](Stations-abandonnees.md)
 - [Pirates](Pirates.md) : vaisseaux ennemis armés par le mod Arsenal
+- [Équipement TF](Equipement-TF.md) : luminaires, caméra, capsule de téléportation, radio, râtelier, objets infinis
 - [Itinéraire conseillé](Itineraire.md)

@@ -25,5 +25,6 @@
 - [Research](Recherche.md)
 - [Black holes](Trous-noirs.md)
 - [Pirates](Pirates.md)
+- [TF equipment](Equipement-TF.md)
 - [Stations and wrecks](Stations-abandonnees.md)
 - [Route](Itineraire.md)

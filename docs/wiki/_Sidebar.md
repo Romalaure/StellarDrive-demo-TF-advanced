@@ -25,5 +25,6 @@
 - [Recherche](Recherche.md)
 - [Trous noirs](Trous-noirs.md)
 - [Pirates](Pirates.md)
+- [Équipement TF](Equipement-TF.md)
 - [Stations et épaves](Stations-abandonnees.md)
 - [Itinéraire](Itineraire.md)

@@ -236,9 +236,12 @@ namespace StellarDriveDemoTFAdvanced.Power
             if (_bubble == null && !CreateBubble(ship))
                 return;
             _bubble.SetActive(true);
+            // Measuring the whole ship walks all its renderers (thousands on a big ship): often
+            // just after the field comes up, then every 20 s (a ship rarely changes in flight)
             if (Time.unscaledTime >= _nextFit)
             {
-                _nextFit = Time.unscaledTime + 2f;
+                _fits++;
+                _nextFit = Time.unscaledTime + (_fits < 5 ? 2f : 20f);
                 Fit(ship);
             }
             // Arsenal missiles and rockets go off on the bubble
@@ -267,6 +270,8 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private float _nextPaint;
         private uint _shipId;
+        private int _fits;
+        private readonly List<Renderer> _renderers = new List<Renderer>();
 
         /// <summary>
         /// The bubble's look, recomputed each frame in its vertex colors (the shader multiplies them
@@ -426,7 +431,8 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             bool any = false;
             var local = new Bounds();
-            foreach (Renderer r in ship.GetComponentsInChildren<Renderer>())
+            ship.GetComponentsInChildren(_renderers);
+            foreach (Renderer r in _renderers)
             {
                 // Not the bubble itself (shell and lattice): it would measure itself and grow at each fit
                 if (r.transform.IsChildOf(_bubble.transform) || !r.enabled || !r.gameObject.activeInHierarchy)

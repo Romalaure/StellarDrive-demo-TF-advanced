@@ -37,6 +37,9 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static readonly List<(float Delay, string Name, Action Run)> Steps = new List<(float, string, Action)>();
         private static readonly HashSet<string> Done = new HashSet<string>();
 
+        /// <summary>Development: a feature switched off by DevDisable (comma separated names), to find what misbehaves.</summary>
+        public static bool Off(string feature) => Active && !string.IsNullOrEmpty(Settings.DevDisable.Value) && ("," + Settings.DevDisable.Value.Replace(" ", "") + ",").Contains("," + feature + ",");
+
         public static bool Active => !string.IsNullOrWhiteSpace(Settings.DevWorld.Value);
 
         public static void OnSceneLoaded(string sceneName)

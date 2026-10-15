@@ -298,7 +298,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 else
                     ships++;
             }
-            foreach (Transform t in FindObjectsByType<Transform>(FindObjectsSortMode.None).Where(t => t.name.StartsWith("TFA_Ruin") || t.name.StartsWith("TFA_City") || t.name.StartsWith("TFA_Village")))
+            foreach (Transform t in Buildings())
             {
                 if ((t.position - center).sqrMagnitude > ScannerTable.Range * ScannerTable.Range * 2f)
                     continue;
@@ -317,6 +317,26 @@ namespace StellarDriveDemoTFAdvanced.Construction
         }
 
         private static readonly List<GameObject> RootBuffer = new List<GameObject>();
+        private static readonly List<Transform> BuildingCache = new List<Transform>();
+        private static float _nextBuildingScan;
+
+        // Ruins, city and village pieces: a walk over every Transform of the scene, so done at
+        // most every 15 s for all tables (buildings do not move)
+        private static List<Transform> Buildings()
+        {
+            BuildingCache.RemoveAll(t => t == null);
+            if (Time.unscaledTime < _nextBuildingScan)
+                return BuildingCache;
+            _nextBuildingScan = Time.unscaledTime + 15f;
+            BuildingCache.Clear();
+            foreach (Transform t in FindObjectsByType<Transform>(FindObjectsSortMode.None))
+            {
+                string n = t.name;
+                if (n.StartsWith("TFA_Ruin") || n.StartsWith("TFA_City") || n.StartsWith("TFA_Village"))
+                    BuildingCache.Add(t);
+            }
+            return BuildingCache;
+        }
 
         // The loaded scenes' root objects (ships' visuals are roots): far fewer than every Transform
         private static IEnumerable<Transform> SceneRoots()

@@ -267,6 +267,12 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Équipement TF et stabilité (v0.18)
+
+Les **luminaires, la caméra et sa tablette, la capsule de téléportation, la radio, le râtelier à outils et les objets infinis** du mod TF sont maintenant dans TF Advanced (onglet **TF Équipement**, mêmes numéros de pièces : ce qui est construit reste). Les objets infinis sont devenus **extrêmement chers**. Le mod TF 0.15 les lui cède. Détail : [wiki, Équipement TF](docs/wiki/Equipement-TF.md).
+
+**Vaisseau qui tremble** : le gyroscope quantique (couple ×5) faisait osciller le vaisseau à chaque pas physique dès qu'il tournait, et après (le régulateur des gyroscopes du jeu lui demandait 5 fois trop). Il connaît maintenant sa force : plus d'oscillation, et de 47-55 à 65-70 images/s en virage sur un gros vaisseau. Aussi : plus de milliers de messages « NetworkManager not found » au menu (TF Advanced et TF), bulle de champ de force et table de cartographie qui ne parcourent plus tout le vaisseau ou toute la scène toutes les 2-3 s.
+
 ## Galaxie d'Érèbe
 
 Une seconde étoile (copie de l'étoile du jeu, une géante orange) à 0,18 année-lumière, avec **Pyros** (volcanique), **Thalassa** (océanique), **Mycélia** (fongique, champignons géants) et **Cristallis** (cristalline, anneau), le trou noir **Œil d'Érèbe** et trois épaves avec de la matière noire. Le jeu n'attend qu'une étoile : l'éclairage, le jour et la nuit, la carte stellaire et le suivi d'étoile prennent l'étoile la plus proche ; les deux restent visibles. La carte stellaire n'affiche que le système où l'on se trouve. Réglage `Erebos`.

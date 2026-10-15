@@ -181,7 +181,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
         /// <summary>Host, every frame.</summary>
         public static void Update()
         {
-            if (!GameServices.IsServer || !Enabled)
+            if (!GameServices.IsServer || !Enabled || DevHarness.Off("pirates"))
                 return;
             ShipsServerTracker ships = Ships;
             if (ships == null)

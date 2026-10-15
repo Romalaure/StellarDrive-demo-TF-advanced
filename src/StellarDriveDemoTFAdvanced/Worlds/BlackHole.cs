@@ -301,7 +301,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
         private static void Postfix(EnvironmentProvider __instance, uint spaceId, Vector3 position, ref Vector3 __result)
         {
-            if (!BlackHole.Active)
+            if (!BlackHole.Active || DevHarness.Off("gravity"))
                 return;
             try
             {

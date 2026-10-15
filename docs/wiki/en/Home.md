@@ -37,4 +37,5 @@ In game, the **[cartography table](Machines.md#cartography-table)** shows the ca
 - [Research](Recherche.md): the technologies to unlock at the research table
 - [Black holes](Trous-noirs.md) and [abandoned stations and wrecks](Stations-abandonnees.md)
 - [Pirates](Pirates.md): enemy ships armed by the Arsenal mod
+- [TF equipment](Equipement-TF.md): lamps, camera, teleport capsule, radio, tool rack, infinite parts
 - [Suggested route](Itineraire.md)

@@ -49,7 +49,8 @@ namespace StellarDriveDemoTFAdvanced.Common
         /// <summary>The host's power tracker; null on a client that does not run the server.</summary>
         public static PowerServerTracker PowerServer => IsServer ? PowerServerCache.Get() : null;
 
-        public static bool IsServer => InstanceFinder.IsServerStarted;
+        // Not InstanceFinder: it logs a line at each call while there is no network manager (the menu)
+        public static bool IsServer => FishNet.Managing.NetworkManager.Instances.Count > 0 && FishNet.Managing.NetworkManager.Instances[0] != null && FishNet.Managing.NetworkManager.Instances[0].IsServerStarted;
 
         public static void Invalidate()
         {

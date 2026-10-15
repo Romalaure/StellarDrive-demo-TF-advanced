@@ -52,6 +52,8 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> DevVisitBlackHole { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitStations { get; private set; }
         public static MelonPreferences_Entry<string> DevWorld { get; private set; }
+        public static MelonPreferences_Entry<string> DevDisable { get; private set; }
+        public static MelonPreferences_Entry<bool> DevFlyTest { get; private set; }
         public static MelonPreferences_Entry<float> DevQuitSeconds { get; private set; }
 
         public static void Load()
@@ -143,6 +145,10 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevMachineTest, the force field generator's part id (0: the basic one).");
             DevVisitPlanetId = _category.CreateEntry("DevVisitPlanetId", 0,
                 description: "For mod development: with DevVisitPlanets, visit only this planet (0: all).");
+            DevFlyTest = _category.CreateEntry("DevFlyTest", false,
+                description: "For mod development: with DevWorld, the seats of the ship nearest the player ask for thrust, then a turn, then both (from 30 s, 10 s each).");
+            DevDisable = _category.CreateEntry("DevDisable", "",
+                description: "For mod development: with DevWorld, features switched off (comma separated): engines, torque, gravity, gyro, sync, pirates.");
             DevVisitBlackHole = _category.CreateEntry("DevVisitBlackHole", false,
                 description: "For mod development: with DevWorld, look for the black hole from TF Petra and take screenshots.");
             DevVisitStations = _category.CreateEntry("DevVisitStations", false,
