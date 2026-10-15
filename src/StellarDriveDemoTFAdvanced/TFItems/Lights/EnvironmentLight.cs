@@ -23,6 +23,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
         private static IWorldTransposeClient _transpose;
         private static float _nextLookup;
         private static int _mask = -1;
+        private static int _planetFrame = -1;
+        private static bool _hasPlanet;
+        private static Vector3 _planetCenter;
+        private static float _planetRadius;
 
         public static float Daylight(Vector3 position)
         {
@@ -32,13 +36,23 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             Vector3 toSun = -sun.transform.forward;
 
             float day = 1f;
-            IPlanetProperties planet = _planets?.GetNearestPlanet(ClientOrigin.LocalVisualSpace);
-            if (planet != null && _transpose != null)
+            // The nearest planet is the same for every lamp: looked up once a frame
+            if (_planetFrame != Time.frameCount)
             {
-                Vector3 center = _transpose.Position(planet.FixedWorldSpace, ClientOrigin.LocalVisualSpace, Vector3.zero);
-                Vector3 fromCenter = position - center;
+                _planetFrame = Time.frameCount;
+                IPlanetProperties planet = _planets?.GetNearestPlanet(ClientOrigin.LocalVisualSpace);
+                _hasPlanet = planet != null && _transpose != null;
+                if (_hasPlanet)
+                {
+                    _planetCenter = _transpose.Position(planet.FixedWorldSpace, ClientOrigin.LocalVisualSpace, Vector3.zero);
+                    _planetRadius = planet.Radius;
+                }
+            }
+            if (_hasPlanet)
+            {
+                Vector3 fromCenter = position - _planetCenter;
                 // Within a few radii, the planet decides day and night
-                if (fromCenter.magnitude < planet.Radius * 3f)
+                if (fromCenter.magnitude < _planetRadius * 3f)
                     day = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(-0.08f, 0.25f, Vector3.Dot(fromCenter.normalized, toSun)));
             }
             if (day <= 0.001f)

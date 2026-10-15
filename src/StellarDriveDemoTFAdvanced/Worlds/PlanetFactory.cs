@@ -58,7 +58,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             {
                 foreach (PlanetSpec spec in PlanetCatalog.All)
                 {
-                    if (spec.System == PlanetWiki.Erebos && erebos == null)
+                    if (spec.System == PlanetWiki.Erebos && (erebos == null || DevHarness.Off("erebosplanets")))
                         continue;
                     try
                     {

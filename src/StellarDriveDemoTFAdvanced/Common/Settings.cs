@@ -54,6 +54,8 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> DevVisitStations { get; private set; }
         public static MelonPreferences_Entry<string> DevWorld { get; private set; }
         public static MelonPreferences_Entry<string> DevDisable { get; private set; }
+        public static MelonPreferences_Entry<bool> DevProfile { get; private set; }
+        public static MelonPreferences_Entry<bool> DevProfileGame { get; private set; }
         public static MelonPreferences_Entry<bool> DevFlyTest { get; private set; }
         public static MelonPreferences_Entry<float> DevQuitSeconds { get; private set; }
 
@@ -150,6 +152,10 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevVisitPlanets, visit only this planet (0: all).");
             DevFlyTest = _category.CreateEntry("DevFlyTest", false,
                 description: "For mod development: with DevWorld, the seats of the ship nearest the player ask for thrust, then a turn, then both (from 30 s, 10 s each).");
+            DevProfile = _category.CreateEntry("DevProfile", false,
+                description: "For mod development: with DevWorld, times this mod's per-frame methods and patches and logs the costliest every 15 s.");
+            DevProfileGame = _category.CreateEntry("DevProfileGame", false,
+                description: "For mod development: with DevProfile, also times the per-frame callbacks of the game and of the other mods.");
             DevDisable = _category.CreateEntry("DevDisable", "",
                 description: "For mod development: with DevWorld, features switched off (comma separated): engines, torque, gravity, gyro, sync, pirates.");
             DevVisitBlackHole = _category.CreateEntry("DevVisitBlackHole", false,

@@ -229,7 +229,17 @@ namespace StellarDriveDemoTFAdvanced.Power
         /// <summary>Host, every frame: ships flying through an open portal jump to their target.</summary>
         public static void Update()
         {
-            if (Generators.Count == 0)
+            // Nothing to do (and nothing to look up) while no portal is open
+            bool open = false;
+            foreach (Entry entry in Generators)
+            {
+                if (entry.Runtime.Phase == Phase.Open)
+                {
+                    open = true;
+                    break;
+                }
+            }
+            if (!open)
                 return;
             var ships = ServiceLocator.GetService<ShipsServerTracker>();
             var transpose = ServiceLocator.GetService<IWorldTransposeServer>();

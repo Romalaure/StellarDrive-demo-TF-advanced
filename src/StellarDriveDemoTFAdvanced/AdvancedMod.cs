@@ -85,6 +85,7 @@ namespace StellarDriveDemoTFAdvanced
                 Parts.UpgradeTableGuard.Install(HarmonyInstance);
                 Power.ArsenalShield.Install(HarmonyInstance);
                 Combat.Pirates.Install(HarmonyInstance);
+                Common.DevProfiler.Install(HarmonyInstance);
             }
             catch (Exception e)
             {
@@ -156,6 +157,7 @@ namespace StellarDriveDemoTFAdvanced
 
         public override void OnUpdate()
         {
+            DevProfiler.Frame();
             DevHarness.Update();
             if (_inGame)
                 StabilityProbe.Update();
