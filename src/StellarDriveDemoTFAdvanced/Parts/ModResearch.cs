@@ -58,6 +58,8 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 Parts = new ushort[] { 7391, 7392, 7393, 7394, 7329, 7318 }, Cost = new[] { (ModItems.Meteorite, 10), (ModItems.QuantumCore, 1), (ModItems.NexoranAlloy, 5) } },
             new Tech { Id = 7511, Name = Loc.Pick("Portail dimensionnel", "Dimensional portal"), Requires = new ushort[] { 7510 }, Position = new Vector2Int(8, 2),
                 Parts = new ushort[] { 7395 }, Cost = new[] { (ModItems.Meteorite, 20), (ModItems.QuantumCore, 2), (ModItems.ExoticMatter, 3), (ModItems.Artifact, 2) } },
+            new Tech { Id = 7513, Name = Loc.Pick("Guerre électronique", "Electronic warfare"), Requires = new ushort[] { 7508 }, Position = new Vector2Int(4, 0),
+                Parts = new ushort[] { 7307, 7308, 7309, 7310 }, Cost = new[] { (Copper, 25), (Glass, 10), (ModItems.Titanium, 10), (ModItems.Quartz, 5) } },
         };
 
         private static readonly HashSet<ushort> Locked = new HashSet<ushort>();

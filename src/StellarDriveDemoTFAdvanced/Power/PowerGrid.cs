@@ -89,6 +89,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             Portal.Forget();
             Solar.Forget();
             LifeSupport.Forget();
+            Combat.CombatPower.Forget();
             _ships = null;
             _connections = null;
         }
@@ -117,6 +118,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             Portal.BeforeTransfers(power, _ships, _connections, deltaTime);
             Solar.BeforeTransfers(power, _ships, deltaTime);
             LifeSupport.BeforeTransfers(power, _ships, _connections, deltaTime);
+            Combat.CombatPower.BeforeTransfers(power, _ships, deltaTime);
         }
 
         public static void AfterTransfers(float deltaTime)
@@ -136,6 +138,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             Portal.AfterTransfers(deltaTime);
             Solar.AfterTransfers();
             LifeSupport.AfterTransfers(deltaTime);
+            Combat.CombatPower.AfterTransfers(deltaTime);
             float efficiency = Mathf.Clamp(PowerCatalog.BatteryEfficiency.Value, 0.5f, 1f);
             foreach (Entry reactor in Reactors)
             {

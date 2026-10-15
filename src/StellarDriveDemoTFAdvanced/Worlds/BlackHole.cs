@@ -87,9 +87,21 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         /// <summary>Vector from <paramref name="position"/> (in <paramref name="spaceId"/>) to the hole, in that space.</summary>
         public Vector3 Offset(IWorldTranspose transpose, uint spaceId, Vector3 position)
         {
-            Vector3Double center = transpose.Position(Space, spaceId, Vector3Double.Zero);
-            return (Vector3)(center - (Vector3Double)position);
+            // Asked for every body in a space at each physics step (gravity): the hole's centre in
+            // that space is transposed once per step and space
+            float now = Time.time;
+            if (!_centers.TryGetValue(spaceId, out var cached) || cached.Time != now || !ReferenceEquals(cached.By, transpose) || !ReferenceEquals(cached.Space, Space))
+            {
+                cached = (now, transpose, Space, transpose.Position(Space, spaceId, Vector3Double.Zero));
+                if (_centers.Count > 64)
+                    _centers.Clear();
+                _centers[spaceId] = cached;
+            }
+            return (Vector3)(cached.Center - (Vector3Double)position);
         }
+
+        private readonly System.Collections.Generic.Dictionary<uint, (float Time, IWorldTranspose By, FixedWorldSpace Space, Vector3Double Center)> _centers =
+            new System.Collections.Generic.Dictionary<uint, (float, IWorldTranspose, FixedWorldSpace, Vector3Double)>();
     }
 
     internal static class BlackHole
@@ -301,14 +313,18 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 // (and spaces the game just removed, while an object moves between them)
                 if (_spaces == null || !_spaces.TryGetSpace(spaceId, out ISpace space) || space is ShipRelativeSpace)
                     return;
-                if (_transpose == null || AbandonedStations.IsSheltered(_transpose, spaceId, position))
+                if (_transpose == null)
                     return;
+                Vector3 pull = Vector3.zero;
                 foreach (Hole hole in BlackHole.Placed)
                 {
                     Vector3 toHole = hole.Offset(_transpose, spaceId, position);
                     if (toHole.magnitude < hole.InfluenceRadius)
-                        __result += hole.Acceleration(toHole);
+                        pull += hole.Acceleration(toHole);
                 }
+                // (the shelter test costs transpositions: only made when a hole pulls)
+                if (pull != Vector3.zero && !AbandonedStations.IsSheltered(_transpose, spaceId, position))
+                    __result += pull;
             }
             catch (Exception e)
             {

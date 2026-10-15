@@ -1,5 +1,7 @@
 # StellarDrive Demo — TF Advanced
 
+![TF Advanced](docs/images/hero.jpg)
+
 *[Version française](README.md)*
 
 Advanced mods by the TF group for **StellarDrive Demo**, in a single MelonLoader DLL, independent of the `StellarDriveDemoTF` mod:
@@ -13,11 +15,23 @@ Advanced mods by the TF group for **StellarDrive Demo**, in a single MelonLoader
 - new ores (titanium, quartz, cryonite, amber, **meteorite**, **uranium**), **nuclear power** (centrifuge, reactor, engines) and **dark matter** (collector, reactor, engine, portal);
 - **force fields** (six generators), cryonite condenser, quantum gyroscope, **cartography table**;
 - a branch of the **research table**, 3 abandoned stations, 3 black holes, asteroid fields;
-- **pirates** (with the Arsenal mod): random attacks, pirate bases, the Bastion Écarlate.
+- **pirates** (with the Arsenal mod): random attacks, pirate bases, the Bastion Écarlate;
+- **radars** (1,000 / 5,000 / 20,000 km) showing pirate ships, bases and incoming raids on a round screen, and a **stealth generator** that makes the ship hard to find and to hit (v0.17).
 
 Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 
 **In-game wiki**: open the **Guide** (G key), entry **TF Advanced Wiki** at the top of the list: every planet, its resources and use, machines, building parts, stations, research, with links between pages. The same pages are in [docs/wiki/en](docs/wiki/en/Home.md).
+
+## Pictures
+
+![Overview of the mod](docs/images/overview.jpg)
+
+| | | |
+|---|---|---|
+| ![Trous noirs](docs/images/blackholes.jpg)<br>Black holes | ![Nouvelles planètes](docs/images/planet_jungle.jpg)<br>New planets | ![Galaxie d'Érèbe](docs/images/planet_erebos.jpg)<br>Erebus galaxy |
+| ![Mondes exotiques](docs/images/planet_exotic.jpg)<br>Exotic worlds | ![Champ de force](docs/images/forcefield.jpg)<br>Force field | ![Portail](docs/images/portal.jpg)<br>Dimensional portal |
+| ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
+| ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
 ## Language
 
@@ -70,6 +84,9 @@ The [suggested route](docs/wiki/en/Itineraire.md) and the [planets](docs/wiki/en
 | `AbandonedStations` | `true` | creates the abandoned stations in a world that does not have them yet |
 | `ResearchUnlocks` | `true` | the mod's parts are unlocked at the research table (`false`: all available at once) |
 | `EngineSeatControl` | `true` | nuclear and dark matter engines obey the pilot seat (`false`: they push as soon as they are fed) |
+| `PirateRaidStartKm` / `PirateApproachKmPerSecond` | `25000` / `250` | where a pirate raid is spotted (km) and how fast it closes in (km/s) |
+| `RadarAlarm` | `true` | on-screen alert when a radar near you sees a raid coming |
+| `RadarWatts` / `CloakWatts` (`[TFAdvancedPower]`) | `400` / `6000` | power of the short range radar (x3 long range, x8 deep space) and of the stealth generator |
 | `Pirates` / `PirateIntervalMinutes` | `true` / `12` | pirates (with Arsenal) and mean time in space between two attacks (min) |
 | `PirateSafeRadiusKm` | `2000` | pirate-free zone around 442 Otrera b (km, 0: none) |
 | `TerrainChunkBuffer` | `1.5` | room for terrain chunks on the graphics card, times the game's; above 1, high mountains no longer leave holes in the ground |

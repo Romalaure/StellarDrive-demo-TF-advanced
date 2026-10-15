@@ -4,6 +4,7 @@ using Planets.Interface.Services;
 using Players.Services;
 using Ships.Cables;
 using Ships.Cables.Power;
+using Ships.Interface.Services;
 using Ships.Services;
 using UnityEngine;
 using WorldTracking.Interface.Services;
@@ -24,6 +25,11 @@ namespace StellarDriveDemoTFAdvanced.Common
         private static readonly CachedService<ISpacesClientProvider> SpacesClientCache = new CachedService<ISpacesClientProvider>();
         private static readonly CachedService<IWorldTransposeClient> TransposeClientCache = new CachedService<IWorldTransposeClient>();
         private static readonly CachedService<IPlanetsClientProvider> PlanetsClientCache = new CachedService<IPlanetsClientProvider>();
+        private static readonly CachedService<IShipsClientProvider> ShipsClientProviderCache = new CachedService<IShipsClientProvider>();
+        private static readonly CachedService<ShipsServerTracker> ShipsServerCache = new CachedService<ShipsServerTracker>();
+        private static readonly CachedService<ConnectionsServerTracker> ConnectionsServerCache = new CachedService<ConnectionsServerTracker>();
+        private static readonly CachedService<IWorldTransposeServer> TransposeServerCache = new CachedService<IWorldTransposeServer>();
+        private static readonly CachedService<ISpacesServerProvider> SpacesServerCache = new CachedService<ISpacesServerProvider>();
 
         public static ShipsClientTracker ShipsClient => ShipsClientCache.Get();
         public static PlayersClientTracker PlayersClient => PlayersClientCache.Get();
@@ -32,6 +38,13 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static ISpacesClientProvider Spaces => SpacesClientCache.Get();
         public static IWorldTransposeClient Transpose => TransposeClientCache.Get();
         public static IPlanetsClientProvider Planets => PlanetsClientCache.Get();
+        public static IShipsClientProvider ShipsClientProvider => ShipsClientProviderCache.Get();
+
+        /// <summary>Host services (null on a client that does not run the server).</summary>
+        public static ShipsServerTracker ShipsServer => IsServer ? ShipsServerCache.Get() : null;
+        public static ConnectionsServerTracker ConnectionsServer => IsServer ? ConnectionsServerCache.Get() : null;
+        public static IWorldTransposeServer TransposeServer => IsServer ? TransposeServerCache.Get() : null;
+        public static ISpacesServerProvider SpacesServer => IsServer ? SpacesServerCache.Get() : null;
 
         /// <summary>The host's power tracker; null on a client that does not run the server.</summary>
         public static PowerServerTracker PowerServer => IsServer ? PowerServerCache.Get() : null;
@@ -48,6 +61,12 @@ namespace StellarDriveDemoTFAdvanced.Common
             SpacesClientCache.Reset();
             TransposeClientCache.Reset();
             PlanetsClientCache.Reset();
+            ShipsClientProviderCache.Reset();
+            ShipsServerCache.Reset();
+            ConnectionsServerCache.Reset();
+            TransposeServerCache.Reset();
+            SpacesServerCache.Reset();
+            ShipVisuals.Forget();
         }
 
         private sealed class CachedService<T> where T : class

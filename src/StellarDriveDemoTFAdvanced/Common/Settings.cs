@@ -35,6 +35,9 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> Pirates { get; private set; }
         public static MelonPreferences_Entry<float> PirateIntervalMinutes { get; private set; }
         public static MelonPreferences_Entry<float> PirateSafeRadiusKm { get; private set; }
+        public static MelonPreferences_Entry<float> PirateRaidStartKm { get; private set; }
+        public static MelonPreferences_Entry<float> PirateApproachKmPerSecond { get; private set; }
+        public static MelonPreferences_Entry<bool> RadarAlarm { get; private set; }
         public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevDockingTest { get; private set; }
         public static MelonPreferences_Entry<string> DevSnapshotParts { get; private set; }
@@ -128,6 +131,12 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "Average time in space between two pirate attacks (minutes).");
             PirateSafeRadiusKm = _category.CreateEntry("PirateSafeRadiusKm", 2000f,
                 description: "Safe zone around the home planet (442 Otrera b): no pirate attack within this distance of its centre, and pirates break off there (km, 0: none).");
+            PirateRaidStartKm = _category.CreateEntry("PirateRaidStartKm", 25000f,
+                description: "Pirate raids are detected this far away (km) and close in before attacking: a radar sees them coming from its range.");
+            PirateApproachKmPerSecond = _category.CreateEntry("PirateApproachKmPerSecond", 250f,
+                description: "Speed of an incoming pirate raid (km/s): 25 000 km at 250 km/s = 100 s of warning with the deep space radar.");
+            RadarAlarm = _category.CreateEntry("RadarAlarm", true,
+                description: "A message on screen when a radar of your ship detects an incoming pirate raid.");
             DevNuclearTest = _category.CreateEntry("DevNuclearTest", 0,
                 description: "For mod development: with DevWorld, an engine part id: a wired test ship with a centrifuge, a nuclear reactor and that engine.");
             DevMachineShield = _category.CreateEntry("DevMachineShield", 0,

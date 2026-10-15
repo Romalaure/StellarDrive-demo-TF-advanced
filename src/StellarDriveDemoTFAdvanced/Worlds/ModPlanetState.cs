@@ -30,11 +30,13 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
         private static readonly Dictionary<PlanetNetworkedState, ulong> PlanetOf = new Dictionary<PlanetNetworkedState, ulong>();
         private static PlanetNetworkedState _demo;
+        private static float _nextDemoLookup;
 
         public static void Forget()
         {
             PlanetOf.Clear();
             _demo = null;
+            _nextDemoLookup = 0f;
         }
 
         public static ulong PlanetId(PlanetNetworkedState state)
@@ -57,8 +59,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             get
             {
-                if (_demo == null)
+                // Read for every tree and rock of a chunk: a missing one is searched for once per second
+                if (_demo == null && Time.unscaledTime >= _nextDemoLookup)
+                {
+                    _nextDemoLookup = Time.unscaledTime + 1f;
                     _demo = Object.FindObjectsByType<PlanetNetworkedState>(FindObjectsSortMode.None).FirstOrDefault(s => PlanetId(s) == TemplateId);
+                }
                 return _demo;
             }
         }

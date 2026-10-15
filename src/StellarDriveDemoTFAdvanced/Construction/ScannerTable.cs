@@ -280,7 +280,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 Mark(minable.transform.position, new Color(1f, 0.6f, 0.2f), 0.05f);
                 ores++;
             }
-            foreach (Transform t in FindObjectsByType<Transform>(FindObjectsSortMode.None).Where(t => t.parent == null && t.name.StartsWith("ship ") && t.name.Contains("visual") && t != ship))
+            foreach (Transform t in SceneRoots().Where(t => t.name.StartsWith("ship ") && t.name.Contains("visual") && t != ship))
             {
                 // Only ships really around the table: drawn, and near in all three directions (a ship far
                 // above or below would otherwise land on the map)
@@ -314,6 +314,28 @@ namespace StellarDriveDemoTFAdvanced.Construction
             markMesh.SetColors(colors);
             _markers.sharedMesh = markMesh;
             _page.text = Page(ground > 0, ores, chests, ships, buildings);
+        }
+
+        private static readonly List<GameObject> RootBuffer = new List<GameObject>();
+
+        // The loaded scenes' root objects (ships' visuals are roots): far fewer than every Transform
+        private static IEnumerable<Transform> SceneRoots()
+        {
+            var roots = new List<Transform>();
+            for (int s = 0; s < UnityEngine.SceneManagement.SceneManager.sceneCount; s++)
+            {
+                var scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(s);
+                if (!scene.isLoaded)
+                    continue;
+                RootBuffer.Clear();
+                scene.GetRootGameObjects(RootBuffer);
+                foreach (GameObject root in RootBuffer)
+                {
+                    if (root != null)
+                        roots.Add(root.transform);
+                }
+            }
+            return roots;
         }
 
         private Mesh ReliefMesh(bool hasGround)

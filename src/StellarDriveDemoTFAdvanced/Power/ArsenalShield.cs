@@ -24,7 +24,6 @@ namespace StellarDriveDemoTFAdvanced.Power
     {
         private const float PanelPoints = 0.25f, BlastPoints = 1f / 20f;
 
-        private static ShipsServerTracker _ships;
         // An explosion's blast and its panel hits on the same ship come in the same frame: counted once
         private static readonly Dictionary<uint, int> BlastFrame = new Dictionary<uint, int>();
 
@@ -73,7 +72,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             AdvancedMod.Log.Msg($"Arsenal found: the force field takes its weapons ({patched} damage hooks, missiles {(_threats != null ? "stopped" : "not stopped")})");
         }
 
-        private static ShipsServerTracker Ships => _ships ?? (_ships = ServiceLocator.GetService<ShipsServerTracker>());
+        private static ShipsServerTracker Ships => Common.GameServices.ShipsServer;
 
         private static uint Root(uint shipId) =>
             Ships != null && Ships.TryGetRootShip(shipId, out Ships.Interface.Model.State.IShipStateRead root) ? root.Id : shipId;
@@ -83,8 +82,8 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             try
             {
-                uint shipId = (uint)AccessTools.Field(__args[0].GetType(), "ShipId").GetValue(__args[0]);
-                float damage = (float)__args[2];
+                uint shipId = ArsenalReflection.ShipIdOf(__args[0]);
+                float damage = ArsenalReflection.AsFloat(__args[2]);
                 if (BlastFrame.TryGetValue(Root(shipId), out int frame) && frame == Time.frameCount)
                     return false;
                 return Ships == null || !ForceField.TryAbsorb(Ships, shipId, damage * PanelPoints);

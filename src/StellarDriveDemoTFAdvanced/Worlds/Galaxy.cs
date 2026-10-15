@@ -123,7 +123,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             Stars.RemoveAll(s => s == null);
             if (Stars.Count <= 1 || ClientOrigin.LocalVisualSpace == null)
                 return _nearest = Stars.FirstOrDefault();
-            var transpose = ServiceLocator.GetService<IWorldTransposeClient>();
+            var transpose = GameServices.Transpose;
             if (transpose == null)
                 return _nearest = Stars.FirstOrDefault();
             PreciseWorldPosition here = transpose.ToPreciseWorldPos(ClientOrigin.LocalVisualSpace);

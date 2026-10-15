@@ -50,6 +50,12 @@ namespace StellarDriveDemoTFAdvanced.Power
         public const ushort NuclearReactorId = 7397;
         /// <summary>Nuclear: a tank for nuclear fuel (the game's fluid tank, shielded).</summary>
         public const ushort NuclearTankId = 7398;
+        /// <summary>Combat: pirate radars, 1 000 / 5 000 / 20 000 km.</summary>
+        public const ushort RadarShortId = 7307;
+        public const ushort RadarLongId = 7308;
+        public const ushort RadarDeepId = 7309;
+        /// <summary>Combat: stealth generator, hides the ship from the pirates.</summary>
+        public const ushort CloakId = 7310;
 
         // Force field generator and condenser: ConstantState (one value, saved, synchronized, emitted on
         // socket 0), not FluidTankState, which the game would take for a tank on their fluid socket
@@ -106,10 +112,13 @@ namespace StellarDriveDemoTFAdvanced.Power
         public static MelonPreferences_Entry<float> ShieldCapacity { get; private set; }
         public static MelonPreferences_Entry<float> ShieldRegenPerSecond { get; private set; }
         public static MelonPreferences_Entry<float> ShieldCooldownSeconds { get; private set; }
+        public static MelonPreferences_Entry<float> RadarWatts { get; private set; }
+        public static MelonPreferences_Entry<float> CloakWatts { get; private set; }
 
         /// <summary>Parts whose FluidTankState carries a status, not fluid (no fluid mass).</summary>
         public static bool HoldsNoFluid(ushort partSettingsId) => IsPowerPart(partSettingsId) || ForceField.IsGenerator(partSettingsId) || partSettingsId == CondenserId
-            || partSettingsId == DarkCollectorId || partSettingsId == DarkReactorId || partSettingsId == PortalId || partSettingsId == NuclearReactorId;
+            || partSettingsId == DarkCollectorId || partSettingsId == DarkReactorId || partSettingsId == PortalId || partSettingsId == NuclearReactorId
+            || Combat.Radar.IsRadar(partSettingsId) || partSettingsId == CloakId;
 
         public static bool IsPowerPart(ushort partSettingsId) =>
             partSettingsId == BatteryId || partSettingsId == BreakerId || partSettingsId == ReactorId || partSettingsId == CryoBatteryId;
@@ -193,6 +202,10 @@ namespace StellarDriveDemoTFAdvanced.Power
                 description: "Charge a working force field regains per second (points).");
             ShieldCooldownSeconds = category.CreateEntry("ShieldCooldownSeconds", 300f,
                 description: "After breaking down, the generator restarts after this long, fully charged (s).");
+            RadarWatts = category.CreateEntry("RadarWatts", 400f,
+                description: "Power the short range radar draws (W); the long range one draws 3 times more, the deep space one 8 times.");
+            CloakWatts = category.CreateEntry("CloakWatts", 6000f,
+                description: "Power a stealth generator draws while it hides the ship (W).");
             BreakerAutoResetSeconds = category.CreateEntry("BreakerAutoResetSeconds", 10f,
                 description: "A tripped breaker with no control cable closes again after this long (s). 0: only a control signal resets it.");
         }

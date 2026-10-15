@@ -2,7 +2,7 @@
 
 *Avec le mod **Arsenal** seulement : les pirates se servent de ses armes.*
 
-Quand votre vaisseau vole dans l'espace (en orbite ou entre les planètes), un groupe de pirates surgit de temps en temps à environ 2 km et vous attaque. En moyenne une attaque toutes les **12 minutes** passées dans l'espace (réglage `PirateIntervalMinutes`). Il n'y a jamais plus d'un groupe à la fois.
+Quand votre vaisseau vole dans l'espace (en orbite ou entre les planètes), un groupe de pirates arrive de temps en temps : repéré au loin (25 000 km), il fonce vers vous et surgit à environ 2 km pour attaquer (voir [Radars](#radars)). En moyenne une attaque toutes les **12 minutes** passées dans l'espace (réglage `PirateIntervalMinutes`). Il n'y a jamais plus d'un groupe à la fois.
 
 Chaque attaque tire au hasard un niveau de difficulté :
 
@@ -23,6 +23,30 @@ Ils ont une vraie silhouette de vaisseau : nez en pointe avec éperon sous le co
 | Corsaire | 1,5 s | 3,5 s | ± 2,5° | toutes les 8 s |
 | Pillard | 2 s | 3 s | ± 1,5° | toutes les 6 s |
 | Croiseur | 2,5 s | 3 s | ± 1° | toutes les 4 s |
+
+## Radars
+
+Trois radars (onglet **TF Avancé**, rangée combat) détectent les pirates autour du vaisseau :
+
+| Radar | Portée | Courant | Coût |
+|---|---|---|---|
+| **Radar courte portée** (lueur verte) | 1 000 km | 400 W | 10 cuivre, 6 verre, 6 fer |
+| **Radar longue portée** (lueur dorée) | 5 000 km | 1 200 W | 20 cuivre, 10 verre, 8 titane, 4 quartz |
+| **Radar de l'espace profond** (lueur violette) | 20 000 km | 3 200 W | 30 cuivre, 15 titane, 8 quartz, 6 cryonite, 1 noyau quantique |
+
+Il lui faut du courant sur ses prises électriques (le réseau doit pouvoir le fournir en entier). Son **écran rond** montre les contacts vus du dessus, l'avant du radar en haut : la distance est en échelle logarithmique (anneaux à 10, 100, 1 000 et 10 000 km), un balayage tourne et allume les échos à son passage. À côté, la liste des contacts les plus proches : vaisseaux pirates (rouge), **bases** (orange) et **raids en approche** avec leur temps avant contact. Sa prise signal donne le nombre de contacts (à brancher sur une alarme) ; éteint : -1 pas de réseau électrique, -3 pas assez de courant.
+
+**Raids en approche** : un groupe de pirates ne surgit plus d'un coup. Il est repéré à **25 000 km** (réglage `PirateRaidStartKm`) et fonce vers sa cible à **250 km/s** (`PirateApproachKmPerSecond`) avant de sauter à côté d'elle. Un radar le voit dès qu'il entre dans sa portée : environ **80 s** d'avance avec le radar de l'espace profond, **20 s** avec le radar longue portée, **4 s** avec le radar courte portée. Quand un radar près de vous voit un raid arriver, une **alerte** s'affiche en haut de l'écran (réglage `RadarAlarm`).
+
+## Générateur d'invisibilité
+
+Le **générateur d'invisibilité** (6 000 W, réglage `CloakWatts`) brouille la signature du vaisseau et de tout ce qui y est amarré sur les capteurs pirates tant qu'il est alimenté (ses anneaux tournent, le cristal brille) :
+- les raids trouvent le vaisseau **trois fois moins souvent**, et un raid déjà en route peut **perdre sa trace** (environ une chance sur cinq toutes les 5 s) ;
+- les pirates ne le voient qu'à moins de **2,5 km** (les bases à moins de **1,2 km**) ; plus loin, ils le perdent ;
+- ils doivent s'approcher pour tirer (**400 m** au lieu de 650), **visent bien plus mal** et verrouillent leurs missiles plus tard (**800 m**, cône plus étroit) ;
+- les bases tirent leurs missiles à moins de 1,2 km au lieu de 2,5 km et lancent leurs chasseurs à moins de 1,5 km au lieu de 4 km.
+
+Coût : 2 noyaux quantiques, 10 cryonite, 8 quartz, 12 titane, 15 cuivre. Sa prise signal vaut 1 quand il masque le vaisseau. Radars et générateur se débloquent avec la tech **Guerre électronique** (après Cartographie).
 
 ## Zone sûre
 

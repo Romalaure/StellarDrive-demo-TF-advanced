@@ -242,7 +242,10 @@ namespace StellarDriveDemoTFAdvanced.Power
                 Fit(ship);
             }
             // Arsenal missiles and rockets go off on the bubble
-            if (ArsenalShield.Installed && uint.TryParse(ship.name.Split(' ')[1], out uint shipId))
+            if (_shipId == 0)
+                _shipId = ShipVisuals.IdOf(ship);
+            uint shipId = _shipId;
+            if (ArsenalShield.Installed && shipId != 0)
             {
                 Vector3? hit = ArsenalShield.StopThreats(_bubble.transform, shipId);
                 if (hit.HasValue)
@@ -253,8 +256,17 @@ namespace StellarDriveDemoTFAdvanced.Power
                 }
             }
             _flash = Mathf.MoveTowards(_flash, 0f, Time.deltaTime * 2.5f);
+            // The vertex colors cost: not when the bubble is off screen, and less often from afar
+            if (Time.unscaledTime < _nextPaint || (_bubbleRenderer != null && !_bubbleRenderer.isVisible))
+                return;
+            Camera camera = MainCamera.Get();
+            float far = camera != null ? (camera.transform.position - _bubble.transform.position).magnitude : 0f;
+            _nextPaint = Time.unscaledTime + (far > 600f ? 0.2f : far > 200f ? 0.066f : 0.033f);
             Paint();
         }
+
+        private float _nextPaint;
+        private uint _shipId;
 
         /// <summary>
         /// The bubble's look, recomputed each frame in its vertex colors (the shader multiplies them

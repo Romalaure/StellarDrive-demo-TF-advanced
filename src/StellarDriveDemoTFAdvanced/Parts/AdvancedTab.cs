@@ -28,6 +28,8 @@ namespace StellarDriveDemoTFAdvanced.Parts
         public const int NuclearRow = 4;
         /// <summary>Every force field generator.</summary>
         public const int ShieldRow = 5;
+        /// <summary>Radars and the stealth generator.</summary>
+        public const int CombatRow = 6;
 
         public const string ConstructionName = "TF Construction";
         public const int ConstructionRow = 0;

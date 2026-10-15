@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.16.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.17.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -108,6 +108,8 @@ namespace StellarDriveDemoTFAdvanced
             Try("the wood, glass and iron parts", Construction.MaterialParts.Register);
             Try("the station modules", Construction.StationModules.Register);
             Try("the cartography table", Construction.ScannerTable.Register);
+            Try("the radars", Combat.Radar.Register);
+            Try("the stealth generator", Combat.Cloak.Register);
             _partsRegistered = true;
             ScheduleSelfTest();
         }
@@ -136,6 +138,7 @@ namespace StellarDriveDemoTFAdvanced
             Worlds.AbandonedStations.OnSceneLoaded(_inGame);
             Worlds.LootCaches.OnSceneLoaded(_inGame);
             Combat.Pirates.OnSceneLoaded(_inGame);
+            Combat.Radar.OnSceneLoaded();
             DevHarness.OnSceneLoaded(sceneName);
             if (_partsRegistered)
             {
@@ -159,6 +162,8 @@ namespace StellarDriveDemoTFAdvanced
                 UpdatePortals();
             if (_inGame)
                 Combat.Pirates.Update();
+            if (_inGame && _partsRegistered)
+                UpdateRadars();
             if (_partsRegistered && Settings.SelfTest.Value)
                 RunSelfTest();
             if (_partsRegistered && _inGame)
@@ -172,6 +177,24 @@ namespace StellarDriveDemoTFAdvanced
         }
 
         private static bool _partsRegistered;
+
+        public override void OnGUI()
+        {
+            if (_inGame)
+                Combat.Radar.OnGUI();
+        }
+
+        private static void UpdateRadars()
+        {
+            try
+            {
+                Combat.Radar.Update();
+            }
+            catch (Exception e)
+            {
+                ErrorLog.Report("radar", e);
+            }
+        }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ScheduleSelfTest() => SelfTest.Schedule();

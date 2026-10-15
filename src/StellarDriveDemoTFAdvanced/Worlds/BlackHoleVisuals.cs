@@ -55,9 +55,24 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             Views.Clear();
         }
 
+        private static Camera _far;
+        private static float _nextFarLookup;
+
+        // The game's far camera (its root is named "Distant..."), looked up at most once per second
+        private static Camera FarCamera()
+        {
+            if (_far != null && _far.isActiveAndEnabled)
+                return _far;
+            if (Time.unscaledTime < _nextFarLookup)
+                return null;
+            _nextFarLookup = Time.unscaledTime + 1f;
+            _far = Camera.allCameras.FirstOrDefault(c => c.transform.root.name.Contains("Distant"));
+            return _far;
+        }
+
         public static void LateUpdate()
         {
-            bool show = BlackHole.Active && SceneManager.GetActiveScene().name == "MainGame";
+            bool show = BlackHole.Active;
             if (!show)
             {
                 foreach (View view in Views)
@@ -69,8 +84,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             }
             try
             {
-                IWorldTransposeClient transpose = ServiceLocator.GetService<IWorldTransposeClient>();
-                Camera far = Camera.allCameras.FirstOrDefault(c => c.transform.root.name.Contains("Distant"));
+                IWorldTransposeClient transpose = GameServices.Transpose;
+                Camera far = FarCamera();
                 if (transpose == null || far == null || ClientOrigin.LocalVisualSpace == null)
                     return;
                 if (Views.Count == 0)

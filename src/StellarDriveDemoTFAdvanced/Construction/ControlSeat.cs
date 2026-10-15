@@ -98,6 +98,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
             _hasContext = true;
         }
 
+        private readonly float[] _inputs = new float[6];
+
         private void Awake()
         {
             foreach (Transform child in GetComponentsInChildren<Transform>(true))
@@ -111,14 +113,19 @@ namespace StellarDriveDemoTFAdvanced.Construction
         {
             if (!_hasContext)
                 return;
-            var ships = ServiceLocator.GetService<IShipsClientProvider>();
+            Camera camera = MainCamera.Get();
+            if (camera == null || (camera.transform.position - transform.position).sqrMagnitude > 40f * 40f)
+                return;
+            var ships = GameServices.ShipsClientProvider;
             Vector3 move = Vector3.zero, turn = Vector3.zero;
             if (ships != null && ships.TryGetPartState(_part, out PilotSeatAdvState seat))
             {
                 move = seat.MoveInput;
                 turn = seat.RotationInput;
             }
-            float[] inputs = { move.x, move.y, move.z, turn.x, turn.y, turn.z };
+            _inputs[0] = move.x; _inputs[1] = move.y; _inputs[2] = move.z;
+            _inputs[3] = turn.x; _inputs[4] = turn.y; _inputs[5] = turn.z;
+            float[] inputs = _inputs;
             for (int i = 0; i < 6; i++)
             {
                 _angles[i] = Mathf.MoveTowards(_angles[i], Mathf.Clamp(inputs[i], -1f, 1f) * MaxAngle, Time.deltaTime * 200f);

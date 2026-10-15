@@ -34,10 +34,10 @@ namespace StellarDriveDemoTFAdvanced.Construction
             try
             {
                 var physics = State(__instance).GetPhysicsState(asServer: true);
-                var spaces = ServiceLocator.GetService<ISpacesServerProvider>();
-                var ships = ServiceLocator.GetService<ShipsServerTracker>();
-                var transpose = ServiceLocator.GetService<IWorldTransposeServer>();
-                var connections = ServiceLocator.GetService<ConnectionsServerTracker>();
+                var spaces = GameServices.SpacesServer;
+                var ships = GameServices.ShipsServer;
+                var transpose = GameServices.TransposeServer;
+                var connections = GameServices.ConnectionsServer;
                 if (spaces == null || ships == null || transpose == null || connections == null)
                     return;
                 if (!(spaces.GetSpace(physics.SpaceId) is ShipRelativeSpace relative) || !ships.TryGetRootShip(relative.ShipId, out IShipStateRead root))

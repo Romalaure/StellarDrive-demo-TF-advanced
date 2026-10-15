@@ -229,7 +229,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             if (Time.unscaledTime >= _next)
             {
                 _next = Time.unscaledTime + 0.1f;
-                var ships = ServiceLocator.GetService<IShipsClientProvider>();
+                var ships = StellarDriveDemoTFAdvanced.Common.GameServices.ShipsClientProvider;
                 if (ships != null && ships.TryGetPartState(_part, out LeverState lever))
                     _target = AirlockColliders.OuterOpen(lever) ? 1f : 0f;
             }

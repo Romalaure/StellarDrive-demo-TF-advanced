@@ -156,6 +156,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             AccessTools.FieldRefAccess<ShipRigidbody, Rigidbody>("_rigidbody");
 
         private static IShipsServerProvider _ships;
+        private static readonly Dictionary<uint, (float Until, bool Has)> Checked = new Dictionary<uint, (float, bool)>();
 
         private static void Postfix(ShipPhysicsCalculationProperties props, IShipStateWrite ____ship, ShipRigidbody ____shipRigidbody)
         {
@@ -166,6 +167,10 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                 if (_ships == null)
                     _ships = ServiceLocator.GetService<IShipsServerProvider>();
                 if (_ships == null)
+                    return;
+                // Most ships have no vector or precision engine: remembered per root, rechecked each second
+                float now = Time.unscaledTime;
+                if (Checked.TryGetValue(____ship.Id, out var known) && now < known.Until && !known.Has)
                     return;
                 Vector3 centerOfMass = props.CenterOfMassIncludingConnectedShips;
                 Vector3 torque = Vector3.zero;
@@ -187,6 +192,23 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                         any = true;
                     }
                 }
+                bool has = any;
+                if (!has)
+                {
+                    foreach (RootRelativeShipData data in _ships.GetRootConnectedShips(____ship.Id))
+                    {
+                        if (data.Ship == null)
+                            continue;
+                        foreach (StatefulPart part in data.Ship.GetAllStatefulParts<ThrusterState>())
+                        {
+                            if (EngineCatalog.TryGet(part.Settings.id, out EngineSpec spec) && spec.OffCenterThrust)
+                                has = true;
+                        }
+                    }
+                }
+                if (Checked.Count > 512)
+                    Checked.Clear();
+                Checked[____ship.Id] = (now + 1f, has);
                 if (!any)
                     return;
                 Rigidbody body = Body(____shipRigidbody);

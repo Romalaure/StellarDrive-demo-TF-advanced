@@ -1,5 +1,7 @@
 # StellarDrive Demo — TF Advanced
 
+![TF Advanced](docs/images/hero.jpg)
+
 *[English version](README.en.md)*
 
 Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, moteurs, réseau électrique, constructions en bois, verre et fer, **stations spatiales** à construire, 7 nouvelles planètes autour d'Otrera et une **seconde galaxie, Érèbe** (4 planètes et une planète artificielle pirate, un trou noir, des épaves) atteinte par **portail**, nouveaux minerais (dont la **météorite** et l'**uranium**), l'**énergie nucléaire** (uranium, centrifugeuse, réacteur, moteurs) et une nouvelle énergie, la **matière noire**, pièces avancées (réacteur quantique, champ de force, condenseur, gyroscope quantique, moteur exotique, machines à matière noire, générateur de portail, table de cartographie), une branche de la **table de recherche**, 3 stations abandonnées, 3 trous noirs, champs d'astéroïdes, dans un seul DLL MelonLoader, indépendant du mod `StellarDriveDemoTF`. Trois onglets de construction : **TF Avancé**, **TF Construction**, **TF Station**.
@@ -7,6 +9,17 @@ Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, mote
 **Wiki dans le jeu** : ouvrez le **Guide** (touche G), entrée **Wiki TF Avancé** en tête de liste : chaque planète, ses ressources et son utilité, machines, constructions, stations, recherche, avec des liens entre les pages. Les mêmes pages sont dans [docs/wiki](docs/wiki/Home.md) (le mod les embarque à la compilation). Résumé : [docs/PLANETES.md](docs/PLANETES.md).
 
 Rapport technique (moteur, systèmes du jeu, faisabilité de chaque projet) : [docs/AUDIT.md](docs/AUDIT.md).
+
+## En images
+
+![Vue d'ensemble du mod](docs/images/overview.jpg)
+
+| | | |
+|---|---|---|
+| ![Trous noirs](docs/images/blackholes.jpg)<br>Trous noirs | ![Nouvelles planètes](docs/images/planet_jungle.jpg)<br>Nouvelles planètes | ![Galaxie d'Érèbe](docs/images/planet_erebos.jpg)<br>Galaxie d'Érèbe |
+| ![Mondes exotiques](docs/images/planet_exotic.jpg)<br>Mondes exotiques | ![Champ de force](docs/images/forcefield.jpg)<br>Champ de force | ![Portail](docs/images/portal.jpg)<br>Portail dimensionnel |
+| ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Modules de station | ![Carte stellaire](docs/images/starmap.jpg)<br>Carte stellaire |
+| ![Poste de pilotage](docs/images/cockpit.jpg)<br>Poste de pilotage | ![Objets et arbres](docs/images/items.jpg)<br>Objets, minerais, arbres | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ordinateur de bord |
 
 ## Installation
 
@@ -248,6 +261,12 @@ Le palier entre les artefacts et la matière noire (il reprend les valeurs qu'av
 
 Des vaisseaux pirates, armés des armes de vaisseau d'Arsenal, attaquent de temps en temps un vaisseau de joueur qui vole dans l'espace (en moyenne toutes les 12 min passées dans l'espace, un groupe à la fois, à ~2 km). Quatre niveaux tirés au hasard : **éclaireur** (facile, 1 200 points, 1 mitrailleuse, en groupe de 2-3), **corsaire** (2 500 points, 2 mitrailleuses et un lance-missiles), **pillard** (difficile, 4 200 points, laser en plus), **croiseur** (très difficile, 7 000 points, canons à plasma, lance-missiles, défense rapprochée). Leurs armes à tir direct tirent par rafales suivies d'un rechargement (de 1,2 s / 4 s pour l'éclaireur à 2,5 s / 3 s pour le croiseur), et les plus faciles visent moins bien. Chaque modèle a son carénage détaillé (nez, verrière, ailes en flèche, dérives, nacelles moteur), sans collision : les tirs percent la coque de fer dessous. Leur pilote (côté hôte) s'approche, tourne autour de sa cible à sa distance de combat, la vise et tire quand il est aligné ; il garde de l'altitude près d'une planète. Les armes d'Arsenal usent leur coque (un corsaire tombe en ~4 missiles) ; détruit, un pirate explose et laisse une capsule de butin. Le champ de force les encaisse comme toute arme d'Arsenal. Sans Arsenal, pas de pirates. **Zone sûre** de 2 000 km autour de 442 Otrera b (`PirateSafeRadiusKm`) : pas d'attaque, combat rompu. Dans Érèbe, la planète artificielle **Bastion Écarlate** (115, couverte de forteresses : tours, canons, bunkers, remparts aux feux rouges) et **trois bases pirates** armées (20 000 points, canons, salves de missiles autoguidés, chasseurs lancés depuis leur hangar), visibles sur la carte stellaire ; autour du Bastion les attaques sont 4 fois plus fréquentes. Détail : [wiki, Pirates](docs/wiki/Pirates.md).
 
+## Radars et générateur d'invisibilité (v0.17)
+
+Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un écran rond les pirates autour du vaisseau : leurs vaisseaux, leurs bases et les **raids en approche**, désormais repérés à 25 000 km et qui foncent à 250 km/s avant d'attaquer (le radar de l'espace profond donne environ 80 s d'avance, avec une alerte à l'écran). Le **générateur d'invisibilité** (6 000 W) rend le vaisseau difficile à trouver et à viser : raids trois fois plus rares et qui peuvent perdre sa trace, pirates qui ne le voient qu'à moins de 2,5 km, tirent de plus près et visent bien plus mal. Tech **Guerre électronique**. Les contacts sont calculés par l'hôte et envoyés à chaque joueur. Détail : [wiki, Pirates](docs/wiki/Pirates.md#radars).
+
+**Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
+
 ## Galaxie d'Érèbe
 
 Une seconde étoile (copie de l'étoile du jeu, une géante orange) à 0,18 année-lumière, avec **Pyros** (volcanique), **Thalassa** (océanique), **Mycélia** (fongique, champignons géants) et **Cristallis** (cristalline, anneau), le trou noir **Œil d'Érèbe** et trois épaves avec de la matière noire. Le jeu n'attend qu'une étoile : l'éclairage, le jour et la nuit, la carte stellaire et le suivi d'étoile prennent l'étoile la plus proche ; les deux restent visibles. La carte stellaire n'affiche que le système où l'on se trouve. Réglage `Erebos`.
@@ -332,6 +351,9 @@ Réglage : `BlackHole` (section `[TFAdvanced]`, les deux trous noirs), identique
 | `EngineSeatControl` | `true` | moteurs nucléaires et à matière noire commandés par le siège de pilotage (`false` : ils poussent dès qu'ils sont alimentés) |
 | `PirateSafeRadiusKm` | `2000` | zone sûre sans pirates autour de 442 Otrera b (km, 0 : aucune) |
 | `Pirates` / `PirateIntervalMinutes` | `true` / `12` | pirates (avec Arsenal) et temps moyen dans l'espace entre deux attaques (min) |
+| `PirateRaidStartKm` / `PirateApproachKmPerSecond` | `25000` / `250` | distance où un raid pirate est repéré et sa vitesse d'approche |
+| `RadarAlarm` | `true` | alerte à l'écran quand un radar près de vous voit un raid arriver |
+| `RadarWatts` / `CloakWatts` (`[TFAdvancedPower]`) | `400` / `6000` | courant du radar courte portée (×3 longue portée, ×8 espace profond) et du générateur d'invisibilité |
 | `CondenserWatts` / `CondenserOxygenPerSecond` (`[TFAdvancedPower]`) | `1500` / `0.05` | condenseur à cryonite |
 | `QuantumGyroFactor` (`[TFAdvancedPower]`) | `5` | couple du gyroscope quantique, en gyroscopes |
 | `SelfTest` | `false` | développement : construit les pièces au menu, en écrit la description et des rendus PNG |

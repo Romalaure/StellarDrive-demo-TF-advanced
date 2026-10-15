@@ -54,6 +54,24 @@ namespace StellarDriveDemoTFAdvanced.Combat
     }
 
     /// <summary>
+    /// A pirate group on its way: detected far away (Settings.PirateRaidStartKm), it closes in on
+    /// its target at Settings.PirateApproachKmPerSecond and jumps in beside it when it arrives.
+    /// Radars see it coming; a stealth generator may make it lose track.
+    /// </summary>
+    internal sealed class Raid
+    {
+        public uint Target;
+        public PirateDesign Design;
+        public int Count;
+        /// <summary>Where it comes from, seen from the target (in the target's space).</summary>
+        public Vector3 Direction;
+        /// <summary>Its distance to the target (m).</summary>
+        public float Distance;
+
+        public float Eta => Mathf.Max(0f, Distance - Pirates.SpawnDistance) / Mathf.Max(1000f, Settings.PirateApproachKmPerSecond.Value * 1000f);
+    }
+
+    /// <summary>
     /// Enemy pirates (host). Only with the Arsenal mod, whose weapons they carry: while a player's
     /// ship flies in space (orbit or between planets), now and then a pirate group jumps in a
     /// couple of kilometres away and attacks. Each pirate pilots its ship like a fighter: it
@@ -66,22 +84,31 @@ namespace StellarDriveDemoTFAdvanced.Combat
     internal static class Pirates
     {
         private const string SaveFile = "tfa_pirates.txt";
-        private const float SpawnDistance = 1800f, LeaveDistance = 9000f;
+        public const float SpawnDistance = 1800f, LeaveDistance = 9000f;
+        /// <summary>A hidden ship (stealth generator) is only seen this close (pirate ships, bases).</summary>
+        private const float CloakedSight = 2500f, CloakedBaseSight = 1200f;
 
         public static readonly Dictionary<uint, Pirate> All = new Dictionary<uint, Pirate>();
+        /// <summary>Pirate groups on their way.</summary>
+        public static readonly List<Raid> Raids = new List<Raid>();
+        private static readonly List<Pirate> ThinkBuffer = new List<Pirate>();
         /// <summary>Bases destroyed in this world (their wreck stays, they must not come back).</summary>
         private static readonly HashSet<uint> DeadBases = new HashSet<uint>();
         private static float _inSpaceSeconds;
         private static float _nextCheck;
         private static bool _loaded;
 
-        private static ShipsServerTracker Ships => ServiceLocator.GetService<ShipsServerTracker>();
+        private static ShipsServerTracker Ships => GameServices.ShipsServer;
+
+        /// <summary>Host: whether a stealth generator hides this ship (or its assembly).</summary>
+        public static bool Cloaked(uint rootShipId) => CombatPower.CloakedRoots.Count > 0 && CombatPower.CloakedRoots.Contains(rootShipId);
 
         public static bool Enabled => Settings.Pirates.Value && Power.ArsenalShield.Installed;
 
         public static void OnSceneLoaded(bool inGame)
         {
             All.Clear();
+            Raids.Clear();
             DeadBases.Clear();
             Zones.Forget();
             _inSpaceSeconds = 0f;
@@ -162,11 +189,18 @@ namespace StellarDriveDemoTFAdvanced.Combat
             if (!_loaded)
                 Load(ships);
             float now = Time.time;
-            foreach (Pirate pirate in All.Values.ToList())
+            if (All.Count > 0)
             {
-                if (now >= pirate.NextThink)
-                    Think(ships, pirate, now);
+                ThinkBuffer.Clear();
+                ThinkBuffer.AddRange(All.Values);
+                foreach (Pirate pirate in ThinkBuffer)
+                {
+                    if (now >= pirate.NextThink)
+                        Think(ships, pirate, now);
+                }
             }
+            if (Raids.Count > 0)
+                Approach(ships, Time.deltaTime);
             if (now < _nextCheck)
                 return;
             _nextCheck = now + 5f;
@@ -221,9 +255,12 @@ namespace StellarDriveDemoTFAdvanced.Combat
             // Pirates left far behind for long are gone (bases stay)
             foreach (Pirate pirate in All.Values.Where(p => !p.IsBase && Time.time - p.LastNearPlayer > 600f).ToList())
                 Despawn(ships, pirate);
-            if (targets.Count == 0 || All.Values.Any(p => !p.IsBase))
+            RaidChecks(ships);
+            if (targets.Count == 0 || Raids.Count > 0 || All.Values.Any(p => !p.IsBase))
                 return;
-            _inSpaceSeconds += 5f;
+            // Hidden ships are found three times less often
+            List<TrackedShipServer> visible = targets.Where(t => !Cloaked(t.Id)).ToList();
+            _inSpaceSeconds += visible.Count > 0 ? 5f : 5f / 3f;
             float interval = Mathf.Max(1f, Settings.PirateIntervalMinutes.Value) * 60f;
             // In their territory, around the Bastion, they come four times as often
             if (targets.Any(t => Zones.NearBastion(t.PhysicsState.SpaceId, t.PhysicsState.Position)))
@@ -231,10 +268,74 @@ namespace StellarDriveDemoTFAdvanced.Combat
             if (_inSpaceSeconds < interval * Random.Range(0.7f, 1.3f))
                 return;
             _inSpaceSeconds = 0f;
-            TrackedShipServer target = targets[Random.Range(0, targets.Count)];
+            List<TrackedShipServer> pool = visible.Count > 0 ? visible : targets;
+            TrackedShipServer target = pool[Random.Range(0, pool.Count)];
             // A difficulty drawn at random: scouts come in packs, cruisers alone
             PirateDesign design = PirateShips.Random();
-            SpawnNear(ships, target, design, Random.Range(design.GroupMin, design.GroupMax + 1));
+            int count = Random.Range(design.GroupMin, design.GroupMax + 1);
+            float start = Mathf.Max(SpawnDistance * 2f, Settings.PirateRaidStartKm.Value * 1000f);
+            Raids.Add(new Raid { Target = target.Id, Design = design, Count = count, Direction = Random.onUnitSphere, Distance = start });
+            AdvancedMod.Log.Msg($"pirates: {count} {design.Name}(s) on their way to ship {target.Id}, {start / 1000f:0} km out");
+        }
+
+        /// <summary>Raids close in; one that arrives jumps in beside its target.</summary>
+        private static void Approach(ShipsServerTracker ships, float deltaTime)
+        {
+            float speed = Mathf.Max(1f, Settings.PirateApproachKmPerSecond.Value) * 1000f;
+            for (int i = Raids.Count - 1; i >= 0; i--)
+            {
+                Raid raid = Raids[i];
+                raid.Distance -= speed * deltaTime;
+                if (raid.Distance > SpawnDistance)
+                    continue;
+                Raids.RemoveAt(i);
+                TrackedShipServer target = ships.GetShip(raid.Target);
+                if (target == null)
+                    continue;
+                // A hidden ship: they only know roughly where it is, they jump in farther out
+                SpawnNear(ships, target, raid.Design, raid.Count, Cloaked(target.Id) ? SpawnDistance * 2f : SpawnDistance);
+            }
+        }
+
+        /// <summary>Every 5 s: raids whose target is gone, in the safe zone or hidden (now and then) give up.</summary>
+        private static void RaidChecks(ShipsServerTracker ships)
+        {
+            for (int i = Raids.Count - 1; i >= 0; i--)
+            {
+                Raid raid = Raids[i];
+                TrackedShipServer target = ships.GetShip(raid.Target);
+                string why = target == null ? "target gone"
+                    : !InOpenSpace(target) ? "target landed"
+                    : Zones.InSafeZone(target.PhysicsState.SpaceId, target.PhysicsState.Position) ? "safe zone"
+                    : Cloaked(target.Id) && Random.value < 0.2f ? "lost track of the hidden ship" : null;
+                if (why == null)
+                    continue;
+                Raids.RemoveAt(i);
+                AdvancedMod.Log.Msg($"pirates: raid on ship {raid.Target} called off ({why})");
+            }
+        }
+
+        /// <summary>In orbit or between planets (where pirates attack), not on a planet's surface.</summary>
+        private static bool InOpenSpace(TrackedShipServer ship)
+        {
+            SpacesServer spaces = ServiceLocator.GetService<SpacesServer>();
+            return spaces != null && spaces.TryGetSpace(ship.PhysicsState.SpaceId, out ISpace space) && (space is OrbitSpace || space is TrajectorySpace);
+        }
+
+        /// <summary>Where a raid is now: its target's space and a position in it.</summary>
+        public static bool TryRaidPosition(ShipsServerTracker ships, Raid raid, out uint spaceId, out Vector3 position)
+        {
+            TrackedShipServer target = ships.GetShip(raid.Target);
+            spaceId = target != null ? target.PhysicsState.SpaceId : 0u;
+            position = target != null ? target.PhysicsState.Position + raid.Direction * raid.Distance : Vector3.zero;
+            return target != null;
+        }
+
+        /// <summary>Whether a pirate (base or ship) at this distance sees the ship.</summary>
+        private static bool Sees(Pirate pirate, TrackedShipServer ship, float sqrDistance, float reach)
+        {
+            float sight = Cloaked(ship.Id) ? (pirate.IsBase ? CloakedBaseSight : CloakedSight) : reach;
+            return sqrDistance < sight * sight;
         }
 
         /// <summary>Pirates jump in near this ship and attack it.</summary>
@@ -302,11 +403,22 @@ namespace StellarDriveDemoTFAdvanced.Combat
             float reach = pirate.IsBase ? 3000f : LeaveDistance;
             TrackedShipServer target = ships.GetShip(pirate.Target);
             if (target == null || All.ContainsKey(target.Id) || target.PhysicsState.SpaceId != self.PhysicsState.SpaceId
-                || (target.PhysicsState.Position - self.PhysicsState.Position).sqrMagnitude > reach * reach)
+                || !Sees(pirate, target, (target.PhysicsState.Position - self.PhysicsState.Position).sqrMagnitude, reach))
             {
-                target = ships.LoadedRootShips.Where(s => s.Id != self.Id && !All.ContainsKey(s.Id) && s.PhysicsState.SpaceId == self.PhysicsState.SpaceId && s.PartCount > 3)
-                    .OrderBy(s => (s.PhysicsState.Position - self.PhysicsState.Position).sqrMagnitude)
-                    .FirstOrDefault(s => (s.PhysicsState.Position - self.PhysicsState.Position).sqrMagnitude < reach * reach);
+                // The nearest ship it sees (a hidden one only up close)
+                target = null;
+                float best = float.MaxValue;
+                foreach (TrackedShipServer s in ships.LoadedRootShips)
+                {
+                    if (s.Id == self.Id || s.PhysicsState.SpaceId != self.PhysicsState.SpaceId || s.PartCount <= 3 || All.ContainsKey(s.Id))
+                        continue;
+                    float d = (s.PhysicsState.Position - self.PhysicsState.Position).sqrMagnitude;
+                    if (d < best && Sees(pirate, s, d, reach))
+                    {
+                        best = d;
+                        target = s;
+                    }
+                }
                 pirate.Target = target?.Id ?? 0;
             }
             pirate.Guns = false;
@@ -338,15 +450,17 @@ namespace StellarDriveDemoTFAdvanced.Combat
             float distance = to.magnitude;
             Vector3 nose = self.PhysicsState.Rotation * Vector3.forward;
             float angle = Vector3.Angle(nose, to);
-            // Guns: a burst while lined up, then a reload before the next
-            bool aligned = angle < 6f && distance < 650f;
+            // Guns: a burst while lined up, then a reload before the next. A hidden ship is a blurred
+            // target: they must come closer to fire, and their missiles lock on later
+            bool hidden = Cloaked(target.Id);
+            bool aligned = angle < 6f && distance < (hidden ? 400f : 650f);
             if (aligned && now >= pirate.ReloadUntil && now >= pirate.BurstUntil)
             {
                 pirate.BurstUntil = now + pirate.Design.Burst;
                 pirate.ReloadUntil = pirate.BurstUntil + pirate.Design.Reload;
             }
             pirate.Guns = aligned && now < pirate.BurstUntil;
-            if (pirate.Design.MissileInterval > 0f && angle < 18f && distance < 1300f && now >= pirate.NextPulse)
+            if (pirate.Design.MissileInterval > 0f && angle < (hidden ? 10f : 18f) && distance < (hidden ? 800f : 1300f) && now >= pirate.NextPulse)
             {
                 pirate.PulseUntil = now + 0.4f;
                 pirate.NextPulse = now + pirate.Design.MissileInterval;
@@ -361,6 +475,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
         {
             Vector3 to = target.PhysicsState.Position - self.PhysicsState.Position;
             float distance = to.magnitude;
+            bool hidden = Cloaked(target.Id);
             bool any = false;
             foreach (StatefulPart part in self.StatefulParts)
             {
@@ -379,12 +494,12 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 pirate.ReloadUntil = pirate.BurstUntil + pirate.Design.Reload;
             }
             pirate.Guns = any && now < pirate.BurstUntil;
-            if (distance < 2500f && now >= pirate.NextPulse)
+            if (distance < (hidden ? 1200f : 2500f) && now >= pirate.NextPulse)
             {
                 pirate.NextPulse = now + pirate.Design.MissileInterval;
                 Salvo(self, target, 2);
             }
-            if (distance < 4000f && now >= pirate.NextLaunch && All.Values.Count(p => p.LaunchedBy == self.Id) < 3)
+            if (distance < (hidden ? 1500f : 4000f) && now >= pirate.NextLaunch && All.Values.Count(p => p.LaunchedBy == self.Id) < 3)
             {
                 pirate.NextLaunch = now + 150f;
                 PirateDesign fighters = Random.value < 0.6f ? PirateShips.Scout : PirateShips.Corsair;
@@ -402,8 +517,8 @@ namespace StellarDriveDemoTFAdvanced.Combat
             {
                 if (_launch == null)
                     _launch = HarmonyLib.AccessTools.Method(HarmonyLib.AccessTools.TypeByName("Arsenal.Vehicles.Missiles"), "Launch");
-                Transform visual = UnityEngine.Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).FirstOrDefault(t => t.parent == null && t.name == $"ship {self.Id} visual");
-                Transform aimAt = UnityEngine.Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).FirstOrDefault(t => t.parent == null && t.name == $"ship {target.Id} visual");
+                Transform visual = ShipVisuals.Find(self.Id);
+                Transform aimAt = ShipVisuals.Find(target.Id);
                 if (_launch == null || visual == null || aimAt == null)
                     return;
                 System.Reflection.ParameterInfo[] p = _launch.GetParameters();
@@ -471,8 +586,10 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 desired = target.PhysicsState.Velocity + Vector3.ClampMagnitude(relative, d.MaxSpeed);
                 // Its aim wanders around the target: the easier the pirate, the more it misses
                 float t = Time.time * 0.6f;
-                float yaw = (Mathf.PerlinNoise(pirate.AimSeed, t) - 0.5f) * 2f * d.Wobble;
-                float pitch = (Mathf.PerlinNoise(t, pirate.AimSeed) - 0.5f) * 2f * d.Wobble;
+                // A hidden ship blurs on their sights: their aim wanders far more
+                float wobble = Cloaked(target.Id) ? d.Wobble * 2.5f + 3f : d.Wobble;
+                float yaw = (Mathf.PerlinNoise(pirate.AimSeed, t) - 0.5f) * 2f * wobble;
+                float pitch = (Mathf.PerlinNoise(t, pirate.AimSeed) - 0.5f) * 2f * wobble;
                 Vector3 side = Vector3.Cross(Vector3.up, dir).sqrMagnitude > 1e-4f ? Vector3.Cross(Vector3.up, dir).normalized : Vector3.right;
                 aim = Quaternion.AngleAxis(yaw, Vector3.Cross(dir, side)) * Quaternion.AngleAxis(pitch, side) * dir;
             }
@@ -538,10 +655,10 @@ namespace StellarDriveDemoTFAdvanced.Combat
             {
                 if (All.Count == 0)
                     return;
-                uint shipId = (uint)AccessTools.Field(__args[0].GetType(), "ShipId").GetValue(__args[0]);
+                uint shipId = ArsenalReflection.ShipIdOf(__args[0]);
                 if (BlastFrame.TryGetValue(Root(shipId), out int frame) && frame == Time.frameCount)
                     return;
-                Hurt(shipId, (float)__args[2]);
+                Hurt(shipId, ArsenalReflection.AsFloat(__args[2]));
             }
             catch (Exception e)
             {

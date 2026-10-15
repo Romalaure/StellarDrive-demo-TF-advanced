@@ -202,7 +202,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private void LateUpdate()
         {
             Camera camera = MainCamera.Get();
-            if (camera == null || transform.parent == null)
+            if (camera == null || transform.parent == null || (camera.transform.position - transform.position).sqrMagnitude > 30f * 30f)
                 return;
             Vector3 up = transform.parent.up;
             Vector3 away = Vector3.ProjectOnPlane(transform.position - camera.transform.position, up);

@@ -463,7 +463,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 _portal.SetActive(false);
                 return;
             }
-            var transpose = ServiceLocator.GetService<IWorldTransposeClient>();
+            var transpose = GameServices.Transpose;
             if (transpose == null || _space == null || ClientOrigin.LocalVisualSpace == null)
                 return;
             _portal.SetActive(true);

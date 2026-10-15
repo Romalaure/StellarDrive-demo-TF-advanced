@@ -24,6 +24,31 @@ They have a real ship shape: pointed nose with a ram under the glazed cockpit, c
 | Raider | 2 s | 3 s | ± 1.5° | every 6 s |
 | Cruiser | 2.5 s | 3 s | ± 1° | every 4 s |
 
+
+## Radars
+
+Three radars (tab **TF Avancé**, combat row) detect the pirates around the ship:
+
+| Radar | Range | Power | Cost |
+|---|---|---|---|
+| **Short range radar** (green glow) | 1,000 km | 400 W | 10 copper, 6 glass, 6 iron |
+| **Long range radar** (golden glow) | 5,000 km | 1,200 W | 20 copper, 10 glass, 8 titanium, 4 quartz |
+| **Deep space radar** (violet glow) | 20,000 km | 3,200 W | 30 copper, 15 titanium, 8 quartz, 6 cryonite, 1 quantum core |
+
+It needs power on its power sockets (the grid must be able to give all of it). Its **round screen** shows the contacts seen from above, the radar's front at the top: distance on a log scale (rings at 10, 100, 1,000 and 10,000 km), a sweep turns and lights the echoes as it passes. Beside it, the list of the nearest contacts: pirate ships (red), **bases** (orange) and **incoming raids** with their time before contact. Its signal socket gives the number of contacts (wire it to an alarm); off: -1 no power grid, -3 not enough power.
+
+**Incoming raids**: a pirate group no longer appears all at once. It is spotted **25,000 km** away (setting `PirateRaidStartKm`) and rushes at its target at **250 km/s** (`PirateApproachKmPerSecond`) before jumping in beside it. A radar sees it as soon as it enters its range: about **80 s** of warning with the deep space radar, **20 s** with the long range radar, **4 s** with the short range radar. When a radar near you sees a raid coming, an **alert** shows at the top of the screen (setting `RadarAlarm`).
+
+## Stealth generator
+
+The **stealth generator** (6,000 W, setting `CloakWatts`) blurs the signature of the ship and everything docked to it on pirate sensors while it is powered (its rings turn, the crystal glows):
+- raids find the ship **three times less often**, and a raid already on its way may **lose its track** (about one chance in five every 5 s);
+- pirates only see it within **2.5 km** (bases within **1.2 km**); farther, they lose it;
+- they must come closer to fire (**400 m** instead of 650), **aim far worse** and lock their missiles later (**800 m**, narrower cone);
+- bases fire their missiles within 1.2 km instead of 2.5 km and launch their fighters within 1.5 km instead of 4 km.
+
+Cost: 2 quantum cores, 10 cryonite, 8 quartz, 12 titanium, 15 copper. Its signal socket reads 1 while it hides the ship. Radars and generator are unlocked by the **Electronic warfare** tech (after Cartography).
+
 ## Safe zone
 
 Around the starting planet, **442 Otrera b**, lies a **2,000 km** safe zone (setting `PirateSafeRadiusKm`, in km from its centre; 0 removes it). No pirate attacks there, and a fight that enters it is broken off: the pirates leave after 15 s.
