@@ -12,6 +12,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
 Remove-Item $dist -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force (Join-Path $stage 'Mods') | Out-Null
 Copy-Item (Join-Path $root 'Mods\mod.json') $stage
+Copy-Item (Join-Path $root 'Mods\thumbnail.png') $stage
 Copy-Item (Join-Path $root 'src\StellarDriveDemoTFAdvanced\bin\Release\StellarDriveDemoTFAdvanced.dll') (Join-Path $stage 'Mods')
 
 $version = (Get-Content (Join-Path $root 'Mods\mod.json') -Raw | ConvertFrom-Json).version
