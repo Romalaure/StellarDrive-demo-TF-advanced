@@ -84,6 +84,7 @@ namespace StellarDriveDemoTFAdvanced.Common
             if (!DevHarness.Active)
                 return;
             Fly();
+            Trace();
             Frames.Add(Time.unscaledDeltaTime);
             SampleVisual();
             if (_since < 0f)
@@ -144,6 +145,48 @@ namespace StellarDriveDemoTFAdvanced.Common
             _visualJitter += jitter;
             _visualJitterMax = Mathf.Max(_visualJitterMax, jitter);
             _visualSamples++;
+        }
+
+        // Turn phase, 2 s: every network snapshot of the probed ship (tick, angle to the previous
+        // one) and every frame (dt, visual angle), to see which one is uneven
+        private static readonly System.Text.StringBuilder TraceLog = new System.Text.StringBuilder();
+        private static ShipState _traced;
+        private static Quaternion _lastSnap, _lastFrame;
+        private static uint _lastTick;
+        private static bool _traceDone;
+
+        private static void Trace()
+        {
+            if (_traceDone || _flyPhase != "turn" || _visualShip == 0)
+                return;
+            float t = Time.unscaledTime - _flyStart;
+            Transform v = ShipVisuals.Find(_visualShip);
+            if (v == null)
+                return;
+            if (_traced == null)
+            {
+                if (t < 14f || !GameServices.ShipsClient.TryGetTrackedShip(_visualShip, out var client))
+                    return;
+                _traced = client.State;
+                _traced.PhysicsStateUpdatedClient += (prev, next, tick) =>
+                {
+                    float rate = _lastTick != 0 && tick > _lastTick ? Quaternion.Angle(_lastSnap, next.Rotation) / (tick - _lastTick) : -1f;
+                    TraceLog.Append($"S f{Time.frameCount} tick {tick} +{tick - _lastTick} {rate:0.000}°/tick; ");
+                    _lastSnap = next.Rotation;
+                    _lastTick = tick;
+                };
+                _lastFrame = v.rotation;
+                return;
+            }
+            if (TraceLog.Length == 0)
+                TraceLog.Append($"vsync {QualitySettings.vSyncCount} refresh {Screen.currentResolution.refreshRateRatio.value:0.0}; ");
+            TraceLog.Append($"F f{Time.frameCount} dt {Time.deltaTime * 1000f:0.0} {Quaternion.Angle(_lastFrame, v.rotation) * 1000f:0}m°; ");
+            _lastFrame = v.rotation;
+            if (t > 16f)
+            {
+                _traceDone = true;
+                AdvancedMod.Log.Msg("dev: trace: " + TraceLog);
+            }
         }
 
         /// <summary>Host physics step of a root ship (called from the pirate steering postfix).</summary>

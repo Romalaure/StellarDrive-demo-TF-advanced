@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.21.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.22.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -161,6 +161,7 @@ namespace StellarDriveDemoTFAdvanced
         {
             DevProfiler.Frame();
             DevHarness.Update();
+            FramePacing.Update();
             if (_inGame)
                 StabilityProbe.Update();
             if (_inGame && Worlds.BlackHole.EnsureAnchor())

@@ -39,6 +39,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<float> PirateRaidStartKm { get; private set; }
         public static MelonPreferences_Entry<float> PirateApproachKmPerSecond { get; private set; }
         public static MelonPreferences_Entry<bool> RadarAlarm { get; private set; }
+        public static MelonPreferences_Entry<bool> SteadyFrameRate { get; private set; }
         public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevDockingTest { get; private set; }
         public static MelonPreferences_Entry<string> DevSnapshotParts { get; private set; }
@@ -144,6 +145,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "Speed of an incoming pirate raid (km/s): 25 000 km at 250 km/s = 100 s of warning with the deep space radar.");
             RadarAlarm = _category.CreateEntry("RadarAlarm", true,
                 description: "A message on screen when a radar of your ship detects an incoming pirate raid.");
+            SteadyFrameRate = _category.CreateEntry("SteadyFrameRate", true,
+                description: "With vertical sync on and the game slower than the screen (60 fps on 165 Hz), frames alternate 2 and 3 screen refreshes and turning ships jerk: wait the same number of refreshes for every frame (55 fps on 165 Hz, steady). Never under 45 fps.");
             DevNuclearTest = _category.CreateEntry("DevNuclearTest", 0,
                 description: "For mod development: with DevWorld, an engine part id: a wired test ship with a centrifuge, a nuclear reactor and that engine.");
             DevMachineShield = _category.CreateEntry("DevMachineShield", 0,

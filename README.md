@@ -267,6 +267,10 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Vaisseaux qui tournent sans à-coups (v0.22)
+
+- **Rotations saccadées corrigées** : avec la synchro verticale sur un écran rapide (165 Hz) et le jeu vers 60 fps, les images restaient à l'écran 2 puis 3 rafraîchissements (12 puis 18 ms) : un vaisseau qui tourne régulièrement avançait par petits puis grands pas. Quand le jeu ne suit pas l'écran, chaque image attend maintenant le même nombre de rafraîchissements (55 fps réguliers sur 165 Hz). Toutes les 45 s il vérifie si le jeu est redevenu assez rapide. Jamais sous 45 fps, rien sans synchro verticale ; réglage `SteadyFrameRate`.
+
 ## Tablette schématique, 3e personne, portail moins gourmand, nouveaux radars (v0.21)
 
 - **Tablette schématique et vue à la 3e personne** (venues du mod TF) : sans le mod TF, TF Advanced les fournit. Même tablette (objet 7201), mêmes schématiques (`UserData/TF/schematics`), touche **V** en pilotant. La tablette se prend au râtelier à outils. Les touches des sièges KeySeat sont gardées et recopiées par les schématiques.
@@ -385,6 +389,7 @@ Réglage : `BlackHole` (section `[TFAdvanced]`, les deux trous noirs), identique
 | `Pirates` / `PirateIntervalMinutes` | `true` / `12` | pirates (avec Arsenal) et temps moyen dans l'espace entre deux attaques (min) |
 | `PirateRaidStartKm` / `PirateApproachKmPerSecond` | `25000` / `250` | distance où un raid pirate est repéré et sa vitesse d'approche |
 | `RadarAlarm` | `true` | alerte à l'écran quand un radar près de vous voit un raid arriver |
+| `SteadyFrameRate` | `true` | synchro verticale activée et jeu plus lent que l'écran : même nombre de rafraîchissements pour chaque image, pour des rotations sans à-coups (jamais sous 45 fps) |
 | `RadarWatts` / `CloakWatts` (`[TFAdvancedPower]`) | `400` / `6000` | courant du radar courte portée (×3 longue portée, ×8 espace profond) et du générateur d'invisibilité |
 | `CondenserWatts` / `CondenserOxygenPerSecond` (`[TFAdvancedPower]`) | `1500` / `0.05` | condenseur à cryonite |
 | `QuantumGyroFactor` (`[TFAdvancedPower]`) | `5` | couple du gyroscope quantique, en gyroscopes |
