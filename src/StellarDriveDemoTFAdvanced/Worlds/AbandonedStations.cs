@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Core.Services;
@@ -13,6 +14,7 @@ using Saving.Services.Model.State;
 using Ships;
 using Ships.Interface.Model.Parts;
 using Ships.Interface.Model.Parts.State;
+using Ships.Interface.Model.State;
 using Ships.Services;
 using StellarDriveDemoTFAdvanced.Common;
 using UnityEngine;
@@ -30,6 +32,10 @@ namespace StellarDriveDemoTFAdvanced.Worlds
     /// can be entered, salvaged with the recycler, looted and docked against), with a named
     /// beacon: it shows up as a target on the star map and the targeting computer, and warp
     /// jumps can aim at it. Created once per world by the host, then saved with the world.
+    /// Its entrance is an open docking door (dock a ship with a docking door against it, or float
+    /// in); inside, lights, consoles, bunks, shelves and chests; outside, trusses, solar panels
+    /// and blinking beacons. Stations from an older version of the mod (no docking door) are
+    /// replaced when the world loads (<see cref="StationVersion"/>, tfa_stations.txt).
     /// </summary>
     internal static class AbandonedStations
     {
@@ -233,6 +239,79 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private static float _checkAt = -1f;
         private static bool _done;
 
+        /// <summary>
+        /// The stations' build. Worlds saved with an older one get their stations replaced when
+        /// loaded (version 2: docking door entrance, furnishing, outside equipment); destroyed
+        /// pirate bases stay wrecks.
+        /// </summary>
+        public const int StationVersion = 2;
+        private const string VersionFile = "tfa_stations.txt";
+        private static bool _loadingWorld;
+        private static int _savedVersion = -1;
+        private static readonly HashSet<uint> DeadBases = new HashSet<uint>();
+        private static int _replaced;
+
+        /// <summary>Host, while the game loads a world's ships.</summary>
+        public static void BeginWorldLoad()
+        {
+            _loadingWorld = true;
+            _replaced = 0;
+            _savedVersion = 0;
+            DeadBases.Clear();
+            string directory = WorldDirectory();
+            if (directory == null)
+                return;
+            string version = Path.Combine(directory, VersionFile);
+            if (File.Exists(version) && int.TryParse(File.ReadAllText(version).Trim(), out int saved))
+                _savedVersion = saved;
+            string pirates = Path.Combine(directory, "tfa_pirates.txt");
+            if (File.Exists(pirates))
+            {
+                foreach (string line in File.ReadAllLines(pirates))
+                {
+                    string[] f = line.Split(' ');
+                    if (f.Length >= 2 && f[1] == "dead" && uint.TryParse(f[0], out uint id))
+                        DeadBases.Add(id);
+                }
+            }
+        }
+
+        public static void EndWorldLoad()
+        {
+            _loadingWorld = false;
+            if (_replaced > 0)
+                AdvancedMod.Log.Msg($"stations: {_replaced} station(s) from an older version left out, rebuilt with a docking door");
+        }
+
+        /// <summary>Whether this saved ship is one of the mod's stations in an older build, to rebuild.</summary>
+        public static bool ShouldReplace(IShipState ship)
+        {
+            if (!_loadingWorld || _savedVersion >= StationVersion || ship?.StatefulParts == null || DeadBases.Contains(ship.Id))
+                return false;
+            foreach (StatefulPart part in ship.StatefulParts)
+            {
+                if (part?.State is BeaconState beacon && All.Any(s => s.Name == beacon.Name))
+                {
+                    _replaced++;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>After the game saved the world: the stations' build goes beside it.</summary>
+        public static void SaveVersion(string worldDirectory)
+        {
+            if (!string.IsNullOrEmpty(worldDirectory) && Directory.Exists(worldDirectory))
+                File.WriteAllText(Path.Combine(worldDirectory, VersionFile), StationVersion.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private static string WorldDirectory()
+        {
+            string save = Managers.Interface.MainGameSceneLoadData.SaveFileFullName;
+            return string.IsNullOrEmpty(save) ? null : Path.GetDirectoryName(save);
+        }
+
         public static void OnSceneLoaded(bool inGame)
         {
             _done = false;
@@ -374,7 +453,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             // Game part ids: iron floor and wall, glass wall and floor, beacon, chest, chemical thruster
             private const int IronFloor = 1, IronWall = 2, GlassWall = 7, GlassFloor = 36;
-            private const int Beacon = 38, Chest = 30, Thruster = 19, Bed = 43, FluidTank = 23;
+            private const int Beacon = 38, Chest = 30, Thruster = 19, Bed = 43, FluidTank = 23, DockingDoor = 42;
+            // Furnishing: the game's star map, research table and supply crate; the mod's ceiling
+            // light, LED strip, blinking beacon, shelf, console, truss, beam and solar support
+            private const int StarMap = 15, ResearchTable = 22, SupplyCrate = 310;
+            private const int CeilingLight = 7101, LedStrip = 7116, NavBeacon = 7114, Shelf = 7346, Console = 7302,
+                Truss = 7364, Beam = 7333, SolarSupport = 7375;
             private const uint Oxygen = 108, Ethanol = 111;
 
             public StationSpec Spec;
@@ -385,6 +469,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             private readonly System.Random _random;
 
             private readonly List<(ushort Weapon, Vector3 At, int Forward)> _batteries = new List<(ushort, Vector3, int)>();
+            private readonly List<(int X, int Y, int Z, int Face)> _doors = new List<(int, int, int, int)>();
+
+            /// <summary>The docking doors (interior voxel, outer face), for the development photos.</summary>
+            public IReadOnlyList<(int X, int Y, int Z, int Face)> Doors => _doors;
+            // Floor cells already holding something (chests, furniture), and the door's way in
+            private readonly HashSet<Vector2Int> _taken = new HashSet<Vector2Int>();
 
             public Blueprint(int seed)
             {
@@ -410,11 +500,28 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                             _inside.Add(new Vector3Int(x, y, z));
             }
 
-            /// <summary>A breached doorway, 1 wide and 2 high, on the outer face next to this interior voxel.</summary>
+            /// <summary>
+            /// The way in: an open docking door, 2 wide and 2 high, on the outer face (0 +x, 1 -x,
+            /// 2 +z, 3 -z) of this interior voxel and the next one to its right seen from outside
+            /// (+x for a +z face, -x for -z, -z for +x, +z for -x: the game turns the door's width
+            /// with it). A ship's docking door docks against it; a player can also float in.
+            /// </summary>
             public void Entrance(int x, int y, int z, int face)
             {
-                _openings.Add(new Vector3Int(x, y, z) * 10 + new Vector3Int(face, 0, 0));
-                _openings.Add(new Vector3Int(x, y + 1, z) * 10 + new Vector3Int(face, 0, 0));
+                _doors.Add((x, y, z, face));
+                Vector3Int side = DoorSide(face);
+                for (int a = 0; a < 2; a++)
+                {
+                    for (int b = 0; b < 2; b++)
+                    {
+                        Vector3Int v = new Vector3Int(x, y + b, z) + side * a;
+                        _openings.Add(v * 10 + new Vector3Int(face, 0, 0));
+                        // Keep the way in clear, one cell deep
+                        _taken.Add(new Vector2Int(v.x, v.z));
+                        Vector3Int inward = v - Direction(face);
+                        _taken.Add(new Vector2Int(inward.x, inward.z));
+                    }
+                }
             }
 
             public string ToJson(string beaconName)
@@ -455,6 +562,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     for (int i = 0; i < count; i++)
                     {
                         int x = _random.Next(m.x0, m.x1 + 1), z = _random.Next(m.z0, m.z1 + 1);
+                        for (int tries = 0; tries < 8 && _taken.Contains(new Vector2Int(x, z)); tries++)
+                        {
+                            x = _random.Next(m.x0, m.x1 + 1);
+                            z = _random.Next(m.z0, m.z1 + 1);
+                        }
+                        _taken.Add(new Vector2Int(x, z));
                         // A loot case now and then instead of a plain chest (opened: no key needed)
                         int container = _random.NextDouble() < 0.4 ? 400 + _random.Next(0, 5) * 10 + _random.Next(0, 7) : Chest;
                         floating.Add(Floating(nextPart, container, new Vector3(x, m.y0 - 0.5f + 0.04f, z), 2, 4));
@@ -485,6 +598,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     nextPart++;
                 }
 
+                Furnish(floating, storages, ref nextPart);
+
                 // Pirate batteries (the base's guns; only with the Arsenal mod, whose parts they are)
                 if (Spec != null && Spec.Pirate && Power.ArsenalShield.Installed)
                 {
@@ -507,12 +622,25 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 sb.Append("\"rooms\":[],");
                 sb.Append("\"hullParts\":[").Append(string.Join(",", hull)).Append("],");
                 sb.Append("\"statefulFloatingParts\":[").Append(string.Join(",", floating)).Append("],");
-                sb.Append("\"statefulHullParts\":[],");
+                var doors = new List<string>();
+                var doorStates = new List<string>();
+                foreach ((int x, int y, int z, int face) in _doors)
+                {
+                    // In the save format a wall belongs to the voxel behind it on its -z / -x side
+                    int dx = face == 1 ? x - 1 : x, dz = face == 3 ? z - 1 : z;
+                    int type = face < 2 ? 2 : 1;
+                    int orientation = face == 0 ? 1 : face == 1 ? 3 : face == 2 ? 0 : 2;
+                    doors.Add($"{{\"id\":{nextPart},\"settingsId\":{DockingDoor},\"coord\":{{\"x\":{dx},\"y\":{y},\"z\":{dz}}},\"orientationId\":{orientation},\"voxelPartTypeId\":{type}}}");
+                    doorStates.Add($"{{\"partId\":{nextPart},\"isOpen\":true,\"isDocked\":false,\"dockedShipId\":0,\"dockedPartId\":0}}");
+                    nextPart++;
+                }
+                sb.Append("\"statefulHullParts\":[").Append(string.Join(",", doors)).Append("],");
                 sb.Append("\"thrustersStates\":[").Append(string.Join(",", thrusters)).Append("],");
+                sb.Append("\"dockingDoorStates\":[").Append(string.Join(",", doorStates)).Append("],");
                 sb.Append("\"storageStates\":[").Append(string.Join(",", storages)).Append("],");
                 sb.Append("\"beaconStates\":[{\"partId\":").Append(beaconId).Append(",\"name\":\"").Append(beaconName.Replace("\"", "'")).Append("\"}],");
                 sb.Append("\"fluidTankStates\":[").Append(string.Join(",", tanks)).Append("],");
-                foreach (string empty in new[] { "leverStates", "warpDriveStates", "dockingDoorStates", "targeterStates", "mathGateStates",
+                foreach (string empty in new[] { "leverStates", "warpDriveStates", "targeterStates", "mathGateStates",
                     "unaryMathGateStates", "memoryRegisterStates", "constantStates", "transmitterStates", "rotorStates", "electrolyzerStates",
                     "woodThrusterStates", "woodGeneratorStates", "ethanolDistillerStates" })
                     sb.Append('"').Append(empty).Append("\":[],");
@@ -521,8 +649,141 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 return sb.ToString();
             }
 
+            // A free floor cell of a module, or null
+            private Vector2Int? FreeCell((int x0, int y0, int z0, int x1, int y1, int z1) m, bool againstWall)
+            {
+                for (int tries = 0; tries < 20; tries++)
+                {
+                    int x = _random.Next(m.x0, m.x1 + 1), z = _random.Next(m.z0, m.z1 + 1);
+                    if (againstWall && x != m.x0 && x != m.x1 && z != m.z0 && z != m.z1)
+                        continue;
+                    var cell = new Vector2Int(x, z);
+                    if (_taken.Add(cell))
+                        return cell;
+                }
+                return null;
+            }
+
+            /// <summary>
+            /// What makes it look lived in: a light on every module's ceiling, a lit strip in the
+            /// corridors, a console and a star map in the core, shelves and supply
+            /// crates, a research table; outside, a truss mast with solar supports on the core and
+            /// blinking beacons on the modules' far corners.
+            /// </summary>
+            private void Furnish(List<string> floating, List<string> storages, ref int nextPart)
+            {
+                bool wreck = Spec != null && Spec.Breaches >= 4f;
+                for (int i = 0; i < _modules.Count; i++)
+                {
+                    var m = _modules[i];
+                    float cx = Mathf.Round((m.x0 + m.x1) * 0.5f), cz = Mathf.Round((m.z0 + m.z1) * 0.5f);
+                    float floor = m.y0 - 0.5f + 0.04f, ceiling = m.y1 + 0.5f - 0.04f, roof = m.y1 + 0.5f + 0.04f;
+                    int area = (m.x1 - m.x0 + 1) * (m.z1 - m.z0 + 1);
+                    bool corridor = Mathf.Min(m.x1 - m.x0, m.z1 - m.z0) <= 2 && area >= 6;
+
+                    // Light: ceiling lights in rooms (most of them dead in a wreck), a lit strip along corridors
+                    if (!wreck || _random.NextDouble() < 0.3)
+                    {
+                        if (corridor)
+                        {
+                            bool alongZ = (m.z1 - m.z0) > (m.x1 - m.x0);
+                            floating.Add(Floating(nextPart++, LedStrip, new Vector3(cx, ceiling, cz), alongZ ? 1 : 0, 5));
+                        }
+                        else
+                        {
+                            floating.Add(Floating(nextPart++, CeilingLight, new Vector3(cx, ceiling, cz), 0, 5));
+                        }
+                    }
+
+                    // Furniture on the floor, against the walls
+                    if (i == 0 && area >= 9)
+                    {
+                        if (FreeCell(m, true) is Vector2Int console)
+                            floating.Add(Floating(nextPart++, Console, new Vector3(console.x, floor, console.y), Facing(m, console), 4));
+                        if (FreeCell(m, false) is Vector2Int map)
+                            floating.Add(Floating(nextPart++, StarMap, new Vector3(map.x, floor, map.y), 2, 4));
+                    }
+                    if (!corridor && area >= 9)
+                    {
+                        int shelves = area >= 20 ? 2 : 1;
+                        for (int s = 0; s < shelves; s++)
+                        {
+                            if (FreeCell(m, true) is Vector2Int shelf)
+                                floating.Add(Floating(nextPart++, Shelf, new Vector3(shelf.x, floor, shelf.y), Facing(m, shelf), 4));
+                        }
+                        if (_random.NextDouble() < 0.6 && FreeCell(m, true) is Vector2Int crate)
+                        {
+                            floating.Add(Floating(nextPart, SupplyCrate, new Vector3(crate.x, floor, crate.y), _random.Next(0, 4), 4));
+                            storages.Add($"{{\"partId\":{nextPart},\"slots\":[{Loot()}]}}");
+                            nextPart++;
+                        }
+                        if (i == 1 && FreeCell(m, true) is Vector2Int table)
+                            floating.Add(Floating(nextPart++, ResearchTable, new Vector3(table.x, floor, table.y), Facing(m, table), 4));
+                    }
+
+                    // Outside: solar arrays along the corridors' roofs, an antenna on top of a tower
+                    if (corridor)
+                    {
+                        bool alongZ = (m.z1 - m.z0) > (m.x1 - m.x0);
+                        int from = alongZ ? m.z0 : m.x0, to = alongZ ? m.z1 : m.x1;
+                        for (int c = from + 1; c < to; c += 3)
+                            floating.Add(Floating(nextPart++, SolarSupport, alongZ ? new Vector3(cx, roof, c) : new Vector3(c, roof, cz), 0, 4));
+                    }
+                    if (i > 0 && m.y0 > 0 && m.x1 - m.x0 <= 4 && m.z1 - m.z0 <= 4)
+                    {
+                        floating.Add(Floating(nextPart++, Beam, new Vector3(cx, roof, cz), 0, 4));
+                        floating.Add(Floating(nextPart++, NavBeacon, new Vector3(cx, roof + 4f, cz), 0, 4));
+                    }
+
+                    // Outside: blinking beacons on the far corners of the roof
+                    if (i > 0 || _modules.Count == 1)
+                    {
+                        floating.Add(Floating(nextPart++, NavBeacon, new Vector3(m.x0, roof, m.z0), 0, 4));
+                        floating.Add(Floating(nextPart++, NavBeacon, new Vector3(m.x1, roof, m.z1), 0, 4));
+                    }
+                }
+
+                // The core's roof: a truss mast with solar supports around it, beams to the corners
+                var core = _modules[0];
+                float rx = Mathf.Round((core.x0 + core.x1) * 0.5f), rz = Mathf.Round((core.z0 + core.z1) * 0.5f);
+                float top = core.y1 + 0.5f + 0.04f;
+                // (the beacon stands on the roof's middle: the mast goes one cell beside it)
+                floating.Add(Floating(nextPart++, Truss, new Vector3(rx + 1f, top, rz), 0, 4));
+                floating.Add(Floating(nextPart++, Truss, new Vector3(rx + 1f, top + 2f, rz), 0, 4));
+                floating.Add(Floating(nextPart++, NavBeacon, new Vector3(rx + 1f, top + 4f, rz), 0, 4));
+                if (core.x1 - core.x0 >= 2 && core.z1 - core.z0 >= 2)
+                {
+                    foreach ((int x, int z) in new[] { (core.x0, core.z0), (core.x1, core.z0), (core.x0, core.z1), (core.x1, core.z1) })
+                    {
+                        floating.Add(Floating(nextPart++, SolarSupport, new Vector3(x, top, z), 0, 4));
+                        floating.Add(Floating(nextPart++, Beam, new Vector3(x, top, z), 0, 4));
+                    }
+                }
+            }
+
+            // Furniture against a wall faces into the room (0 +z, 1 +x, 2 -z, 3 -x)
+            private static int Facing((int x0, int y0, int z0, int x1, int y1, int z1) m, Vector2Int cell)
+            {
+                if (cell.x == m.x0) return 1;
+                if (cell.x == m.x1) return 3;
+                if (cell.y == m.z0) return 0;
+                return 2;
+            }
+
+            /// <summary>Where a docking door on this face takes its second column of voxels.</summary>
+            internal static Vector3Int DoorSide(int face)
+            {
+                switch (face)
+                {
+                    case 0: return new Vector3Int(0, 0, -1);
+                    case 1: return new Vector3Int(0, 0, 1);
+                    case 3: return Vector3Int.left;
+                    default: return Vector3Int.right;
+                }
+            }
+
             // Faces: 0 +x, 1 -x, 2 +z, 3 -z, 4 -y (floor), 5 +y (ceiling)
-            private static Vector3Int Direction(int face)
+            internal static Vector3Int Direction(int face)
             {
                 switch (face)
                 {
@@ -591,6 +852,32 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 while (slots.Count < 10)
                     slots.Add("{\"hasItem\":false,\"itemId\":0,\"quantity\":0}");
                 return string.Join(",", slots);
+            }
+        }
+    }
+
+    /// <summary>Host: the world's ships are being loaded (stations of an older build are left out, then rebuilt).</summary>
+    [HarmonyLib.HarmonyPatch(typeof(Managers.Server.Saving.ServerStateLoader), "LoadWorldFromFileEntry")]
+    internal static class StationsWorldLoadPatch
+    {
+        private static void Prefix() => AbandonedStations.BeginWorldLoad();
+
+        private static void Finalizer() => AbandonedStations.EndWorldLoad();
+    }
+
+    [HarmonyLib.HarmonyPatch(typeof(ShipsServerTracker), nameof(ShipsServerTracker.LoadShip))]
+    internal static class StationsLoadShipPatch
+    {
+        private static bool Prefix(IShipState shipToLoad)
+        {
+            try
+            {
+                return !AbandonedStations.ShouldReplace(shipToLoad);
+            }
+            catch (Exception e)
+            {
+                ErrorLog.Report("stations load", e);
+                return true;
             }
         }
     }

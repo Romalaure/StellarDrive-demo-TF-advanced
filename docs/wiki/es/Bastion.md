@@ -21,6 +21,7 @@ El Bastión Escarlata: un planeta entero cubierto de metal por los [piratas](Pir
 
 - fortalezas, torretas y murallas por toda la superficie
 - **Base pirate : Forteresse Écarlate** y **Base pirate : Chantier de la Rouille**, en órbita (visibles en el mapa estelar)
+- cofres de botín en las **torres y cúpulas** de la fortaleza en el suelo (aleación, titanio, uranio, meteorito, núcleos cuánticos, oro), más ricos en las torres altas
 - anillo de escombros
 
 ## Utilidad

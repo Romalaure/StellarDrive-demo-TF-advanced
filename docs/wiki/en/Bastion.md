@@ -15,7 +15,7 @@ The Scarlet Bastion: a whole planet covered in metal by the [pirates](Pirates.md
 
 - uranium
 - meteorite
-- the loot of the pirate bases
+- the loot of the pirate bases, and chests of plunder in the fortress **towers and domes** on the ground (alloy, titanium, uranium, meteorite, quantum cores, gold), richer in the tall towers
 
 ## Places
 

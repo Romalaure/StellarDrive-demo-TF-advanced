@@ -33,6 +33,12 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Stations you can enter, pirate fortress chests (v0.24)
+
+- **Stations and wrecks you can enter**: their entrance is now one of the game's docking doors, open: dock with your ship's docking door, or float in. Stations already in your worlds are rebuilt with their door when the world loads (a destroyed pirate base stays a wreck).
+- **More realistic stations**: ceiling lights, lit strips in corridors, a console, a star map, a research table, shelves, supply crates besides the chests; outside, a truss mast, solar panels along the corridors, antennas and blinking beacons.
+- **Chests in the Bastion's pirate fortress**: towers and domes hide the pirates' plunder (alloy, titanium, uranium, meteorite, quantum cores, gold).
+
 ## Paint gun, rack fixed, new capsule (v0.23)
 
 - **The TF mod's paint gun**: without the TF mod, TF Advanced provides it. It also paints doors, machines and placed parts, with finishes, presets and camouflage; the colors you already laid (`tf-paint.json`) come back, and schematics copy the paint.

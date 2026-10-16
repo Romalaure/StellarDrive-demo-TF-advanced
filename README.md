@@ -267,6 +267,12 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Stations accessibles, coffres de la forteresse pirate (v0.24)
+
+- **Stations et épaves accessibles** : leur entrée est maintenant une porte d'amarrage du jeu, ouverte : amarrez-vous avec la porte d'amarrage de votre vaisseau, ou entrez en flottant. Les stations déjà dans vos mondes sont reconstruites avec leur porte au chargement (une base pirate détruite reste une épave).
+- **Stations plus réalistes** : éclairage au plafond, bandes lumineuses dans les couloirs, console, carte stellaire, table de recherche, étagères, caisses de ravitaillement en plus des coffres ; dehors, mât en treillis, panneaux solaires sur les couloirs, antennes et balises clignotantes.
+- **Coffres dans la forteresse pirate du Bastion** : tours et dômes cachent le butin des pirates (alliage, titane, uranium, météorite, noyaux quantiques, or).
+
 ## Pistolet à peinture, râtelier réparé, nouvelle capsule (v0.23)
 
 - **Pistolet à peinture du mod TF** : sans le mod TF, TF Advanced le fournit. Il peint aussi les portes, machines et pièces posées, avec finitions, préréglages et camouflages ; vos couleurs déjà posées (`tf-paint.json`) reviennent, et les schématiques recopient la peinture.

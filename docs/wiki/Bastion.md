@@ -25,7 +25,7 @@ Une planète entière recouverte de métal par les [pirates](Pirates.md). Partou
 
 ## Utilité
 
-Le repaire des pirates. Leurs bases se pillent : coffres pleins de noyaux quantiques, matière exotique, alliage nexorien, uranium ; la base détruite laisse en plus une grosse capsule de butin.
+Le repaire des pirates. Leurs bases se pillent : coffres pleins de noyaux quantiques, matière exotique, alliage nexorien, uranium ; la base détruite laisse en plus une grosse capsule de butin. Dans la forteresse au sol, les **tours et dômes** cachent aussi des coffres de pillage (alliage, titane, uranium, météorite, noyaux quantiques, lingots d'or), plus riches dans les grandes tours.
 
 > ⚠️ Territoire pirate : dans un rayon de 5 000 km, les attaques sont **quatre fois plus fréquentes**. Les bases tirent sur tout vaisseau à moins de 3 km, lancent des salves de missiles et des chasseurs. Pas d'air, gravité forte.
 

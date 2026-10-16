@@ -31,7 +31,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 {
     /// <summary>
     /// Chests inside the mod's buildings (village houses, halls, towers and temples, the city's
-    /// lobbies and domes), filled with what that place and planet has: local ores, materials, and
+    /// lobbies and domes, the pirate fortress's towers and domes on the Bastion), filled with what that place and planet has: local ores, materials, and
     /// sometimes the rare finds the advanced parts are built from. A chest is a one-part ship, like
     /// any part set down on the ground: the game saves it, synchronizes it and lets players open,
     /// empty or recycle it. The host places it the first time a building's collider is loaded
@@ -54,6 +54,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 case Kind.Temple: color = Gold; finish = Timber; break;
                 case Kind.CityCore: color = Gold; finish = Alloy; break;
                 case Kind.City: color = Purple; finish = Alloy; break;
+                case Kind.FortCore: color = Gold; finish = Rusted; break;
+                case Kind.Fort: color = prefix.Contains("Dome") ? Purple : Gray; finish = Rusted; break;
                 default:
                     color = prefix.Contains("Hall") ? Blue : prefix.Contains("Tower") ? Gray : Green;
                     finish = prefix.Contains("Tower") ? Rusted : Timber;
@@ -66,7 +68,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             return 400 + color * 10 + finish;
         }
 
-        private enum Kind { Village, Temple, City, CityCore }
+        private enum Kind { Village, Temple, City, CityCore, Fort, FortCore }
 
         private sealed class Site
         {
@@ -85,7 +87,11 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             new Site { Prefix = "TFA_RuinTemple_", Kind = Kind.Temple, Spots = new[] { new Vector3(0f, 0.92f, 0.6f) } },
             new Site { Prefix = "TFA_CityTowerTall", Kind = Kind.CityCore, Spots = new[] { new Vector3(-5.6f, 0.07f, -6.6f) } },
             new Site { Prefix = "TFA_CityTower", Kind = Kind.City, Spots = new[] { new Vector3(-5.6f, 0.07f, -6.6f) } },
-            new Site { Prefix = "TFA_CityDome", Kind = Kind.City, Spots = new[] { new Vector3(6f, 0.12f, -5f) } }
+            new Site { Prefix = "TFA_CityDome", Kind = Kind.City, Spots = new[] { new Vector3(6f, 0.12f, -5f) } },
+            // The pirate fortress's towers and domes are built like the city's: same lobby, same floor
+            new Site { Prefix = "TFA_FortTowerTall", Kind = Kind.FortCore, Spots = new[] { new Vector3(-5.6f, 0.07f, -6.6f), new Vector3(5.6f, 0.07f, -6.6f) } },
+            new Site { Prefix = "TFA_FortTower", Kind = Kind.Fort, Spots = new[] { new Vector3(-5.6f, 0.07f, -6.6f) } },
+            new Site { Prefix = "TFA_FortDome", Kind = Kind.Fort, Spots = new[] { new Vector3(6f, 0.12f, -5f) } }
         };
 
         private static readonly HashSet<string> Known = new HashSet<string>();
@@ -220,6 +226,22 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
         private static IEnumerable<Drop> LootTable(Kind kind, ulong planetId)
         {
+            if (kind == Kind.Fort || kind == Kind.FortCore)
+            {
+                // The pirates' plunder: what they took from ships and stations
+                bool core = kind == Kind.FortCore;
+                yield return new Drop(ModItems.NexoranAlloy, 2, 8, 0.75);
+                yield return new Drop(ModItems.Titanium, 4, 12, 0.6);
+                yield return new Drop(ModItems.Uranium, 2, 8, 0.5);
+                yield return new Drop(ModItems.Meteorite, 2, 6, 0.45);
+                yield return new Drop(ModItems.QuantumCore, 1, core ? 2 : 1, core ? 0.7 : 0.3);
+                yield return new Drop(ModItems.ExoticMatter, 1, 2, core ? 0.5 : 0.2);
+                yield return new Drop(ModItems.GoldBar, 1, 3, core ? 0.6 : 0.3);
+                yield return new Drop(ModItems.Artifact, 1, 1, core ? 0.35 : 0.12);
+                yield return new Drop(ModItems.Iron, 6, 20, 0.5);
+                yield return new Drop(ModItems.Copper, 4, 12, 0.4);
+                yield break;
+            }
             if (kind == Kind.City || kind == Kind.CityCore)
             {
                 yield return new Drop(ModItems.NexoranAlloy, 2, 6, 0.85);
@@ -315,6 +337,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             try
             {
                 LootCaches.SaveSites(worldDirectoryFullName);
+                AbandonedStations.SaveVersion(worldDirectoryFullName);
                 Combat.Pirates.Save(worldDirectoryFullName);
             }
             catch (Exception e)

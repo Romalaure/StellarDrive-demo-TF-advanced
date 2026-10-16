@@ -63,6 +63,19 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Move(station, new Vector3(18f, 10f, -32f), Quaternion.LookRotation(new Vector3(-18f, -9f, 32f).normalized, Vector3.up));
                 yield return Wait(5f);
                 DevHarness.Screenshot($"station_{tag}_outside");
+                // The docking door from outside and from inside, and the whole station, in its own frame
+                var plan = new AbandonedStations.Blueprint(spec.Seed) { Spec = spec };
+                spec.Build(plan);
+                var views = new System.Collections.Generic.List<(Vector3 At, Vector3 Look)> { (new Vector3(26f, 16f, -38f), new Vector3(-26f, -16f, 38f)) };
+                foreach ((int x, int y, int z, int face) in plan.Doors)
+                {
+                    Vector3 out_ = AbandonedStations.Blueprint.Direction(face);
+                    Vector3 side = (Vector3)AbandonedStations.Blueprint.DoorSide(face) * 0.5f;
+                    Vector3 center = new Vector3(x, y + 0.5f, z) + side + out_ * 0.5f;
+                    views.Add((center + out_ * 6f + Vector3.up * 1.5f, -out_ * 6f - Vector3.up * 1.5f));
+                    views.Add((center - out_ * 3.5f, out_));
+                }
+                yield return Parts.Showcase.PhotographFrom(station.Id, $"station_{tag}_view", views);
                 AdvancedMod.Log.Msg($"dev: visited {spec.Name} (ship {station.Id}, {station.PartCount} parts)");
                 yield return Wait(0.5f);
             }

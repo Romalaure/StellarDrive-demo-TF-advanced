@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.23.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.24.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -33,6 +33,7 @@ namespace StellarDriveDemoTFAdvanced
             Worlds.StarMapProbe.Install();
             Items.ItemProbe.Install();
             Common.FpsProbe.Install();
+            Common.InteractProbe.Install();
             Power.MachineTest.Install();
             Power.NuclearTest.Install();
             Combat.PirateTest.Install();
