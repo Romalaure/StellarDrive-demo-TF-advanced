@@ -18,6 +18,8 @@ using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.Items;
 using UnityEngine;
 using WorldTracking.Interface.Model;
+using WorldTracking.Interface.Model.Spaces;
+using WorldTracking.Interface.Services;
 using WorldTracking.Services;
 using WorldTracking.Spaces;
 
@@ -87,7 +89,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             StatefulPart generator = ship.GetAllStatefulParts<ConstantState>().First(p => p.Id == 3);
             Vector3 forward = rotation * (generator.LocalRotation * Vector3.forward);
             float start = Time.unscaledTime;
-            bool pushed = false;
+            bool pushed = false, moved = false;
             float nextLog = 0f;
             while (Time.unscaledTime - start < 70f)
             {
@@ -100,10 +102,16 @@ namespace StellarDriveDemoTFAdvanced.Power
                 double portal = ship.GetAllStatefulParts<ConstantState>().Where(p => p.Id == 3).Select(p => ((ConstantState)p.State).ConstantValue).FirstOrDefault();
                 if (ship.SpaceId != space)
                 {
+                    // Getting under way changes the ship's space: the portal must stay open; going
+                    // through it does too, and closes it
                     AdvancedMod.Log.Msg($"dev: portal test: ship left its space ({space} -> {ship.SpaceId}), portal state {portal}");
-                    yield return Worlds.StationVisit.Wait(0.4f);
-                    Photograph("portal_closing");
-                    break;
+                    space = ship.SpaceId;
+                    if (portal < Portal.Open)
+                    {
+                        yield return Worlds.StationVisit.Wait(0.4f);
+                        Photograph("portal_closing");
+                        break;
+                    }
                 }
                 if (portal >= Portal.Open && !pushed)
                 {
@@ -116,7 +124,21 @@ namespace StellarDriveDemoTFAdvanced.Power
                     yield return Worlds.StationVisit.Wait(1.4f);
                     Photograph("portal_open");
                 }
-                // Held in place while charging, then flown forward through the portal
+                // Held in place while charging; once open the ship is moved to another space (as the game
+                // does when a ship gets under way: the portal must follow), then flown through the portal
+                if (pushed && !moved && spaces.GetSpace(space) is ShipRelativeSpace relative && ships.GetShip(relative.ShipId) is TrackedShipServer carrier)
+                {
+                    var transposeServer = ServiceLocator.GetService<IWorldTransposeServer>();
+                    hold = transposeServer.Position(space, carrier.SpaceId, hold);
+                    forward = transposeServer.Rotation(space, carrier.SpaceId, Quaternion.LookRotation(forward)) * Vector3.forward;
+                    rotation = transposeServer.Rotation(space, carrier.SpaceId, rotation);
+                    AdvancedMod.Log.Msg($"dev: portal test: ship moved from space {space} to {carrier.SpaceId}");
+                    space = carrier.SpaceId;
+                    spaces.SetWorldObjectPhysics(ship, space, new LocalPhysicsState { Position = hold, Rotation = rotation, Velocity = forward * 20f });
+                    moved = true;
+                    yield return null;
+                    continue;
+                }
                 Vector3 velocity = pushed ? forward * 20f : Vector3.zero;
                 Vector3 position = pushed ? ship.Position : hold;
                 spaces.SetWorldObjectPhysics(ship, space, new LocalPhysicsState { Position = position, Rotation = rotation, Velocity = velocity });

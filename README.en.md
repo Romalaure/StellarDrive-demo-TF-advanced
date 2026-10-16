@@ -33,6 +33,14 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Portal on the move, teleporter, new models (v0.27)
+
+- **Portal**: no longer closes when the ship gets under way (the game then changes the ship's space; the portal is carried over to the new space, in the same place).
+- **Teleport capsule**: you come out in front of the arrival capsule's door, facing out, instead of being pushed out at a side.
+- **Dark matter collector**: new model (mast, stator, three-vane rotor, meteorite dish, a singularity in a gimbal) and an animation while it collects: the rotor spins up, the gimbal turns, the singularity throbs, violet streaks swirl into it and everything lights up.
+- **Infinite parts**: lighter, more detailed texture and armor of their own (glowing cage on the generator, hoops on the oxygen and ethanol tanks, guards and plate on the chest), with the infinity sign and a crystal.
+- **Radio**: new model (bevelled case, round speaker with chrome rings, lit dial with a needle, preset keys, ridged knobs, power light, chrome handle, telescopic antenna).
+
 ## Own crafts, new models, loot ping (v0.26)
 
 - **Crafts**: no material from another mod nor aluminium any more. Everything is built from the game's materials (iron, glass, copper, wood, stellar shards) and the mod's (titanium, uranium, meteorite…).

@@ -144,8 +144,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             Vector3 center = transform.position + transform.forward * Mathf.Max(5f, PowerCatalog.PortalDistance.Value);
             if (_rift == null)
                 _rift = PortalRift.Create(gameObject.layer);
-            _rift.Open(space, transpose.Position(ClientOrigin.LocalVisualSpace, space, center),
-                transpose.Position(ClientOrigin.LocalVisualSpace, space, center + transform.forward));
+            _rift.Open(space, spaceId, transpose.Position(ClientOrigin.LocalVisualSpace, space, center),
+                transpose.Position(ClientOrigin.LocalVisualSpace, space, center + transform.forward), shipId);
         }
 
         // The ship went through (or out of sight): the portal stays to close on its own, then goes
@@ -179,7 +179,12 @@ namespace StellarDriveDemoTFAdvanced.Power
         private ParticleSystem _sparks;
         private MaterialPropertyBlock _block;
         private ISpace _space;
+        private uint _spaceId, _shipId;
         private Vector3 _center, _tip;
+        // The portal in the frame of the ship that opened it, kept every frame to carry it over
+        // when that ship's space changes (it gets under way)
+        private Vector3 _fromShip, _normalFromShip;
+        private bool _hasFromShip;
         private float _openedAt, _closedAt = -1f;
         private bool _released;
 
@@ -192,9 +197,12 @@ namespace StellarDriveDemoTFAdvanced.Power
             return rift;
         }
 
-        public void Open(ISpace space, Vector3 center, Vector3 tip)
+        public void Open(ISpace space, uint spaceId, Vector3 center, Vector3 tip, uint shipId)
         {
             _space = space;
+            _spaceId = spaceId;
+            _shipId = shipId;
+            _hasFromShip = false;
             _center = center;
             _tip = tip;
             _openedAt = Time.time;
@@ -205,6 +213,22 @@ namespace StellarDriveDemoTFAdvanced.Power
                 _sparks.Clear(true);
                 _sparks.Play(true);
             }
+        }
+
+        // The ship's space was replaced: the portal is put back where it stood next to the ship, in its new space
+        private bool Reanchor(ISpacesClientProvider spaces, Transform ship)
+        {
+            var ships = ServiceLocator.GetService<IShipsClientProvider>();
+            var transpose = GameServices.Transpose;
+            if (_closedAt >= 0f || !_hasFromShip || ship == null || ships == null || transpose == null || !ships.TryGetRootShip(_shipId, out IShipStateRead root)
+                || !spaces.TryGetSpace(root.SpaceId, out ISpace space))
+                return false;
+            Vector3 center = ship.TransformPoint(_fromShip), normal = ship.TransformDirection(_normalFromShip);
+            _space = space;
+            _spaceId = root.SpaceId;
+            _center = transpose.Position(ClientOrigin.LocalVisualSpace, space, center);
+            _tip = transpose.Position(ClientOrigin.LocalVisualSpace, space, center + normal);
+            return true;
         }
 
         public void Close()
@@ -407,6 +431,14 @@ namespace StellarDriveDemoTFAdvanced.Power
             if (transpose == null || _space == null || ClientOrigin.LocalVisualSpace == null)
                 return;
             Vector3 center, normal;
+            Transform ship = ShipVisuals.Find(_shipId);
+            var spaces = ServiceLocator.GetService<ISpacesClientProvider>();
+            if (spaces != null && !spaces.TryGetSpace(_spaceId, out _) && !Reanchor(spaces, ship))
+            {
+                // Its space is gone and its ship too
+                Destroy(gameObject);
+                return;
+            }
             try
             {
                 center = transpose.Position(_space, ClientOrigin.LocalVisualSpace, _center);
@@ -414,9 +446,14 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
             catch
             {
-                // Its space is gone
                 Destroy(gameObject);
                 return;
+            }
+            if (ship != null)
+            {
+                _fromShip = ship.InverseTransformPoint(center);
+                _normalFromShip = ship.InverseTransformDirection(normal);
+                _hasFromShip = true;
             }
             float radius = Mathf.Max(2f, PowerCatalog.PortalRadius.Value);
             transform.position = center;

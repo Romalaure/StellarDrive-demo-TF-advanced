@@ -12,7 +12,8 @@ namespace StellarDriveDemoTFAdvanced.Power
     /// </summary>
     internal static class TankModels
     {
-        public enum Kind { Nuclear, DarkMatter, Infinite }
+        /// <summary>The contents; from Infinite on, a tank that never empties (infinity sign, crystal on top).</summary>
+        public enum Kind { Nuclear, DarkMatter, Infinite, InfiniteOxygen, InfiniteEthanol }
 
         public static void Armor(GameObject prefab, Kind kind)
         {
@@ -34,8 +35,9 @@ namespace StellarDriveDemoTFAdvanced.Power
             Drum(drum, out float radius, out Vector3 axis, out float half);
             var m = new MachineModels.Model();
             Build(m, kind, axis, radius, half);
-            Color glow = kind == Kind.Nuclear ? MachineModels.Green : MachineModels.Violet;
-            Color core = kind == Kind.Nuclear ? new Color(0.6f, 1f, 0.35f) : kind == Kind.Infinite ? new Color(1f, 0.55f, 1f) : new Color(0.8f, 0.5f, 1f);
+            Color glow = kind == Kind.Nuclear ? MachineModels.Green : kind == Kind.InfiniteOxygen ? MachineModels.Cyan : kind == Kind.InfiniteEthanol ? new Color(1f, 0.55f, 0.15f) : MachineModels.Violet;
+            Color core = kind == Kind.Nuclear ? new Color(0.6f, 1f, 0.35f) : kind == Kind.Infinite ? new Color(1f, 0.55f, 1f)
+                : kind == Kind.InfiniteOxygen ? new Color(0.7f, 0.97f, 1f) : kind == Kind.InfiniteEthanol ? new Color(1f, 0.8f, 0.4f) : new Color(0.8f, 0.5f, 1f);
             MachineModels.Attach(parent, m, "Tank" + kind, glow, core);
         }
 
@@ -104,7 +106,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             // The contents' emblem on both sides
             foreach (float side in new[] { -1f, 1f })
             {
-                Vector3 face = c + Vector3.right * side * (r + 0.004f);
+                // Standing off the drum, over the middle hoop
+                Vector3 face = c + Vector3.right * side * (r + 0.03f);
                 var right = new Vector3(0f, 0f, -side);
                 m.Dark.Cylinder(face, face + Vector3.right * side * 0.012f, 0.17f, 0.17f, 24);
                 m.Armor.Cylinder(face, face + Vector3.right * side * 0.016f, 0.19f, 0.19f, 24, capA: false, capB: false);
@@ -134,22 +137,11 @@ namespace StellarDriveDemoTFAdvanced.Power
                         m.Core.Cylinder(front + Vector3.right * side * 0.004f, front + Vector3.right * side * 0.008f, 0.02f, 0.02f, 12);
                         break;
                     default:
-                        // The infinity sign: two rings side by side
-                        foreach (float s in new[] { -1f, 1f })
-                        {
-                            Vector3 loop = front + right * s * 0.065f;
-                            for (int i = 0; i < 16; i++)
-                            {
-                                float a = i * Mathf.PI / 8f;
-                                Vector3 d = Vector3.up * Mathf.Sin(a) + right * Mathf.Cos(a);
-                                Vector3 tangent = Vector3.up * Mathf.Cos(a) - right * Mathf.Sin(a);
-                                m.Core.Box(loop + d * 0.055f, new Vector3(0.024f, 0.022f, 0.005f), Quaternion.LookRotation(Vector3.right * side, tangent));
-                            }
-                        }
+                        Infinity(m.Core, front, Vector3.right * side, right, 1f);
                         break;
                 }
             }
-            if (kind == Kind.Infinite)
+            if (kind >= Kind.Infinite)
             {
                 // A small glowing crystal held over the hatch: the tank that never empties
                 Vector3 o = hatch + Vector3.up * 0.06f;
@@ -159,6 +151,23 @@ namespace StellarDriveDemoTFAdvanced.Power
                 {
                     Vector3 d = Quaternion.Euler(0f, deg, 0f) * Vector3.right;
                     m.Armor.Cylinder(hatch + Vector3.up * 0.04f + d * 0.06f, o + Vector3.up * 0.035f + d * 0.03f, 0.007f, 0.006f, 6);
+                }
+            }
+        }
+
+        /// <summary>The infinity sign: two rings of beads side by side, on a face looking along <paramref name="normal"/>.</summary>
+        public static void Infinity(MeshBuilder mesh, Vector3 center, Vector3 normal, Vector3 right, float scale)
+        {
+            Vector3 up = Vector3.Cross(normal, right).normalized;
+            foreach (float s in new[] { -1f, 1f })
+            {
+                Vector3 loop = center + right * s * 0.065f * scale;
+                for (int i = 0; i < 16; i++)
+                {
+                    float a = i * Mathf.PI / 8f;
+                    Vector3 d = up * Mathf.Sin(a) + right * Mathf.Cos(a);
+                    Vector3 tangent = up * Mathf.Cos(a) - right * Mathf.Sin(a);
+                    mesh.Box(loop + d * 0.055f * scale, new Vector3(0.024f, 0.022f, 0.005f) * scale, Quaternion.LookRotation(normal, tangent));
                 }
             }
         }

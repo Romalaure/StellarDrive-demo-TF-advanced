@@ -267,6 +267,14 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Portail en mouvement, téléporteur, nouveaux modèles (v0.27)
+
+- **Portail** : il ne se ferme plus quand le vaisseau se met à bouger (le jeu change alors l'espace du vaisseau ; le portail est reporté dans le nouvel espace, à la même place).
+- **Capsule de téléportation** : on réapparaît devant la porte de la capsule d'arrivée, face à l'extérieur, et non plus éjecté sur un côté.
+- **Collecteur de matière noire** : nouveau modèle (mât, stator, rotor à trois pales, coupelle en météorite, singularité dans un cardan) et animation quand il collecte : le rotor accélère, le cardan tourne, la singularité palpite, des traînées violettes s'y engouffrent et tout s'illumine.
+- **Objets infinis** : texture plus claire et détaillée, plus un blindage propre à chacun (cage lumineuse du générateur, cerclages des réservoirs d'oxygène et d'éthanol, renforts et plaque du coffre), avec le symbole infini et un cristal.
+- **Radio** : nouveau modèle (caisse biseautée, haut-parleur rond à anneaux chromés, cadran éclairé avec aiguille, touches de présélection, boutons crantés, voyant, poignée chromée, antenne télescopique).
+
 ## Crafts du mod seul, nouveaux modèles, ping de butin (v0.26)
 
 - **Crafts** : plus aucune matière d'un autre mod ni d'aluminium. Tout se construit avec les matières du jeu (fer, verre, cuivre, bois, éclats stellaires) et celles du mod (titane, uranium, météorite…).

@@ -67,52 +67,149 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
         private static Dictionary<string, DeviceMaterial> Materials() => new Dictionary<string, DeviceMaterial>
         {
-            ["TF_Radio_Case"] = new DeviceMaterial(new Color(0.55f, 0.33f, 0.18f), 0f, 0.55f),
-            ["TF_NoPaint_RadioGrille"] = new DeviceMaterial(new Color(0.82f, 0.74f, 0.58f), 0f, 0.2f),
-            ["TF_NoPaint_RadioMetal"] = new DeviceMaterial(new Color(0.78f, 0.74f, 0.66f), 1f, 0.8f),
-            ["TF_NoPaint_RadioDial"] = new DeviceMaterial(new Color(1f, 0.8f, 0.45f), 0f, 0.7f, new Color(1f, 0.7f, 0.3f) * 1.6f),
-            ["TF_NoPaint_RadioKnob"] = new DeviceMaterial(new Color(0.12f, 0.1f, 0.09f), 0.2f, 0.6f)
+            ["TF_Radio_Case"] = new DeviceMaterial(new Color(0.55f, 0.33f, 0.18f), 0f, 0.6f),
+            ["TF_NoPaint_RadioGrille"] = new DeviceMaterial(new Color(0.78f, 0.7f, 0.55f), 0f, 0.15f),
+            ["TF_NoPaint_RadioMetal"] = new DeviceMaterial(new Color(0.82f, 0.78f, 0.7f), 1f, 0.85f),
+            ["TF_NoPaint_RadioTrim"] = new DeviceMaterial(new Color(0.16f, 0.15f, 0.14f), 0.6f, 0.75f),
+            ["TF_NoPaint_RadioDial"] = new DeviceMaterial(new Color(1f, 0.82f, 0.5f), 0f, 0.7f, new Color(1f, 0.7f, 0.3f) * 1.6f),
+            ["TF_NoPaint_RadioKnob"] = new DeviceMaterial(new Color(0.1f, 0.09f, 0.08f), 0.2f, 0.6f),
+            ["TF_NoPaint_RadioLamp"] = new DeviceMaterial(new Color(1f, 0.25f, 0.15f), 0f, 0.8f, new Color(1f, 0.25f, 0.1f) * 2.2f),
+            ["TF_NoPaint_RadioLed"] = new DeviceMaterial(new Color(0.3f, 1f, 0.4f), 0f, 0.8f, new Color(0.25f, 1f, 0.35f) * 2.2f)
         };
 
+        /// <summary>
+        /// A 1950s portable: a wooden case with bevelled top edges and a dark front bezel, a round
+        /// speaker behind a cloth grille with chrome rings, a lit tuning dial with its scale and red
+        /// needle, preset keys, two ridged knobs, a power light, a chrome handle and a telescopic
+        /// antenna. Front is -z.
+        /// </summary>
         internal static Dictionary<string, MeshBuilder> Shapes()
         {
             var body = new MeshBuilder();
             var grille = new MeshBuilder();
             var metal = new MeshBuilder();
+            var trim = new MeshBuilder();
             var dial = new MeshBuilder();
             var knob = new MeshBuilder();
-            const float w = 0.5f, h = 0.28f, d = 0.2f;
+            var lamp = new MeshBuilder();
+            var led = new MeshBuilder();
+            const float w = 0.5f, h = 0.28f, d = 0.2f, foot = 0.012f;
             float front = -d / 2f;
 
-            // Wooden case with rounded-ish edges: a body and a slightly narrower top
-            body.Box(new Vector3(0f, 0.01f + h / 2f, 0f), new Vector3(w, h, d));
-            body.Box(new Vector3(0f, h + 0.02f, 0f), new Vector3(w - 0.03f, 0.02f, d - 0.03f));
-            // Feet
+            // ---- Case: a body, then bevelled top edges (corners in MeshBuilder.Block's bit order: x, y, z)
+            body.Box(new Vector3(0f, foot + (h - 0.03f) / 2f, 0f), new Vector3(w, h - 0.03f, d));
+            float y0 = foot + h - 0.03f, y1 = foot + h;
+            body.Block(new[]
+            {
+                new Vector3(-w / 2f, y0, -d / 2f), new Vector3(w / 2f, y0, -d / 2f), new Vector3(-w / 2f + 0.025f, y1, -d / 2f + 0.025f), new Vector3(w / 2f - 0.025f, y1, -d / 2f + 0.025f),
+                new Vector3(-w / 2f, y0, d / 2f), new Vector3(w / 2f, y0, d / 2f), new Vector3(-w / 2f + 0.025f, y1, d / 2f - 0.025f), new Vector3(w / 2f - 0.025f, y1, d / 2f - 0.025f)
+            });
+            // Chrome strips round the sides, vent slots on the top
+            foreach (float x in new[] { -w / 2f - 0.002f, w / 2f + 0.002f })
+                metal.Box(new Vector3(x, foot + 0.05f, 0f), new Vector3(0.004f, 0.008f, d - 0.02f));
+            for (int i = 0; i < 6; i++)
+                trim.Box(new Vector3(-0.1f + i * 0.04f, y1 + 0.001f, 0.04f), new Vector3(0.022f, 0.002f, 0.07f));
+            // Rubber feet
             foreach (float x in new[] { -w / 2f + 0.05f, w / 2f - 0.05f })
-                metal.Box(new Vector3(x, 0.005f, 0f), new Vector3(0.05f, 0.01f, d - 0.04f));
-            // Speaker grille (cloth) on the left, with brass bars
-            grille.Box(new Vector3(-0.09f, 0.16f, front - 0.002f), new Vector3(0.26f, 0.2f, 0.006f));
+                foreach (float z in new[] { -d / 2f + 0.035f, d / 2f - 0.035f })
+                    knob.Cylinder(new Vector3(x, 0f, z), new Vector3(x, foot, z), 0.018f, 0.016f, 10);
+
+            // ---- Front: a dark bezel framing the face
+            trim.Box(new Vector3(0f, foot + h - 0.04f, front - 0.004f), new Vector3(w - 0.02f, 0.014f, 0.008f));
+            trim.Box(new Vector3(0f, foot + 0.018f, front - 0.004f), new Vector3(w - 0.02f, 0.014f, 0.008f));
+            foreach (float x in new[] { -w / 2f + 0.017f, w / 2f - 0.017f, 0.035f })
+                trim.Box(new Vector3(x, foot + (h - 0.03f) / 2f, front - 0.004f), new Vector3(0.012f, h - 0.07f, 0.008f));
+
+            // ---- Speaker on the left: cloth, a chrome ring with rings inside, a cap, a name plate
+            var speaker = new Vector3(-0.105f, foot + 0.135f, front);
+            grille.Box(speaker + new Vector3(0f, 0f, -0.002f), new Vector3(0.25f, 0.19f, 0.004f));
+            metal.Cylinder(speaker + new Vector3(0f, 0f, -0.002f), speaker + new Vector3(0f, 0f, -0.01f), 0.088f, 0.088f, 32, false, false);
+            metal.Cylinder(speaker + new Vector3(0f, 0f, -0.002f), speaker + new Vector3(0f, 0f, -0.01f), 0.08f, 0.08f, 32, false, false);
+            for (int r = 0; r < 3; r++)
+            {
+                float radius = 0.022f + r * 0.02f;
+                trim.Cylinder(speaker + new Vector3(0f, 0f, -0.004f), speaker + new Vector3(0f, 0f, -0.006f), radius + 0.003f, radius + 0.003f, 28, false, true);
+                grille.Cylinder(speaker + new Vector3(0f, 0f, -0.005f), speaker + new Vector3(0f, 0f, -0.007f), radius, radius, 28, false, true);
+            }
+            metal.Cylinder(speaker + new Vector3(0f, 0f, -0.006f), speaker + new Vector3(0f, 0f, -0.014f), 0.016f, 0.012f, 16);
+            // Two bars across the speaker, a name plate under it
+            foreach (float y in new[] { -0.04f, 0.04f })
+                metal.Box(speaker + new Vector3(0f, y, -0.011f), new Vector3(0.2f, 0.005f, 0.004f));
+            metal.Box(speaker + new Vector3(0f, -0.093f, -0.006f), new Vector3(0.07f, 0.014f, 0.004f));
+
+            // ---- Tuning dial on the right: chrome frame, lit scale, ticks and a red needle
+            var dialAt = new Vector3(0.14f, foot + 0.205f, front);
+            metal.Box(dialAt + new Vector3(0f, 0f, -0.004f), new Vector3(0.175f, 0.075f, 0.008f));
+            dial.Box(dialAt + new Vector3(0f, 0f, -0.009f), new Vector3(0.158f, 0.058f, 0.004f));
+            for (int i = 0; i <= 10; i++)
+            {
+                float x = -0.07f + i * 0.014f;
+                knob.Box(dialAt + new Vector3(x, 0.017f - (i % 2) * 0.003f, -0.0115f), new Vector3(0.002f, i % 2 == 0 ? 0.016f : 0.01f, 0.001f));
+            }
+            knob.Box(dialAt + new Vector3(0f, -0.014f, -0.0115f), new Vector3(0.14f, 0.002f, 0.001f));
+            lamp.Box(dialAt + new Vector3(0.018f, 0f, -0.0125f), new Vector3(0.003f, 0.052f, 0.001f));
+            // Preset keys under the dial
             for (int i = 0; i < 5; i++)
-                metal.Box(new Vector3(-0.09f, 0.08f + i * 0.04f, front - 0.007f), new Vector3(0.26f, 0.006f, 0.006f));
-            // Tuning dial on the right
-            metal.Box(new Vector3(0.14f, 0.2f, front - 0.003f), new Vector3(0.17f, 0.08f, 0.008f));
-            dial.Box(new Vector3(0.14f, 0.2f, front - 0.008f), new Vector3(0.15f, 0.06f, 0.004f));
-            // Two knobs below the dial
+            {
+                var key = new Vector3(0.082f + i * 0.029f, foot + 0.14f, front);
+                knob.Box(key + new Vector3(0f, 0f, -0.008f), new Vector3(0.022f, 0.026f, 0.016f));
+                metal.Box(key + new Vector3(0f, 0f, -0.0165f), new Vector3(0.018f, 0.022f, 0.002f));
+            }
+            // Two ridged knobs with chrome caps
             foreach (float x in new[] { 0.095f, 0.185f })
-                knob.Cylinder(new Vector3(x, 0.09f, front), new Vector3(x, 0.09f, front - 0.025f), 0.022f, 0.02f, 14);
-            // Handle on top and a telescopic antenna at the back
-            metal.Cylinder(new Vector3(-0.15f, h + 0.03f, 0f), new Vector3(-0.15f, h + 0.07f, 0f), 0.008f, 0.008f, 8);
-            metal.Cylinder(new Vector3(0.15f, h + 0.03f, 0f), new Vector3(0.15f, h + 0.07f, 0f), 0.008f, 0.008f, 8);
-            metal.Cylinder(new Vector3(-0.155f, h + 0.07f, 0f), new Vector3(0.155f, h + 0.07f, 0f), 0.01f, 0.01f, 8);
-            metal.Cylinder(new Vector3(0.2f, h + 0.02f, d / 2f - 0.03f), new Vector3(0.27f, h + 0.3f, d / 2f - 0.03f), 0.005f, 0.003f, 6);
+            {
+                var at = new Vector3(x, foot + 0.07f, front);
+                knob.Cylinder(at, at + new Vector3(0f, 0f, -0.028f), 0.026f, 0.023f, 18);
+                for (int k = 0; k < 12; k++)
+                {
+                    float a = k * Mathf.PI / 6f;
+                    knob.Box(at + new Vector3(Mathf.Cos(a) * 0.025f, Mathf.Sin(a) * 0.025f, -0.014f), new Vector3(0.004f, 0.004f, 0.026f), Quaternion.Euler(0f, 0f, k * 30f));
+                }
+                metal.Cylinder(at + new Vector3(0f, 0f, -0.028f), at + new Vector3(0f, 0f, -0.031f), 0.014f, 0.012f, 14);
+                metal.Box(at + new Vector3(0f, 0.017f, -0.0315f), new Vector3(0.003f, 0.01f, 0.002f));
+            }
+            // Power light between the knobs
+            metal.Cylinder(new Vector3(0.14f, foot + 0.07f, front), new Vector3(0.14f, foot + 0.07f, front - 0.006f), 0.009f, 0.009f, 12);
+            led.Cylinder(new Vector3(0.14f, foot + 0.07f, front - 0.006f), new Vector3(0.14f, foot + 0.07f, front - 0.01f), 0.006f, 0.005f, 12);
+
+            // ---- Handle: two chrome posts and a curved grip
+            foreach (float x in new[] { -0.16f, 0.16f })
+            {
+                metal.Box(new Vector3(x, y1 + 0.006f, 0f), new Vector3(0.03f, 0.012f, 0.03f));
+                metal.Cylinder(new Vector3(x, y1 + 0.01f, 0f), new Vector3(x * 0.95f, y1 + 0.05f, 0f), 0.007f, 0.007f, 8);
+            }
+            const int arc = 8;
+            Vector3 Grip(float t) => new Vector3(Mathf.Lerp(-0.152f, 0.152f, t), y1 + 0.05f + Mathf.Sin(t * Mathf.PI) * 0.012f, 0f);
+            for (int i = 0; i < arc; i++)
+                metal.Cylinder(Grip(i / (float)arc), Grip((i + 1) / (float)arc), 0.009f, 0.009f, 8, false, false);
+            knob.Cylinder(new Vector3(-0.08f, y1 + 0.058f, 0f), new Vector3(0.08f, y1 + 0.058f, 0f), 0.013f, 0.013f, 10);
+
+            // ---- Antenna: a swivel at the back corner and three segments, a ball on top
+            var swivel = new Vector3(0.21f, y1 + 0.004f, d / 2f - 0.03f);
+            trim.Cylinder(swivel - Vector3.up * 0.004f, swivel + Vector3.up * 0.012f, 0.016f, 0.012f, 10);
+            Vector3 dir = new Vector3(0.22f, 1f, 0.08f).normalized;
+            float[] lengths = { 0.1f, 0.1f, 0.09f };
+            float[] radii = { 0.006f, 0.0045f, 0.0032f };
+            Vector3 p = swivel + Vector3.up * 0.01f;
+            for (int i = 0; i < lengths.Length; i++)
+            {
+                Vector3 q = p + dir * lengths[i];
+                metal.Cylinder(p, q, radii[i], radii[i], 8);
+                metal.Cylinder(q - dir * 0.004f, q + dir * 0.002f, radii[i] + 0.0015f, radii[i] + 0.0015f, 8);
+                p = q;
+            }
+            metal.Cylinder(p, p + dir * 0.008f, 0.006f, 0.006f, 8);
 
             return new Dictionary<string, MeshBuilder>
             {
                 ["TF_Radio_Case"] = body,
                 ["TF_NoPaint_RadioGrille"] = grille,
                 ["TF_NoPaint_RadioMetal"] = metal,
+                ["TF_NoPaint_RadioTrim"] = trim,
                 ["TF_NoPaint_RadioDial"] = dial,
-                ["TF_NoPaint_RadioKnob"] = knob
+                ["TF_NoPaint_RadioKnob"] = knob,
+                ["TF_NoPaint_RadioLamp"] = lamp,
+                ["TF_NoPaint_RadioLed"] = led
             };
         }
 

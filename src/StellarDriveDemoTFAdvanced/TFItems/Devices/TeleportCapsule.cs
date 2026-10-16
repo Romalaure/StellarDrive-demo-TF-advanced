@@ -171,10 +171,11 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 return;
             }
 
-            // Standing on the capsule's pad, facing out of its door
+            // Standing just outside its door, facing away from it: inside, the capsule's collision box
+            // pushed the player out at a random side
             var physics = new LocalPhysicsState
             {
-                Position = placement.LocalPosition + placement.Rotation * (Vector3.up * 1.05f),
+                Position = placement.LocalPosition + placement.Rotation * new Vector3(0f, 1.05f, -(BoundsSize.z * 0.5f + 0.45f)),
                 Rotation = placement.Rotation,
                 Velocity = Vector3.zero
             };

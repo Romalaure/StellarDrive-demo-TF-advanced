@@ -33,32 +33,11 @@ namespace StellarDriveDemoTFAdvanced.Power
                 Loc.Pick($"Une antenne de météorite qui capte la matière noire du vide et la condense dans la conduite branchée sur sa prise de fluide (vide ou déjà de matière noire) : {PowerCatalog.DarkCollectorPerSecond.Value:0.###} unité/s, cinq fois plus près d'un trou noir, trois fois plus dans la galaxie d'Érèbe. Consomme {PowerCatalog.DarkCollectorWatts.Value:0} W. Sa prise signal donne sa production en dix-millièmes d'unité/s.", $"A meteorite antenna that catches dark matter out of the void and condenses it into the line on its fluid socket (empty or already dark matter): {PowerCatalog.DarkCollectorPerSecond.Value:0.###} unit/s, five times more near a black hole, three times more in the Erebos galaxy. Uses {PowerCatalog.DarkCollectorWatts.Value:0} W. Its signal socket gives its output in ten-thousandths of a unit/s.", $"Una antena de meteorito que capta materia oscura del vacío y la condensa en la línea de su toma de fluido (vacía o ya de materia oscura): {PowerCatalog.DarkCollectorPerSecond.Value:0.###} unidad/s, cinco veces más cerca de un agujero negro, tres veces más en la galaxia de Érebo. Consume {PowerCatalog.DarkCollectorWatts.Value:0} W. Su toma de señal da su producción en diezmilésimas de unidad/s."),
                 150f, new[] { (ModItems.Meteorite, 8), (ModItems.QuantumCore, 1), (ModItems.Titanium, 6), (Copper, 10) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
-            const float width = 1f, height = 0.6f, depth = 1f;
+            const float width = 1f, depth = 1f;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, 0.75f, 0f), new Vector3(width, 1.5f, depth));
-            var model = new MachineModels.Model();
-            MachineModels.Housing(model, width, height, depth, 0.7f);
-            float face = depth * 0.47f;
-            MachineModels.Vent(model, -0.25f, 0.25f, face, 0.22f, 0.24f, 3);
-            MachineModels.Vent(model, 0.25f, 0.25f, face, 0.22f, 0.24f, 3);
-            MachineModels.Grille(model, 0.25f, face, 0.1f, 0.26f);
-            // A mast of meteorite iron carrying a wide funnel open to the sky, three violet rings inside
-            model.Armor.Cylinder(new Vector3(0f, height, 0f), new Vector3(0f, height + 0.3f, 0f), 0.08f, 0.06f, 8);
-            model.Armor.Cylinder(new Vector3(0f, height + 0.3f, 0f), new Vector3(0f, height + 0.85f, 0f), 0.08f, 0.45f, 12, capA: true, capB: false);
-            model.Dark.Cylinder(new Vector3(0f, height + 0.32f, 0f), new Vector3(0f, height + 0.84f, 0f), 0.06f, 0.42f, 12, capA: false, capB: false);
-            for (int i = 0; i < 3; i++)
-            {
-                float y = height + 0.45f + i * 0.13f;
-                float r = 0.12f + i * 0.1f;
-                model.Glow.Cylinder(new Vector3(0f, y, 0f), new Vector3(0f, y + 0.02f, 0f), r, r, 16, capA: false, capB: false);
-            }
-            model.Core.Cylinder(new Vector3(0f, height + 0.32f, 0f), new Vector3(0f, height + 0.5f, 0f), 0.05f, 0f, 6);
-            foreach (float a in new[] { 0f, 120f, 240f })
-            {
-                Vector3 dir = Quaternion.Euler(0f, a, 0f) * Vector3.right;
-                model.Light.Box(new Vector3(0f, height + 0.6f, 0f) + dir * 0.32f, new Vector3(0.015f, 0.5f, 0.015f), Quaternion.FromToRotation(Vector3.up, (Vector3.up + dir * 0.75f).normalized));
-            }
-            MachineModels.Attach(visuals, model, "DarkCollector", MachineModels.Violet, MachineModels.Violet);
-            Sockets(prefab, width * 0.47f, face, 0.25f);
+            CollectorModel.Build(visuals, width, depth);
+            visuals.gameObject.AddComponent<DarkCollectorVisuals>();
+            Sockets(prefab, width * 0.47f, depth * 0.47f, 0.25f);
         }
 
         private static void ConfigureTank(PartSettings settings, GameObject prefab)

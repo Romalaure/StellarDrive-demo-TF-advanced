@@ -106,11 +106,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Infinite
                     LampParts.SetCost(settings, cost);
                     settings.mass = Mass;
                     Tint(prefab, tint);
+                    InfiniteModels.Dress(id, prefab);
                 }
             });
         }
 
-        // Tinted copies of the donor's materials, so the infinite version is easy to tell apart
+        // Tinted copies of the donor's materials, so the infinite version is easy to tell apart: blended
+        // toward the tint rather than multiplied by it, so the texture keeps its light and detail
         private static void Tint(GameObject prefab, Color tint)
         {
             int colorId = Shader.PropertyToID("_Color");
@@ -128,15 +130,22 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Infinite
                     {
                         copy = new Material(original) { name = original.name + "_TFInfinite" };
                         if (copy.HasProperty(colorId))
-                            copy.SetColor(colorId, copy.GetColor(colorId) * tint);
+                            copy.SetColor(colorId, Blend(copy.GetColor(colorId), tint));
                         if (copy.HasProperty(baseColorId))
-                            copy.SetColor(baseColorId, copy.GetColor(baseColorId) * tint);
+                            copy.SetColor(baseColorId, Blend(copy.GetColor(baseColorId), tint));
                         copies[original] = copy;
                     }
                     materials[i] = copy;
                 }
                 renderer.sharedMaterials = materials;
             }
+        }
+
+        private static Color Blend(Color original, Color tint)
+        {
+            Color c = Color.Lerp(original, tint, 0.35f);
+            c.a = original.a;
+            return c;
         }
 
         public static InventorySlot ChestSlot(byte slotId) =>

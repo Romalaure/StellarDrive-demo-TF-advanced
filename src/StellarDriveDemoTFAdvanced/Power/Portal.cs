@@ -64,6 +64,11 @@ namespace StellarDriveDemoTFAdvanced.Power
             public Vector3 Center;
             public Vector3 Normal;
             public float LastSide;
+            // The portal seen from the ship that opened it (its frame), kept every frame: when the
+            // ship gets under way the game gives it a new space and drops the old one, and the
+            // portal is carried over to the new space from there
+            public Vector3 FromShip, NormalFromShip;
+            public bool HasFromShip;
             public float LastWrite = -10f;
             public double Written = double.NaN;
         }
@@ -77,6 +82,7 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         private static readonly Dictionary<(uint, ushort), Runtime> Runtimes = new Dictionary<(uint, ushort), Runtime>();
         private static readonly List<Entry> Generators = new List<Entry>();
+        private static float _nextDevLog;
 
         public static void Forget()
         {
@@ -195,6 +201,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             Vector3 tip = transpose.Position(entry.Ship.SpaceId, space, center + forward);
             rt.Normal = (tip - rt.Center).normalized;
             rt.LastSide = float.NaN;
+            rt.HasFromShip = false;
             rt.Phase = Phase.Open;
             rt.Until = now + Mathf.Max(3f, PowerCatalog.PortalOpenSeconds.Value);
             rt.Charge = 0f;
@@ -254,7 +261,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 Runtime rt = entry.Runtime;
                 if (rt.Phase != Phase.Open)
                     continue;
-                if (!spaces.HasSpace(rt.SpaceId) || !ships.TryGetRootShip(entry.Ship.Id, out IShipStateRead root))
+                if (!ships.TryGetRootShip(entry.Ship.Id, out IShipStateRead root) || !Follow(ships, spaces, transpose, entry, root))
                 {
                     Close(rt, now);
                     continue;
@@ -265,6 +272,11 @@ namespace StellarDriveDemoTFAdvanced.Power
                 float across = (offset - rt.Normal * side).magnitude;
                 bool crossed = !float.IsNaN(rt.LastSide) && rt.LastSide < 0f && side >= 0f;
                 rt.LastSide = side;
+                if (DevHarness.Active && now >= _nextDevLog)
+                {
+                    _nextDevLog = now + 1f;
+                    AdvancedMod.Log.Msg($"dev: portal {entry.Ship.Id}: ship {root.Id} in space {root.SpaceId}, portal space {rt.SpaceId}, side {side:0.0} m, across {across:0.0} m");
+                }
                 if (!crossed || across > Mathf.Max(2f, PowerCatalog.PortalRadius.Value))
                     continue;
                 try
@@ -277,6 +289,39 @@ namespace StellarDriveDemoTFAdvanced.Power
                 }
                 Close(rt, now);
             }
+        }
+
+        /// <summary>
+        /// Keeps the portal where it opened while its ship's space changes under it (getting under
+        /// way, entering or leaving an orbit): false when it cannot be placed any more.
+        /// </summary>
+        private static bool Follow(ShipsServerTracker ships, SpacesServer spaces, IWorldTransposeServer transpose, Entry entry, IShipStateRead root)
+        {
+            Runtime rt = entry.Runtime;
+            var ship = ships.GetShipPhysicsState(root.Id);
+            if (root.SpaceId != rt.SpaceId)
+            {
+                if (spaces.HasSpace(rt.SpaceId))
+                {
+                    Vector3 tip = transpose.Position(rt.SpaceId, root.SpaceId, rt.Center + rt.Normal);
+                    rt.Center = transpose.Position(rt.SpaceId, root.SpaceId, rt.Center);
+                    rt.Normal = (tip - rt.Center).normalized;
+                }
+                else if (rt.HasFromShip)
+                {
+                    rt.Center = ship.Position + ship.Rotation * rt.FromShip;
+                    rt.Normal = ship.Rotation * rt.NormalFromShip;
+                }
+                else
+                    return false;
+                AdvancedMod.Log.Msg($"portal {entry.Ship.Id}:{entry.Part.Id} carried from space {rt.SpaceId} to {root.SpaceId}");
+                rt.SpaceId = root.SpaceId;
+            }
+            Quaternion back = Quaternion.Inverse(ship.Rotation);
+            rt.FromShip = back * (rt.Center - ship.Position);
+            rt.NormalFromShip = back * rt.Normal;
+            rt.HasFromShip = true;
+            return true;
         }
 
         private static void Jump(ShipsServerTracker ships, SpacesServer spaces, IWorldTransposeServer transpose, Entry entry, IShipStateRead root)
