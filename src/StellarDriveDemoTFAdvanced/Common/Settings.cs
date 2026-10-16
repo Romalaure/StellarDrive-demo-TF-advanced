@@ -44,6 +44,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> SteadyFrameRate { get; private set; }
         public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevDockingTest { get; private set; }
+        public static MelonPreferences_Entry<bool> DevFieldDoorTest { get; private set; }
         public static MelonPreferences_Entry<string> DevSnapshotParts { get; private set; }
         public static MelonPreferences_Entry<string> DevShowcase { get; private set; }
         public static MelonPreferences_Entry<bool> DevBuildMenu { get; private set; }
@@ -121,6 +122,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevWorld, ask the build tool where parts go when aimed at placed parts, and photograph the result.");
             DevDockingTest = _category.CreateEntry("DevDockingTest", false,
                 description: "For mod development: with DevWorld, two ships with docking modules try to dock high in the air.");
+            DevFieldDoorTest = _category.CreateEntry("DevFieldDoorTest", false,
+                description: "For mod development: with DevWorld, check in the game's room code that a force field door seals a doorway.");
             DevPortalTest = _category.CreateEntry("DevPortalTest", 0,
                 description: "For mod development: with DevWorld, a planet id: a test ship opens a portal to that planet and flies through it.");
             DevMachineTest = _category.CreateEntry("DevMachineTest", false,

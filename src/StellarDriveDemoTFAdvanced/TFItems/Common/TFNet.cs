@@ -30,6 +30,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         Radio = 10,
         /// <summary>Client to server, then server to everyone: player A wears Text ("RRGGBB RRGGBB").</summary>
         Outfit = 20,
+        /// <summary>Client to server: force field door A/B, Text is "width height on" (the host writes its state).</summary>
+        FieldDoor = 25,
 
         /// <summary>Client to server: copy the ship A (and what is attached to it) as schematic Text.</summary>
         SchematicCopy = 30,

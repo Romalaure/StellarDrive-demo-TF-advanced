@@ -414,7 +414,8 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 int id = i + 1;
                 switch (stateClass)
                 {
-                    case "ConstantState": lists["constantStates"].Add($"{{\"partId\":{id},\"constantValue\":0.0}}"); break;
+                    // A force field door with its field up (DevDisable fielddoorpower keeps it so without power)
+                    case "ConstantState": lists["constantStates"].Add($"{{\"partId\":{id},\"constantValue\":{(settingsId == Power.FieldDoor.Id ? new Power.FieldDoor.Config(2, 3, Power.FieldDoor.Status.Up).Value : 0.0).ToString(System.Globalization.CultureInfo.InvariantCulture)}}}"); break;
                     case "StorageState": lists["storageStates"].Add($"{{\"partId\":{id},\"slots\":[{emptySlots}]}}"); break;
                     case "DockingDoorState": lists["dockingDoorStates"].Add($"{{\"partId\":{id},\"isOpen\":false,\"isDocked\":false,\"dockedShipId\":0,\"dockedPartId\":0}}"); break;
                     case "FluidTankState": lists["fluidTankStates"].Add($"{{\"partId\":{id},\"fluidItemId\":0,\"fluidQuantity\":0.0}}"); break;

@@ -52,6 +52,16 @@ The power grid must be able to give it **all** of its power (together with the g
 - rings off, signal **-1**: no power socket plugged;
 - signal **-10 and below**: it broke, it restarts in (−value − 10) seconds.
 
+## Force field door
+
+An emitter you set **on the floor, in the middle of an opening in the hull**, facing the opening. Look at it and press the use key (**T**): a window lets you choose the **field's width and height** (1 to 30 m each, for example 2 × 2 or 10 × 20; an orange outline shows the size while you set it) and switch it on or off.
+
+- On, the field **holds the oxygen like a closed door**, but **you walk through it** (a ripple runs from where you cross it).
+- It draws **25 W per m²** (setting `FieldDoorWattsPerSquareMeter`) on its two power sockets; the grid must be able to supply all of it. Without power it goes out and the air escapes.
+- Rail lights: cyan up, blinking orange not enough power or starting, blinking red no grid, dark off.
+- Take the opening's size: the field overlaps the hull around by half a meter, and settles into the hull's plane by itself.
+- Research **Artifact technology**, force field row of the TF Advanced tab.
+
 ## Nuclear power
 
 Between artifact power and dark matter. **Uranium** is mined on TF Aridia, TF Petra and Pyros (greenish rocks with glowing veins).

@@ -52,6 +52,16 @@ Le réseau électrique doit pouvoir lui donner **toute** sa puissance (avec les 
 - anneaux éteints, signal **-1** : aucune prise électrique branchée ;
 - signal **-10 et moins** : il a cassé, il redémarre dans (−valeur − 10) secondes.
 
+## Porte à champ de force
+
+Un émetteur à poser **au sol, au milieu d'une ouverture de la coque**, face à l'ouverture. Regarde-le et appuie sur la touche d'utilisation (**T**) : une fenêtre permet de choisir la **largeur et la hauteur du champ** (de 1 à 30 m chacune, par exemple 2 × 2 ou 10 × 20 ; un contour orange montre la taille pendant le réglage) et de l'allumer ou l'éteindre.
+
+- Allumé, le champ **retient l'oxygène comme une porte fermée**, mais **on passe à travers** (une onde part de l'endroit où tu le traverses).
+- Il consomme **25 W par m²** (réglage `FieldDoorWattsPerSquareMeter`) sur ses deux prises électriques ; le réseau doit pouvoir les fournir en entier. Sans courant, il s'éteint et l'air s'échappe.
+- Voyants du rail : cyan actif, orange clignotant pas assez de courant ou démarrage, rouge clignotant pas de réseau, éteint.
+- Prends la taille de l'ouverture : le champ déborde d'un demi-mètre sur la coque autour, et se cale de lui-même dans le plan de la coque.
+- Recherche **Technologie des artefacts**, rangée des champs de force de l'onglet TF Avancé.
+
 ## Énergie nucléaire
 
 Entre l'énergie des artefacts et la matière noire. L'**uranium** se mine sur TF Aridia, TF Petra et Pyros (rochers verdâtres aux veines lumineuses).

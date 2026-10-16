@@ -33,9 +33,10 @@ namespace StellarDriveDemoTFAdvanced.Power
                 ForceField.Tier tier = shield;
                 PartFactory.Register(tier.Id, "SignalDisplay", AdvancedTab.Name, AdvancedTab.ShieldRow, (settings, prefab) => ConfigureShield(tier, settings, prefab));
             }
+            PartFactory.Register(FieldDoor.Id, "SignalDisplay", AdvancedTab.Name, AdvancedTab.ShieldRow, FieldDoorParts.Configure);
             PartFactory.Register(PowerCatalog.CondenserId, "SignalDisplay", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureCondenser);
             PartFactory.Register(PowerCatalog.QuantumGyroId, "Gyroscope", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureQuantumGyro);
-            AdvancedMod.Log.Msg("registered the battery, the circuit breaker, the quantum reactor, the cryonite battery and the force field generators");
+            AdvancedMod.Log.Msg("registered the battery, the circuit breaker, the quantum reactor, the cryonite battery, the force field generators and the force field door");
         }
 
         private static void ConfigureBattery(PartSettings settings, GameObject prefab)

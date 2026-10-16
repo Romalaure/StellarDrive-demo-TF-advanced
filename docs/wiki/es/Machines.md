@@ -52,6 +52,16 @@ La red eléctrica debe poder darle **toda** su energía (junto con las demás m�
 - anillos apagados, señal **-1**: ninguna toma de energía conectada;
 - señal **-10 y menos**: se rompió, se reinicia en (−valor − 10) segundos.
 
+## Puerta de campo de fuerza
+
+Un emisor que se coloca **en el suelo, en medio de una abertura del casco**, de cara a la abertura. Míralo y pulsa la tecla de uso (**T**): una ventana permite elegir el **ancho y el alto del campo** (de 1 a 30 m cada uno, por ejemplo 2 × 2 o 10 × 20; un contorno naranja muestra el tamaño mientras lo ajustas) y encenderlo o apagarlo.
+
+- Encendido, el campo **retiene el oxígeno como una puerta cerrada**, pero **se puede atravesar** (una onda sale del punto por donde lo cruzas).
+- Consume **25 W por m²** (ajuste `FieldDoorWattsPerSquareMeter`) en sus dos tomas de energía; la red debe poder suministrarlos todos. Sin energía se apaga y el aire se escapa.
+- Luces del riel: cian activo, naranja parpadeante energía insuficiente o arrancando, rojo parpadeante sin red, apagado.
+- Toma el tamaño de la abertura: el campo se solapa medio metro con el casco alrededor y se ajusta solo al plano del casco.
+- Investigación **Tecnología de artefactos**, fila de los campos de fuerza de la pestaña TF Avanzado.
+
 ## Energía nuclear
 
 Entre la energía de artefactos y la materia oscura. El **uranio** se extrae en TF Aridia, TF Petra y Pyros (rocas verdosas con vetas brillantes).

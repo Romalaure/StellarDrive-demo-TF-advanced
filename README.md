@@ -267,6 +267,10 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Porte à champ de force (v0.28)
+
+- **Porte à champ de force** (onglet TF Avancé, rangée des champs de force, recherche Technologie des artefacts) : un rail émetteur à poser au sol au milieu d'une ouverture de la coque. Touche d'utilisation (T) : on choisit la taille du champ, de 1 × 1 à 30 × 30 m (2 × 2, 10 × 20...), un contour orange la montre, puis on l'allume. Le champ retient l'oxygène comme une porte fermée, mais on passe à travers (une onde part de l'endroit traversé). 25 W par m² ; sans courant, il s'éteint et l'air s'échappe.
+
 ## Portail en mouvement, téléporteur, nouveaux modèles (v0.27)
 
 - **Portail** : il ne se ferme plus quand le vaisseau se met à bouger (le jeu change alors l'espace du vaisseau ; le portail est reporté dans le nouvel espace, à la même place).

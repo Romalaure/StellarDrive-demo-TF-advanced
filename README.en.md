@@ -33,6 +33,10 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Force field door (v0.28)
+
+- **Force field door** (TF Advanced tab, force field row, Artifact technology research): an emitter rail set on the floor in the middle of an opening in the hull. Use key (T): choose the field's size, from 1 × 1 to 30 × 30 m (2 × 2, 10 × 20...), an orange outline shows it, then switch it on. The field holds the oxygen like a closed door, but you walk through it (a ripple runs from where you cross). 25 W per m²; without power it goes out and the air escapes.
+
 ## Portal on the move, teleporter, new models (v0.27)
 
 - **Portal**: no longer closes when the ship gets under way (the game then changes the ship's space; the portal is carried over to the new space, in the same place).

@@ -117,11 +117,12 @@ namespace StellarDriveDemoTFAdvanced.Power
         public static MelonPreferences_Entry<float> ShieldCooldownSeconds { get; private set; }
         public static MelonPreferences_Entry<float> RadarWatts { get; private set; }
         public static MelonPreferences_Entry<float> CloakWatts { get; private set; }
+        public static MelonPreferences_Entry<float> FieldDoorWattsPerSquareMeter { get; private set; }
 
         /// <summary>Parts whose FluidTankState carries a status, not fluid (no fluid mass).</summary>
         public static bool HoldsNoFluid(ushort partSettingsId) => IsPowerPart(partSettingsId) || ForceField.IsGenerator(partSettingsId) || partSettingsId == CondenserId
             || partSettingsId == ShipMiningLaser.Id || partSettingsId == DarkCollectorId || partSettingsId == DarkReactorId || partSettingsId == PortalId || partSettingsId == NuclearReactorId
-            || Combat.Radar.IsRadar(partSettingsId) || partSettingsId == CloakId;
+            || Combat.Radar.IsRadar(partSettingsId) || partSettingsId == CloakId || partSettingsId == FieldDoor.Id;
 
         public static bool IsPowerPart(ushort partSettingsId) =>
             partSettingsId == BatteryId || partSettingsId == BreakerId || partSettingsId == ReactorId || partSettingsId == CryoBatteryId;
@@ -221,6 +222,8 @@ namespace StellarDriveDemoTFAdvanced.Power
                 description: "Power the short range radar draws (W); the long range one draws 3 times more, the deep space one 8 times.");
             CloakWatts = category.CreateEntry("CloakWatts", 6000f,
                 description: "Power a stealth generator draws while it hides the ship (W).");
+            FieldDoorWattsPerSquareMeter = category.CreateEntry("FieldDoorWattsPerSquareMeter", 25f,
+                description: "Power a force field door draws while its field is up, per square meter of field (W).");
             BreakerAutoResetSeconds = category.CreateEntry("BreakerAutoResetSeconds", 10f,
                 description: "A tripped breaker with no control cable closes again after this long (s). 0: only a control signal resets it.");
         }

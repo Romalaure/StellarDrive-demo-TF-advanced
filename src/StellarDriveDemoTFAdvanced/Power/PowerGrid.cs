@@ -83,6 +83,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             Reactors.Clear();
             Journal.Clear();
             ForceField.Forget();
+            FieldDoor.Forget();
             Condenser.Forget();
             ShipMiningLaser.Forget();
             DarkMatter.Forget();
@@ -114,6 +115,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             foreach (Entry reactor in Reactors)
                 PrepareReactor(power, reactor, deltaTime);
             ForceField.BeforeTransfers(power, _ships, _connections, deltaTime);
+            FieldDoor.BeforeTransfers(power, _ships, deltaTime);
             Condenser.BeforeTransfers(power, _ships, _connections, deltaTime);
             ShipMiningLaser.BeforeTransfers(power, _ships, _connections, deltaTime);
             DarkMatter.BeforeTransfers(power, _ships, _connections, deltaTime);
@@ -135,6 +137,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 Write(breaker, rt.Status, rt.Flow, now);
             }
             ForceField.AfterTransfers(deltaTime);
+            FieldDoor.AfterTransfers(deltaTime);
             Condenser.AfterTransfers(deltaTime);
             ShipMiningLaser.AfterTransfers(deltaTime);
             DarkMatter.AfterTransfers(deltaTime);
