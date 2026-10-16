@@ -66,7 +66,7 @@ Opens a violet portal **45 m in front of it** (in the direction of its front fac
 - a planet: at about 20 km altitude, on the side you come from;
 - a beacon (station, wreck, ship): 300 m away.
 
-How it works: a signal > 0 on the **command socket** starts it; it charges for **10 s** at 20,000 W, burns **5 dark matter** (fluid socket), then the portal stays open **30 s**, and the generator recharges for 60 s. State socket: 0 ready, 1 to 99 charge %, 100 open, -1 no target, -2 not enough dark matter, -3 no power, -10 and below: seconds of recharge.
+How it works: a signal > 0 on the **command socket** starts it; it charges for **10 s** at 8,000 W (less power: it charges slower), burns **3 dark matter** (fluid socket), then the portal stays open **30 s**, and the generator recharges for 60 s. State socket: 0 ready, 1 to 99 charge %, 100 open, -1 no target, -2 not enough dark matter, -3 no power, -10 and below: seconds of recharge.
 
 The model: an upright ring in twelve armored sections with glowing seams and four focusing emitters, between two pylons circled with coils and fins. In the middle, two nested **gimbal rings** turn like a gyroscope around a **floating crystal**: they spin faster with the charge, the crystal throbs and everything turns violet, then flickers when the charge is nearly full. Below, an emitter lens; at the back, capacitor banks and a control desk.
 

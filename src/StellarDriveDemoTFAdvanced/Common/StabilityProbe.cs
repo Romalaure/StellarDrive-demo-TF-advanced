@@ -93,17 +93,17 @@ namespace StellarDriveDemoTFAdvanced.Common
             _since = Time.unscaledTime;
             float avg = Frames.Count > 0 ? Frames.Average() : 0f, worst = Frames.Count > 0 ? Frames.Max() : 0f;
             int hitches = Frames.Count(f => f > 0.05f);
-            AdvancedMod.Log.Msg($"dev: stability: {Frames.Count / 5f:0} fps avg {avg * 1000f:0.0} ms worst {worst * 1000f:0} ms, {hitches} hitch(es) > 50 ms; ship {_visualShip} visual jitter avg {(_visualSamples > 0 ? _visualJitter / _visualSamples : 0f):0.000}° max {_visualJitterMax:0.00}°, physics angular jerk avg {(_physicsSamples > 0 ? _angularJerk / _physicsSamples : 0f):0.0000} max {_angularJerkMax:0.000} rad/s per step; state writes/s: "
+            AdvancedMod.Log.Msg($"dev: stability: {Frames.Count / 5f:0} fps avg {avg * 1000f:0.0} ms worst {worst * 1000f:0} ms, {hitches} hitch(es) > 50 ms; ship {_visualShip} visual turn {(_visualSamples > 0 ? _turnRate / _visualSamples : 0f):0.0}°/s, jitter avg {(_visualSamples > 0 ? _visualJitter / _visualSamples : 0f):0.00}°/s max {_visualJitterMax:0.0}°/s, physics angular jerk avg {(_physicsSamples > 0 ? _angularJerk / _physicsSamples : 0f):0.0000} max {_angularJerkMax:0.000} rad/s per step; state writes/s: "
                 + string.Join(", ", Writes.OrderByDescending(w => w.Value).Take(10).Select(w => $"{w.Key} {w.Value / 5f:0}")));
             Frames.Clear();
             Writes.Clear();
-            _visualJitter = _visualJitterMax = _angularJerk = _angularJerkMax = 0f;
+            _visualJitter = _visualJitterMax = _angularJerk = _angularJerkMax = _turnRate = 0f;
             _visualSamples = _physicsSamples = 0;
         }
 
         // The ship under the camera: its visual's turn from one frame to the next, minus the
         // average turn (a steady spin is not a shake)
-        private static float _lastTurn;
+        private static float _lastTurn, _turnRate;
 
         private static void SampleVisual()
         {
@@ -134,9 +134,12 @@ namespace StellarDriveDemoTFAdvanced.Common
                 _lastVisual = v.rotation;
                 return;
             }
-            float turn = Quaternion.Angle(_lastVisual, v.rotation);
+            // Turn rate (deg/s) from one frame to the next: frames of different lengths are not a shake
+            float dt = Mathf.Max(1e-4f, Time.deltaTime);
+            float turn = Quaternion.Angle(_lastVisual, v.rotation) / dt;
             float jitter = Mathf.Abs(turn - _lastTurn);
             _lastTurn = turn;
+            _turnRate += turn;
             _lastVisual = v.rotation;
             _visualJitter += jitter;
             _visualJitterMax = Mathf.Max(_visualJitterMax, jitter);

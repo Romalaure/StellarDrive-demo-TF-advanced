@@ -66,7 +66,7 @@ Ouvre un portail violet **45 m devant lui** (dans la direction de sa face avant)
 - une planète : à environ 20 km d'altitude, du côté d'où vous venez ;
 - une balise (station, épave, vaisseau) : à 300 m.
 
-Fonctionnement : un signal > 0 sur la **prise de commande** le lance ; il charge **10 s** à 20 000 W, brûle **5 matière noire** (prise de fluide) puis le portail reste ouvert **30 s**, et le générateur se recharge 60 s. Prise d'état : 0 prêt, 1 à 99 charge %, 100 ouvert, -1 pas de cible, -2 pas assez de matière noire, -3 pas de courant, -10 et moins : secondes de recharge.
+Fonctionnement : un signal > 0 sur la **prise de commande** le lance ; il charge **10 s** à 8 000 W (moins de courant : il charge plus lentement), brûle **3 matière noire** (prise de fluide) puis le portail reste ouvert **30 s**, et le générateur se recharge 60 s. Prise d'état : 0 prêt, 1 à 99 charge %, 100 ouvert, -1 pas de cible, -2 pas assez de matière noire, -3 pas de courant, -10 et moins : secondes de recharge.
 
 Le modèle : un anneau dressé en douze sections blindées aux joints lumineux, avec quatre émetteurs de focalisation, entre deux pylônes cerclés de bobines et d'ailettes. Au centre, deux **anneaux de cardan** imbriqués comme un gyroscope tournent autour d'un **cristal flottant** : ils accélèrent avec la charge, le cristal pulse et tout vire au violet, puis ça clignote quand la charge est presque pleine. Dessous, une lentille d'émission ; à l'arrière, des bancs de condensateurs et un pupitre de commande.
 

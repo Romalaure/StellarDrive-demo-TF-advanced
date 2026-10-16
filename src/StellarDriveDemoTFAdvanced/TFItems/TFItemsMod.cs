@@ -25,6 +25,18 @@ namespace StellarDriveDemoTFAdvanced.TFItems
         /// <summary>Whether this mod provides the TF objects (false while an old TF mod does).</summary>
         public static bool Active => _active ?? (_active = !OldTfProvides()).Value;
 
+        private static bool? _tools;
+
+        /// <summary>
+        /// The schematic tablet and its schematics, the third person view and the KeySeat
+        /// compatibility, moved here from the TF mod too: provided while no TF mod is installed
+        /// (a TF mod, any version, still provides them itself).
+        /// </summary>
+        public static bool ToolsActive => _tools ?? (_tools = Active && !AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "StellarDriveDemoTF")).Value;
+
+        /// <summary>The patch classes of those tools, skipped while a TF mod provides them.</summary>
+        public static readonly string[] ToolPatches = { "ThirdPersonCameraPatch", "KeySeatChangePatch", "KeySeatRemovePatch", "SchematicTabletItemPatch" };
+
         private static bool OldTfProvides()
         {
             Assembly tf = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "StellarDriveDemoTF");
@@ -47,6 +59,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.TeleportCapsule.Install();
             Devices.Radio.Install();
             Devices.ToolRack.Install();
+            if (ToolsActive)
+                Devices.Schematics.Install();
         }
 
         /// <summary>Only call when SDModKit is loaded.</summary>
@@ -67,6 +81,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems
         {
             if (Active)
                 Common.GameServices.Invalidate();
+            if (ToolsActive)
+                Devices.KeySeatCompat.Reset();
         }
 
         public static void Update()
@@ -77,6 +93,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Common.TFNet.Update();
             Common.UsableParts.Update();
             Devices.RadioSound.Update();
+            if (ToolsActive)
+            {
+                Devices.ThirdPerson.Update();
+                Devices.SchematicTablet.Update();
+                Devices.KeySeatCompat.Update();
+            }
         }
 
         public static void LateUpdate()
@@ -94,6 +116,11 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.TeleportMenu.Draw();
             Devices.RadioMenu.Draw();
             Devices.ToolRackMenu.Draw();
+            if (ToolsActive)
+            {
+                Devices.SchematicsMenu.Draw();
+                Devices.SchematicTablet.Draw();
+            }
         }
     }
 }

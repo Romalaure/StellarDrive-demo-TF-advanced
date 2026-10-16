@@ -245,7 +245,7 @@ Les pièces du mod se débloquent à la **table de recherche** : une branche de 
 ## Matière noire et portail
 
 - **Collecteur de matière noire** : 0,004 unité/s pour 8 000 W ; ×5 près d'un trou noir, ×3 dans Érèbe. **Réservoir** de matière noire. **Réacteur à matière noire** : 150 000 W pour 0,002 unité/s. **Moteur à matière noire** : 624 000 N.
-- **Générateur de portail** : un signal sur sa prise de commande ; 10 s de charge à 20 000 W, 5 matière noire, puis un portail de 18 m de rayon s'ouvre 45 m devant lui, fixe dans l'espace, 30 s. Le vaisseau qui le traverse ressort près de la **cible de son ordinateur de visée ou de sa carte stellaire** (planète : ~20 km d'altitude ; balise : 300 m). Le saut passe par l'espace de distorsion du jeu.
+- **Générateur de portail** : un signal sur sa prise de commande ; 10 s de charge à 8 000 W (plus lente si le courant manque), 3 matière noire, puis un portail de 18 m de rayon s'ouvre 45 m devant lui, fixe dans l'espace, 30 s. Le vaisseau qui le traverse ressort près de la **cible de son ordinateur de visée ou de sa carte stellaire** (planète : ~20 km d'altitude ; balise : 300 m). Le saut passe par l'espace de distorsion du jeu.
 - **Table de cartographie** : relief 3D du terrain sur 300 m (fonction d'altitude du jeu sur l'hôte), repères des gisements, coffres, bâtiments et vaisseaux, et la fiche de la planète.
 
 ## Énergie nucléaire
@@ -266,6 +266,12 @@ Des vaisseaux pirates, armés des armes de vaisseau d'Arsenal, attaquent de temp
 Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un écran rond les pirates autour du vaisseau : leurs vaisseaux, leurs bases et les **raids en approche**, désormais repérés à 25 000 km et qui foncent à 250 km/s avant d'attaquer (le radar de l'espace profond donne environ 80 s d'avance, avec une alerte à l'écran). Le **générateur d'invisibilité** (6 000 W) rend le vaisseau difficile à trouver et à viser : raids trois fois plus rares et qui peuvent perdre sa trace, pirates qui ne le voient qu'à moins de 2,5 km, tirent de plus près et visent bien plus mal. Tech **Guerre électronique**. Les contacts sont calculés par l'hôte et envoyés à chaque joueur. Détail : [wiki, Pirates](docs/wiki/Pirates.md#radars).
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
+
+## Tablette schématique, 3e personne, portail moins gourmand, nouveaux radars (v0.21)
+
+- **Tablette schématique et vue à la 3e personne** (venues du mod TF) : sans le mod TF, TF Advanced les fournit. Même tablette (objet 7201), mêmes schématiques (`UserData/TF/schematics`), touche **V** en pilotant. La tablette se prend au râtelier à outils. Les touches des sièges KeySeat sont gardées et recopiées par les schématiques.
+- **Portail** : il demande 8 000 W au lieu de 20 000 (un générateur infini en donne 20 000 : il ne s'arrêtait plus de charger dès qu'une autre machine tirait du courant) et 3 matières noires au lieu de 5. Avec moins de courant, il charge plus lentement au lieu de s'arrêter. Vos réglages restés aux anciennes valeurs passent aux nouvelles.
+- **Radars refaits** : antenne barre tournante pour la courte portée, parabole à trépied et contrepoids pour la longue portée, panneau à réseau phasé lumineux pour l'espace profond ; mât haubané, palier lumineux, visière d'écran, voyants.
 
 ## Pirates de plus en plus durs, nouveau portail (v0.20)
 

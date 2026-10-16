@@ -172,11 +172,11 @@ namespace StellarDriveDemoTFAdvanced.Power
                 description: "Nuclear fuel made from one uranium ore (units).");
             SolarWatts = category.CreateEntry("SolarWatts", 3000f,
                 description: "Power a solar panel support gives with its wings facing the star (W).");
-            PortalWatts = category.CreateEntry("PortalWatts", 20000f,
-                description: "Power a portal generator draws while it charges (W).");
+            PortalWatts = category.CreateEntry("PortalWatts", 8000f,
+                description: "Power a portal generator draws while it charges (W). Short of it, it charges slower.");
             PortalChargeSeconds = category.CreateEntry("PortalChargeSeconds", 10f,
                 description: "Time a portal generator charges before the portal opens (s).");
-            PortalDarkMatter = category.CreateEntry("PortalDarkMatter", 5f,
+            PortalDarkMatter = category.CreateEntry("PortalDarkMatter", 3f,
                 description: "Dark matter a portal burns when it opens (units).");
             PortalOpenSeconds = category.CreateEntry("PortalOpenSeconds", 30f,
                 description: "How long a portal stays open (s).");
@@ -186,6 +186,12 @@ namespace StellarDriveDemoTFAdvanced.Power
                 description: "Distance from the generator to the portal it opens, straight in front of it (m).");
             PortalRadius = category.CreateEntry("PortalRadius", 18f,
                 description: "Radius of the portal (m): the ship's center must pass through it.");
+            // The portal drew a whole infinite generator (20 kW) and stalled beside any other machine:
+            // still at the old defaults, the settings move to the new ones
+            if (PortalWatts.Value == 20000f)
+                PortalWatts.Value = 8000f;
+            if (PortalDarkMatter.Value == 5f)
+                PortalDarkMatter.Value = 3f;
             CondenserWatts = category.CreateEntry("CondenserWatts", 1500f,
                 description: "Power a cryonite condenser draws while it makes oxygen (W).");
             CondenserOxygenPerSecond = category.CreateEntry("CondenserOxygenPerSecond", 0.05f,

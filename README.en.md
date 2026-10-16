@@ -33,6 +33,12 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Schematic tablet, third person, lighter portal, new radars (v0.21)
+
+- **Schematic tablet and third person view** (from the TF mod): without the TF mod, TF Advanced provides them. Same tablet (item 7201), same schematics (`UserData/TF/schematics`), key **V** while piloting. The tablet comes from the tool rack. KeySeat seat keys are kept and copied by schematics.
+- **Portal**: it draws 8,000 W instead of 20,000 (an infinite generator gives 20,000: it stalled as soon as another machine drew power) and burns 3 dark matter instead of 5. Short of power, it charges slower instead of stopping. Settings left at the old values move to the new ones.
+- **Radars remade**: a sweeping bar antenna for short range, a dish on a tripod with a counterweight for long range, a lit phased array panel for deep space; braced mast, lit bearing, screen visor, status lights.
+
 ## Tougher pirates the farther you go, new portal (v0.20)
 
 **Danger grows with distance**: near the home planet, only scouts, one or two at a time, and less often. One danger level more every 5 million km (setting `PirateDangerStepKm`): corsairs and hornets around TF Aridia, raiders and lancers around TF Verdance and TF Glacia, escorted cruisers and torpedo boats past TF Nexora, and dreadnoughts in the Erebos galaxy.

@@ -184,7 +184,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         // Host: a base tool (build tool, recycler, mining laser) for the player who asked, if they lack it
         private static void ServerGive(NetworkConnection sender, TFMessageKind kind, uint itemId, ushort b, string text)
         {
-            if (sender == null || System.Array.IndexOf(BaseTools, itemId) < 0)
+            if (sender == null || (System.Array.IndexOf(BaseTools, itemId) < 0 && !(itemId == SchematicTablet.ItemId && TFItemsMod.ToolsActive)))
                 return;
             TrackedPlayerServer player = GameServices.PlayersServer?.GetTrackedPlayerFromConnectionId(sender.ClientId);
             if (player == null)
@@ -279,6 +279,15 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 if (TfTools.HasTablet && GUILayout.Button(Loc.Pick("Tablette schématique  (mod TF)", "Schematic tablet  (TF mod)", "Tableta esquemática  (mod TF)"), DeviceUi.Button, GUILayout.Height(44f)))
                 {
                     TfTools.Tablet();
+                    ModMenu.Close();
+                }
+                GUILayout.Space(12f);
+            }
+            else if (TFItemsMod.ToolsActive)
+            {
+                if (GUILayout.Button(Loc.Pick("Tablette schématique", "Schematic tablet", "Tableta esquemática"), DeviceUi.Button, GUILayout.Height(44f)))
+                {
+                    ToolRack.RequestTool(SchematicTablet.ItemId);
                     ModMenu.Close();
                 }
                 GUILayout.Space(12f);

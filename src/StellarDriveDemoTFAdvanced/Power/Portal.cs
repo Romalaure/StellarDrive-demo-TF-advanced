@@ -148,10 +148,12 @@ namespace StellarDriveDemoTFAdvanced.Power
                 Runtime rt = entry.Runtime;
                 if (rt.Phase == Phase.Charging && rt.Group != null)
                 {
-                    if (rt.Group.NormalizedConsumerRate > 0.95f)
+                    // It charges as fast as the power it gets: short of power, slower, not stalled
+                    float supplied = Mathf.Clamp01(rt.Group.NormalizedConsumerRate);
+                    if (supplied > 0.05f)
                     {
                         rt.Problem = 0;
-                        rt.Charge += deltaTime;
+                        rt.Charge += deltaTime * supplied;
                     }
                     else
                         rt.Problem = NoPower;

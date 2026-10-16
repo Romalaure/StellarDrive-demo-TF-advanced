@@ -304,6 +304,146 @@ namespace StellarDriveDemoTFAdvanced.Combat
 
         // ------------------------------------------------------------------ part
 
+        /// <summary>A visor over the screen, three status lights under it, handles on the sides.</summary>
+        private static void ScreenDetails(MachineModels.Model model, float width, float depth, Vector3 screen, Quaternion tilt)
+        {
+            model.Armor.Box(screen + tilt * new Vector3(0f, 0.27f, 0.05f), new Vector3(width * 0.96f, 0.03f, 0.13f), tilt);
+            foreach (float s in new[] { -1f, 1f })
+                model.Armor.Box(screen + tilt * new Vector3(s * width * 0.475f, 0.12f, 0.04f), new Vector3(0.025f, 0.3f, 0.11f), tilt);
+            for (int i = 0; i < 3; i++)
+            {
+                var at = new Vector3(-0.08f + i * 0.08f, 0.36f, depth * 0.47f + 0.115f);
+                model.Dark.Cylinder(at, at + Vector3.forward * 0.01f, 0.022f, 0.022f, 10);
+                (i == 1 ? model.Core : model.Glow).Cylinder(at + Vector3.forward * 0.01f, at + Vector3.forward * 0.016f, 0.015f, 0.012f, 10);
+            }
+            foreach (float s in new[] { -1f, 1f })
+            {
+                float x = s * (width * 0.5f + 0.02f);
+                model.Dark.Cylinder(new Vector3(x, 0.22f, depth * 0.2f), new Vector3(x, 0.22f, -depth * 0.2f), 0.018f, 0.018f, 8);
+                model.Armor.Box(new Vector3(x - s * 0.015f, 0.22f, depth * 0.2f), new Vector3(0.03f, 0.04f, 0.03f));
+                model.Armor.Box(new Vector3(x - s * 0.015f, 0.22f, -depth * 0.2f), new Vector3(0.03f, 0.04f, 0.03f));
+            }
+        }
+
+        /// <summary>A collared mast, braced for the bigger ones, with a lit bearing under the antenna.</summary>
+        private static void Mast(MachineModels.Model model, int level, float width, float depth, float top, float mast, float mz)
+        {
+            float bearing = top + mast * 0.7f;
+            model.Armor.Cylinder(new Vector3(0f, top - 0.02f, mz), new Vector3(0f, top + 0.06f, mz), 0.17f, 0.14f, 14);
+            for (int i = 0; i < 8; i++)
+            {
+                float a = i * Mathf.PI / 4f;
+                model.Dark.Cylinder(new Vector3(Mathf.Cos(a) * 0.14f, top + 0.06f, mz + Mathf.Sin(a) * 0.14f), new Vector3(Mathf.Cos(a) * 0.14f, top + 0.075f, mz + Mathf.Sin(a) * 0.14f), 0.012f, 0.012f, 6);
+            }
+            float r = level == 3 ? 0.055f : 0.045f;
+            model.Armor.Cylinder(new Vector3(0f, top + 0.06f, mz), new Vector3(0f, bearing - 0.06f, mz), r, r * 0.85f, 10);
+            // Cable up the mast
+            model.Dark.Cylinder(new Vector3(r + 0.012f, top + 0.06f, mz), new Vector3(r * 0.85f + 0.012f, bearing - 0.07f, mz), 0.01f, 0.01f, 6);
+            // Bearing: a housing and a lit ring the antenna turns on
+            model.Armor.Cylinder(new Vector3(0f, bearing - 0.07f, mz), new Vector3(0f, bearing - 0.01f, mz), 0.085f, 0.075f, 14);
+            model.Glow.Cylinder(new Vector3(0f, bearing - 0.012f, mz), new Vector3(0f, bearing - 0.002f, mz), 0.078f, 0.078f, 16, capA: false, capB: false);
+            if (level >= 2)
+            {
+                // Three braces from the roof to the mast
+                for (int i = 0; i < 3; i++)
+                {
+                    float a = (90f + i * 120f) * Mathf.Deg2Rad;
+                    var foot = new Vector3(Mathf.Cos(a) * width * 0.34f, top - 0.04f, mz + Mathf.Sin(a) * depth * 0.4f);
+                    var head = new Vector3(Mathf.Cos(a) * r, top + mast * 0.38f, mz + Mathf.Sin(a) * r);
+                    model.Dark.Cylinder(foot, head, 0.014f, 0.012f, 6);
+                    model.Armor.Box(foot, new Vector3(0.05f, 0.02f, 0.05f));
+                }
+            }
+            if (level == 3)
+            {
+                foreach (float y in new[] { 0.28f, 0.46f, 0.6f })
+                    model.Light.Cylinder(new Vector3(0f, top + mast * y, mz), new Vector3(0f, top + mast * y + 0.015f, mz), 0.075f, 0.075f, 12, capA: false, capB: false);
+            }
+        }
+
+        /// <summary>Short range: a slotted bar antenna sweeping round like a ship's radar.</summary>
+        private static void BarAntenna(MachineModels.Model a)
+        {
+            a.Armor.Cylinder(Vector3.zero, new Vector3(0f, 0.05f, 0f), 0.05f, 0.045f, 12);
+            a.Armor.Box(new Vector3(0f, 0.075f, 0f), new Vector3(0.06f, 0.05f, 0.06f));
+            a.Armor.Box(new Vector3(0f, 0.12f, 0.02f), new Vector3(0.62f, 0.07f, 0.05f));
+            a.Dark.Box(new Vector3(0f, 0.12f, 0.046f), new Vector3(0.58f, 0.05f, 0.005f));
+            for (int i = 0; i < 12; i++)
+                a.Glow.Box(new Vector3(-0.264f + i * 0.048f, 0.12f, 0.05f), new Vector3(0.018f, 0.032f, 0.003f));
+            foreach (float s in new[] { -1f, 1f })
+                a.Armor.Box(new Vector3(s * 0.315f, 0.12f, 0.02f), new Vector3(0.012f, 0.08f, 0.06f));
+            a.Core.Cylinder(new Vector3(0f, 0.155f, 0.02f), new Vector3(0f, 0.17f, 0.02f), 0.015f, 0.01f, 8);
+        }
+
+        /// <summary>Long range: a stepped parabolic dish on a yoke, feed horn on a tripod, counterweight behind.</summary>
+        private static void DishAntenna(MachineModels.Model a)
+        {
+            const float dish = 0.34f;
+            a.Armor.Cylinder(Vector3.zero, new Vector3(0f, 0.05f, 0f), 0.05f, 0.045f, 12);
+            foreach (float s in new[] { -1f, 1f })
+                a.Armor.Box(new Vector3(s * 0.06f, 0.1f, 0f), new Vector3(0.02f, 0.1f, 0.05f));
+            a.Dark.Cylinder(new Vector3(-0.07f, 0.13f, 0f), new Vector3(0.07f, 0.13f, 0f), 0.02f, 0.02f, 8);
+            var c = new Vector3(0f, 0.13f, 0.03f);
+            Quaternion up = Quaternion.Euler(-12f, 0f, 0f);
+            // Bowl in four steps, deeper toward the middle
+            float[] radii = { 0.07f, 0.16f, 0.25f, dish };
+            float[] depths = { 0f, 0.025f, 0.06f, 0.11f };
+            for (int i = 0; i < radii.Length - 1; i++)
+                a.Armor.Cylinder(c + up * new Vector3(0f, 0f, depths[i]), c + up * new Vector3(0f, 0f, depths[i + 1]), radii[i], radii[i + 1], 24, capA: i == 0, capB: false);
+            a.Glow.Cylinder(c + up * new Vector3(0f, 0f, 0.108f), c + up * new Vector3(0f, 0f, 0.118f), dish, dish * 1.03f, 24, capA: false, capB: false);
+            for (int i = 1; i < radii.Length - 1; i++)
+                a.Light.Cylinder(c + up * new Vector3(0f, 0f, depths[i] + 0.002f), c + up * new Vector3(0f, 0f, depths[i] + 0.006f), radii[i] * 1.01f, radii[i] * 1.01f, 24, capA: false, capB: false);
+            // Feed horn held by three struts from the rim
+            Vector3 feed = c + up * new Vector3(0f, 0f, 0.3f);
+            for (int i = 0; i < 3; i++)
+            {
+                float ang = (90f + i * 120f) * Mathf.Deg2Rad;
+                Vector3 rim = c + up * new Vector3(Mathf.Cos(ang) * dish * 0.92f, Mathf.Sin(ang) * dish * 0.92f, 0.1f);
+                a.Dark.Cylinder(rim, feed, 0.008f, 0.008f, 6);
+            }
+            a.Dark.Cylinder(feed - up * new Vector3(0f, 0f, 0.03f), feed + up * new Vector3(0f, 0f, 0.02f), 0.03f, 0.022f, 10);
+            a.Core.Cylinder(feed + up * new Vector3(0f, 0f, 0.02f), feed + up * new Vector3(0f, 0f, 0.03f), 0.02f, 0.012f, 10);
+            // Counterweight and electronics box behind
+            a.Armor.Box(c + up * new Vector3(0f, 0f, -0.07f), new Vector3(0.16f, 0.12f, 0.08f), up);
+            a.Glow.Box(c + up * new Vector3(0f, 0.03f, -0.112f), new Vector3(0.1f, 0.012f, 0.004f), up);
+        }
+
+        /// <summary>Deep space: a phased array panel of lit emitter tiles, a small dish above, two emitter rods.</summary>
+        private static void ArrayAntenna(MachineModels.Model a)
+        {
+            a.Armor.Cylinder(Vector3.zero, new Vector3(0f, 0.06f, 0f), 0.06f, 0.05f, 14);
+            a.Armor.Box(new Vector3(0f, 0.12f, -0.02f), new Vector3(0.1f, 0.12f, 0.08f));
+            Quaternion lean = Quaternion.Euler(-20f, 0f, 0f);
+            var c = new Vector3(0f, 0.3f, 0.03f);
+            const float w = 0.62f, h = 0.44f;
+            a.Armor.Box(c, new Vector3(w + 0.04f, h + 0.04f, 0.04f), lean);
+            a.Dark.Box(c + lean * new Vector3(0f, 0f, 0.022f), new Vector3(w, h, 0.004f), lean);
+            const int cols = 6, rows = 4;
+            for (int x = 0; x < cols; x++)
+            {
+                for (int y = 0; y < rows; y++)
+                {
+                    var at = new Vector3((x + 0.5f) / cols * w - w * 0.5f, (y + 0.5f) / rows * h - h * 0.5f, 0.026f);
+                    ((x + y) % 3 == 0 ? a.Core : a.Glow).Box(c + lean * at, new Vector3(w / cols * 0.72f, h / rows * 0.72f, 0.004f), lean);
+                }
+            }
+            // Ribs behind the panel
+            foreach (float x in new[] { -0.2f, 0f, 0.2f })
+                a.Armor.Box(c + lean * new Vector3(x, 0f, -0.04f), new Vector3(0.025f, h, 0.04f), lean);
+            // A small dish on top, and two emitter rods on the sides
+            Vector3 cap = c + lean * new Vector3(0f, h * 0.5f + 0.06f, 0f);
+            a.Dark.Cylinder(c + lean * new Vector3(0f, h * 0.5f + 0.02f, 0f), cap, 0.012f, 0.012f, 6);
+            a.Armor.Cylinder(cap, cap + Vector3.forward * 0.04f, 0.02f, 0.09f, 14, capA: true, capB: false);
+            a.Core.Cylinder(cap + Vector3.forward * 0.05f, cap + Vector3.forward * 0.06f, 0.012f, 0.008f, 8);
+            foreach (float s in new[] { -1f, 1f })
+            {
+                Vector3 root = c + lean * new Vector3(s * (w * 0.5f + 0.02f), 0f, 0f);
+                Vector3 tip = root + new Vector3(s * 0.12f, 0.16f, 0f);
+                a.Dark.Cylinder(root, tip, 0.012f, 0.008f, 6);
+                a.Core.Cylinder(tip, tip + new Vector3(s * 0.012f, 0.016f, 0f), 0.02f, 0.02f, 8);
+            }
+        }
+
         private static void Configure(Tier tier, PartSettings settings, GameObject prefab)
         {
             float watts = Mathf.Max(0f, PowerCatalog.RadarWatts.Value) * tier.WattsScale;
@@ -332,27 +472,15 @@ namespace StellarDriveDemoTFAdvanced.Combat
             // The mast and its antenna on top (RadarVisuals turns the antenna while powered)
             float top = height;
             float mz = -depth * 0.12f;
-            model.Armor.Cylinder(new Vector3(0f, top - 0.02f, mz), new Vector3(0f, top + 0.06f, mz), 0.16f, 0.13f, 10);
-            model.Dark.Cylinder(new Vector3(0f, top + 0.06f, mz), new Vector3(0f, top + mast * 0.7f, mz), 0.04f, 0.035f, 8);
-            if (tier.Level == 3)
-            {
-                foreach (float y in new[] { 0.3f, 0.5f })
-                    model.Light.Cylinder(new Vector3(0f, top + mast * y, mz), new Vector3(0f, top + mast * y + 0.015f, mz), 0.07f, 0.07f, 12, capA: false, capB: false);
-            }
+            ScreenDetails(model, width, depth, screen, tilt);
+            Mast(model, tier.Level, width, depth, top, mast, mz);
             var antenna = new MachineModels.Model();
-            float dish = tier.Level == 3 ? 0.42f : tier.Level == 2 ? 0.32f : 0.2f;
-            // A dish (shallow cone) facing forward on a short arm, a feed horn at its focus
-            antenna.Armor.Cylinder(new Vector3(0f, 0f, 0f), new Vector3(0f, 0f, 0.05f), 0.03f, 0.03f, 8);
-            antenna.Armor.Cylinder(new Vector3(0f, 0f, 0.05f), new Vector3(0f, 0f, 0.05f + dish * 0.35f), dish * 0.15f, dish, 18, capA: true, capB: false);
-            antenna.Glow.Cylinder(new Vector3(0f, 0f, 0.05f + dish * 0.35f), new Vector3(0f, 0f, 0.05f + dish * 0.36f), dish, dish * 1.02f, 18, capA: false, capB: false);
-            antenna.Dark.Cylinder(new Vector3(0f, 0f, 0.05f), new Vector3(0f, 0f, 0.05f + dish * 0.8f), 0.01f, 0.01f, 6);
-            antenna.Core.Cylinder(new Vector3(0f, 0f, 0.05f + dish * 0.8f), new Vector3(0f, 0f, 0.05f + dish * 0.88f), 0.025f, 0.015f, 8);
-            if (tier.Level >= 2)
-            {
-                // Side fins for the bigger ones
-                antenna.Armor.Box(new Vector3(dish * 0.6f, 0f, 0.04f), new Vector3(dish * 0.5f, 0.02f, 0.06f));
-                antenna.Armor.Box(new Vector3(-dish * 0.6f, 0f, 0.04f), new Vector3(dish * 0.5f, 0.02f, 0.06f));
-            }
+            if (tier.Level == 1)
+                BarAntenna(antenna);
+            else if (tier.Level == 2)
+                DishAntenna(antenna);
+            else
+                ArrayAntenna(antenna);
             MachineModels.Attach(visuals, model, "Radar" + tier.Level, tier.Glow, tier.Glow);
             var head = new GameObject(RadarVisuals.AntennaName) { layer = visuals.gameObject.layer };
             head.transform.SetParent(visuals, false);

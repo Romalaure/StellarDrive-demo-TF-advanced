@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.20.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.21.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -63,6 +63,8 @@ namespace StellarDriveDemoTFAdvanced
             foreach (Type type in types.Where(t => t.GetCustomAttributes(typeof(HarmonyLib.HarmonyPatch), false).Length > 0))
             {
                 if (type.Namespace != null && type.Namespace.StartsWith("StellarDriveDemoTFAdvanced.TFItems") && !TFItems.TFItemsMod.Active)
+                    continue;
+                if (Array.IndexOf(TFItems.TFItemsMod.ToolPatches, type.Name) >= 0 && !TFItems.TFItemsMod.ToolsActive)
                     continue;
                 try
                 {
