@@ -60,6 +60,10 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 Parts = new ushort[] { 7395 }, Cost = new[] { (ModItems.Meteorite, 20), (ModItems.QuantumCore, 2), (ModItems.ExoticMatter, 3), (ModItems.Artifact, 2) } },
             new Tech { Id = 7513, Name = Loc.Pick("Guerre électronique", "Electronic warfare", "Guerra electrónica"), Requires = new ushort[] { 7508 }, Position = new Vector2Int(4, 0),
                 Parts = new ushort[] { 7307, 7308, 7309, 7310 }, Cost = new[] { (Copper, 25), (Glass, 10), (ModItems.Titanium, 10), (ModItems.Quartz, 5) } },
+            new Tech { Id = 7514, Name = Loc.Pick("Blindage renforcé", "Reinforced plating", "Blindaje reforzado"), Requires = new ushort[] { 7501 }, Position = new Vector2Int(7, 5),
+                Parts = Range(7421, 7429).Concat(Range(7431, 7439)).ToArray(), Cost = new[] { (Iron, 40), (Glass, 20), (Aluminum, 10) } },
+            new Tech { Id = 7515, Name = Loc.Pick("Minage embarqué", "Ship mining", "Minería embarcada"), Requires = new ushort[] { 7506 }, Position = new Vector2Int(7, 4),
+                Parts = new ushort[] { 7399 }, Cost = new[] { (Iron, 20), (Copper, 15), (Aluminum, 5) } },
         };
 
         private static readonly HashSet<ushort> Locked = new HashSet<ushort>();
@@ -94,7 +98,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
             Locked.Clear();
             foreach (Tech tech in All)
             {
-                var parts = tech.Parts.Select(id => CustomParts.Get(id)).Where(p => p != null).ToArray();
+                var parts = tech.Parts.Select(id => CustomParts.Get(id) ?? Construction.ReinforcedHull.Get(id)).Where(p => p != null).ToArray();
                 if (parts.Length == 0)
                     continue;
                 var settings = ScriptableObject.CreateInstance<ResearchSettings>();

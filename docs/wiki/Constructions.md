@@ -20,3 +20,12 @@ Les positions suivent une grille de 25 cm comptée depuis la pièce visée.
 S'y ajoutent les **pièces de structure** : poutres 1, 2 et 4 m, poutre renforcée, plaques 1 × 1 et 2 × 1, cadre, jonction.
 
 Le bois et le fer portent les textures de la coque du jeu, le verre son verre. La collision est la boîte de la pièce (le vide d'un treillis est visuel).
+
+## Coque renforcée
+
+Onglet **TF Blindage**, recherche *Blindage renforcé*. Les pièces de coque du jeu en **fer** et en **verre** (sol, plaque, plaque pivotée, coins de sol et de mur, pente, coins de pente), en version renforcée : même modèle, même pose, mais une teinte un peu plus sombre quand on les pose (la peinture les recolore comme les autres). C'est de la vraie coque : elle ferme les pièces étanches comme celle du jeu.
+
+- **3 fois plus solide** dans les collisions ;
+- avec le mod **Arsenal** : les armes n'y font qu'**un tiers des dégâts** et n'y percent **aucun trou** ;
+- **1,5 fois plus lourde** ;
+- coût : le double de fer (ou de verre), plus 1 aluminium (fer renforcé) ou 1 fer (verre renforcé).

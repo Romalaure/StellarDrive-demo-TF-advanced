@@ -17,5 +17,7 @@ Las piezas del mod se desbloquean en la **mesa de investigación**, en una rama 
 | Materia oscura | Energía nuclear | colector, tanque, reactor de materia oscura, generador de campo de materia oscura, motor de materia oscura | 10 de meteorito, 1 núcleo cuántico, 5 aleaciones |
 | Portal dimensional | Materia oscura | generador de portal | 20 de meteorito, 2 núcleos cuánticos, 3 de materia exótica, 2 artefactos |
 | Guerra electrónica | Cartografía | radares (corto alcance, largo alcance, espacio profundo), generador de sigilo | 25 de cobre, 10 de vidrio, 10 de titanio, 5 de cuarzo |
+| Blindaje reforzado | Construcción metálica | casco reforzado de hierro y cristal | 40 de hierro, 20 de vidrio, 10 de aluminio |
+| Minería embarcada | Red eléctrica avanzada | láser de minería de nave | 20 de hierro, 15 de cobre, 5 de aluminio |
 
 Ajuste `ResearchUnlocks = false` (sección `[TFAdvanced]`): todas las piezas están disponibles desde el principio.

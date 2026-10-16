@@ -37,6 +37,11 @@ namespace StellarDriveDemoTFAdvanced.Parts
         public const int GlassRow = 2;
         public const int IronRow = 3;
 
+        /// <summary>Reinforced hull: the game's iron and glass pieces, tougher, their own tab.</summary>
+        public const string ArmorName = "TF Blindage";
+        public const int ReinforcedIronRow = 0;
+        public const int ReinforcedGlassRow = 1;
+
         /// <summary>Space station modules, their own tab.</summary>
         public const string StationName = "TF Station";
         public const int StationRow = 0;
@@ -47,6 +52,36 @@ namespace StellarDriveDemoTFAdvanced.Parts
             BuildTabs.Declare(Name, 52, Icon());
             BuildTabs.Declare(ConstructionName, 53, ConstructionIcon());
             BuildTabs.Declare(StationName, 54, StationIcon());
+            BuildTabs.Declare(ArmorName, 56, ArmorIcon());
+        }
+
+        // A dark riveted plate, a glass pane in its corner
+        private static Texture2D ArmorIcon()
+        {
+            const int size = 64;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { name = "TFA_ArmorTabIcon", hideFlags = HideFlags.HideAndDontSave };
+            var clear = new Color(1f, 1f, 1f, 0f);
+            var plate = new Color(0.55f, 0.57f, 0.62f, 1f);
+            var edge = new Color(0.85f, 0.86f, 0.9f, 1f);
+            var glass = new Color(0.4f, 0.65f, 0.8f, 1f);
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    Color c = clear;
+                    if (x >= 6 && x < 58 && y >= 6 && y < 58)
+                    {
+                        bool border = x < 10 || x >= 54 || y < 10 || y >= 54;
+                        bool rivet = !border && ((x - 15) * (x - 15) + (y - 15) * (y - 15) < 6 || (x - 49) * (x - 49) + (y - 15) * (y - 15) < 6
+                            || (x - 15) * (x - 15) + (y - 49) * (y - 49) < 6);
+                        bool pane = x >= 34 && x < 50 && y >= 34 && y < 50;
+                        c = border || rivet ? edge : pane ? glass : plate;
+                    }
+                    texture.SetPixel(x, y, c);
+                }
+            }
+            texture.Apply();
+            return texture;
         }
 
         // Two station modules joined by a corridor, a solar wing above

@@ -20,3 +20,12 @@ Positions follow a 25 cm grid counted from the aimed part.
 On top of these come the **structural parts**: beams 1, 2 and 4 m, reinforced beam, plates 1 × 1 and 2 × 1, frame, junction.
 
 Wood and iron use the game's hull textures, glass uses its glass. The collision is the part's box (the gaps of a lattice are only visual).
+
+## Reinforced hull
+
+**TF Blindage** tab, research *Reinforced plating*. The game's **iron** and **glass** hull pieces (floor, plate, pivoted plate, floor and wall corners, slope, slope corners), reinforced: same model, placed the same way, but a slightly darker shade when placed (paint recolors them like any hull). It is real hull: it seals airtight rooms like the game's.
+
+- **3 times tougher** in collisions;
+- with the **Arsenal** mod: weapons do **a third of the damage** and punch **no holes**;
+- **1.5 times heavier**;
+- cost: twice the iron (or glass), plus 1 aluminium (reinforced iron) or 1 iron (reinforced glass).

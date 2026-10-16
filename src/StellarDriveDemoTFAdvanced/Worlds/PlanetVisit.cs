@@ -188,7 +188,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         }
 
         // Dry land, above the shore
-        private static bool TryFindLand(Planet planet, out Vector3 up)
+        internal static bool TryFindLand(Planet planet, out Vector3 up)
         {
             var random = new System.Random((int)planet.Id);
             // On the day side of the planet's own star
@@ -209,7 +209,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         }
 
         // Rotations are given in the surface spot's local frame, y up: yaw turns the view
-        private static void Place(Planet planet, Vector3 up, float yaw)
+        internal static void Place(Planet planet, Vector3 up, float yaw)
         {
             Move(planet, up, Quaternion.Euler(0f, yaw, 0f));
         }

@@ -20,3 +20,12 @@ Las posiciones siguen una cuadrícula de 25 cm contada desde la pieza apuntada.
 A esto se suman las **piezas de estructura**: vigas de 1, 2 y 4 m, viga reforzada, placas 1 × 1 y 2 × 1, marco, unión.
 
 La madera y el hierro usan las texturas de casco del juego, el cristal usa su cristal. La colisión es la caja de la pieza (los huecos de una celosía son solo visuales).
+
+## Casco reforzado
+
+Pestaña **TF Blindage**, investigación *Blindaje reforzado*. Las piezas de casco del juego de **hierro** y **cristal** (suelo, placa, placa girada, esquinas de suelo y de pared, pendiente, esquinas de pendiente), reforzadas: mismo modelo, se colocan igual, pero con un tono algo más oscuro al colocarlas (la pintura las recolorea como cualquier casco). Es casco de verdad: cierra las salas estancas como el del juego.
+
+- **3 veces más resistente** en los choques;
+- con el mod **Arsenal**: las armas solo hacen **un tercio del daño** y **no abren agujeros**;
+- **1,5 veces más pesado**;
+- coste: el doble de hierro (o de cristal), más 1 aluminio (hierro reforzado) o 1 hierro (cristal reforzado).

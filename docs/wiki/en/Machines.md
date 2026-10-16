@@ -14,6 +14,17 @@
 | Quantum gyroscope | the torque of 5 gyroscopes | like the gyroscope |
 | Solar panel mount | up to 3,000 W facing the star, nothing at night or in a planet's shadow | 2 power, 1 signal (W) |
 
+## Ship mining laser
+
+The player's mining laser, scaled up, on a turret that bolts to the hull (floor, wall, ceiling, the ship's underside). Its beam goes straight out of the surface it is placed on, up to **40 m**, and mines the rocks, crystals and asteroid ores it hits, **3 times faster** than the tool. What it mines does not go to your inventory: it goes into the **chest linked by an item line**.
+
+1. Place the laser, the turret facing what you want to mine.
+2. Plug power into one of its power sockets (**800 W** while it fires).
+3. Link its **item socket** (the yellow hatch, in the middle of the row of sockets) with an **item line** to a chest that has one: the *Item Lines* mod's **item terminal** or supply crate, or a storage machine with an item port. With no chest linked it does not fire.
+4. **Command** socket: with no cable it fires as soon as it has power; with a cable (lever, button, seat) it fires while the signal is above 0.
+
+**Status** socket: 2 mining, 1 firing with nothing to mine, 0 off, -1 no power, -2 no chest, -3 chest full (it waits until emptied). Mining runs on the host, near a player (rocks only exist where someone is). Research *Ship mining*.
+
 ## Force field
 
 Wraps the whole ship (and what is docked to it) in a cyan bubble that takes impacts and black hole tidal forces: **150 points** (an impact counts its change of speed in m/s). Draws 2,000 W and 0.02 oxygen/s, recharges 0.5 point/s. At zero it breaks and restarts **5 minutes** later. The bubble is an energy shell: almost invisible face-on, glowing at the edges, covered with a hexagonal grid, crossed by a rising scan band; each impact sends a ripple across the bubble. It turns red as the charge drops and flickers when almost empty.

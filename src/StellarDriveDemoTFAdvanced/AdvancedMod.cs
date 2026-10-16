@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.24.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.25.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -35,6 +35,7 @@ namespace StellarDriveDemoTFAdvanced
             Common.FpsProbe.Install();
             Common.InteractProbe.Install();
             Power.MachineTest.Install();
+            Power.MiningLaserTest.Install();
             Power.NuclearTest.Install();
             Combat.PirateTest.Install();
             TFItems.TFItemsMod.Initialize();
@@ -87,6 +88,7 @@ namespace StellarDriveDemoTFAdvanced
             {
                 Parts.UpgradeTableGuard.Install(HarmonyInstance);
                 Power.ArsenalShield.Install(HarmonyInstance);
+                Construction.ReinforcedHull.InstallArsenal(HarmonyInstance);
                 Combat.Pirates.Install(HarmonyInstance);
                 Common.DevProfiler.Install(HarmonyInstance);
             }
@@ -104,6 +106,7 @@ namespace StellarDriveDemoTFAdvanced
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void RegisterParts()
         {
+            HangWatch.Start();
             Try("the build tabs", Parts.AdvancedTab.Declare);
             Try("the ship computer screens", DashboardParts.Register);
             Try("the engines", Propulsion.EngineParts.Register);
@@ -113,6 +116,8 @@ namespace StellarDriveDemoTFAdvanced
             Try("the pirate fairings", Combat.PirateDecor.Register);
             Try("the structural parts", Construction.StructureParts.Register);
             Try("the wood, glass and iron parts", Construction.MaterialParts.Register);
+            Try("the reinforced hull", Construction.ReinforcedHull.Register);
+            Try("the ship mining laser", Power.MiningLaserParts.Register);
             Try("the station modules", Construction.StationModules.Register);
             Try("the cartography table", Construction.ScannerTable.Register);
             Try("the radars", Combat.Radar.Register);
@@ -136,6 +141,8 @@ namespace StellarDriveDemoTFAdvanced
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
+            HangWatch.Mark("scene loaded " + sceneName);
+            HangWatch.OnScene();
             GameServices.Invalidate();
             TelemetryHub.Clear();
             Power.PowerGrid.Forget();
@@ -160,6 +167,7 @@ namespace StellarDriveDemoTFAdvanced
 
         public override void OnUpdate()
         {
+            HangWatch.Tick();
             DevProfiler.Frame();
             DevHarness.Update();
             FramePacing.Update();

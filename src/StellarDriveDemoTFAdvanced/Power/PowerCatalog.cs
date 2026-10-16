@@ -108,6 +108,9 @@ namespace StellarDriveDemoTFAdvanced.Power
         public static MelonPreferences_Entry<float> PortalRadius { get; private set; }
         public static MelonPreferences_Entry<float> CondenserOxygenPerSecond { get; private set; }
         public static MelonPreferences_Entry<float> QuantumGyroFactor { get; private set; }
+        public static MelonPreferences_Entry<float> MiningLaserWatts { get; private set; }
+        public static MelonPreferences_Entry<float> MiningLaserRange { get; private set; }
+        public static MelonPreferences_Entry<float> MiningLaserDamagePerSecond { get; private set; }
         public static MelonPreferences_Entry<float> ShieldOxygenPerSecond { get; private set; }
         public static MelonPreferences_Entry<float> ShieldCapacity { get; private set; }
         public static MelonPreferences_Entry<float> ShieldRegenPerSecond { get; private set; }
@@ -117,7 +120,7 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         /// <summary>Parts whose FluidTankState carries a status, not fluid (no fluid mass).</summary>
         public static bool HoldsNoFluid(ushort partSettingsId) => IsPowerPart(partSettingsId) || ForceField.IsGenerator(partSettingsId) || partSettingsId == CondenserId
-            || partSettingsId == DarkCollectorId || partSettingsId == DarkReactorId || partSettingsId == PortalId || partSettingsId == NuclearReactorId
+            || partSettingsId == ShipMiningLaser.Id || partSettingsId == DarkCollectorId || partSettingsId == DarkReactorId || partSettingsId == PortalId || partSettingsId == NuclearReactorId
             || Combat.Radar.IsRadar(partSettingsId) || partSettingsId == CloakId;
 
         public static bool IsPowerPart(ushort partSettingsId) =>
@@ -196,6 +199,12 @@ namespace StellarDriveDemoTFAdvanced.Power
                 description: "Power a cryonite condenser draws while it makes oxygen (W).");
             CondenserOxygenPerSecond = category.CreateEntry("CondenserOxygenPerSecond", 0.05f,
                 description: "Oxygen a cryonite condenser puts in the line on its fluid socket (unit/s). A chemical thruster at full thrust burns 0.05.");
+            MiningLaserWatts = category.CreateEntry("MiningLaserWatts", 800f,
+                description: "Power a ship mining laser draws while it fires (W).");
+            MiningLaserRange = category.CreateEntry("MiningLaserRange", 40f,
+                description: "Reach of a ship mining laser's beam (m).");
+            MiningLaserDamagePerSecond = category.CreateEntry("MiningLaserDamagePerSecond", 12f,
+                description: "How fast a ship mining laser mines (the hand mining laser: 4).");
             QuantumGyroFactor = category.CreateEntry("QuantumGyroFactor", 5f,
                 description: "Torque of a quantum gyroscope, in gyroscopes.");
             ShieldWatts = category.CreateEntry("ShieldWatts", 2000f,

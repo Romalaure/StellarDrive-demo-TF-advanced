@@ -14,6 +14,17 @@ Onglet de construction **TF Avancé**. Les machines se débloquent à la [table 
 | Gyroscope quantique | le couple de 5 gyroscopes | comme le gyroscope |
 | Support de panneaux solaires | jusqu'à 3 000 W face à l'étoile, rien la nuit ou à l'ombre d'une planète | 2 puissance, 1 signal (W) |
 
+## Laser de minage embarqué
+
+Le laser de minage du joueur, en grand, sur une tourelle à fixer sur la coque (sol, mur, plafond, dessous du vaisseau). Son rayon part tout droit de la surface où on le pose, jusqu'à **40 m**, et mine les rochers, cristaux et minerais d'astéroïde qu'il touche, **3 fois plus vite** que l'outil. Ce qu'il extrait ne va pas dans votre inventaire : il va dans le **coffre relié par une ligne d'objets**.
+
+1. Posez le laser, la tourelle tournée vers ce que vous voulez miner.
+2. Branchez du courant sur une de ses prises électriques (**800 W** pendant qu'il tire).
+3. Reliez sa **prise d'objets** (la trappe jaune, au milieu de la rangée de prises) par une **ligne d'objets** à un coffre qui en a une : le **terminal d'objets** ou la caisse de ravitaillement du mod *Item Lines*, ou une machine de stockage avec un port d'objets. Sans coffre relié, il ne tire pas.
+4. Prise de **commande** : sans câble, il tire dès qu'il a du courant ; avec un câble (levier, bouton, siège), il tire quand le signal est au-dessus de 0.
+
+Prise d'**état** : 2 mine, 1 tire sans rien à miner, 0 éteint, -1 sans courant, -2 sans coffre, -3 coffre plein (il attend qu'on le vide). Le minage se fait chez l'hôte, près d'un joueur (les rochers n'existent que là où il y a quelqu'un). Recherche *Minage embarqué*.
+
 ## Champ de force
 
 Enveloppe tout le vaisseau (et ce qui y est amarré) d'une bulle cyan qui encaisse les chocs et les forces de marée des trous noirs : **150 points** (un choc compte sa variation de vitesse en m/s). Consomme 2 000 W et 0,02 oxygène/s, se recharge de 0,5 point/s. À zéro il casse et redémarre **5 minutes** plus tard. La bulle est une coque d'énergie : presque invisible de face, lumineuse sur les bords, couverte d'une grille hexagonale, traversée par une bande de balayage qui monte ; chaque impact lance une onde qui s'étend sur la bulle. Elle rougit quand la charge baisse et vacille quand elle est presque vide.

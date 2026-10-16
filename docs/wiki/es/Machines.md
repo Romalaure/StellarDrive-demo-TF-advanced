@@ -14,6 +14,17 @@ Pestaña de construcción **TF Avancé**. Las máquinas se desbloquean en la [me
 | Giroscopio cuántico | el par de 5 giroscopios | como el giroscopio |
 | Soporte de paneles solares | hasta 3.000 W de cara a la estrella, nada de noche o a la sombra de un planeta | 2 de energía, 1 de señal (W) |
 
+## Láser de minería de nave
+
+El láser de minería del jugador, en grande, sobre una torreta que se fija al casco (suelo, pared, techo, bajo la nave). Su rayo sale recto de la superficie donde se coloca, hasta **40 m**, y mina las rocas, cristales y minerales de asteroide que toca, **3 veces más rápido** que la herramienta. Lo que extrae no va a tu inventario: va al **cofre unido por una línea de objetos**.
+
+1. Coloca el láser, con la torreta mirando hacia lo que quieres minar.
+2. Conecta energía a una de sus tomas eléctricas (**800 W** mientras dispara).
+3. Une su **toma de objetos** (la trampilla amarilla, en medio de la fila de tomas) con una **línea de objetos** a un cofre que tenga una: el **terminal de objetos** o la caja de suministros del mod *Item Lines*, o una máquina de almacenamiento con puerto de objetos. Sin cofre unido no dispara.
+4. Toma de **mando**: sin cable dispara en cuanto tiene energía; con cable (palanca, botón, asiento) dispara mientras la señal es mayor que 0.
+
+Toma de **estado**: 2 mina, 1 dispara sin nada que minar, 0 apagado, -1 sin energía, -2 sin cofre, -3 cofre lleno (espera a que se vacíe). La minería se hace en el anfitrión, cerca de un jugador (las rocas solo existen donde hay alguien). Investigación *Minería embarcada*.
+
 ## Campo de fuerza
 
 Envuelve toda la nave (y lo que está acoplado a ella) en una burbuja cian que recibe los impactos y las fuerzas de marea de los agujeros negros: **150 puntos** (un impacto cuenta su cambio de velocidad en m/s). Consume 2.000 W y 0,02 de oxígeno/s, se recarga 0,5 puntos/s. A cero se rompe y se reinicia **5 minutos** después. La burbuja es una capa de energía: casi invisible de frente, brillante en los bordes, cubierta por una malla hexagonal, recorrida por una banda de escaneo ascendente; cada impacto lanza una onda sobre la burbuja. Se vuelve roja a medida que baja la carga y parpadea cuando está casi vacía.

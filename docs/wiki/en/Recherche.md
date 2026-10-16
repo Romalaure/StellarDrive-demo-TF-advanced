@@ -17,5 +17,7 @@ The mod's parts are unlocked at the **research table**, in a branch of the mod l
 | Dark matter | Nuclear power | collector, tank, dark matter reactor, dark matter field generator, dark matter engine | 10 meteorite, 1 quantum core, 5 alloys |
 | Dimensional portal | Dark matter | portal generator | 20 meteorite, 2 quantum cores, 3 exotic matter, 2 artifacts |
 | Electronic warfare | Cartography | radars (short range, long range, deep space), stealth generator | 25 copper, 10 glass, 10 titanium, 5 quartz |
+| Reinforced plating | Metal construction | reinforced iron and glass hull | 40 iron, 20 glass, 10 aluminium |
+| Ship mining | Advanced power grid | ship mining laser | 20 iron, 15 copper, 5 aluminium |
 
 Setting `ResearchUnlocks = false` (section `[TFAdvanced]`): every part is available from the start.

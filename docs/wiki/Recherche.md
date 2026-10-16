@@ -17,5 +17,7 @@ Les pièces du mod se débloquent à la **table de recherche**, dans une branche
 | Matière noire | Énergie nucléaire | collecteur, réservoir, réacteur à matière noire, générateur de champ à matière noire, moteur à matière noire | 10 météorite, 1 noyau quantique, 5 alliages |
 | Portail dimensionnel | Matière noire | générateur de portail | 20 météorite, 2 noyaux quantiques, 3 matière exotique, 2 artefacts |
 | Guerre électronique | Cartographie | radars (courte portée, longue portée, espace profond), générateur d'invisibilité | 25 cuivre, 10 verre, 10 titane, 5 quartz |
+| Blindage renforcé | Construction métallique | coque renforcée en fer et en verre | 40 fer, 20 verre, 10 aluminium |
+| Minage embarqué | Réseau électrique avancé | laser de minage embarqué | 20 fer, 15 cuivre, 5 aluminium |
 
 Réglage `ResearchUnlocks = false` (section `[TFAdvanced]`) : toutes les pièces sont disponibles d'emblée.

@@ -267,6 +267,11 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Coque renforcée, laser de minage embarqué (v0.25)
+
+- **Coque renforcée** (onglet *TF Blindage*) : les sols, plaques, coins et pentes du jeu en fer et en verre, en version renforcée. Même modèle, teinte un peu plus sombre, vraie coque étanche. 3 fois plus solide aux chocs ; avec Arsenal, un tiers des dégâts et aucun trou. 1,5 fois plus lourde.
+- **Laser de minage embarqué** : le laser de minage du joueur sur une tourelle à fixer sur la coque. Son rayon (40 m) mine rochers, cristaux et minerais d'astéroïde, 3 fois plus vite que l'outil, et dépose ce qu'il extrait dans le coffre relié à sa prise d'objets par une ligne d'objets. 800 W, prise de commande et prise d'état.
+
 ## Stations accessibles, coffres de la forteresse pirate (v0.24)
 
 - **Stations et épaves accessibles** : leur entrée est maintenant une porte d'amarrage du jeu, ouverte : amarrez-vous avec la porte d'amarrage de votre vaisseau, ou entrez en flottant. Les stations déjà dans vos mondes sont reconstruites avec leur porte au chargement (une base pirate détruite reste une épave).

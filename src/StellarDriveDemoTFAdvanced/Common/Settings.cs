@@ -26,6 +26,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> DevVisitPlanets { get; private set; }
         public static MelonPreferences_Entry<int> DevVisitPlanetId { get; private set; }
         public static MelonPreferences_Entry<bool> DevMachineTest { get; private set; }
+        public static MelonPreferences_Entry<bool> DevMiningLaserTest { get; private set; }
         public static MelonPreferences_Entry<int> DevMachineShield { get; private set; }
         public static MelonPreferences_Entry<int> DevNuclearTest { get; private set; }
         public static MelonPreferences_Entry<int> DevPirateTest { get; private set; }
@@ -123,6 +124,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevWorld, a planet id: a test ship opens a portal to that planet and flies through it.");
             DevMachineTest = _category.CreateEntry("DevMachineTest", false,
                 description: "For mod development: with DevWorld, drop a wired test ship with a reactor, a force field and a condenser above the player.");
+            DevMiningLaserTest = _category.CreateEntry("DevMiningLaserTest", false,
+                description: "For mod development: with DevWorld, a test ship of reinforced hull with a mining laser and an item terminal lands next to the nearest rock and mines it.");
             DevNuclearMode = _category.CreateEntry("DevNuclearMode", "seat",
                 description: "For mod development: with DevNuclearTest, how the engine is commanded: seat, valve, signal, transmitter, sharedvalve.");
             EngineSeatControl = _category.CreateEntry("EngineSeatControl", true,
