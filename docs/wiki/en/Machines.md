@@ -59,6 +59,8 @@ An emitter you set **on the floor, in the middle of an opening in the hull**, fa
 - On, the field **holds the oxygen like a closed door**, but **you walk through it** (a ripple runs from where you cross it).
 - It draws **25 W per m²** (setting `FieldDoorWattsPerSquareMeter`) on its two power sockets; the grid must be able to supply all of it. Without power it goes out and the air escapes.
 - Rail lights: cyan up, blinking orange not enough power or starting, blinking red no grid, dark off.
+- **Side**: the field spreads on both sides of the emitter, or only to its left or its right (seen facing the emitter, from the side without plugs): then set it against one side of the opening.
+- The field is thick (20 cm) and goes down to the floor. While it is up the rail has no collision: you walk over it without bumping (switch it off to take it down).
 - Take the opening's size: the field overlaps the hull around by half a meter, and settles into the hull's plane by itself.
 - Research **Artifact technology**, force field row of the TF Advanced tab.
 

@@ -44,15 +44,16 @@ namespace StellarDriveDemoTFAdvanced.Power
             yield return new WaitForSecondsRealtime(1.5f);
             ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(DevHarness.Folder, "fielddoor_menu.png"));
             yield return new WaitForSecondsRealtime(1f);
-            FieldDoor.Request(door.Key, 4, 3, true);
+            FieldDoor.Request(door.Key, 4, 3, true, FieldDoor.Side.Left);
             yield return new WaitForSecondsRealtime(1.5f);
+            ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(DevHarness.Folder, "fielddoor_left.png"));
             AdvancedMod.Log.Msg($"dev: force field door window: after resize {Describe(door)}");
-            FieldDoor.Request(door.Key, 4, 3, false);
+            FieldDoor.Request(door.Key, 4, 3, false, FieldDoor.Side.Left);
             yield return new WaitForSecondsRealtime(1.5f);
             AdvancedMod.Log.Msg($"dev: force field door window: after switching off {Describe(door)}");
             ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(DevHarness.Folder, "fielddoor_preview.png"));
             yield return new WaitForSecondsRealtime(1f);
-            FieldDoor.Request(door.Key, 4, 3, true);
+            FieldDoor.Request(door.Key, 4, 3, true, FieldDoor.Side.Left);
             yield return new WaitForSecondsRealtime(1.5f);
             AdvancedMod.Log.Msg($"dev: force field door window: switched on again {Describe(door)}");
             TFItems.Common.ModMenu.Close();
@@ -61,7 +62,9 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static string Describe(FieldDoorVisuals door)
         {
             FieldDoor.Config config = FieldDoor.Decode(FieldDoorVisuals.Values.TryGetValue(door.Key, out double value) ? value : 0);
-            return $"{config.Width} x {config.Height} {config.Status}";
+            string solid = string.Join(",", Object.FindObjectsByType<FieldDoorCollider>(FindObjectsSortMode.None)
+                .Select(c => c.GetComponentInChildren<BoxCollider>(true)).Where(b => b != null).Select(b => b.enabled ? "solid" : "passable"));
+            return $"{config.Width} x {config.Height} {config.Side} {config.Status}, rail {solid}";
         }
 
         private static void Run()
@@ -75,17 +78,21 @@ namespace StellarDriveDemoTFAdvanced.Power
                 return;
             }
             Check("doorway open", ship, env, null);
-            Check("field in the doorway", ship, env, (new Vector3(1.5f, -0.5f, 3.5f), Quaternion.identity, 2, 2));
-            Check("field 0.3 m inside, 0.3 m off-center", ship, env, (new Vector3(1.8f, -0.5f, 3.2f), Quaternion.identity, 2, 2));
-            Check("field turned round", ship, env, (new Vector3(1.5f, -0.5f, 3.6f), Quaternion.Euler(0f, 180f, 0f), 2, 2));
-            Check("field too small (1 x 1)", ship, env, (new Vector3(1.5f, -0.5f, 3.5f), Quaternion.identity, 1, 1));
-            Check("field 10 x 20 over the box", ship, env, (new Vector3(1.5f, -0.5f, 3.5f), Quaternion.identity, 10, 20));
+            Check("field in the doorway", ship, env, (new Vector3(1.5f, -0.5f, 3.5f), Quaternion.identity, 2, 2, 0f));
+            Check("field 0.3 m inside, 0.3 m off-center", ship, env, (new Vector3(1.8f, -0.5f, 3.2f), Quaternion.identity, 2, 2, 0f));
+            Check("field turned round", ship, env, (new Vector3(1.5f, -0.5f, 3.6f), Quaternion.Euler(0f, 180f, 0f), 2, 2, 0f));
+            Check("field too small (1 x 1)", ship, env, (new Vector3(1.5f, -0.5f, 3.5f), Quaternion.identity, 1, 1, 0f));
+            Check("field 10 x 20 over the box", ship, env, (new Vector3(1.5f, -0.5f, 3.5f), Quaternion.identity, 10, 20, 0f));
+            // Emitter at the doorway's side: the field only to its left (+x) or, turned round, to its right
+            Check("field to the left from the doorway's side", ship, env, (new Vector3(0.5f, -0.5f, 3.5f), Quaternion.identity, 2, 2, FieldDoor.Shift(2, FieldDoor.Side.Left)));
+            Check("field to the right, turned round", ship, env, (new Vector3(0.5f, -0.5f, 3.5f), Quaternion.Euler(0f, 180f, 0f), 2, 2, FieldDoor.Shift(2, FieldDoor.Side.Right)));
+            Check("field to the right from the doorway's side (wrong way)", ship, env, (new Vector3(0.5f, -0.5f, 3.5f), Quaternion.identity, 2, 2, FieldDoor.Shift(2, FieldDoor.Side.Right)));
             // Up, then down again: the room goes
             var tree = new ShipRoomsVoxelsTree();
             var gases = new ShipRoomsGases();
             var updater = new ShipRoomsVoxelUpdater(tree, gases, env, ship);
             Box(updater);
-            FieldDoorRooms.Voxels(new Vector3(1.5f, -0.5f, 3.5f), Quaternion.identity, 2, 2, out Vector3Int[] walls, out Vector3Int[] scan);
+            FieldDoorRooms.Voxels(new Vector3(1.5f, -0.5f, 3.5f), Quaternion.identity, 2, 2, 0f, out Vector3Int[] walls, out Vector3Int[] scan);
             updater.AddHullVoxel(walls, scan);
             updater.UpdateRooms();
             bool up = tree.SampleRoomAtPosition(new Vector3(1.5f, 1f, 1.5f)).RoomId != 0;
@@ -95,7 +102,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             AdvancedMod.Log.Msg($"dev: force field door test: field up then down: room {(up ? "yes" : "NO")} then {(down ? "STILL" : "gone")}");
         }
 
-        private static void Check(string name, IShipStateRead ship, IWorldEnvironmentProvider env, (Vector3 At, Quaternion Rotation, int W, int H)? field)
+        private static void Check(string name, IShipStateRead ship, IWorldEnvironmentProvider env, (Vector3 At, Quaternion Rotation, int W, int H, float Shift)? field)
         {
             var tree = new ShipRoomsVoxelsTree();
             var gases = new ShipRoomsGases();
@@ -104,7 +111,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             int fieldVoxels = 0;
             if (field.HasValue)
             {
-                FieldDoorRooms.Voxels(field.Value.At, field.Value.Rotation, field.Value.W, field.Value.H, out Vector3Int[] walls, out Vector3Int[] scan);
+                FieldDoorRooms.Voxels(field.Value.At, field.Value.Rotation, field.Value.W, field.Value.H, field.Value.Shift, out Vector3Int[] walls, out Vector3Int[] scan);
                 updater.AddHullVoxel(walls, scan);
                 fieldVoxels = walls.Length;
             }

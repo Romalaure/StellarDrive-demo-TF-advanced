@@ -59,6 +59,8 @@ Un emisor que se coloca **en el suelo, en medio de una abertura del casco**, de 
 - Encendido, el campo **retiene el oxígeno como una puerta cerrada**, pero **se puede atravesar** (una onda sale del punto por donde lo cruzas).
 - Consume **25 W por m²** (ajuste `FieldDoorWattsPerSquareMeter`) en sus dos tomas de energía; la red debe poder suministrarlos todos. Sin energía se apaga y el aire se escapa.
 - Luces del riel: cian activo, naranja parpadeante energía insuficiente o arrancando, rojo parpadeante sin red, apagado.
+- **Lado**: el campo se extiende a ambos lados del emisor, o solo a su izquierda o a su derecha (visto de frente al emisor, desde el lado sin tomas): colócalo entonces contra un lado de la abertura.
+- El campo es grueso (20 cm) y baja hasta el suelo. Mientras está activo, el riel no tiene colisión: se pasa por encima sin tropezar (apágalo para desmontarlo).
 - Toma el tamaño de la abertura: el campo se solapa medio metro con el casco alrededor y se ajusta solo al plano del casco.
 - Investigación **Tecnología de artefactos**, fila de los campos de fuerza de la pestaña TF Avanzado.
 

@@ -23,7 +23,8 @@ namespace StellarDriveDemoTFAdvanced.Power
     /// closed door, but players (and anything else) go through it. It runs on the ship's power
     /// (<see cref="PowerCatalog.FieldDoorWattsPerSquareMeter"/> per m²).
     /// The whole setting is one value in the part's ConstantState (saved, synchronized):
-    /// (width × 100 + height) × 10 + status, the status being <see cref="Status"/>.
+    /// (side × 10000 + width × 100 + height) × 10 + status, the side being <see cref="Side"/>
+    /// (0 for the doors of 0.28) and the status <see cref="Status"/>.
     /// The host runs the power; every game (host and players) seals its copy of the ship's rooms
     /// from the state, as the game does for its doors (<see cref="FieldDoorRooms"/>).
     /// </summary>
@@ -49,36 +50,59 @@ namespace StellarDriveDemoTFAdvanced.Power
             Starting = 4
         }
 
+        /// <summary>
+        /// Where the field goes from the emitter, as seen facing its front (the side without plugs):
+        /// centered on it, or only to the left or to the right of it.
+        /// </summary>
+        public enum Side
+        {
+            Center = 0,
+            Left = 1,
+            Right = 2
+        }
+
         public readonly struct Config
         {
             public readonly int Width, Height;
+            public readonly Side Side;
             public readonly Status Status;
 
-            public Config(int width, int height, Status status)
+            public Config(int width, int height, Status status, Side side = Side.Center)
             {
                 Width = Mathf.Clamp(width, 1, MaxSize);
                 Height = Mathf.Clamp(height, 1, MaxSize);
+                Side = side;
                 Status = status;
             }
 
             public bool On => Status != Status.Off;
             public bool Sealed => Status == Status.Up;
-            public double Value => (Width * 100 + Height) * 10 + (int)Status;
-            public Config With(Status status) => new Config(Width, Height, status);
+            public double Value => ((int)Side * 10000 + Width * 100 + Height) * 10 + (int)Status;
+            public Config With(Status status) => new Config(Width, Height, status, Side);
+
+            /// <summary>
+            /// The field's middle along the emitter (its local x, m). Facing the front, the
+            /// emitter's +x is on the left.
+            /// </summary>
+            public float Shift => Shift(Width, Side);
         }
+
+        public static float Shift(int width, Side side) => side == Side.Left ? width * 0.5f : side == Side.Right ? -width * 0.5f : 0f;
 
         public static Config Decode(double value)
         {
             long v = (long)System.Math.Round(System.Math.Abs(value));
             int status = (int)(v % 10);
-            long size = v / 10;
+            long setting = v / 10;
+            int side = (int)(setting / 10000);
+            long size = setting % 10000;
             int width = (int)(size / 100), height = (int)(size % 100);
             if (width < 1 || height < 1 || width > MaxSize || height > MaxSize)
             {
                 width = DefaultWidth;
                 height = DefaultHeight;
             }
-            return new Config(width, height, status <= (int)Status.Starting ? (Status)status : Status.Off);
+            return new Config(width, height, status <= (int)Status.Starting ? (Status)status : Status.Off, side <= (int)Side.Right ? (Side)side : Side.Center);
         }
 
         public static Config Decode(IStatefulPartState state) =>
@@ -86,18 +110,21 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         public static float Watts(Config config) => Mathf.Max(0f, PowerCatalog.FieldDoorWattsPerSquareMeter.Value) * config.Width * config.Height;
 
-        // ---- Requests from the players (the menu): "width height on"
+        // ---- Requests from the players (the menu): "width height on side"
 
         public static void Install() => TFNet.OnServer(TFMessageKind.FieldDoor, OnRequest);
 
         /// <summary>Asks the host for this size and on (or off).</summary>
-        public static void Request(PartKey door, int width, int height, bool on) =>
-            TFNet.SendToServer(TFMessageKind.FieldDoor, door.ShipId, door.PartId, $"{width} {height} {(on ? 1 : 0)}");
+        public static void Request(PartKey door, int width, int height, bool on, Side side) =>
+            TFNet.SendToServer(TFMessageKind.FieldDoor, door.ShipId, door.PartId, $"{width} {height} {(on ? 1 : 0)} {(int)side}");
 
         private static void OnRequest(NetworkConnection sender, TFMessageKind kind, uint shipId, ushort partId, string text)
         {
             string[] words = text.Split(' ');
-            if (words.Length != 3 || !int.TryParse(words[0], out int width) || !int.TryParse(words[1], out int height) || !int.TryParse(words[2], out int on))
+            if (words.Length < 3 || !int.TryParse(words[0], out int width) || !int.TryParse(words[1], out int height) || !int.TryParse(words[2], out int on))
+                return;
+            int side = 0;
+            if (words.Length > 3 && (!int.TryParse(words[3], out side) || side < 0 || side > (int)Side.Right))
                 return;
             var ships = StellarDriveDemoTFAdvanced.Common.GameServices.ShipsServer;
             if (ships == null || !(ships.GetShip(shipId) is TrackedShipServer ship))
@@ -108,11 +135,11 @@ namespace StellarDriveDemoTFAdvanced.Power
             Config old = Decode(state);
             // On, it keeps how it runs (a resize does not drop the field); the host powers it next tick
             Status status = on == 0 ? Status.Off : old.On ? old.Status : Status.Starting;
-            var config = new Config(width, height, status);
+            var config = new Config(width, height, status, (Side)side);
             if (config.Value == state.ConstantValue)
                 return;
             ship.UpdatePartState(part.Id, state with { ConstantValue = config.Value });
-            AdvancedMod.Log.Msg($"force field door {shipId}:{partId}: {config.Width} x {config.Height} m, {config.Status}");
+            AdvancedMod.Log.Msg($"force field door {shipId}:{partId}: {config.Width} x {config.Height} m, {config.Side}, {config.Status}");
         }
 
         private static StatefulPart Find(TrackedShipServer ship, ushort partId)
@@ -281,7 +308,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 }
                 if (!seal)
                     return;
-                Voxels(part.LocalPosition, part.LocalRotation, config.Width, config.Height, out Vector3Int[] walls, out Vector3Int[] scan);
+                Voxels(part.LocalPosition, part.LocalRotation, config.Width, config.Height, config.Shift, out Vector3Int[] walls, out Vector3Int[] scan);
                 if (offset.HasValue)
                 {
                     Convert(walls, offset.Value, rotation);
@@ -298,7 +325,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
         }
 
-        private static bool SameField(FieldDoor.Config a, FieldDoor.Config b) => a.Width == b.Width && a.Height == b.Height && a.Sealed == b.Sealed;
+        private static bool SameField(FieldDoor.Config a, FieldDoor.Config b) => a.Width == b.Width && a.Height == b.Height && a.Side == b.Side && a.Sealed == b.Sealed;
 
         private static Vector3Int ToVoxel(Vector3 position) => Vector3Int.RoundToInt((position + Vector3.one * 0.5f) * ShipRoomsConstants.RoomVoxelResolution);
 
@@ -306,10 +333,10 @@ namespace StellarDriveDemoTFAdvanced.Power
         /// The field's wall voxels (three voxels thick) and the voxels on both sides of it the
         /// game grows the rooms from, in the ship's room voxels (4 per meter, hull faces at k + ½ m).
         /// </summary>
-        public static void Voxels(Vector3 position, Quaternion rotation, int width, int height, out Vector3Int[] walls, out Vector3Int[] scan)
+        public static void Voxels(Vector3 position, Quaternion rotation, int width, int height, float shift, out Vector3Int[] walls, out Vector3Int[] scan)
         {
             Vector3 right = rotation * Vector3.right, up = rotation * Vector3.up, normal = rotation * Vector3.forward;
-            Vector3 center = position;
+            Vector3 center = position + right * shift;
             // Along the grid: in the plane of the nearest hull faces
             int axis = Mathf.Abs(normal.x) > Mathf.Abs(normal.y) ? (Mathf.Abs(normal.x) > Mathf.Abs(normal.z) ? 0 : 2) : (Mathf.Abs(normal.y) > Mathf.Abs(normal.z) ? 1 : 2);
             if (Mathf.Abs(normal[axis]) > 0.99f)

@@ -4,6 +4,7 @@ using Ships.Interface.Model.Parts.Common;
 using Ships.Interface.Model.Parts.State;
 using Ships.Interface.Model.Parts.StateTypes;
 using Ships.Parts.Common.Model;
+using Ships.Parts.Common.Model.Reactions;
 using Ships.Parts.Common.Utils;
 using Ships.Interface.Settings;
 using Ships.Parts.Common;
@@ -27,15 +28,16 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             float w = PowerCatalog.FieldDoorWattsPerSquareMeter.Value;
             PartFactory.Describe(settings, Loc.Pick("Porte à champ de force", "Force field door", "Puerta de campo de fuerza"),
-                Loc.Pick($"Un émetteur à poser au sol, au milieu d'une ouverture de la coque, face à l'ouverture. Regarde-le et appuie sur la touche d'utilisation (T) pour choisir la taille du champ (de 1 × 1 à {FieldDoor.MaxSize} × {FieldDoor.MaxSize} m, par exemple 2 × 2 ou 10 × 20) et l'allumer. Le champ garde l'oxygène comme une porte fermée, mais on passe à travers. Il consomme {w:0} W par m² sur ses prises électriques (le réseau doit pouvoir les fournir en entier) ; sans courant, il s'éteint et l'air s'échappe.",
-                    $"An emitter set on the floor in the middle of an opening in the hull, facing the opening. Look at it and press the use key (T) to choose the field's size (from 1 × 1 to {FieldDoor.MaxSize} × {FieldDoor.MaxSize} m, for example 2 × 2 or 10 × 20) and switch it on. The field holds the oxygen like a closed door, but you walk through it. It draws {w:0} W per m² on its power sockets (the grid must be able to supply all of it); without power it goes out and the air escapes.",
-                    $"Un emisor que se coloca en el suelo, en medio de una abertura del casco, de cara a la abertura. Míralo y pulsa la tecla de uso (T) para elegir el tamaño del campo (de 1 × 1 a {FieldDoor.MaxSize} × {FieldDoor.MaxSize} m, por ejemplo 2 × 2 o 10 × 20) y encenderlo. El campo retiene el oxígeno como una puerta cerrada, pero se puede atravesar. Consume {w:0} W por m² en sus tomas de energía (la red debe poder suministrarlos todos); sin energía se apaga y el aire se escapa."),
+                Loc.Pick($"Un émetteur à poser au sol, au milieu d'une ouverture de la coque, face à l'ouverture. Regarde-le et appuie sur la touche d'utilisation (T) pour choisir la taille du champ (de 1 × 1 à {FieldDoor.MaxSize} × {FieldDoor.MaxSize} m, par exemple 2 × 2 ou 10 × 20), s'il part des deux côtés de l'émetteur ou seulement à sa gauche ou à sa droite, et l'allumer. Le champ garde l'oxygène comme une porte fermée, mais on passe à travers, et l'émetteur aussi (éteins-le pour le démonter). Il consomme {w:0} W par m² sur ses prises électriques (le réseau doit pouvoir les fournir en entier) ; sans courant, il s'éteint et l'air s'échappe.",
+                    $"An emitter set on the floor in the middle of an opening in the hull, facing the opening. Look at it and press the use key (T) to choose the field's size (from 1 × 1 to {FieldDoor.MaxSize} × {FieldDoor.MaxSize} m, for example 2 × 2 or 10 × 20), whether it spreads on both sides of the emitter or only to its left or its right, and switch it on. The field holds the oxygen like a closed door, but you walk through it, and through the emitter too (switch it off to take it down). It draws {w:0} W per m² on its power sockets (the grid must be able to supply all of it); without power it goes out and the air escapes.",
+                    $"Un emisor que se coloca en el suelo, en medio de una abertura del casco, de cara a la abertura. Míralo y pulsa la tecla de uso (T) para elegir el tamaño del campo (de 1 × 1 a {FieldDoor.MaxSize} × {FieldDoor.MaxSize} m, por ejemplo 2 × 2 o 10 × 20), si se extiende a ambos lados del emisor o solo a su izquierda o a su derecha, y encenderlo. El campo retiene el oxígeno como una puerta cerrada, pero se puede atravesar, y el emisor también (apágalo para desmontarlo). Consume {w:0} W por m² en sus tomas de energía (la red debe poder suministrarlos todos); sin energía se apaga y el aire se escapa."),
                 40f, new[] { (Items.ModItems.Titanium, 4), (Items.ModItems.Cryonite, 2), (112u, 6), (102u, 4) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, RailHeight * 0.5f, 0f), new Vector3(RailWidth, RailHeight, RailDepth));
             MachineModels.Attach(visuals, Model(), "FieldDoor", MachineModels.Cyan, new Color(0.75f, 0.95f, 1f));
             // Low enough to step over: players walk through the doorway
             DeviceModels.FlattenColliders(prefab, new Vector3(RailWidth, 0.06f, RailDepth));
+            FieldDoorCollider.Attach(prefab);
             UsablePart.AddBox(visuals, new Vector3(0f, 0.18f, 0f), new Vector3(RailWidth + 0.1f, 0.4f, RailDepth + 0.15f));
             visuals.gameObject.AddComponent<FieldDoorVisuals>();
             var bounds = prefab.GetComponent<ShipPartBounds>();
@@ -109,6 +111,9 @@ namespace StellarDriveDemoTFAdvanced.Power
         private Vector2[] _points;
         private Color32[] _colors;
         private int _builtWidth, _builtHeight;
+        private float _builtShift = float.NaN;
+        // Half the field's thickness: two sheets with lit edges between them
+        private const float Half = 0.1f;
         private float _rise;
         private float _touchAge = -1f;
         private Vector2 _touch;
@@ -169,10 +174,11 @@ namespace StellarDriveDemoTFAdvanced.Power
                 return;
             }
             int width = preview ? FieldDoorMenu.PendingWidth : _config.Width, height = preview ? FieldDoorMenu.PendingHeight : _config.Height;
+            float shift = preview ? FieldDoor.Shift(width, FieldDoorMenu.PendingSide) : _config.Shift;
             if (_field == null && !CreateField())
                 return;
-            if (width != _builtWidth || height != _builtHeight)
-                Build(width, height);
+            if (width != _builtWidth || height != _builtHeight || shift != _builtShift)
+                Build(width, height, shift);
             _field.SetActive(true);
             _rise = _config.Sealed ? Mathf.MoveTowards(_rise, 1f, Time.deltaTime * 1.6f) : 1f;
             Touch();
@@ -231,40 +237,62 @@ namespace StellarDriveDemoTFAdvanced.Power
             return true;
         }
 
-        // A grid of vertices over the sheet (5 per meter, up to 120 across)
-        private void Build(int width, int height)
+        // Two grids of vertices (5 per meter, up to 120 across), one on each face of the field,
+        // joined along the four edges: a slab, down into the floor (no gap under it)
+        private void Build(int width, int height, float shift)
         {
             _builtWidth = width;
             _builtHeight = height;
+            _builtShift = shift;
             int nx = Mathf.Clamp(width * 5, 6, 120) + 1, ny = Mathf.Clamp(height * 5, 6, 120) + 1;
-            var vertices = new Vector3[nx * ny];
-            _points = new Vector2[nx * ny];
-            _colors = new Color32[nx * ny];
+            int face = nx * ny;
+            var vertices = new Vector3[face * 2];
+            _points = new Vector2[face * 2];
+            _colors = new Color32[face * 2];
             for (int j = 0; j < ny; j++)
             {
                 for (int i = 0; i < nx; i++)
                 {
                     float x = (i / (float)(nx - 1) - 0.5f) * width, y = j / (float)(ny - 1) * height;
-                    // The sheet starts on the rail's emitter slit
-                    vertices[j * nx + i] = new Vector3(x, Mathf.Max(y, 0.13f), 0f);
-                    _points[j * nx + i] = new Vector2(x, y);
+                    float below = j == 0 ? -0.05f : y;
+                    for (int s = 0; s < 2; s++)
+                    {
+                        vertices[s * face + j * nx + i] = new Vector3(x + shift, below, s == 0 ? -Half : Half);
+                        _points[s * face + j * nx + i] = new Vector2(x, y);
+                    }
                 }
             }
-            var triangles = new int[(nx - 1) * (ny - 1) * 6];
-            int t = 0;
+            var triangles = new List<int>((nx - 1) * (ny - 1) * 12 + (nx + ny) * 12);
+            for (int s = 0; s < 2; s++)
+            {
+                for (int j = 0; j < ny - 1; j++)
+                {
+                    for (int i = 0; i < nx - 1; i++)
+                    {
+                        int a = s * face + j * nx + i, b = a + 1, c = a + nx, d = c + 1;
+                        triangles.AddRange(new[] { a, c, b, b, c, d });
+                    }
+                }
+            }
+            // The edges: bottom and top rows, left and right columns, from one face to the other
+            void Edge(int p, int q)
+            {
+                triangles.AddRange(new[] { p, q, p + face, q, q + face, p + face });
+            }
+            for (int i = 0; i < nx - 1; i++)
+            {
+                Edge(i, i + 1);
+                Edge((ny - 1) * nx + i, (ny - 1) * nx + i + 1);
+            }
             for (int j = 0; j < ny - 1; j++)
             {
-                for (int i = 0; i < nx - 1; i++)
-                {
-                    int a = j * nx + i, b = a + 1, c = a + nx, d = c + 1;
-                    triangles[t++] = a; triangles[t++] = c; triangles[t++] = b;
-                    triangles[t++] = b; triangles[t++] = c; triangles[t++] = d;
-                }
+                Edge(j * nx, (j + 1) * nx);
+                Edge(j * nx + nx - 1, (j + 1) * nx + nx - 1);
             }
             _mesh.Clear();
             _mesh.indexFormat = vertices.Length > 65000 ? IndexFormat.UInt32 : IndexFormat.UInt16;
             _mesh.vertices = vertices;
-            _mesh.triangles = triangles;
+            _mesh.SetTriangles(triangles, 0);
             _mesh.colors32 = _colors;
             _mesh.RecalculateBounds();
             _nextPaint = 0f;
@@ -287,10 +315,10 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
             Vector3 eye = transform.InverseTransformPoint(camera.transform.position);
             if (_hadEye && Mathf.Sign(eye.z) != Mathf.Sign(_lastEye.z) && Mathf.Abs(eye.z - _lastEye.z) < 1.5f
-                && Mathf.Abs(eye.x) < _config.Width * 0.5f + 0.3f && eye.y > -0.5f && eye.y < _config.Height + 0.5f)
+                && Mathf.Abs(eye.x - _config.Shift) < _config.Width * 0.5f + 0.3f && eye.y > -0.5f && eye.y < _config.Height + 0.5f)
             {
                 _touchAge = 0f;
-                _touch = new Vector2(eye.x, Mathf.Clamp(eye.y - 0.5f, 0f, _config.Height));
+                _touch = new Vector2(eye.x - _config.Shift, Mathf.Clamp(eye.y - 0.5f, 0f, _config.Height));
             }
             _lastEye = eye;
             _hadEye = true;
@@ -350,10 +378,12 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static bool _open;
         private static PartKey _door;
         private static int _width = FieldDoor.DefaultWidth, _height = FieldDoor.DefaultHeight;
+        private static FieldDoor.Side _side;
 
         private static readonly (int W, int H)[] Presets = { (1, 2), (2, 2), (2, 3), (3, 3), (4, 4), (6, 4), (8, 6), (10, 20) };
 
         public static int PendingWidth => _width;
+        public static FieldDoor.Side PendingSide => _side;
         public static int PendingHeight => _height;
 
         public static bool IsEditing(PartKey door) => _open && ModMenu.IsOpen && _door.Equals(door);
@@ -364,6 +394,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             _open = true;
             FieldDoor.Config config = Current();
             _width = config.Width;
+            _side = config.Side;
             _height = config.Height;
             ModMenu.Open(() => _open = false);
         }
@@ -380,7 +411,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
             float screenWidth = Screen.width / scale, screenHeight = Screen.height / scale;
             FieldDoor.Config config = Current();
-            Rect area = DeviceUi.Window(screenWidth, screenHeight, 560f, 430f, Loc.Pick("PORTE À CHAMP DE FORCE", "FORCE FIELD DOOR", "PUERTA DE CAMPO DE FUERZA"));
+            Rect area = DeviceUi.Window(screenWidth, screenHeight, 600f, 500f, Loc.Pick("PORTE À CHAMP DE FORCE", "FORCE FIELD DOOR", "PUERTA DE CAMPO DE FUERZA"));
             GUILayout.BeginArea(area);
 
             GUILayout.Label(Describe(config), DeviceUi.Text);
@@ -401,20 +432,35 @@ namespace StellarDriveDemoTFAdvanced.Power
                 }
             }
             GUILayout.EndHorizontal();
+            GUILayout.Space(4f);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(Loc.Pick("Côté", "Side", "Lado"), DeviceUi.Text, GUILayout.Width(90f));
+            foreach ((FieldDoor.Side side, string label) in new[]
+            {
+                (FieldDoor.Side.Left, Loc.Pick("À gauche", "Left", "Izquierda")),
+                (FieldDoor.Side.Center, Loc.Pick("Des deux côtés", "Both sides", "Ambos lados")),
+                (FieldDoor.Side.Right, Loc.Pick("À droite", "Right", "Derecha"))
+            })
+            {
+                if (GUILayout.Button(label, side == _side ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Height(30f)))
+                    _side = side;
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Label(Loc.Pick("Gauche et droite vues face à l'émetteur, du côté sans prises.", "Left and right as seen facing the emitter, from the side without plugs.", "Izquierda y derecha vistas de frente al emisor, desde el lado sin tomas."), DeviceUi.Muted);
             GUILayout.Space(6f);
             float watts = FieldDoor.Watts(new FieldDoor.Config(_width, _height, FieldDoor.Status.Up));
             GUILayout.Label(Loc.Pick($"Surface {_width * _height} m², consommation {watts:0} W", $"Area {_width * _height} m², draw {watts:0} W", $"Superficie {_width * _height} m², consumo {watts:0} W"), DeviceUi.Text);
-            GUILayout.Label(Loc.Pick("Pose l'émetteur au sol, au milieu de l'ouverture : le champ part de lui, centré, vers le haut. Prends la taille de l'ouverture (il déborde un peu sur la coque autour).",
-                "Set the emitter on the floor in the middle of the opening: the field rises from it, centered. Take the opening's size (it overlaps the hull around a little).",
-                "Coloca el emisor en el suelo, en medio de la abertura: el campo sube desde él, centrado. Toma el tamaño de la abertura (se solapa un poco con el casco alrededor)."), DeviceUi.Muted);
+            GUILayout.Label(Loc.Pick("Pose l'émetteur au sol, au milieu de l'ouverture (ou contre un de ses bords avec « à gauche » ou « à droite ») : le champ monte de lui. Prends la taille de l'ouverture (il déborde un peu sur la coque autour).",
+                "Set the emitter on the floor in the middle of the opening (or against one of its sides with \"left\" or \"right\"): the field rises from it. Take the opening's size (it overlaps the hull around a little).",
+                "Coloca el emisor en el suelo, en medio de la abertura (o contra uno de sus lados con «izquierda» o «derecha»): el campo sube desde él. Toma el tamaño de la abertura (se solapa un poco con el casco alrededor)."), DeviceUi.Muted);
             GUILayout.FlexibleSpace();
 
-            bool resized = _width != config.Width || _height != config.Height;
+            bool resized = _width != config.Width || _height != config.Height || _side != config.Side;
             GUILayout.BeginHorizontal();
-            if (resized && GUILayout.Button(Loc.Pick("Appliquer la taille", "Apply size", "Aplicar tamaño"), DeviceUi.Button, GUILayout.Height(36f)))
-                FieldDoor.Request(_door, _width, _height, config.On);
+            if (resized && GUILayout.Button(Loc.Pick("Appliquer", "Apply", "Aplicar"), DeviceUi.Button, GUILayout.Height(36f)))
+                FieldDoor.Request(_door, _width, _height, config.On, _side);
             if (GUILayout.Button(config.On ? Loc.Pick("Couper le champ", "Switch off", "Apagar el campo") : Loc.Pick("Activer le champ", "Switch on", "Activar el campo"), DeviceUi.Button, GUILayout.Height(36f)))
-                FieldDoor.Request(_door, _width, _height, !config.On);
+                FieldDoor.Request(_door, _width, _height, !config.On, _side);
             if (GUILayout.Button(Loc.Pick("Fermer (Échap)", "Close (Esc)", "Cerrar (Esc)"), DeviceUi.Button, GUILayout.Height(36f)))
                 ModMenu.Close();
             GUILayout.EndHorizontal();
@@ -448,5 +494,38 @@ namespace StellarDriveDemoTFAdvanced.Power
                 default: return Loc.Pick("Éteint : l'ouverture laisse passer l'air.", "Off: the opening lets the air through.", "Apagado: la abertura deja pasar el aire.");
             }
         }
+    }
+}
+
+namespace StellarDriveDemoTFAdvanced.Power
+{
+    /// <summary>
+    /// The emitter's collision box, handed to the game as the part's dynamic collider: off while
+    /// the field is up, so nothing bumps into the rail in the doorway.
+    /// </summary>
+    internal sealed class FieldDoorCollider : MonoBehaviour, IShipPartDynamicCollider
+    {
+        public GameObject GameObject => gameObject;
+
+        public static void Attach(GameObject prefab)
+        {
+            int ship = LayerMask.NameToLayer("Ship");
+            var root = new GameObject("TFA_FieldDoorCollider") { layer = ship };
+            root.transform.SetParent(prefab.transform, false);
+            var child = new GameObject("Rail") { layer = ship, tag = "ShipFloatingPart" };
+            child.transform.SetParent(root.transform, false);
+            child.transform.localPosition = new Vector3(0f, 0.03f, 0f);
+            child.AddComponent<BoxCollider>().size = new Vector3(FieldDoorParts.RailWidth, 0.06f, FieldDoorParts.RailDepth);
+            root.AddComponent<FieldDoorCollider>();
+        }
+
+        public void SetNetworkState(IStatefulPartState state)
+        {
+            bool solid = !FieldDoor.Decode(state).Sealed;
+            foreach (BoxCollider box in GetComponentsInChildren<BoxCollider>(true))
+                box.enabled = solid;
+        }
+
+        public void ReactToNetworkStateChange(StatefulPartStateChangeEvent change) => SetNetworkState(change.NewState);
     }
 }

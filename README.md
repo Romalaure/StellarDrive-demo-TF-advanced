@@ -267,6 +267,12 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Porte à champ de force : côtés, épaisseur (v0.29)
+
+- **Côté** : le champ part des deux côtés de l'émetteur, ou seulement à sa gauche ou à sa droite (à poser contre un bord de l'ouverture).
+- Champ **épais** (20 cm, deux faces aux bords lumineux) et **jusqu'au sol** : plus de fente en bas.
+- Champ actif : le rail n'a **plus de collision**, on passe dessus sans buter.
+
 ## Porte à champ de force (v0.28)
 
 - **Porte à champ de force** (onglet TF Avancé, rangée des champs de force, recherche Technologie des artefacts) : un rail émetteur à poser au sol au milieu d'une ouverture de la coque. Touche d'utilisation (T) : on choisit la taille du champ, de 1 × 1 à 30 × 30 m (2 × 2, 10 × 20...), un contour orange la montre, puis on l'allume. Le champ retient l'oxygène comme une porte fermée, mais on passe à travers (une onde part de l'endroit traversé). 25 W par m² ; sans courant, il s'éteint et l'air s'échappe.
