@@ -5,7 +5,7 @@ using UnityEngine;
 namespace StellarDriveDemoTFAdvanced.Propulsion
 {
     /// <summary>
-    /// Detailed models of the nuclear and dark matter engines, built over the game's thruster
+    /// Detailed models of the exotic matter, nuclear and dark matter engines, built over the game's thruster
     /// they replace: mount plate at the bottom (the propellant plugs on its sides stay clear),
     /// nozzle opening at the top where the game's flame comes out. Coordinates are fractions of
     /// the thruster's body: x and z of its half-width, y of its height from its base.
@@ -124,6 +124,107 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                         m.Glow.Box(c + new Vector3((k - 1.5f) * f.R * 0.2f, 0f, side * f.R * 0.018f), new Vector3(f.R * 0.03f, f.H * 0.22f, f.R * 0.006f));
                     m.Light.Box(c + Vector3.up * f.H * 0.135f, new Vector3(f.R * 0.92f, f.R * 0.02f, f.R * 0.035f));
                 }
+            }
+        }
+
+        /// <summary>
+        /// The exotic matter engine: an armored mount, a chamber where shards of exotic matter
+        /// float in a cage of six pillars ringed by three field coils, four emitter prongs, and a
+        /// bell of eight armored petals lined with a glowing field.
+        /// </summary>
+        public static void Exotic(MachineModels.Model m, Bounds body)
+        {
+            Frame f = Of(body);
+            // Mount plate, trim and the chamber's floor
+            m.Armor.Cylinder(f.Axis(0f), f.Axis(0.06f), f.R * 0.98f, f.R * 0.93f, 8);
+            m.Light.Cylinder(f.Axis(0.06f), f.Axis(0.067f), f.R * 0.92f, f.R * 0.92f, 8, capA: false, capB: false);
+            m.Dark.Cylinder(f.Axis(0.067f), f.Axis(0.12f), f.R * 0.8f, f.R * 0.74f, 16);
+            // The exotic matter: a cluster of long crystals, the biggest upright in the middle
+            const float low = 0.14f, high = 0.5f;
+            void Crystal(Vector3 foot, Vector3 dir, float length, float r)
+            {
+                Vector3 mid = foot + dir * length * 0.35f;
+                m.Core.Cylinder(foot, mid, r * 0.4f, r, 6, capA: true, capB: false);
+                m.Core.Cylinder(mid, foot + dir * length, r, 0f, 6, capA: false, capB: false);
+            }
+            Crystal(f.Axis(low), Vector3.up, (high - low) * f.H * 0.95f, f.R * 0.13f);
+            for (int i = 0; i < 5; i++)
+            {
+                float a = (i * 72f + 20f) * Mathf.Deg2Rad;
+                var outward = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                Crystal(f.Axis(low) + outward * f.R * 0.12f, (Vector3.up * 2.2f + outward).normalized, (high - low) * f.H * (0.5f + 0.08f * (i % 3)), f.R * 0.08f);
+            }
+            // Cage of six pillars, the crystals seen between them
+            for (int i = 0; i < 6; i++)
+            {
+                float a = (i * 60f + 30f) * Mathf.Deg2Rad;
+                var outward = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                Vector3 foot = f.Axis(0.06f) + outward * f.R * 0.74f, head = f.Axis(high + 0.02f) + outward * f.R * 0.66f;
+                m.Armor.Box(Vector3.Lerp(foot, head, 0.5f), new Vector3(f.R * 0.1f, (head - foot).magnitude, f.R * 0.1f), Quaternion.LookRotation(outward, (head - foot).normalized));
+                m.Light.Box(Vector3.Lerp(foot, head, 0.5f) + outward * f.R * 0.052f, new Vector3(f.R * 0.02f, (head - foot).magnitude * 0.85f, f.R * 0.006f), Quaternion.LookRotation(outward, (head - foot).normalized));
+            }
+            // Three field coils around the chamber, each glowing between two armored lips
+            foreach (float y in new[] { 0.22f, 0.33f, 0.44f })
+            {
+                m.Armor.Cylinder(f.Axis(y - 0.022f), f.Axis(y - 0.01f), f.R * 0.72f, f.R * 0.72f, 24, capA: false, capB: false);
+                m.Glow.Cylinder(f.Axis(y - 0.01f), f.Axis(y + 0.01f), f.R * 0.69f, f.R * 0.69f, 24, capA: false, capB: false);
+                m.Armor.Cylinder(f.Axis(y + 0.01f), f.Axis(y + 0.022f), f.R * 0.72f, f.R * 0.72f, 24, capA: false, capB: false);
+            }
+            // Throat: an armored cone closing over the chamber, a bright ring where the jet leaves it
+            float throat = high + 0.08f;
+            m.Armor.Cylinder(f.Axis(high), f.Axis(throat), f.R * 0.7f, f.R * 0.3f, 24, capA: false, capB: false);
+            m.Core.Cylinder(f.Axis(throat - 0.01f), f.Axis(throat + 0.015f), f.R * 0.31f, f.R * 0.31f, 20, capA: false, capB: false);
+            // Bell: a glowing field lining inside eight armored petals with dark seams
+            const int petals = 8;
+            float exitR = 0.95f;
+            Vector3 Edge(float t, float angle, float extra) =>
+                f.Axis(throat + (1f - throat) * t) + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * f.R * (0.3f + (exitR - 0.3f) * Mathf.Sqrt(t) + extra);
+            for (int i = 0; i < 6; i++)
+            {
+                float t0 = i / 6f, t1 = (i + 1) / 6f;
+                float r0 = f.R * (0.3f + (exitR - 0.3f) * Mathf.Sqrt(t0)), r1 = f.R * (0.3f + (exitR - 0.3f) * Mathf.Sqrt(t1));
+                m.Dark.Cylinder(f.Axis(throat + (1f - throat) * t0), f.Axis(throat + (1f - throat) * t1), r0 * 0.96f, r1 * 0.96f, 24, capA: false, capB: false);
+            }
+            foreach (float t in new[] { 0.2f, 0.5f, 0.8f })
+            {
+                float y = throat + (1f - throat) * t, r = f.R * (0.3f + (exitR - 0.3f) * Mathf.Sqrt(t)) * 0.95f;
+                m.Glow.Cylinder(f.Axis(y - 0.008f), f.Axis(y + 0.008f), r, r, 24, capA: false, capB: false);
+            }
+            for (int k = 0; k < petals; k++)
+            {
+                float a = k * Mathf.PI * 2f / petals;
+                float width = 2f * Mathf.PI / petals * 1.02f;
+                for (int i = 0; i < 3; i++)
+                {
+                    float t0 = i / 3f, t1 = (i + 1) / 3f;
+                    Vector3 p0 = Edge(t0, a, 0.02f), p1 = Edge(t1, a, 0.02f);
+                    var outward = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                    float w = f.R * (0.3f + (exitR - 0.3f) * Mathf.Sqrt((t0 + t1) * 0.5f)) * width;
+                    Vector3 along = (p1 - p0).normalized;
+                    m.Armor.Box(Vector3.Lerp(p0, p1, 0.5f), new Vector3(w, (p1 - p0).magnitude * 1.02f, f.R * 0.035f), Quaternion.LookRotation(Vector3.Cross(along, Vector3.Cross(outward, along)).normalized, along));
+                }
+                float s = a + Mathf.PI / petals;
+                Vector3 s0 = Edge(0f, s, 0.045f), s1 = Edge(1f, s, 0.045f), slope = (s1 - s0).normalized;
+                var across = new Vector3(-Mathf.Sin(s), 0f, Mathf.Cos(s));
+                m.Dark.Box(Vector3.Lerp(s0, s1, 0.5f), new Vector3(f.R * 0.03f, (s1 - s0).magnitude, f.R * 0.03f), Quaternion.LookRotation(Vector3.Cross(across, slope).normalized, slope));
+            }
+            // Bright lip at the exit and a hoop holding the petals
+            m.Core.Cylinder(f.Axis(0.985f), f.Axis(1f), f.R * (exitR + 0.03f), f.R * (exitR + 0.04f), 24, capA: false, capB: false);
+            float hoop = throat + (1f - throat) * 0.45f, hoopR = f.R * (0.3f + (exitR - 0.3f) * Mathf.Sqrt(0.45f) + 0.06f);
+            m.Armor.Cylinder(f.Axis(hoop - 0.015f), f.Axis(hoop + 0.015f), hoopR, hoopR, 24, capA: false, capB: false);
+            m.Glow.Cylinder(f.Axis(hoop - 0.004f), f.Axis(hoop + 0.004f), hoopR + f.R * 0.006f, hoopR + f.R * 0.006f, 24, capA: false, capB: false);
+            // Four emitter prongs on the diagonals, from the mount up to the hoop, a hot tip each
+            for (int i = 0; i < 4; i++)
+            {
+                float a = (45f + i * 90f) * Mathf.Deg2Rad;
+                var outward = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                Vector3 footP = f.Axis(0.06f) + outward * f.R * 0.88f;
+                Vector3 knee = f.Axis(0.4f) + outward * f.R * 0.86f;
+                Vector3 tip = f.Axis(hoop) + outward * (hoopR + f.R * 0.02f);
+                m.Armor.Cylinder(footP, knee, f.R * 0.05f, f.R * 0.045f, 8);
+                m.Armor.Cylinder(knee, tip, f.R * 0.045f, f.R * 0.03f, 8);
+                m.Dark.Cylinder(knee - Vector3.up * f.H * 0.02f, knee + Vector3.up * f.H * 0.02f, f.R * 0.065f, f.R * 0.065f, 8);
+                m.Core.Cylinder(tip, tip + (tip - knee).normalized * f.R * 0.08f, f.R * 0.035f, 0f, 6, capA: true, capB: false);
             }
         }
 

@@ -78,7 +78,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                 Id = 7312, Key = "Heavy", Label = Loc.Pick("Moteur lourd", "Heavy engine", "Motor pesado"),
                 Description = Loc.Pick("Moteur principal pour gros vaisseaux et charges lourdes : 23 400 N, trois fois le propulseur chimique, un peu moins efficace (+10 % d'ergols par newton). Met 1,5 s à atteindre sa pleine poussée.", "Main engine for big ships and heavy loads: 23,400 N, three Chemical Thrusters, a little less efficient (+10% propellant per newton). Takes 1.5 s to reach full thrust.", "Motor principal para naves grandes y cargas pesadas: 23.400 N, tres Propulsores químicos, algo menos eficiente (+10 % de propergol por newton). Tarda 1,5 s en alcanzar el empuje máximo."),
                 DefaultThrust = 3f, DefaultFuel = 3.3f, Mass = 75f, Scale = 1.5f, SpoolSeconds = 1.5f,
-                Tint = new Color(0.62f, 0.64f, 0.68f), Cost = new[] { (101u, 8), (104u, 4), (112u, 2) }
+                Tint = new Color(0.62f, 0.64f, 0.68f), Cost = new[] { (101u, 12), (112u, 2) }
             },
             new EngineSpec
             {
@@ -92,14 +92,14 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                 Id = 7314, Key = "Efficient", Label = Loc.Pick("Moteur économe", "Efficient engine", "Motor eficiente"),
                 Description = Loc.Pick("Privilégie l'autonomie : 4 680 N pour seulement 35 % des ergols du propulseur chimique (environ 1,7 fois plus de poussée par unité). Montée en régime lente : 4 s.", "Built for range: 4,680 N for only 35% of the Chemical Thruster's propellant (about 1.7 times more thrust per unit). Slow spool-up: 4 s.", "Hecho para la autonomía: 4.680 N con solo el 35 % del propergol del Propulsor químico (unas 1,7 veces más empuje por unidad). Arranque lento: 4 s."),
                 DefaultThrust = 0.6f, DefaultFuel = 0.35f, Mass = 28f, Scale = 1.1f, SpoolSeconds = 4f,
-                Tint = new Color(0.72f, 0.92f, 0.74f), Cost = new[] { (101u, 4), (104u, 2), (112u, 3) }
+                Tint = new Color(0.72f, 0.92f, 0.74f), Cost = new[] { (101u, 6), (112u, 3) }
             },
             new EngineSpec
             {
                 Id = 7315, Key = "Exotic", Label = Loc.Pick("Moteur à matière exotique", "Exotic matter engine", "Motor de materia exótica"),
                 Description = Loc.Pick("La matière exotique ramassée près des trous noirs, brûlée dans un champ quantique : 78 000 N (dix propulseurs chimiques) pour à peine 10 % de leurs ergols. Montée en régime : 3 s. Ergols et commande comme le propulseur chimique (vannes).", "Exotic matter gathered near black holes, burnt in a quantum field: 78,000 N (ten Chemical Thrusters) for barely 10% of their propellant. Spool-up: 3 s. Propellants and control as the Chemical Thruster (valves).", "Materia exótica recogida cerca de los agujeros negros, quemada en un campo cuántico: 78.000 N (diez Propulsores químicos) con apenas el 10 % de su propergol. Arranque: 3 s. Propergoles y control como el Propulsor químico (válvulas)."),
                 DefaultThrust = 10f, DefaultFuel = 0.1f, Mass = 140f, Scale = 1.9f, SpoolSeconds = 3f,
-                Tint = new Color(0.42f, 0.3f, 0.62f), Glow = new Color(0.18f, 0.05f, 0.35f),
+                Tint = Color.white, Model = EngineModels.Exotic, ModelGlow = new Color(1f, 0.3f, 0.75f), ModelCore = new Color(1f, 0.5f, 0.9f), Flame = new Color(1f, 0.6f, 0.95f),
                 Cost = new[] { (Items.ModItems.ExoticMatter, 3), (Items.ModItems.QuantumCore, 1), (Items.ModItems.Titanium, 12), (Items.ModItems.NexoranAlloy, 6) },
                 Tab = Parts.AdvancedTab.ArtifactsName, Row = Parts.AdvancedTab.ArtifactsPropulsionRow
             },
@@ -118,7 +118,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                 Description = Loc.Pick("Moteur nucléaire thermique de grande taille, cœur à quatre turbopompes et radiateurs : 234 000 N (trente propulseurs chimiques) pour 0,005 unité/s de combustible nucléaire et 0,05 d'oxygène. Une prise de propergol reçoit le combustible nucléaire, l'autre l'oxygène. Commande : un signal sur sa prise de commande (0-1), sinon une vanne sur sa conduite, sinon le siège de pilotage. Montée en régime : 4 s.", "A large nuclear thermal engine, core with four turbopumps and radiators: 234,000 N (thirty Chemical Thrusters) for 0.005 unit/s of nuclear fuel and 0.05 of oxygen. One propellant socket takes nuclear fuel, the other oxygen. Control: a signal on its command socket (0-1), else a valve on its line, else the pilot seat. Spool-up: 4 s.", "Un gran motor térmico nuclear, núcleo con cuatro turbobombas y radiadores: 234.000 N (treinta Propulsores químicos) por 0,005 unidad/s de combustible nuclear y 0,05 de oxígeno. Una toma de propergol recibe combustible nuclear, la otra oxígeno. Control: una señal en su toma de mando (0-1), si no una válvula en su línea, si no el asiento del piloto. Arranque: 4 s."),
                 DefaultThrust = 30f, DefaultFuel = 0.1f, ReactionMass = 1f, Fuel = Items.ModItems.NuclearFuel, Mass = 320f, Scale = 2.2f, SpoolSeconds = 4f,
                 Tint = Color.white, Model = EngineModels.NuclearHeavy, ModelGlow = Power.MachineModels.Green, ModelCore = new Color(1f, 0.55f, 0.15f), Flame = new Color(0.75f, 1f, 0.85f),
-                Cost = new[] { (Items.ModItems.Titanium, 40), (Items.ModItems.Uranium, 10), (Items.ModItems.NexoranAlloy, 10), (Items.ModItems.QuantumCore, 1), (104u, 20) },
+                Cost = new[] { (Items.ModItems.Titanium, 40), (Items.ModItems.Uranium, 10), (Items.ModItems.NexoranAlloy, 10), (Items.ModItems.QuantumCore, 1), (112u, 20) },
                 Row = Parts.AdvancedTab.NuclearRow
             },
             new EngineSpec

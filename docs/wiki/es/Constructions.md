@@ -28,4 +28,4 @@ Pestaña **TF Blindage**, investigación *Blindaje reforzado*. Las piezas de cas
 - **3 veces más resistente** en los choques;
 - con el mod **Arsenal**: las armas solo hacen **un tercio del daño** y **no abren agujeros**;
 - **1,5 veces más pesado**;
-- coste: el doble de hierro (o de cristal), más 1 aluminio (hierro reforzado) o 1 hierro (cristal reforzado).
+- coste: el doble de hierro (o de cristal), más 1 titanio (hierro reforzado) o 1 hierro (cristal reforzado).

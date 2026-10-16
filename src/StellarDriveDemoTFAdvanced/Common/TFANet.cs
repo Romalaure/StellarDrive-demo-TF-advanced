@@ -15,6 +15,8 @@ namespace StellarDriveDemoTFAdvanced.Common
     internal static class TFANet
     {
         public const byte RadarContacts = 1;
+        /// <summary>A destroyed pirate's loot capsule (A: its ship id), see <see cref="Combat.LootPing"/>.</summary>
+        public const byte LootPing = 2;
 
         private struct TFAMessage : IBroadcast
         {

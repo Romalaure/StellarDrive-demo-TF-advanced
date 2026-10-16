@@ -310,6 +310,21 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 System.IO.File.WriteAllBytes(System.IO.Path.Combine(DevHarness.Folder, prefix + "_" + name + ".png"), sheet.EncodeToPNG());
                 yield return null;
             }
+            // A cartography table in the set: its page read from the front
+            if (Construction.ScannerVisuals.DevView(out Vector3 eye, out Vector3 aim))
+            {
+                camera.transform.position = eye;
+                camera.transform.rotation = Quaternion.LookRotation(aim - eye, frame.up);
+                Construction.ScannerVisuals.FaceAll(eye);
+                camera.Render();
+                RenderTexture previous = RenderTexture.active;
+                RenderTexture.active = target;
+                sheet.ReadPixels(new Rect(0, 0, 1600, 900), 0, 0);
+                sheet.Apply();
+                RenderTexture.active = previous;
+                System.IO.File.WriteAllBytes(System.IO.Path.Combine(DevHarness.Folder, prefix + "_scanner.png"), sheet.EncodeToPNG());
+                yield return null;
+            }
             camera.targetTexture = null;
             RenderTexture.ReleaseTemporary(target);
             Object.Destroy(sheet);

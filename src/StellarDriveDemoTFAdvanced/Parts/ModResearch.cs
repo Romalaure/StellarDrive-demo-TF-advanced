@@ -30,7 +30,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
             public (uint Item, int Count)[] Cost;
         }
 
-        private const uint Iron = 101, Glass = 102, Aluminum = 104, Wood = 110, Copper = 112;
+        private const uint Iron = 101, Glass = 102, Wood = 110, Copper = 112;
 
         private static readonly Tech[] All =
         {
@@ -43,7 +43,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
             new Tech { Id = 7504, Name = Loc.Pick("Ordinateur de bord", "Ship computer", "Ordenador de a bordo"), Requires = new ushort[] { 15 }, Position = new Vector2Int(4, 1),
                 Parts = Range(7301, 7306), Cost = new[] { (Copper, 10), (Glass, 5) } },
             new Tech { Id = 7505, Name = Loc.Pick("Propulsion avancée", "Advanced propulsion", "Propulsión avanzada"), Requires = new ushort[] { 20 }, Position = new Vector2Int(5, 4),
-                Parts = Range(7311, 7314), Cost = new[] { (Iron, 20), (Aluminum, 10) } },
+                Parts = Range(7311, 7314), Cost = new[] { (Iron, 25), (Copper, 10) } },
             new Tech { Id = 7506, Name = Loc.Pick("Réseau électrique avancé", "Advanced power grid", "Red eléctrica avanzada"), Requires = new ushort[] { 12 }, Position = new Vector2Int(3, 3),
                 Parts = new ushort[] { 7321, 7322 }, Cost = new[] { (Copper, 20), (Iron, 10) } },
             new Tech { Id = 7507, Name = Loc.Pick("Technologie des artefacts", "Artifact technology", "Tecnología de artefactos"), Requires = new ushort[] { 7506 }, Position = new Vector2Int(5, 1),
@@ -51,7 +51,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
             new Tech { Id = 7508, Name = Loc.Pick("Cartographie", "Cartography", "Cartografía"), Requires = new ushort[] { 14 }, Position = new Vector2Int(3, 0),
                 Parts = new ushort[] { 7381 }, Cost = new[] { (Copper, 10), (Glass, 10), (ModItems.Meteorite, 2) } },
             new Tech { Id = 7509, Name = Loc.Pick("Modules de station", "Station modules", "Módulos de estación"), Requires = new ushort[] { 7501 }, Position = new Vector2Int(6, 6),
-                Parts = Range(7371, 7380).Concat(Range(7382, 7390)).ToArray(), Cost = new[] { (Iron, 40), (Glass, 15), (Aluminum, 10) } },
+                Parts = Range(7371, 7380).Concat(Range(7382, 7390)).ToArray(), Cost = new[] { (Iron, 40), (Glass, 15), (ModItems.Titanium, 10) } },
             new Tech { Id = 7512, Name = Loc.Pick("Énergie nucléaire", "Nuclear power", "Energía nuclear"), Requires = new ushort[] { 7507 }, Position = new Vector2Int(6, 2),
                 Parts = new ushort[] { 7396, 7397, 7398, 7316, 7317, 7320 }, Cost = new[] { (ModItems.Uranium, 10), (ModItems.Titanium, 15), (Copper, 20) } },
             new Tech { Id = 7510, Name = Loc.Pick("Matière noire", "Dark matter", "Materia oscura"), Requires = new ushort[] { 7512 }, Position = new Vector2Int(7, 2),
@@ -61,9 +61,9 @@ namespace StellarDriveDemoTFAdvanced.Parts
             new Tech { Id = 7513, Name = Loc.Pick("Guerre électronique", "Electronic warfare", "Guerra electrónica"), Requires = new ushort[] { 7508 }, Position = new Vector2Int(4, 0),
                 Parts = new ushort[] { 7307, 7308, 7309, 7310 }, Cost = new[] { (Copper, 25), (Glass, 10), (ModItems.Titanium, 10), (ModItems.Quartz, 5) } },
             new Tech { Id = 7514, Name = Loc.Pick("Blindage renforcé", "Reinforced plating", "Blindaje reforzado"), Requires = new ushort[] { 7501 }, Position = new Vector2Int(7, 5),
-                Parts = Range(7421, 7429).Concat(Range(7431, 7439)).ToArray(), Cost = new[] { (Iron, 40), (Glass, 20), (Aluminum, 10) } },
+                Parts = Range(7421, 7429).Concat(Range(7431, 7439)).ToArray(), Cost = new[] { (Iron, 40), (Glass, 20), (ModItems.Titanium, 10) } },
             new Tech { Id = 7515, Name = Loc.Pick("Minage embarqué", "Ship mining", "Minería embarcada"), Requires = new ushort[] { 7506 }, Position = new Vector2Int(7, 4),
-                Parts = new ushort[] { 7399 }, Cost = new[] { (Iron, 20), (Copper, 15), (Aluminum, 5) } },
+                Parts = new ushort[] { 7399 }, Cost = new[] { (Iron, 25), (Copper, 15) } },
         };
 
         private static readonly HashSet<ushort> Locked = new HashSet<ushort>();

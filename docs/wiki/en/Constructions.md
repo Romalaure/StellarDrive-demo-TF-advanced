@@ -28,4 +28,4 @@ Wood and iron use the game's hull textures, glass uses its glass. The collision 
 - **3 times tougher** in collisions;
 - with the **Arsenal** mod: weapons do **a third of the damage** and punch **no holes**;
 - **1.5 times heavier**;
-- cost: twice the iron (or glass), plus 1 aluminium (reinforced iron) or 1 iron (reinforced glass).
+- cost: twice the iron (or glass), plus 1 titanium (reinforced iron) or 1 iron (reinforced glass).

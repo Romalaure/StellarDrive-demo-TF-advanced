@@ -33,6 +33,13 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Own crafts, new models, loot ping (v0.26)
+
+- **Crafts**: no material from another mod nor aluminium any more. Everything is built from the game's materials (iron, glass, copper, wood, stellar shards) and the mod's (titanium, uranium, meteorite…).
+- **New 3D models**: exotic matter engine (crystals in a field cage, petal nozzle), nuclear fuel, dark matter and infinite dark matter tanks (glowing hoops, shield plate, hatch, emblem).
+- **Cartography table**: more detailed model, animated hologram (sweep, scan wave, spinning rings) and an easier-to-read page on a dark panel.
+- **Loot ping**: when a pirate ship is destroyed, a marker on screen shows its loot capsule for 10 minutes (`LootPingMinutes` setting).
+
 ## Reinforced hull, ship mining laser (v0.25)
 
 - **Reinforced hull** (*TF Blindage* tab): the game's iron and glass floors, plates, corners and slopes, reinforced. Same model, a slightly darker shade, real airtight hull. 3 times tougher in collisions; with Arsenal, a third of the damage and no holes. 1.5 times heavier.

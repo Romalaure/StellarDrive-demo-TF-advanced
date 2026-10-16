@@ -67,6 +67,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 Loc.Pick("Le réservoir de fluide du jeu, blindé de météorite pour garder la matière noire (il prend aussi les autres fluides). Branchement et prise signal comme le réservoir du jeu.", "The game's fluid tank, armoured with meteorite to hold dark matter (it takes the other fluids too). Wiring and signal socket as the game's tank.", "El tanque de fluido del juego, blindado con meteorito para contener materia oscura (también acepta los otros fluidos). Conexiones y toma de señal como el tanque del juego."),
                 30f, new[] { (ModItems.Meteorite, 2), (ModItems.Titanium, 4), (Glass, 4) });
             Recolor(prefab, new Color(0.45f, 0.38f, 0.6f), new Color(0.08f, 0.02f, 0.14f));
+            TankModels.Armor(prefab, TankModels.Kind.DarkMatter);
         }
 
         private static void ConfigureInfiniteTank(PartSettings settings, GameObject prefab)
@@ -76,6 +77,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 30f, new[] { (ModItems.Meteorite, 20), (ModItems.QuantumCore, 2), (ModItems.ExoticMatter, 2), (ModItems.Titanium, 8) });
             // Darker shell, a stronger violet glow than the plain dark matter tank
             Recolor(prefab, new Color(0.3f, 0.22f, 0.45f), new Color(0.35f, 0.08f, 0.6f));
+            TankModels.Armor(prefab, TankModels.Kind.Infinite);
         }
 
         private static void ConfigureReactor(PartSettings settings, GameObject prefab)

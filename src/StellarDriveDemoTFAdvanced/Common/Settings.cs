@@ -40,6 +40,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<float> PirateRaidStartKm { get; private set; }
         public static MelonPreferences_Entry<float> PirateApproachKmPerSecond { get; private set; }
         public static MelonPreferences_Entry<bool> RadarAlarm { get; private set; }
+        public static MelonPreferences_Entry<float> LootPingMinutes { get; private set; }
         public static MelonPreferences_Entry<bool> SteadyFrameRate { get; private set; }
         public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevDockingTest { get; private set; }
@@ -133,7 +134,7 @@ namespace StellarDriveDemoTFAdvanced.Common
             DevPirateShowcase = _category.CreateEntry("DevPirateShowcase", false,
                 description: "For mod development: with DevWorld, each pirate design held beside the player and photographed.");
             DevPirateTest = _category.CreateEntry("DevPirateTest", 0,
-                description: "For mod development: with DevWorld, pirates attack the ship nearest the player (1 scout, 2 corsair, 3 raider, 4 cruiser, 5 random, 6 base, 7 hornet, 8 lancer, 9 torpedo boat, 10 dreadnought, 11-15 drawn for danger 1-5).");
+                description: "For mod development: with DevWorld, pirates attack the ship nearest the player (1 scout, 2 corsair, 3 raider, 4 cruiser, 5 random, 6 base, 7 hornet, 8 lancer, 9 torpedo boat, 10 dreadnought, 11-15 drawn for danger 1-5, 16 only a loot capsule and its ping).");
             Pirates = _category.CreateEntry("Pirates", true,
                 description: "Pirate ships (with the Arsenal mod only, whose weapons they use) now and then attack a player's ship flying in space.");
             PirateIntervalMinutes = _category.CreateEntry("PirateIntervalMinutes", 12f,
@@ -146,6 +147,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "Pirate raids are detected this far away (km) and close in before attacking: a radar sees them coming from its range.");
             PirateApproachKmPerSecond = _category.CreateEntry("PirateApproachKmPerSecond", 250f,
                 description: "Speed of an incoming pirate raid (km/s): 25 000 km at 250 km/s = 100 s of warning with the deep space radar.");
+            LootPingMinutes = _category.CreateEntry("LootPingMinutes", 10f,
+                description: "When a pirate ship is destroyed, a marker on screen shows where its loot capsule is, for this many minutes or until the capsule is gone (0: no marker).");
             RadarAlarm = _category.CreateEntry("RadarAlarm", true,
                 description: "A message on screen when a radar of your ship detects an incoming pirate raid.");
             SteadyFrameRate = _category.CreateEntry("SteadyFrameRate", true,

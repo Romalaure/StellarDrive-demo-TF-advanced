@@ -102,6 +102,8 @@ The pirate pilot rushes at your ship then circles it at its fighting distance, n
 
 Destroyed, a pirate explodes and leaves a **loot capsule** (a chest on a plate), richer with its difficulty: titanium, uranium and cryonite for the scout; plus Nexoran alloy for the corsair; quantum core and meteorite for the raider; the cruiser adds an artifact fragment. The hornet leaves a bit more than the scout, the lancer a quantum core, the torpedo boat two cores and meteorite, the dreadnought two artifacts and exotic matter.
 
+A **gold marker** on screen shows where the capsule is (with its distance) for 10 minutes, or until it is gone; out of view, it stays at the screen's edge and points to it. Setting `LootPingMinutes` (0: no marker).
+
 A pirate left far behind (more than 9 km) for 10 minutes goes away.
 
 Settings (`[TFAdvanced]`): `Pirates = false` to see no more of them, `PirateIntervalMinutes` for how often, `PirateDangerStepKm` for the distance between two danger levels.

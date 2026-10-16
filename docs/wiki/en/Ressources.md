@@ -17,4 +17,4 @@
 
 **Dark matter** and **nuclear fuel** are fluids: they flow in pipes and are stored in tanks, like oxygen.
 
-Deposits are mined with the laser like the game's rocks. Chests in buildings (once each) and in stations also hold iron, glass, copper, aluminum, wood, ingots and keys.
+Deposits are mined with the laser like the game's rocks. Chests in buildings (once each) and in stations also hold iron, glass, copper, titanium, wood, ingots and keys.

@@ -246,7 +246,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             {
                 yield return new Drop(ModItems.NexoranAlloy, 2, 6, 0.85);
                 yield return new Drop(ModItems.QuantumCore, 1, 1, kind == Kind.CityCore ? 0.6 : 0.3);
-                yield return new Drop(ModItems.Aluminum, 4, 12, 0.6);
+                yield return new Drop(ModItems.Titanium, 3, 10, 0.6);
                 yield return new Drop(ModItems.Glass, 4, 12, 0.5);
                 yield return new Drop(ModItems.Copper, 3, 10, 0.4);
                 yield return new Drop(ModItems.Quartz, 2, 6, 0.4);

@@ -838,7 +838,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             {
                 (int item, int min, int max, double chance)[] table =
                 {
-                    (101, 6, 20, 0.9), (102, 4, 16, 0.6), (112, 4, 20, 0.7), (104, 3, 14, 0.5),
+                    (101, 6, 20, 0.9), (102, 4, 16, 0.6), (112, 4, 20, 0.7), ((int)Items.ModItems.Titanium, 2, 8, 0.5),
                     (110, 6, 20, 0.4), (103, 1, 4, 0.25), (158, 1, 2, 0.1), (151, 1, 1, 0.15)
                 };
                 var slots = new List<string>();

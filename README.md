@@ -180,7 +180,7 @@ Ce sont de vrais objets du jeu : ils s'empilent, pèsent, vont dans l'inventaire
 | Pièce | Effet | Coût |
 |---|---|---|
 | **Réacteur quantique** | 12 000 W en continu, **sans carburant et sans fin** (trois générateurs à bois) | 2 noyaux quantiques, 6 alliages nexoriens, 8 titane, 2 fragments d'artefact, 10 cuivre |
-| **Batterie à cryonite** | 8 fois la capacité d'une batterie, charge et décharge 3 fois plus rapides | 8 cryonite, 4 titane, 8 cuivre, 4 aluminium |
+| **Batterie à cryonite** | 8 fois la capacité d'une batterie, charge et décharge 3 fois plus rapides | 8 cryonite, 6 titane, 8 cuivre |
 | **Moteur à matière exotique** | 78 000 N (dix propulseurs chimiques) pour 10 % de leurs ergols | 3 matière exotique, 1 noyau quantique, 12 titane, 6 alliages nexoriens |
 | **Générateur de champ de force** | protège **tout le vaisseau** (et les vaisseaux qui lui sont attachés) : absorbe 150 points de dégâts (chocs, forces de marée des trous noirs). Consomme 2 000 W et 0,02 oxygène/s. Se recharge de 0,5 point/s. Vide, il casse : **5 min** avant de redémarrer. Bulle translucide visible quand il est actif | 1 noyau quantique, 6 cryonite, 4 alliages nexoriens, 6 titane, 8 cuivre |
 | **Générateur de champ renforcé** | champ de force doré : **450 points**, recharge 1,5 point/s. Consomme 6 000 W et 0,05 oxygène/s | 3 noyaux quantiques, 15 cryonite, 12 alliages nexoriens, 20 titane, 20 cuivre |
@@ -266,6 +266,13 @@ Des vaisseaux pirates, armés des armes de vaisseau d'Arsenal, attaquent de temp
 Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un écran rond les pirates autour du vaisseau : leurs vaisseaux, leurs bases et les **raids en approche**, désormais repérés à 25 000 km et qui foncent à 250 km/s avant d'attaquer (le radar de l'espace profond donne environ 80 s d'avance, avec une alerte à l'écran). Le **générateur d'invisibilité** (6 000 W) rend le vaisseau difficile à trouver et à viser : raids trois fois plus rares et qui peuvent perdre sa trace, pirates qui ne le voient qu'à moins de 2,5 km, tirent de plus près et visent bien plus mal. Tech **Guerre électronique**. Les contacts sont calculés par l'hôte et envoyés à chaque joueur. Détail : [wiki, Pirates](docs/wiki/Pirates.md#radars).
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
+
+## Crafts du mod seul, nouveaux modèles, ping de butin (v0.26)
+
+- **Crafts** : plus aucune matière d'un autre mod ni d'aluminium. Tout se construit avec les matières du jeu (fer, verre, cuivre, bois, éclats stellaires) et celles du mod (titane, uranium, météorite…).
+- **Nouveaux modèles 3D** : moteur à matière exotique (cristaux dans une cage de champ, tuyère en pétales), réservoirs de combustible nucléaire, de matière noire et de matière noire infinie (cerclages lumineux, plaque de blindage, trappe, emblème).
+- **Table de cartographie** : modèle plus détaillé, hologramme animé (balayage, onde de scan, anneaux tournants) et fiche plus lisible sur un panneau sombre.
+- **Ping de butin** : quand un vaisseau pirate est détruit, un marqueur à l'écran montre sa capsule de butin pendant 10 minutes (réglage `LootPingMinutes`).
 
 ## Coque renforcée, laser de minage embarqué (v0.25)
 

@@ -139,7 +139,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             PartFactory.Describe(settings, Loc.Pick("Support de panneaux solaires", "Solar panel mount", "Soporte de paneles solares"),
                 Loc.Pick($"Un mât et deux ailes de cellules photovoltaïques : jusqu'à {PowerCatalog.SolarWatts.Value:0} W sur ses prises électriques quand les ailes font face à l'étoile, rien la nuit ou dans l'ombre d'une planète. Posez-le sur le toit de la base, ailes vers le ciel. Sa prise signal donne la puissance produite (W).", $"A mast and two wings of solar cells: up to {PowerCatalog.SolarWatts.Value:0} W on its power sockets when the wings face the star, nothing at night or in a planet's shadow. Put it on the base's roof, wings to the sky. Its signal socket gives the power made (W).", $"Un mástil y dos alas de células solares: hasta {PowerCatalog.SolarWatts.Value:0} W en sus tomas de energía cuando las alas miran a la estrella, nada de noche o a la sombra de un planeta. Ponlo en el tejado de la base, con las alas hacia el cielo. Su toma de señal da la energía producida (W)."),
-                120f, new[] { (102u, 12), (112u, 10), (104u, 6), (101u, 6) });
+                120f, new[] { (102u, 12), (112u, 10), (101u, 12) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             settings.snappingStyle = Ships.Interface.Model.SnappingStyle.PreciseOnFloor;
             const float wing = 3f, chord = 1.6f, mast = 1.6f;

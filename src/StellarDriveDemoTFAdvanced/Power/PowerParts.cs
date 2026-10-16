@@ -42,7 +42,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             PartFactory.Describe(settings, Loc.Pick("Batterie", "Battery", "Batería"),
                 Loc.Pick($"Stocke l'énergie du réseau électrique branché sur ses prises. Se recharge avec la puissance que les générateurs ont en réserve (ils brûlent alors plus de bois) et la rend quand le réseau en manque. {PowerCatalog.BatteryCapacityKJ.Value:0} kJ, charge {PowerCatalog.BatteryChargeWatts.Value:0} W, décharge {PowerCatalog.BatteryDischargeWatts.Value:0} W, rendement {PowerCatalog.BatteryEfficiency.Value:P0}. Sa prise signal donne la charge en %.", $"Stores the energy of the power network on its sockets. Charges from the power the generators have to spare (they then burn more wood) and gives it back when the network runs short. {PowerCatalog.BatteryCapacityKJ.Value:0} kJ, charge {PowerCatalog.BatteryChargeWatts.Value:0} W, discharge {PowerCatalog.BatteryDischargeWatts.Value:0} W, efficiency {PowerCatalog.BatteryEfficiency.Value:P0}. Its signal socket gives the charge in %.", $"Almacena la energía de la red eléctrica de sus tomas. Se carga con la energía que les sobra a los generadores (que entonces queman más madera) y la devuelve cuando a la red le falta. {PowerCatalog.BatteryCapacityKJ.Value:0} kJ, carga {PowerCatalog.BatteryChargeWatts.Value:0} W, descarga {PowerCatalog.BatteryDischargeWatts.Value:0} W, eficiencia {PowerCatalog.BatteryEfficiency.Value:P0}. Su toma de señal da la carga en %."),
-                100f, new[] { (101u, 6), (112u, 6), (104u, 2) });
+                100f, new[] { (101u, 8), (112u, 6) });
             settings.internalStateClass = StateClass;
             BuildCell(prefab, "Battery", 0.9f, 0.8f, 0.7f, MachineModels.Red, false);
         }
@@ -109,7 +109,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             float capacity = PowerCatalog.BatteryCapacityKJ.Value * PowerCatalog.CryoBatteryScale;
             PartFactory.Describe(settings, Loc.Pick("Batterie à cryonite", "Cryonite battery", "Batería de criónita"),
                 Loc.Pick($"Les cristaux de cryonite de TF Glacia gardent l'énergie presque sans perte : {capacity:0} kJ (huit batteries), charge {PowerCatalog.BatteryChargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W, décharge {PowerCatalog.BatteryDischargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W. Branchement et prise signal comme la batterie.", $"The cryonite crystals of TF Glacia hold energy almost without loss: {capacity:0} kJ (eight batteries), charge {PowerCatalog.BatteryChargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W, discharge {PowerCatalog.BatteryDischargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W. Wiring and signal socket as the battery.", $"Los cristales de criónita de TF Glacia guardan la energía casi sin pérdidas: {capacity:0} kJ (ocho baterías), carga {PowerCatalog.BatteryChargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W, descarga {PowerCatalog.BatteryDischargeWatts.Value * PowerCatalog.CryoBatteryRateScale:0} W. Conexiones y toma de señal como la batería."),
-                160f, new[] { (Items.ModItems.Cryonite, 8), (Items.ModItems.Titanium, 4), (112u, 8), (104u, 4) });
+                160f, new[] { (Items.ModItems.Cryonite, 8), (Items.ModItems.Titanium, 6), (112u, 8) });
             settings.internalStateClass = StateClass;
             BuildCell(prefab, "CryoBattery", 1.1f, 0.9f, 0.8f, MachineModels.Cyan, true);
         }

@@ -46,5 +46,23 @@ namespace StellarDriveDemoTFAdvanced.Common
             Cache[name] = material;
             return material;
         }
+
+        /// <summary>A see-through tinted surface (alpha blended, not added): dark glass behind texts.</summary>
+        public static Material Blended(string name, Color color)
+        {
+            if (Cache.TryGetValue(name, out Material cached) && cached != null)
+                return cached;
+            Material additive = Additive(name + "_Base", null);
+            if (additive == null)
+                return null;
+            var material = new Material(additive) { name = name };
+            material.SetColor("_BaseColor", color);
+            material.SetFloat("_Blend", 0f);
+            material.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+            // Before the texts drawn over it
+            material.renderQueue = 2990;
+            Cache[name] = material;
+            return material;
+        }
     }
 }

@@ -47,15 +47,31 @@ namespace StellarDriveDemoTFAdvanced.Construction
             const float width = Size, height = 0.95f, depth = Size;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, height * 0.5f, 0f), new Vector3(width, height, depth));
             var model = new MachineModels.Model();
-            // An octagonal pedestal on a plinth, vents on its front and back, four struts under the top
-            model.Armor.Box(new Vector3(0f, 0.04f, 0f), new Vector3(width * 0.62f, 0.08f, depth * 0.62f));
-            model.Armor.Cylinder(new Vector3(0f, 0.08f, 0f), new Vector3(0f, 0.7f, 0f), 0.34f, 0.3f, 8);
-            model.Light.Cylinder(new Vector3(0f, 0.09f, 0f), new Vector3(0f, 0.1f, 0f), 0.345f, 0.345f, 8, capA: false, capB: false);
+            // A two-step octagonal plinth, a tapered pedestal with glowing edges and a collar, vents
+            // on its front and back, four struts under the top
+            model.Armor.Cylinder(new Vector3(0f, 0f, 0f), new Vector3(0f, 0.05f, 0f), 0.5f, 0.48f, 8);
+            model.Light.Cylinder(new Vector3(0f, 0.05f, 0f), new Vector3(0f, 0.056f, 0f), 0.47f, 0.47f, 8, capA: false, capB: false);
+            model.Armor.Cylinder(new Vector3(0f, 0.056f, 0f), new Vector3(0f, 0.1f, 0f), 0.42f, 0.38f, 8);
+            model.Dark.Cylinder(new Vector3(0f, 0.1f, 0f), new Vector3(0f, 0.12f, 0f), 0.36f, 0.35f, 8);
+            model.Armor.Cylinder(new Vector3(0f, 0.12f, 0f), new Vector3(0f, 0.7f, 0f), 0.34f, 0.28f, 8);
+            for (int i = 0; i < 4; i++)
+            {
+                // Light strips down the pedestal's diagonal edges (the octagon's corners at 22.5° + k·45°)
+                float a = (22.5f + 45f + i * 90f) * Mathf.Deg2Rad;
+                var outward = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                Vector3 low = new Vector3(0f, 0.16f, 0f) + outward * 0.335f, high = new Vector3(0f, 0.66f, 0f) + outward * 0.287f;
+                model.Glow.Box(Vector3.Lerp(low, high, 0.5f) + outward * 0.006f, new Vector3(0.014f, (high - low).magnitude, 0.006f), Quaternion.LookRotation(outward, (high - low).normalized));
+            }
+            model.Armor.Cylinder(new Vector3(0f, 0.6f, 0f), new Vector3(0f, 0.64f, 0f), 0.33f, 0.33f, 8);
+            model.Glow.Cylinder(new Vector3(0f, 0.615f, 0f), new Vector3(0f, 0.625f, 0f), 0.334f, 0.334f, 8, capA: false, capB: false);
             foreach (float face in new[] { 0.29f, -0.29f })
                 MachineModels.Vent(model, 0f, 0.38f, face, 0.3f, 0.3f, 4);
             foreach (float x in new[] { -1f, 1f })
                 foreach (float z in new[] { -1f, 1f })
-                    model.Armor.Cylinder(new Vector3(x * 0.22f, 0.5f, z * 0.22f), new Vector3(x * (width * 0.42f), height - 0.08f, z * (depth * 0.42f)), 0.025f, 0.02f, 8);
+                {
+                    model.Armor.Cylinder(new Vector3(x * 0.22f, 0.5f, z * 0.22f), new Vector3(x * (width * 0.42f), height - 0.08f, z * (depth * 0.42f)), 0.03f, 0.022f, 8);
+                    model.Dark.Cylinder(new Vector3(x * 0.2f, 0.47f, z * 0.2f), new Vector3(x * 0.24f, 0.53f, z * 0.24f), 0.045f, 0.045f, 8);
+                }
             // The top: a chamfered frame around a dark glass with a glowing grid
             model.Armor.Block(new[]
             {
@@ -75,8 +91,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 model.Glow.Box(new Vector3(t, height - 0.013f, 0f), new Vector3(0.004f, 0.002f, inner), null);
                 model.Glow.Box(new Vector3(0f, height - 0.013f, t), new Vector3(inner, 0.002f, 0.004f), null);
             }
-            // The emitter in the middle: rings of light
-            model.Core.Cylinder(new Vector3(0f, height - 0.015f, 0f), new Vector3(0f, height - 0.005f, 0f), 0.06f, 0.05f, 16);
+            // The emitter in the middle: a raised lens in rings of light
+            model.Armor.Cylinder(new Vector3(0f, height - 0.02f, 0f), new Vector3(0f, height + 0.005f, 0f), 0.08f, 0.07f, 16);
+            model.Core.Cylinder(new Vector3(0f, height + 0.005f, 0f), new Vector3(0f, height + 0.02f, 0f), 0.05f, 0.035f, 16);
             foreach (float r in new[] { 0.1f, 0.16f })
                 model.Glow.Cylinder(new Vector3(0f, height - 0.014f, 0f), new Vector3(0f, height - 0.01f, 0f), r, r, 24, capA: false, capB: false);
             // Light strips along the rim, projector studs at the corners
@@ -84,12 +101,16 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 model.Light.Box(new Vector3(0f, height - 0.025f, z), new Vector3(width * 0.92f, 0.01f, 0.01f));
             foreach (float x in new[] { width * 0.5f + 0.003f, -width * 0.5f - 0.003f })
                 model.Light.Box(new Vector3(x, height - 0.025f, 0f), new Vector3(0.01f, 0.01f, depth * 0.92f));
+            // Projector pylons at the corners, leaning in toward the map, a lens on each
             foreach (float x in new[] { -1f, 1f })
                 foreach (float z in new[] { -1f, 1f })
                 {
                     Vector3 c = new Vector3(x * (width * 0.5f - rim * 0.5f), height, z * (depth * 0.5f - rim * 0.5f));
-                    model.Armor.Cylinder(c, c + Vector3.up * 0.03f, 0.03f, 0.025f, 8);
-                    model.Core.Cylinder(c + Vector3.up * 0.03f, c + Vector3.up * 0.05f, 0.015f, 0.008f, 8);
+                    Vector3 lean = new Vector3(-x * 0.03f, 0.11f, -z * 0.03f);
+                    model.Armor.Cylinder(c, c + Vector3.up * 0.025f, 0.035f, 0.032f, 8);
+                    model.Armor.Cylinder(c + Vector3.up * 0.025f, c + lean, 0.022f, 0.016f, 8);
+                    model.Light.Cylinder(c + lean * 0.5f, c + lean * 0.5f + lean.normalized * 0.006f, 0.022f, 0.022f, 8, capA: false, capB: false);
+                    model.Core.Cylinder(c + lean, c + lean + lean.normalized * 0.025f, 0.018f, 0.008f, 8);
                 }
             // A console on the front edge: a tilted keyboard and two small screens
             // The keyboard rises toward the table, the screens lean back: both face the player standing at the front (-Z)
@@ -113,18 +134,26 @@ namespace StellarDriveDemoTFAdvanced.Construction
         }
     }
 
-    /// <summary>The table's hologram: relief, markers and the planet's page, rebuilt every few seconds while someone is near.</summary>
+    /// <summary>
+    /// The table's hologram: relief, markers and the planet's page, rebuilt every few seconds while
+    /// someone is near; between scans it is animated by moving transforms only (a scan blade going
+    /// round, a pulse spreading out, spinning rings over the emitter, markers breathing), no mesh work.
+    /// </summary>
     internal sealed class ScannerVisuals : DefaultShipPartVisuals
     {
         private const int Grid = 32;
         // The map stays inside the table's rim (ScannerTable.Size), the page above it
         private const float MapHalf = ScannerTable.Size * 0.5f - 0.11f, MapHeight = 0.4f, Top = 0.96f;
-        private static Material _holoMaterial;
+        private const float ScanSeconds = 3f;
+        private static Material _holoMaterial, _panelMaterial;
+        private static Mesh _bladeMesh, _ringMesh, _beamMesh, _quadMesh;
 
         private GameObject _holo;
         private MeshFilter _relief;
         private MeshFilter _markers;
+        private Transform _blade, _pulse, _ringA, _ringB, _panel, _pageRoot;
         private TextMeshPro _page;
+        private string _pageText;
         private float _next;
         private float _baseline;
         private readonly Vector3[] _heights = new Vector3[(Grid + 1) * (Grid + 1)];
@@ -138,16 +167,17 @@ namespace StellarDriveDemoTFAdvanced.Construction
             bool near = camera != null && (camera.transform.position - transform.position).sqrMagnitude < 25f * 25f;
             if (!near)
             {
-                if (_holo != null)
+                if (_holo != null && _holo.activeSelf)
                     _holo.SetActive(false);
                 return;
             }
             if (_holo == null)
                 Build();
-            _holo.SetActive(true);
+            if (!_holo.activeSelf)
+                _holo.SetActive(true);
             if (Time.unscaledTime >= _next)
             {
-                _next = Time.unscaledTime + 3f;
+                _next = Time.unscaledTime + ScanSeconds;
                 try
                 {
                     Scan(root);
@@ -157,40 +187,206 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     ErrorLog.Report("cartography table", e);
                 }
             }
+            Animate();
             // The page turns to the viewer, about the table's up axis
-            Vector3 toCamera = Vector3.ProjectOnPlane(camera.transform.position - _page.transform.position, transform.up);
+            Vector3 toCamera = Vector3.ProjectOnPlane(camera.transform.position - _pageRoot.position, transform.up);
             if (toCamera.sqrMagnitude > 0.01f)
-                _page.transform.rotation = Quaternion.LookRotation(-toCamera.normalized, transform.up);
+                _pageRoot.rotation = Quaternion.LookRotation(-toCamera.normalized, transform.up);
+        }
+
+        private void Animate()
+        {
+            float t = Time.unscaledTime;
+            // One turn of the blade and one pulse per scan
+            float phase = 1f - Mathf.Clamp01((_next - t) / ScanSeconds);
+            _blade.localRotation = Quaternion.Euler(0f, phase * 360f, 0f);
+            float pulse = Mathf.Max(0.02f, phase);
+            _pulse.localScale = new Vector3(pulse, 1f, pulse);
+            _ringA.localRotation = Quaternion.Euler(12f, t * 70f, 0f);
+            _ringB.localRotation = Quaternion.Euler(-16f, -t * 45f, 0f);
+            _markers.transform.localScale = new Vector3(1f, 1f + 0.18f * Mathf.Sin(t * 4f), 1f);
         }
 
         private void Build()
         {
             if (_holoMaterial == null)
                 _holoMaterial = TransparentMaterials.Additive("TFA_ScannerHolo", null);
+            if (_panelMaterial == null)
+                _panelMaterial = TransparentMaterials.Blended("TFA_ScannerPanel", new Color(0.01f, 0.03f, 0.05f, 0.82f));
+            BuildMeshes();
             _holo = new GameObject("TFA_ScannerHologram") { layer = gameObject.layer };
             _holo.transform.SetParent(transform, false);
             _holo.transform.localPosition = new Vector3(0f, Top, 0f);
-            _relief = Child("Relief");
-            _markers = Child("Markers");
-            var page = new GameObject("TFA_ScannerPage") { layer = gameObject.layer };
-            page.transform.SetParent(_holo.transform, false);
-            page.transform.localPosition = new Vector3(0f, MapHeight + 0.1f, 0f);
-            _page = page.AddComponent<TextMeshPro>();
+            _relief = Child("Relief", _holoMaterial);
+            _markers = Child("Markers", _holoMaterial);
+            Child("Beam", _holoMaterial).sharedMesh = _beamMesh;
+            MeshFilter blade = Child("Blade", _holoMaterial);
+            blade.sharedMesh = _bladeMesh;
+            _blade = blade.transform;
+            MeshFilter pulse = Child("Pulse", _holoMaterial);
+            pulse.sharedMesh = _ringMesh;
+            _pulse = pulse.transform;
+            _pulse.localScale = new Vector3(0.02f, 1f, 0.02f);
+            _pulse.localPosition = new Vector3(0f, 0.006f, 0f);
+            MeshFilter ringA = Child("RingA", _holoMaterial), ringB = Child("RingB", _holoMaterial);
+            ringA.sharedMesh = ringB.sharedMesh = _ringMesh;
+            _ringA = ringA.transform;
+            _ringB = ringB.transform;
+            _ringA.localPosition = new Vector3(0f, 0.07f, 0f);
+            _ringA.localScale = new Vector3(0.16f / MapHalf, 1f, 0.16f / MapHalf);
+            _ringB.localPosition = new Vector3(0f, 0.11f, 0f);
+            _ringB.localScale = new Vector3(0.11f / MapHalf, 1f, 0.11f / MapHalf);
+            // The page: dark glass behind bright text, framed, turned to whoever looks
+            var pageRoot = new GameObject("TFA_ScannerPage") { layer = gameObject.layer };
+            pageRoot.transform.SetParent(_holo.transform, false);
+            pageRoot.transform.localPosition = new Vector3(0f, MapHeight + 0.12f, 0f);
+            _pageRoot = pageRoot.transform;
+            var panel = new GameObject("Panel") { layer = gameObject.layer };
+            panel.transform.SetParent(_pageRoot, false);
+            panel.AddComponent<MeshFilter>().sharedMesh = _quadMesh;
+            var panelRenderer = panel.AddComponent<MeshRenderer>();
+            panelRenderer.sharedMaterial = _panelMaterial;
+            panelRenderer.shadowCastingMode = ShadowCastingMode.Off;
+            _panel = panel.transform;
+            var text = new GameObject("Text") { layer = gameObject.layer };
+            text.transform.SetParent(_pageRoot, false);
+            _page = text.AddComponent<TextMeshPro>();
             _page.font = ComputerStyle.Font;
-            _page.fontSize = 0.7f;
-            _page.color = new Color(0.6f, 0.95f, 1f);
+            _page.richText = true;
+            _page.color = new Color(0.85f, 0.97f, 1f);
             _page.alignment = TextAlignmentOptions.Bottom;
             _page.textWrappingMode = TextWrappingModes.Normal;
-            _page.rectTransform.sizeDelta = new Vector2(ScannerTable.Size, 0.9f);
+            _page.enableAutoSizing = true;
+            _page.fontSizeMax = 1f;
+            _page.fontSizeMin = 0.6f;
+            _page.fontSize = 1f;
+            _page.outlineWidth = 0.18f;
+            _page.outlineColor = new Color32(0, 10, 20, 255);
+            _page.rectTransform.sizeDelta = new Vector2(ScannerTable.Size * 1.25f, 0.95f);
             _page.rectTransform.pivot = new Vector2(0.5f, 0f);
+            _panel.gameObject.SetActive(false);
         }
 
-        private MeshFilter Child(string name)
+        /// <summary>Development: where to stand to read the first table's page (photos).</summary>
+        public static bool DevView(out Vector3 eye, out Vector3 aim)
+        {
+            eye = aim = Vector3.zero;
+            ScannerVisuals table = FindObjectsByType<ScannerVisuals>(FindObjectsSortMode.None).FirstOrDefault(v => v._pageRoot != null);
+            if (table == null)
+                return false;
+            Transform t = table.transform;
+            aim = t.position + t.up * (Top + MapHeight * 0.8f);
+            eye = aim - t.forward * 1.9f + t.up * 0.15f;
+            return true;
+        }
+
+        /// <summary>Development: every page turned to a photo camera (the player's camera turns them otherwise).</summary>
+        public static void FaceAll(Vector3 eye)
+        {
+            foreach (ScannerVisuals table in FindObjectsByType<ScannerVisuals>(FindObjectsSortMode.None))
+            {
+                if (table._pageRoot == null)
+                    continue;
+                Vector3 toEye = Vector3.ProjectOnPlane(eye - table._pageRoot.position, table.transform.up);
+                if (toEye.sqrMagnitude > 0.01f)
+                    table._pageRoot.rotation = Quaternion.LookRotation(-toEye.normalized, table.transform.up);
+                AdvancedMod.Log.Msg($"dev: scanner page: panel {table._panel.gameObject.activeSelf} size {table._panel.localScale}, text {table._page.textBounds.size}, font {table._page.fontSize:0.00}, panel material {table._panel.GetComponent<MeshRenderer>().sharedMaterial?.name}");
+            }
+        }
+
+        // Shared by every table: built once
+        private static void BuildMeshes()
+        {
+            if (_bladeMesh != null)
+                return;
+            // The scan blade: a vertical sheet from the center to the rim, bright at its leading edge and
+            // trailing off behind over 40°
+            var vertices = new List<Vector3>();
+            var colors = new List<Color>();
+            var triangles = new List<int>();
+            const int steps = 12;
+            for (int i = 0; i <= steps; i++)
+            {
+                float a = -i / (float)steps * 40f * Mathf.Deg2Rad;
+                var dir = new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a));
+                float fade = 1f - i / (float)steps;
+                Color c = new Color(0.3f, 0.95f, 1f) * (0.45f * fade * fade);
+                vertices.Add(Vector3.zero);
+                vertices.Add(dir * MapHalf);
+                colors.Add(c);
+                colors.Add(c * 0.6f);
+                if (i > 0)
+                {
+                    int b = i * 2;
+                    triangles.AddRange(new[] { b - 2, b - 1, b + 1, b - 2, b + 1, b });
+                }
+            }
+            // The leading edge as a thin wall of light
+            int w = vertices.Count;
+            vertices.Add(new Vector3(0f, 0f, 0f)); vertices.Add(new Vector3(0f, 0f, MapHalf)); vertices.Add(new Vector3(0f, MapHeight * 0.5f, MapHalf)); vertices.Add(new Vector3(0f, MapHeight * 0.5f, 0f));
+            colors.Add(new Color(0.4f, 1f, 1f) * 0.5f); colors.Add(new Color(0.4f, 1f, 1f) * 0.35f); colors.Add(Color.clear); colors.Add(Color.clear);
+            triangles.AddRange(new[] { w, w + 1, w + 2, w, w + 2, w + 3 });
+            _bladeMesh = Mesh("TFA_ScannerBlade", vertices, colors, triangles);
+            // A ring of radius MapHalf (scaled for the pulse and the emitter's rings)
+            vertices.Clear(); colors.Clear(); triangles.Clear();
+            const int sides = 48;
+            for (int i = 0; i <= sides; i++)
+            {
+                float a = i * Mathf.PI * 2f / sides;
+                var dir = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                vertices.Add(dir * MapHalf * 0.97f);
+                vertices.Add(dir * MapHalf);
+                colors.Add(new Color(0.3f, 0.95f, 1f) * 0.15f);
+                colors.Add(new Color(0.5f, 1f, 1f) * 0.8f);
+                if (i > 0)
+                {
+                    int b = i * 2;
+                    triangles.AddRange(new[] { b - 2, b - 1, b + 1, b - 2, b + 1, b });
+                }
+            }
+            _ringMesh = Mesh("TFA_ScannerRing", vertices, colors, triangles);
+            // The emitter's beam: a faint cone of light from the lens up to the page
+            vertices.Clear(); colors.Clear(); triangles.Clear();
+            for (int i = 0; i <= 16; i++)
+            {
+                float a = i * Mathf.PI * 2f / 16;
+                var dir = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                vertices.Add(dir * 0.04f + Vector3.up * 0.02f);
+                vertices.Add(dir * 0.2f + Vector3.up * (MapHeight + 0.1f));
+                colors.Add(new Color(0.3f, 0.9f, 1f) * 0.22f);
+                colors.Add(Color.clear);
+                if (i > 0)
+                {
+                    int b = i * 2;
+                    triangles.AddRange(new[] { b - 2, b - 1, b + 1, b - 2, b + 1, b });
+                }
+            }
+            _beamMesh = Mesh("TFA_ScannerBeam", vertices, colors, triangles);
+            // A unit quad, facing -z (the page's front), for the dark glass
+            vertices.Clear(); colors.Clear(); triangles.Clear();
+            vertices.Add(new Vector3(-0.5f, -0.5f, 0f)); vertices.Add(new Vector3(0.5f, -0.5f, 0f)); vertices.Add(new Vector3(0.5f, 0.5f, 0f)); vertices.Add(new Vector3(-0.5f, 0.5f, 0f));
+            for (int i = 0; i < 4; i++)
+                colors.Add(Color.white);
+            triangles.AddRange(new[] { 0, 2, 1, 0, 3, 2 });
+            _quadMesh = Mesh("TFA_ScannerPanel", vertices, colors, triangles);
+        }
+
+        private static Mesh Mesh(string name, List<Vector3> vertices, List<Color> colors, List<int> triangles)
+        {
+            var mesh = new Mesh { name = name };
+            mesh.SetVertices(vertices);
+            mesh.SetColors(colors);
+            mesh.SetTriangles(triangles, 0);
+            mesh.RecalculateBounds();
+            return mesh;
+        }
+
+        private MeshFilter Child(string name, Material material)
         {
             var go = new GameObject(name) { layer = gameObject.layer };
             go.transform.SetParent(_holo.transform, false);
             var renderer = go.AddComponent<MeshRenderer>();
-            renderer.sharedMaterial = _holoMaterial;
+            renderer.sharedMaterial = material;
             renderer.shadowCastingMode = ShadowCastingMode.Off;
             return go.AddComponent<MeshFilter>();
         }
@@ -313,7 +509,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             Mesh markMesh = marks.Build("TFA_ScannerMarkers");
             markMesh.SetColors(colors);
             _markers.sharedMesh = markMesh;
-            _page.text = Page(ground > 0, ores, chests, ships, buildings);
+            SetPage(Page(ground > 0, ores, chests, ships, buildings));
         }
 
         private static readonly List<GameObject> RootBuffer = new List<GameObject>();
@@ -429,6 +625,25 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 : Color.Lerp(new Color(0.2f, 0.9f, 1f, 0.9f), new Color(0.95f, 1f, 1f, 1f), (t - 0.5f) * 2f);
         }
 
+        // New text only when it changed; the dark glass is fitted to it
+        private void SetPage(string text)
+        {
+            if (text == _pageText)
+                return;
+            _pageText = text;
+            _page.text = text;
+            _page.ForceMeshUpdate();
+            Bounds bounds = _page.textBounds;
+            if (bounds.size.x <= 0f)
+            {
+                _panel.gameObject.SetActive(false);
+                return;
+            }
+            _panel.gameObject.SetActive(true);
+            _panel.localPosition = new Vector3(bounds.center.x, bounds.center.y, 0.01f);
+            _panel.localScale = new Vector3(bounds.size.x + 0.08f, bounds.size.y + 0.06f, 1f);
+        }
+
         private string Page(bool ground, int ores, int chests, int ships, int buildings)
         {
             var text = new StringBuilder();
@@ -437,18 +652,19 @@ namespace StellarDriveDemoTFAdvanced.Construction
             WikiEntry entry = planet != null ? PlanetWiki.Get(planet.Id) : null;
             if (entry != null)
             {
-                text.Append("<b>").Append(entry.Name.ToUpperInvariant()).Append("</b>  <size=70%>").Append(PlanetWiki.SystemName(entry.System)).Append("</size>\n");
-                text.Append("<size=75%>").Append(entry.Biome).Append(" · ").Append(entry.Gravity).Append(" · air ").Append(entry.Air).Append('\n');
-                text.Append(Loc.Pick("Ressources : ", "Resources: ", "Recursos: ")).Append(string.Join(", ", entry.Resources)).Append('\n');
-                text.Append(Loc.Pick("Lieux : ", "Places: ", "Lugares: ")).Append(string.Join(", ", entry.Places)).Append('\n');
+                text.Append("<size=125%><b><color=#ffffff>").Append(entry.Name.ToUpperInvariant()).Append("</color></b></size>  <color=#7fd8ff>").Append(PlanetWiki.SystemName(entry.System)).Append("</color>\n");
+                text.Append("<size=80%>");
+                text.Append("<color=#ffffff>").Append(entry.Biome).Append("</color>  ·  ").Append(entry.Gravity).Append("  ·  air ").Append(entry.Air).Append('\n');
+                text.Append("<color=#7fd8ff>").Append(Loc.Pick("Ressources", "Resources", "Recursos")).Append("</color>  ").Append(string.Join(", ", entry.Resources)).Append('\n');
+                text.Append("<color=#7fd8ff>").Append(Loc.Pick("Lieux", "Places", "Lugares")).Append("</color>  ").Append(string.Join(", ", entry.Places)).Append('\n');
                 text.Append(entry.Use);
                 if (!string.IsNullOrEmpty(entry.Danger))
                     text.Append("\n<color=#ff9a6a>").Append(entry.Danger).Append("</color>");
                 text.Append("</size>\n");
             }
-            text.Append("<size=70%><color=#ffb060>■</color> ").Append(ores).Append(Loc.Pick(" gisements", " deposits", " yacimientos")).Append("  <color=#ffe040>■</color> ").Append(chests)
-                .Append(Loc.Pick(" coffres", " chests", " cofres")).Append("  <color=#c080ff>■</color> ").Append(buildings).Append(Loc.Pick(" bâtiments", " buildings", " edificios"))
-                .Append("  <color=#ffffff>■</color> ").Append(ships).Append(Loc.Pick(" vaisseaux", " ships", " naves"));
+            text.Append("<size=80%><color=#ffb060>■ ").Append(ores).Append(Loc.Pick(" gisements", " deposits", " yacimientos")).Append("</color>   <color=#ffe040>■ ").Append(chests)
+                .Append(Loc.Pick(" coffres", " chests", " cofres")).Append("</color>   <color=#c080ff>■ ").Append(buildings).Append(Loc.Pick(" bâtiments", " buildings", " edificios"))
+                .Append("</color>   <color=#ffffff>■ ").Append(ships).Append(Loc.Pick(" vaisseaux", " ships", " naves")).Append("</color>");
             if (!ground)
                 text.Append(Loc.Pick("\nAucun sol à portée : scan de l'espace", "\nNo ground in range: scanning space", "\nSin terreno al alcance: escaneando el espacio"));
             text.Append("</size>");

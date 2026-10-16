@@ -173,6 +173,17 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 Pirates.AddBase(baseState.Id);
                 AdvancedMod.Log.Msg($"dev: pirate test: base {baseState.Id} built with {baseState.StatefulParts.Length} parts");
             }
+            else if (which == 16)
+            {
+                // The loot ping alone: a capsule dropped by the target ship as if it were a destroyed scout
+                Pirates.DevDropLoot(target);
+                yield return Worlds.StationVisit.Wait(3f);
+                AdvancedMod.Log.Msg("dev: pirate test: loot pings " + LootPing.DevState());
+                ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(DevHarness.Folder, "pirate_lootping.png"));
+                yield return Worlds.StationVisit.Wait(2f);
+                AdvancedMod.Log.Msg("dev: pirate test: loot pings " + LootPing.DevState());
+                yield break;
+            }
             else
             {
                 // 1-4: scout, corsair, raider, cruiser; 5: one at random; 7-10: hornet, lancer, torpedo boat, dreadnought;
@@ -230,6 +241,9 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 {
                     AdvancedMod.Log.Msg("dev: pirate test: no pirate left");
                     yield return Worlds.StationVisit.Wait(3f);
+                    AdvancedMod.Log.Msg("dev: pirate test: loot pings " + LootPing.DevState());
+                    ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(DevHarness.Folder, "pirate_lootping.png"));
+                    yield return null;
                     foreach (uint id in spawned.Concat(ships.LoadedRootShips.Where(s => s.PartCount <= 3 && s.StatefulParts.Any(p => p.Settings != null && p.Settings.id == 30)).Select(s => s.Id)).Distinct())
                     {
                         TrackedShipServer wreck = ships.GetShip(id);

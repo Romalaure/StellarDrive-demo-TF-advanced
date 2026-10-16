@@ -22,13 +22,13 @@ namespace StellarDriveDemoTFAdvanced.Construction
     /// </summary>
     internal static class ControlSeat
     {
-        private const uint Iron = 101, Copper = 112, Aluminum = 104;
+        private const uint Iron = 101, Copper = 112;
 
         public static void Configure(PartSettings settings, GameObject prefab)
         {
             PartFactory.Describe(settings, Loc.Pick("Siège de commande à leviers", "Lever control seat", "Asiento de mando con palancas"),
                 Loc.Pick("Le poste de pilotage avancé du jeu (on s'y assoit, il pilote et sort six signaux sur ses six prises) avec deux consoles d'accoudoir de trois leviers chacune. Les leviers suivent les commandes envoyées : à gauche les déplacements (latéral, vertical, avant), à droite les rotations (tangage, lacet, roulis). Pour piloter une station, une grue ou des portes depuis un fauteuil.", "The game's advanced pilot station (you sit in it, it flies and sends six signals on its six sockets) with two armrest consoles of three levers each. The levers follow the commands sent: on the left the moves (sideways, vertical, forward), on the right the rotations (pitch, yaw, roll). To drive a station, a crane or doors from an armchair.", "El puesto de pilotaje avanzado del juego (te sientas en él, pilota y envía seis señales por sus seis tomas) con dos consolas de reposabrazos de tres palancas cada una. Las palancas siguen las órdenes enviadas: a la izquierda los desplazamientos (lateral, vertical, avance), a la derecha las rotaciones (cabeceo, guiñada, alabeo). Para manejar una estación, una grúa o puertas desde un sillón."),
-                40f, new[] { (Iron, 10), (Copper, 6), (Aluminum, 4) });
+                40f, new[] { (Iron, 14), (Copper, 6) });
             GameSkin.Capture(prefab);
             Transform visuals = prefab.GetComponentInChildren<IShipPartVisual>(true)?.GameObject.transform;
             if (visuals == null)

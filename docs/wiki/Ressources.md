@@ -17,4 +17,4 @@
 
 La **matière noire** et le **combustible nucléaire** sont des fluides : elle circule dans les conduites et se stocke dans les réservoirs, comme l'oxygène.
 
-Les gisements se minent au laser comme les rochers du jeu. Les coffres des bâtiments (une fois chacun) et des stations contiennent aussi fer, verre, cuivre, aluminium, bois, lingots et clés.
+Les gisements se minent au laser comme les rochers du jeu. Les coffres des bâtiments (une fois chacun) et des stations contiennent aussi fer, verre, cuivre, titane, bois, lingots et clés.

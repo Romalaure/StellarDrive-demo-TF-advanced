@@ -768,6 +768,9 @@ namespace StellarDriveDemoTFAdvanced.Combat
             }
         }
 
+        /// <summary>Development: a scout's loot capsule thrown from the given ship (DevPirateTest 16).</summary>
+        public static void DevDropLoot(TrackedShipServer ship) => DropLoot(Ships, ship, PirateShips.All[0]);
+
         /// <summary>The loot capsule, thrown clear of the wreck before it blows up.</summary>
         private static void DropLoot(ShipsServerTracker ships, TrackedShipServer wreck, PirateDesign design)
         {
@@ -788,6 +791,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
                 state.RelativeSpaceId = spaces.GetOrCreateShipRelativeSpace(state.Id);
                 ships.LoadShip(state);
                 AdvancedMod.Log.Msg($"pirates: loot capsule {state.Id} left by {design.Name}");
+                LootPing.Announce(state.Id);
             }
             catch (Exception e)
             {

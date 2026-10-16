@@ -101,6 +101,8 @@ Le pilote pirate fonce sur votre vaisseau puis tourne autour de lui à sa distan
 
 Détruit, un pirate explose et laisse une **capsule de butin** (un coffre sur une plaque), plus riche selon sa difficulté : titane, uranium et cryonite pour l'éclaireur ; alliage nexorien en plus pour le corsaire ; noyau quantique et météorite pour le pillard ; le croiseur ajoute un fragment d'artefact. Le frelon laisse un peu plus que l'éclaireur, le lancier un noyau quantique, le torpilleur deux noyaux et de la météorite, le cuirassé deux artefacts et de la matière exotique.
 
+Un **marqueur doré** à l'écran montre où est la capsule (avec sa distance) pendant 10 minutes, ou jusqu'à ce qu'elle disparaisse ; hors du champ de vision, il reste au bord de l'écran et pointe vers elle. Réglage `LootPingMinutes` (0 : pas de marqueur).
+
 Un pirate laissé loin derrière (plus de 9 km) pendant 10 minutes s'en va.
 
 Réglages (`[TFAdvanced]`) : `Pirates = false` pour ne plus en voir, `PirateIntervalMinutes` pour leur fréquence, `PirateDangerStepKm` pour la distance entre deux niveaux de danger.

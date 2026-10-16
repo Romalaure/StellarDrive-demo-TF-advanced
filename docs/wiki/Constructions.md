@@ -28,4 +28,4 @@ Onglet **TF Blindage**, recherche *Blindage renforcé*. Les pièces de coque du 
 - **3 fois plus solide** dans les collisions ;
 - avec le mod **Arsenal** : les armes n'y font qu'**un tiers des dégâts** et n'y percent **aucun trou** ;
 - **1,5 fois plus lourde** ;
-- coût : le double de fer (ou de verre), plus 1 aluminium (fer renforcé) ou 1 fer (verre renforcé).
+- coût : le double de fer (ou de verre), plus 1 titane (fer renforcé) ou 1 fer (verre renforcé).

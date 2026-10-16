@@ -24,7 +24,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
     /// new ids, with the game's own model and hull look, painted a little darker when placed. They
     /// are real hull (the voxel grid, airtight rooms), only tougher: collisions need three times
     /// the impact to break them, Arsenal's weapons do a third of the damage and punch no holes.
-    /// They weigh half again as much and cost twice the material plus aluminium (iron) or iron
+    /// They weigh half again as much and cost twice the material plus titanium (iron) or iron
     /// (glass). Only call <see cref="Register"/> when SDModKit is loaded.
     /// </summary>
     internal static class ReinforcedHull
@@ -146,9 +146,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 ? Loc.Pick("Verre feuilleté et trempé, teinté plus sombre : trois fois plus résistant aux chocs, les armes n'y font qu'un tiers des dégâts et aucun trou. Se pose comme le verre du jeu.",
                     "Laminated, tempered glass, tinted darker: three times tougher in collisions, weapons do a third of the damage and punch no holes. Placed like the game's glass.",
                     "Vidrio laminado y templado, tintado más oscuro: tres veces más resistente a los choques, las armas solo hacen un tercio del daño y ningún agujero. Se coloca como el vidrio del juego.")
-                : Loc.Pick("Plaque de fer doublée d'aluminium, plus sombre : trois fois plus résistante aux chocs, les armes n'y font qu'un tiers des dégâts et aucun trou. Une fois et demie plus lourde. Se pose comme la coque du jeu.",
-                    "Iron plate backed with aluminium, darker: three times tougher in collisions, weapons do a third of the damage and punch no holes. Half again as heavy. Placed like the game's hull.",
-                    "Placa de hierro reforzada con aluminio, más oscura: tres veces más resistente a los choques, las armas solo hacen un tercio del daño y ningún agujero. Una vez y media más pesada. Se coloca como el casco del juego.");
+                : Loc.Pick("Plaque de fer doublée de titane, plus sombre : trois fois plus résistante aux chocs, les armes n'y font qu'un tiers des dégâts et aucun trou. Une fois et demie plus lourde. Se pose comme la coque du jeu.",
+                    "Iron plate backed with titanium, darker: three times tougher in collisions, weapons do a third of the damage and punch no holes. Half again as heavy. Placed like the game's hull.",
+                    "Placa de hierro reforzada con titanio, más oscura: tres veces más resistente a los choques, las armas solo hacen un tercio del daño y ningún agujero. Una vez y media más pesada. Se coloca como el casco del juego.");
         }
 
         // The pivoted plate and the corners switch to their pivoted twin: the reinforced twin
@@ -175,7 +175,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             return new List<ItemDrop>
             {
                 new ItemDrop { ItemId = glass ? ItemsConstants.GlassItemId : ItemsConstants.IronItemId, Quantity = (byte)(quantity * 2) },
-                new ItemDrop { ItemId = glass ? ItemsConstants.IronItemId : 104u, Quantity = 1 },
+                new ItemDrop { ItemId = glass ? ItemsConstants.IronItemId : Items.ModItems.Titanium, Quantity = 1 },
             };
         }
 

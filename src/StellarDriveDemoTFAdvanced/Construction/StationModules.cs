@@ -104,7 +104,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             public IEnumerable<Door> AllDoors => Doors ?? new[] { Side.Back, Side.Front, Side.Left, Side.Right }.Where(d => (Openings & d) != 0).Select(d => new Door(d));
         }
 
-        private const uint Iron = 101, Glass = 102, Aluminum = 104, Copper = 112;
+        private const uint Iron = 101, Glass = 102, Titanium = Items.ModItems.Titanium, Copper = 112;
 
         public static readonly Spec[] All =
         {
@@ -112,28 +112,28 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 Id = HabitationId, Label = Loc.Pick("Module d'habitation", "Habitation module", "Módulo de habitación"), Mass = 900f, Size = new Vector3(4f, 3f, 6f), Openings = Side.Front | Side.Back, Windows = true,
                 Donor = "StorageChest", StateClass = "StorageState", AirSocket = 0,
-                Cost = new[] { (Iron, 40), (Glass, 12), (Aluminum, 10), (Copper, 6) },
+                Cost = new[] { (Iron, 40), (Glass, 12), (Titanium, 10), (Copper, 6) },
                 Description = Loc.Pick("Une pièce de station de 4 × 6 m, 3 m sous plafond, avec hublots et portes aux deux bouts. Tout y sert : la couchette du bas est un vrai lit (dormir pour passer le temps, comme le lit du jeu), la couchette du haut fait de la pièce votre point de réapparition, l'armoire à casiers est un rangement de dix emplacements, la console murale ouvre le wiki du mod et l'interrupteur près de la porte allume ou éteint la pièce. Pressurisée si un module de la station est relié à une conduite d'oxygène (prise de fluide sous le plancher, à l'arrière).", "A 4 × 6 m station room, 3 m high, with portholes and doors at both ends. Everything works: the lower bunk is a real bed (sleep to pass the time, like the game's bed), the upper bunk makes the room your respawn point, the locker is a ten-slot storage, the wall console opens the mod's wiki and the switch by the door turns the room's lights on or off. Pressurized if a module of the station is linked to an oxygen line (fluid socket under the floor, at the back).", "Una sala de estación de 4 × 6 m, 3 m de alto, con ojos de buey y puertas en ambos extremos. Todo funciona: la litera de abajo es una cama de verdad (duerme para pasar el tiempo, como la cama del juego), la de arriba hace de la sala tu punto de reaparición, la taquilla es un almacén de diez casillas, la consola de pared abre la wiki del mod y el interruptor junto a la puerta enciende o apaga las luces de la sala. Presurizada si un módulo de la estación está conectado a una línea de oxígeno (toma de fluido bajo el suelo, al fondo)."),
                 Interior = Habitation
             },
             new Spec
             {
                 Id = CorridorId, Label = Loc.Pick("Couloir pressurisé", "Pressurized corridor", "Pasillo presurizado"), Mass = 380f, Size = new Vector3(2.4f, 2.6f, 4f), Openings = Side.Front | Side.Back,
-                Cost = new[] { (Iron, 16), (Glass, 2), (Aluminum, 4) },
+                Cost = new[] { (Iron, 16), (Glass, 2), (Titanium, 4) },
                 Description = Loc.Pick("Couloir de 4 m entre deux modules, avec mains courantes, caillebotis et éclairage. Pressurisé comme les autres modules de la station.", "4 m corridor between two modules, with handrails, grating and lights. Pressurized like the station's other modules.", "Pasillo de 4 m entre dos módulos, con pasamanos, rejilla y luces. Presurizado como los demás módulos de la estación."),
                 Interior = Corridor
             },
             new Spec
             {
                 Id = HubId, Label = Loc.Pick("Hub de connexion", "Connection hub", "Nodo de conexión"), Mass = 700f, Size = new Vector3(4f, 3f, 4f), Openings = Side.Front | Side.Back | Side.Left | Side.Right, Windows = false,
-                Cost = new[] { (Iron, 30), (Glass, 4), (Aluminum, 8), (Copper, 8) },
+                Cost = new[] { (Iron, 30), (Glass, 4), (Titanium, 8), (Copper, 8) },
                 Description = Loc.Pick("Carrefour de 4 × 4 m avec une porte sur chaque face pour relier jusqu'à quatre modules, et une console centrale qui ouvre le wiki du mod.", "4 × 4 m crossroads with a door on each side to link up to four modules, and a central console that opens the mod's wiki.", "Cruce de 4 × 4 m con una puerta en cada lado para unir hasta cuatro módulos, y una consola central que abre la wiki del mod."),
                 Interior = Hub
             },
             new Spec
             {
                 Id = StorageId, Label = Loc.Pick("Module de stockage", "Storage module", "Módulo de almacén"), Mass = 650f, Size = new Vector3(4f, 3f, 4f), Openings = Side.Back, Donor = "StorageChest", StateClass = "StorageState", AirSocket = 0,
-                Cost = new[] { (Iron, 30), (Aluminum, 10), (Copper, 4) },
+                Cost = new[] { (Iron, 30), (Titanium, 10), (Copper, 4) },
                 Description = Loc.Pick("Soute de station avec ses étagères et un terminal d'inventaire au fond (dix emplacements, comme un coffre). Une seule porte, à l'arrière.", "Station hold with shelves and an inventory terminal at the far end (ten slots, like a chest). A single door, at the back.", "Bodega de estación con estanterías y una terminal de inventario al fondo (diez casillas, como un cofre). Una sola puerta, al fondo."),
                 Interior = Storage
             },
@@ -142,7 +142,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 Id = DockingId, Label = Loc.Pick("Module d'amarrage", "Docking module", "Módulo de atraque"), Mass = 520f, Size = new Vector3(3f, 2.6f, 4f), Openings = Side.Back | Side.Front, StateClass = "DockingDoorState", AirSocket = 1,
                 // The game docks at a fixed point of a docking door's frame, (0.5, 0.5, 0.25): the collar is put there
                 Offset = new Vector3(0.5f, -0.5f, 0.25f - 2f),
-                Cost = new[] { (Iron, 24), (Aluminum, 8), (Copper, 6), (Glass, 2) },
+                Cost = new[] { (Iron, 24), (Titanium, 8), (Copper, 6), (Glass, 2) },
                 Description = Loc.Pick("Sas avec un collier d'amarrage magnétique au bout : un vaisseau s'y amarre par sa porte d'amarrage, comme sur la porte du jeu (signal > 0 sur la prise de commande pour l'aimant). Posez-en plusieurs autour d'un hub pour accueillir plusieurs vaisseaux.", "An airlock with a magnetic docking collar at its end: a ship docks to it with its docking door, as on the game's door (signal > 0 on the command socket for the magnet). Put several around a hub to host several ships.", "Una esclusa con un collar de atraque magnético en su extremo: una nave se acopla a él con su puerta de atraque, como en la puerta del juego (señal > 0 en la toma de mando para el imán). Pon varios alrededor de un nodo para recibir varias naves."),
                 Interior = Docking
             },
@@ -151,7 +151,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 Id = LaboratoryId, Label = Loc.Pick("Laboratoire", "Laboratory", "Laboratorio"), Mass = 700f, Size = new Vector3(4f, 3f, 4f), Openings = Side.Back, Windows = true, Row = 1,
                 Donor = "ResearchTable", KeepDonor = true, DonorAt = new Vector3(0f, Wall, 1.1f), DonorTurn = 180f, AirSocket = 0,
-                Cost = new[] { (Iron, 30), (Glass, 10), (Aluminum, 8), (Copper, 12) },
+                Cost = new[] { (Iron, 30), (Glass, 10), (Titanium, 8), (Copper, 12) },
                 Description = Loc.Pick("Un laboratoire de station autour d'une vraie table de recherche (on y fait sa recherche comme sur la table du jeu), avec paillasses, flacons et écrans. Une porte à l'arrière.", "A station laboratory around a real research table (research works as on the game's table), with benches, flasks and screens. One door at the back.", "Un laboratorio de estación alrededor de una mesa de investigación real (la investigación funciona como en la mesa del juego), con bancos, matraces y pantallas. Una puerta al fondo."),
                 Interior = Laboratory
             },
@@ -159,7 +159,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 Id = InfirmaryId, Label = Loc.Pick("Infirmerie de clonage", "Cloning infirmary", "Enfermería de clonación"), Mass = 750f, Size = new Vector3(4f, 3f, 4f), Openings = Side.Back, Row = 1,
                 Donor = "ClonePod", KeepDonor = true, DonorAt = new Vector3(0f, Wall, 1.25f), DonorTurn = -90f, AirSocket = 0,
-                Cost = new[] { (Iron, 30), (Glass, 8), (Aluminum, 10), (Copper, 10) },
+                Cost = new[] { (Iron, 30), (Glass, 8), (Titanium, 10), (Copper, 10) },
                 Description = Loc.Pick("Une infirmerie avec une vraie capsule de clonage au fond : choisissez-la comme point de réapparition, comme la capsule du jeu. Deux lits médicaux et une armoire à pharmacie. Une porte à l'arrière.", "An infirmary with a real clone pod at the far end: pick it as your respawn point, like the game's pod. Two medical beds and a medicine cabinet. One door at the back.", "Una enfermería con una cápsula de clonación real al fondo: elígela como punto de reaparición, como la cápsula del juego. Dos camas médicas y un botiquín. Una puerta al fondo."),
                 Interior = Infirmary
             },
@@ -167,7 +167,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 Id = LifeSupportId, Label = Loc.Pick("Module de support vital", "Life support module", "Módulo de soporte vital"), Mass = 800f, Size = new Vector3(4f, 3f, 4f), Openings = Side.Back | Side.Front, Row = 1,
                 StateClass = PowerCatalog.MachineStateClass, AirSocket = PowerCatalog.MachineFluid,
-                Cost = new[] { (Iron, 34), (Glass, 6), (Aluminum, 10), (Copper, 14) },
+                Cost = new[] { (Iron, 34), (Glass, 6), (Titanium, 10), (Copper, 14) },
                 Description = Loc.Pick("Le cœur de l'air d'une station : une usine à oxygène qui consomme 2 500 W (prises électriques sous le plancher, à l'arrière) et fabrique 0,1 unité d'oxygène par seconde dans la conduite de sa prise d'air. Branchez-y un réservoir : tous les modules de la station respirent sur cette conduite. Sa prise signal donne l'oxygène fabriqué (millièmes d'unité/s). Portes aux deux bouts.", "The heart of a station's air: an oxygen plant that draws 2,500 W (power sockets under the floor, at the back) and makes 0.1 unit of oxygen per second into the line on its air socket. Plug a tank into it: every module of the station breathes from that line. Its signal socket gives the oxygen made (thousandths of a unit/s). Doors at both ends.", "El corazón del aire de una estación: una planta de oxígeno que consume 2.500 W (tomas de energía bajo el suelo, al fondo) y produce 0,1 unidades de oxígeno por segundo en la línea de su toma de aire. Conéctale un tanque: todos los módulos de la estación respiran de esa línea. Su toma de señal da el oxígeno producido (milésimas de unidad/s). Puertas en ambos extremos."),
                 Interior = LifeSupport
             },
@@ -176,7 +176,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 Id = ObservatoryId, Label = Loc.Pick("Observatoire", "Observatory", "Observatorio"), Mass = 600f, Size = new Vector3(4f, 3f, 4f), Openings = Side.Back, Windows = true, GlassRoof = true, Row = 1,
                 EndWindows = true, WindowLow = 0.7f, WindowHigh = 2.55f,
                 Donor = "StarMap", KeepDonor = true, DonorAt = new Vector3(0f, Wall + 0.42f, 0.4f), DonorTurn = 180f, AirSocket = 3,
-                Cost = new[] { (Iron, 24), (Glass, 24), (Aluminum, 8), (Copper, 8) },
+                Cost = new[] { (Iron, 24), (Glass, 24), (Titanium, 8), (Copper, 8) },
                 Description = Loc.Pick("Une coupole vitrée pour regarder les étoiles : plafond de verre et grandes baies sur trois côtés, une vraie carte stellaire sur un pupitre bas (elle choisit la cible comme celle du jeu, et son menu passe d'une galaxie à l'autre), deux fauteuils et une lunette. Une porte à l'arrière.", "A glass cupola to watch the stars: glass ceiling and big windows on three sides, a real star map on a low desk (it picks the target like the game's, and its menu switches between galaxies), two armchairs and a telescope. One door at the back.", "Una cúpula de cristal para mirar las estrellas: techo de cristal y grandes ventanas en tres lados, un mapa estelar real sobre un escritorio bajo (elige el objetivo como el del juego, y su menú cambia entre galaxias), dos sillones y un telescopio. Una puerta al fondo."),
                 Interior = Observatory
             },
@@ -185,7 +185,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 Id = AirlockId, Label = Loc.Pick("Sas de dépressurisation", "Airlock", "Esclusa"), Mass = 600f, Size = new Vector3(3f, 2.6f, 3f), Openings = Side.Back | Side.Front, Row = 2,
                 Donor = "Lever", KeepDonor = true, DonorAt = new Vector3(1.08f, 1.05f, -1.05f), DonorTurn = 0f, AirSocket = 1,
-                Cost = new[] { (Iron, 26), (Glass, 4), (Aluminum, 8), (Copper, 8) },
+                Cost = new[] { (Iron, 26), (Glass, 4), (Titanium, 8), (Copper, 8) },
                 Description = Loc.Pick("L'entrée de la base : deux portes étanches commandées par le levier du sas. Levier en bas : la porte intérieure (arrière) est ouverte, l'extérieure fermée et le sas est pressurisé ; levier en haut : la porte intérieure se ferme, l'extérieure (avant) s'ouvre et le sas se vide de son air. Jamais les deux ouvertes. La prise signal du levier donne l'état du sas.", "The base's entrance: two airtight doors driven by the airlock lever. Lever down: the inner door (back) is open, the outer one closed and the airlock is pressurized; lever up: the inner door closes, the outer one (front) opens and the airlock is emptied of air. Never both open. The lever's signal socket gives the airlock's state.", "La entrada de la base: dos puertas estancas manejadas por la palanca de la esclusa. Palanca abajo: la puerta interior (fondo) está abierta, la exterior cerrada y la esclusa presurizada; palanca arriba: la puerta interior se cierra, la exterior (frente) se abre y la esclusa se vacía de aire. Nunca las dos abiertas. La toma de señal de la palanca da el estado de la esclusa."),
                 Interior = Airlock
             },
@@ -193,7 +193,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 Id = CornerId, Label = Loc.Pick("Couloir d'angle", "Corner corridor", "Pasillo en esquina"), Mass = 420f, Size = new Vector3(4.4f, 3f, 4.4f), Row = 2,
                 Doors = new[] { new Door(Side.Back), new Door(Side.Right) },
-                Cost = new[] { (Iron, 12), (Aluminum, 3) },
+                Cost = new[] { (Iron, 12), (Titanium, 3) },
                 Description = Loc.Pick("Coude à 90° de 4,4 × 4,4 m : une porte à l'arrière, une à droite ; assez grand pour que les deux modules qu'il relie ne se touchent pas. Tournez-le en le posant pour tourner à gauche.", "4.4 × 4.4 m 90° bend: one door at the back, one on the right; big enough that the two modules it links do not touch. Rotate it while placing it to turn left.", "Codo de 90° de 4,4 × 4,4 m: una puerta al fondo, otra a la derecha; lo bastante grande para que los dos módulos que une no se toquen. Gíralo al colocarlo para girar a la izquierda."),
                 Interior = SmallCorridor
             },
@@ -201,7 +201,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 Id = TeeId, Label = Loc.Pick("Couloir en T", "T corridor", "Pasillo en T"), Mass = 480f, Size = new Vector3(4.4f, 3f, 4.4f), Row = 2,
                 Doors = new[] { new Door(Side.Back), new Door(Side.Left), new Door(Side.Right) },
-                Cost = new[] { (Iron, 14), (Aluminum, 4) },
+                Cost = new[] { (Iron, 14), (Titanium, 4) },
                 Description = Loc.Pick("Embranchement en T de 4,4 × 4,4 m : une porte à l'arrière, une de chaque côté, chacune assez loin des autres pour y accrocher un module de 4 m de large.", "4.4 × 4.4 m T junction: one door at the back, one on each side, each far enough from the others to attach a 4 m wide module.", "Cruce en T de 4,4 × 4,4 m: una puerta al fondo, una a cada lado, cada una lo bastante lejos de las otras para acoplar un módulo de 4 m de ancho."),
                 Interior = SmallCorridor
             },
@@ -209,7 +209,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 Id = UTurnId, Label = Loc.Pick("Couloir en U (demi-tour)", "U corridor (U-turn)", "Pasillo en U (media vuelta)"), Mass = 620f, Size = new Vector3(8.6f, 3f, 2.8f), Row = 2,
                 Doors = new[] { new Door(Side.Back, -2.15f), new Door(Side.Back, 2.15f) },
-                Cost = new[] { (Iron, 18), (Aluminum, 5) },
+                Cost = new[] { (Iron, 18), (Titanium, 5) },
                 Description = Loc.Pick("Demi-tour à 180° : deux portes sur la même face, à 4,3 m l'une de l'autre, pour accrocher deux modules de 4 m côte à côte et revenir en sens inverse.", "180° U-turn: two doors on the same side, 4.3 m apart, to attach two 4 m modules side by side and head back the other way.", "Media vuelta de 180°: dos puertas del mismo lado, separadas 4,3 m, para acoplar dos módulos de 4 m uno al lado del otro y volver en sentido contrario."),
                 Interior = UTurn
             },
@@ -217,7 +217,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 Id = LongCorridorId, Label = Loc.Pick("Couloir long", "Long corridor", "Pasillo largo"), Mass = 700f, Size = new Vector3(2.4f, 2.6f, 8f), Openings = Side.Front | Side.Back, Windows = true, Row = 2,
                 WindowLow = 1.0f, WindowHigh = 1.9f,
-                Cost = new[] { (Iron, 28), (Glass, 6), (Aluminum, 8) },
+                Cost = new[] { (Iron, 28), (Glass, 6), (Titanium, 8) },
                 Description = Loc.Pick("Couloir vitré de 8 m pour éloigner deux parties de la station.", "8 m glazed corridor to set two parts of the station apart.", "Pasillo acristalado de 8 m para separar dos partes de la estación."),
                 Interior = Corridor
             },
@@ -225,7 +225,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 Id = StairsId, Label = Loc.Pick("Cage d'escalier", "Stairwell", "Hueco de escalera"), Mass = 1400f, Size = new Vector3(4f, 6f, 8f), Row = 2, Levels = 2, Windows = true,
                 Doors = new[] { new Door(Side.Back, 0f, 0), new Door(Side.Front, 0f, 1) },
-                Cost = new[] { (Iron, 50), (Glass, 8), (Aluminum, 12) },
+                Cost = new[] { (Iron, 50), (Glass, 8), (Titanium, 12) },
                 Description = Loc.Pick("Deux étages reliés par un escalier en pente douce (31°) le long du mur gauche : une porte en bas à l'arrière, une en haut à l'avant (palier à 3 m). En entrant par le bas, l'escalier part à gauche. Les modules posés contre la porte du haut se mettent à sa hauteur.", "Two floors linked by a gentle staircase (31°) along the left wall: one door downstairs at the back, one upstairs at the front (landing at 3 m). Coming in from below, the stairs go up on the left. Modules placed against the upper door snap to its height.", "Dos pisos unidos por una escalera suave (31°) a lo largo de la pared izquierda: una puerta abajo al fondo, otra arriba al frente (rellano a 3 m). Entrando por abajo, la escalera sube por la izquierda. Los módulos colocados contra la puerta de arriba se ajustan a su altura."),
                 Interior = Stairs
             },
@@ -233,14 +233,14 @@ namespace StellarDriveDemoTFAdvanced.Construction
             new Spec
             {
                 Id = DomeId, Label = Loc.Pick("Dôme d'habitation", "Habitation dome", "Cúpula habitable"), Mass = 1300f, Size = new Vector3(6f, 5.6f, 6f), Openings = Side.Back | Side.Front, Row = 3, Shape = Shape.Dome,
-                Cost = new[] { (Iron, 50), (Glass, 16), (Aluminum, 14), (Copper, 6) },
+                Cost = new[] { (Iron, 50), (Glass, 16), (Titanium, 14), (Copper, 6) },
                 Description = Loc.Pick("Une grande salle ronde de 6 m sous un dôme : mur circulaire de 2,6 m, coupole jusqu'à 5,6 m, une table ronde, des banquettes et un puits de lumière. Portes à l'arrière et à l'avant. Avec le matériau Verre du pistolet à peinture, la coupole devient transparente.", "A big round 6 m room under a dome: 2.6 m circular wall, cupola up to 5.6 m, a round table, benches and a light well. Doors at the back and front. With the paint gun's Glass material, the cupola becomes see-through.", "Una gran sala redonda de 6 m bajo una cúpula: pared circular de 2,6 m, cúpula hasta 5,6 m, una mesa redonda, bancos y un pozo de luz. Puertas al fondo y al frente. Con el material Cristal de la pistola de pintura, la cúpula se vuelve transparente."),
                 Interior = DomeRoom
             },
             new Spec
             {
                 Id = TubeId, Label = Loc.Pick("Couloir cylindrique", "Cylindrical corridor", "Pasillo cilíndrico"), Mass = 420f, Size = new Vector3(3.4f, 3.25f, 4f), Openings = Side.Back | Side.Front, Row = 3, Shape = Shape.Tube,
-                Cost = new[] { (Iron, 18), (Aluminum, 5) },
+                Cost = new[] { (Iron, 18), (Titanium, 5) },
                 Description = Loc.Pick("Un couloir en tube de 4 m, rond comme un module de station orbitale, avec des arceaux lumineux.", "A 4 m tube corridor, round like an orbital station module, with lit hoops.", "Un pasillo tubular de 4 m, redondo como un módulo de estación orbital, con aros iluminados."),
                 Interior = TubeCorridor
             },

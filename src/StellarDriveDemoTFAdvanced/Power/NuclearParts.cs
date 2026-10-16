@@ -14,7 +14,7 @@ namespace StellarDriveDemoTFAdvanced.Power
     /// </summary>
     internal static class NuclearParts
     {
-        private const uint Iron = 101, Glass = 102, Aluminum = 104, Copper = 112;
+        private const uint Iron = 101, Glass = 102, Copper = 112;
 
         public static void Register()
         {
@@ -39,7 +39,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             float oreRate = PowerCatalog.CentrifugeOrePerSecond.Value;
             PartFactory.Describe(settings, Loc.Pick("Centrifugeuse d'enrichissement", "Enrichment centrifuge", "Centrifugadora de enriquecimiento"),
                 Loc.Pick($"Enrichit le minerai d'uranium placé dans sa trappe (à la main ou par une ligne d'objets) en combustible nucléaire, envoyé dans la conduite de sa prise de fluide (vide ou déjà de combustible) : {oreRate:0.###} minerai/s, {PowerCatalog.CentrifugeFuelPerOre.Value:0.##} unité de combustible par minerai. Consomme {PowerCatalog.CentrifugeWatts.Value:0} W. Branchement comme le distillateur d'éthanol du jeu.", $"Enriches the uranium ore put in its hatch (by hand or by an item line) into nuclear fuel, sent into the line on its fluid socket (empty or already nuclear fuel): {oreRate:0.###} ore/s, {PowerCatalog.CentrifugeFuelPerOre.Value:0.##} unit of fuel per ore. Uses {PowerCatalog.CentrifugeWatts.Value:0} W. Wired like the game's ethanol distiller.", $"Enriquece el mineral de uranio puesto en su trampilla (a mano o por una línea de objetos) en combustible nuclear, enviado a la línea de su toma de fluido (vacía o ya con combustible nuclear): {oreRate:0.###} mineral/s, {PowerCatalog.CentrifugeFuelPerOre.Value:0.##} unidad de combustible por mineral. Consume {PowerCatalog.CentrifugeWatts.Value:0} W. Se conecta como el destilador de etanol del juego."),
-                180f, new[] { (ModItems.Titanium, 12), ((uint)Aluminum, 10), ((uint)Copper, 12), ((uint)Glass, 6), (ModItems.NexoranAlloy, 2) });
+                180f, new[] { (ModItems.Titanium, 18), ((uint)Iron, 8), ((uint)Copper, 12), ((uint)Glass, 6), (ModItems.NexoranAlloy, 2) });
             Transform visual = prefab.transform.Find("Visual");
             if (visual == null)
                 return;
@@ -100,6 +100,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 Loc.Pick("Le réservoir de fluide du jeu, blindé de plomb et de titane pour le combustible nucléaire (il prend aussi les autres fluides). Branchement et prise signal comme le réservoir du jeu.", "The game's fluid tank, shielded with lead and titanium for nuclear fuel (it takes the other fluids too). Wiring and signal socket as the game's tank.", "El tanque de fluido del juego, blindado con plomo y titanio para combustible nuclear (también acepta los otros fluidos). Conexiones y toma de señal como el tanque del juego."),
                 40f, new[] { (ModItems.Titanium, 4), ((uint)Iron, 8), ((uint)Glass, 4) });
             SuperiorParts.Recolor(prefab, new Color(0.5f, 0.62f, 0.42f), new Color(0.05f, 0.25f, 0.02f));
+            TankModels.Armor(prefab, TankModels.Kind.Nuclear);
         }
 
         private static void ConfigureReactor(PartSettings settings, GameObject prefab)

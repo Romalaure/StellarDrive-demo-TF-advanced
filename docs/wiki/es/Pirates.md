@@ -102,6 +102,8 @@ El piloto pirata se lanza hacia tu nave y luego la rodea a su distancia de comba
 
 Destruido, un pirata explota y deja una **cápsula de botín** (un cofre sobre una plataforma), más rica según su dificultad: titanio, uranio y criónita para el explorador; además aleación nexoriana para el corsario; núcleo cuántico y meteorito para el saqueador; el crucero añade un fragmento de artefacto. El avispón deja algo más que el explorador, el lancero un núcleo cuántico, el torpedero dos núcleos y meteorito, el acorazado dos artefactos y materia exótica.
 
+Un **marcador dorado** en pantalla muestra dónde está la cápsula (con su distancia) durante 10 minutos, o hasta que desaparezca; fuera de la vista, queda en el borde de la pantalla y apunta hacia ella. Ajuste `LootPingMinutes` (0: sin marcador).
+
 Un pirata dejado muy atrás (más de 9 km) durante 10 minutos se marcha.
 
 Ajustes (`[TFAdvanced]`): `Pirates = false` para no verlos más, `PirateIntervalMinutes` para su frecuencia, `PirateDangerStepKm` para la distancia entre dos niveles de peligro.

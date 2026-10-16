@@ -17,4 +17,4 @@
 
 La **materia oscura** y el **combustible nuclear** son fluidos: circulan por tuberías y se guardan en tanques, como el oxígeno.
 
-Los yacimientos se extraen con el láser como las rocas del juego. Los cofres de los edificios (una vez cada uno) y de las estaciones también contienen hierro, vidrio, cobre, aluminio, madera, lingotes y llaves.
+Los yacimientos se extraen con el láser como las rocas del juego. Los cofres de los edificios (una vez cada uno) y de las estaciones también contienen hierro, vidrio, cobre, titanio, madera, lingotes y llaves.
