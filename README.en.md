@@ -33,6 +33,12 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Paint gun, rack fixed, new capsule (v0.23)
+
+- **The TF mod's paint gun**: without the TF mod, TF Advanced provides it. It also paints doors, machines and placed parts, with finishes, presets and camouflage; the colors you already laid (`tf-paint.json`) come back, and schematics copy the paint.
+- **Tool rack**: gives the paint gun and the tablet, and tells you when you already have it (before, it silently gave nothing).
+- **Teleport capsule remade**: a pad with a turning emitter, profiled pillars, a lit back wall, an emitter roof, a console; animated energy rings, a light column and rising sparks, brighter with someone inside and on departure.
+
 ## Ships turn without jerks (v0.22)
 
 - **Jerky turns fixed**: with vertical sync on a fast screen (165 Hz) and the game around 60 fps, frames stayed on screen 2 then 3 refreshes (12 then 18 ms): a ship turning steadily moved by small then big steps. When the game can't keep up with the screen, every frame now waits the same number of refreshes (a steady 55 fps on 165 Hz). Every 45 s it checks whether the game got fast enough again. Never under 45 fps, nothing without vertical sync; setting `SteadyFrameRate`.

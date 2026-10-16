@@ -28,13 +28,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems
         private static bool? _tools;
 
         /// <summary>
-        /// The schematic tablet and its schematics, the third person view and the KeySeat
-        /// compatibility, moved here from the TF mod too: provided while no TF mod is installed
+        /// The schematic tablet and its schematics, the paint gun (parts, camouflage, finishes,
+        /// tf-paint.json), the third person view and the KeySeat compatibility, moved here from the TF mod too: provided while no TF mod is installed
         /// (a TF mod, any version, still provides them itself).
         /// </summary>
         public static bool ToolsActive => _tools ?? (_tools = Active && !AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "StellarDriveDemoTF")).Value;
 
-        /// <summary>The patch classes of those tools, skipped while a TF mod provides them.</summary>
+        /// <summary>The patch classes of those tools (and all of the Paint namespace), skipped while a TF mod provides them.</summary>
         public static readonly string[] ToolPatches = { "ThirdPersonCameraPatch", "KeySeatChangePatch", "KeySeatRemovePatch", "SchematicTabletItemPatch" };
 
         private static bool OldTfProvides()
@@ -60,7 +60,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.Radio.Install();
             Devices.ToolRack.Install();
             if (ToolsActive)
+            {
+                Paint.PaintNet.InstallSerializers();
                 Devices.Schematics.Install();
+            }
         }
 
         /// <summary>Only call when SDModKit is loaded.</summary>
@@ -95,6 +98,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.RadioSound.Update();
             if (ToolsActive)
             {
+                Paint.PaintNet.Update();
+                Paint.PaintHud.Update();
                 Devices.ThirdPerson.Update();
                 Devices.SchematicTablet.Update();
                 Devices.KeySeatCompat.Update();
@@ -118,6 +123,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.ToolRackMenu.Draw();
             if (ToolsActive)
             {
+                Paint.PaintHud.Draw();
                 Devices.SchematicsMenu.Draw();
                 Devices.SchematicTablet.Draw();
             }

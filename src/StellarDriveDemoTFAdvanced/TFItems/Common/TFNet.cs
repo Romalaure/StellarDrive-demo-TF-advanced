@@ -23,6 +23,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         CapsuleName = 4,
         /// <summary>Client to server: give me the tool item A (paint gun or schematic tablet).</summary>
         GiveTool = 5,
+        /// <summary>Server to one client: tool item A given (B = 1) or already owned (B = 0).</summary>
+        ToolGiven = 6,
 
         /// <summary>Client to server, then server to everyone: radio A/B now plays Text.</summary>
         Radio = 10,

@@ -21,6 +21,14 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
         public static bool TryGet(uint shipId, ushort partId, out Color color)
         {
             color = default;
+            if (TFItemsMod.ToolsActive)
+            {
+                // This mod's own paint (the TF mod is not installed)
+                if (!Paint.PaintNet.Client.TryGet(new Common.PartKey(shipId, partId), out Paint.PaintData paint))
+                    return false;
+                color = paint.Color;
+                return true;
+            }
             if (!_resolved)
                 Resolve();
             if (_tryGet == null)

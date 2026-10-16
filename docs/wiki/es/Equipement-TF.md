@@ -6,17 +6,18 @@ Los objetos del mod **StellarDrive Demo TF** se unieron a TF Advanced (v0.18), e
 |---|---|
 | **15 lámparas** (plafón, aplique, foco, regleta, foco empotrado, farol industrial, baliza intermitente, girofaro...) | iluminan las paredes, suelos y piezas a su alrededor, más fuerte de noche y en interiores; toman el color pintado con la pistola de pintura del mod TF |
 | **Cámara de vigilancia** | se fija en cualquier sitio; la **tableta** (**F9**) muestra su imagen, las flechas cambian de cámara, Z cambia el tamaño |
-| **Cápsula de teletransporte** | mírala y pulsa **T**: elige otra cápsula (con nombre) y te teletransportas allí |
+| **Cápsula de teletransporte** | mírala y pulsa **T**: elige otra cápsula (con nombre) y te teletransportas allí. Base con emisor giratorio, pilares, pared trasera iluminada y consola; sus anillos de energía suben y bajan, más rápido contigo dentro, y se aceleran al partir |
 | **Radio** | **T**: reproduce música (del juego o enlace de YouTube) que oyen todos los jugadores cercanos |
-| **Soporte de herramientas** | **T**: recupera una herramienta básica perdida (construcción, reciclador, láser de minería), la tableta esquemática; con el mod TF, también la pistola de pintura |
+| **Soporte de herramientas** | **T**: recupera una herramienta básica perdida (construcción, reciclador, láser de minería), la pistola de pintura, la tableta esquemática; te avisa si ya la tienes |
 | **Generador, tanques de oxígeno y de etanol, cofre de recursos infinitos** | sin fin, pero **extremadamente caros**: cientos de hierro, cobre o vidrio, 8 núcleos cuánticos, 10 de materia exótica, 6 artefactos, 40 aleaciones nexorianas y 30 meteoritos cada uno |
 
-Mismos números de pieza que antes: lo ya construido en tus mundos se conserva. Mantén el mod TF actualizado (0.15 o más): deja estos objetos a TF Advanced (la pintura, las sillas, el armario y las puertas de atraque siguen en el mod TF). Con un mod TF más antiguo, es él quien los conserva, sin duplicados.
+Mismos números de pieza que antes: lo ya construido en tus mundos se conserva. Mantén el mod TF actualizado (0.15 o más): deja estos objetos a TF Advanced (las sillas, el armario y las puertas de atraque siguen en el mod TF). Con un mod TF más antiguo, es él quien los conserva, sin duplicados.
 
-## Tableta esquemática y vista en tercera persona
+## Pistola de pintura, tableta esquemática, vista en tercera persona
 
-Sin el mod TF, TF Advanced también ofrece (mismo objeto 7201, mismos archivos: nada se pierde):
-- la **tableta esquemática**: cógela del soporte, selecciónala en tu barra de herramientas, **clic izquierdo** para abrir su ventana. **Copiar** guarda la nave más cercana (y lo acoplado); **Construir** la vuelve a crear gratis delante de ti. Los esquemas están en tu PC en `UserData/TF/schematics`, compartidos por todos tus mundos. La pintura guardada solo vuelve con el mod TF;
+Sin el mod TF, TF Advanced también ofrece (mismos objetos, mismos archivos: nada se pierde):
+- la **pistola de pintura** del mod TF: pinta paredes y suelos, y también puertas, máquinas y todas las piezas colocadas, con acabado (brillo, metal, luminoso), preajustes y **camuflajes** (bosque, desierto, ártico...). Cógela del soporte, **clic izquierdo** pinta, **clic derecho** paleta, **rueda** cuentagotas. Los colores se guardan con el mundo (`tf-paint.json`);
+- la **tableta esquemática**: cógela del soporte, selecciónala en tu barra de herramientas, **clic izquierdo** para abrir su ventana. **Copiar** guarda la nave más cercana (y lo acoplado); **Construir** la vuelve a crear gratis delante de ti. Los esquemas están en tu PC en `UserData/TF/schematics`, compartidos por todos tus mundos. La pintura de la nave se copia también;
 - la **vista en tercera persona** al pilotar: tecla **V** (`ThirdPersonKey`), rueda del ratón para la distancia (`ThirdPersonDistance`);
 - las teclas de los asientos del mod **KeySeat** guardadas al instante y copiadas por los esquemas.
 

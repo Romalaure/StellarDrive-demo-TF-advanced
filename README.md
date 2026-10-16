@@ -267,6 +267,12 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Pistolet à peinture, râtelier réparé, nouvelle capsule (v0.23)
+
+- **Pistolet à peinture du mod TF** : sans le mod TF, TF Advanced le fournit. Il peint aussi les portes, machines et pièces posées, avec finitions, préréglages et camouflages ; vos couleurs déjà posées (`tf-paint.json`) reviennent, et les schématiques recopient la peinture.
+- **Râtelier** : donne le pistolet à peinture et la tablette, et dit si vous l'avez déjà (avant, il ne donnait rien sans rien dire).
+- **Capsule de téléportation refaite** : socle à émetteur tournant, piliers profilés, paroi arrière lumineuse, toit émetteur, console ; anneaux d'énergie animés, colonne de lumière et étincelles qui montent, plus vives quand on est dedans et au départ.
+
 ## Vaisseaux qui tournent sans à-coups (v0.22)
 
 - **Rotations saccadées corrigées** : avec la synchro verticale sur un écran rapide (165 Hz) et le jeu vers 60 fps, les images restaient à l'écran 2 puis 3 rafraîchissements (12 puis 18 ms) : un vaisseau qui tourne régulièrement avançait par petits puis grands pas. Quand le jeu ne suit pas l'écran, chaque image attend maintenant le même nombre de rafraîchissements (55 fps réguliers sur 165 Hz). Toutes les 45 s il vérifie si le jeu est redevenu assez rapide. Jamais sous 45 fps, rien sans synchro verticale ; réglage `SteadyFrameRate`.

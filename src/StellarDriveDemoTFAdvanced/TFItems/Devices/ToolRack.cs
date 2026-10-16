@@ -41,12 +41,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         public static void Install()
         {
             TFNet.OnServer(TFMessageKind.GiveTool, ServerGive);
+            TFNet.OnClient(TFMessageKind.ToolGiven, (kind, itemId, given, text) => ToolRackMenu.Notify(itemId, given != 0));
         }
 
         private static void Configure(PartSettings settings, GameObject prefab)
         {
             Transform visuals = DeviceModels.Build(settings, prefab, Loc.Pick("Râtelier à outils", "Tool rack", "Soporte de herramientas"),
-                Loc.Pick("Panneau à fixer au mur : regarde-le et appuie sur la touche d'utilisation (T) pour reprendre un outil de base perdu (et, avec le mod TF, un pistolet à peinture ou une tablette schématique).", "Wall panel: look at it and press the use key (T) to take back a lost base tool (and, with the TF mod, a paint gun or a schematic tablet).", "Panel de pared: míralo y pulsa la tecla de uso (T) para recuperar una herramienta básica perdida (y, con el mod TF, una pistola de pintura o una tableta esquemática)."),
+                Loc.Pick("Panneau à fixer au mur : regarde-le et appuie sur la touche d'utilisation (T) pour prendre un pistolet à peinture, une tablette schématique ou reprendre un outil de base perdu.", "Wall panel: look at it and press the use key (T) to take a paint gun, a schematic tablet or take back a lost base tool.", "Panel de pared: míralo y pulsa la tecla de uso (T) para coger una pistola de pintura, una tableta esquemática o recuperar una herramienta básica perdida."),
                 4f, new[] { (101u, 2), (110u, 2) }, BoundsCenter, BoundsSize, Shapes(), Materials());
             UsablePart.AddBox(visuals, BoundsCenter, BoundsSize + new Vector3(0f, 0.2f, 0f));
             visuals.gameObject.AddComponent<ToolRackVisuals>();
@@ -184,14 +185,16 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         // Host: a base tool (build tool, recycler, mining laser) for the player who asked, if they lack it
         private static void ServerGive(NetworkConnection sender, TFMessageKind kind, uint itemId, ushort b, string text)
         {
-            if (sender == null || (System.Array.IndexOf(BaseTools, itemId) < 0 && !(itemId == SchematicTablet.ItemId && TFItemsMod.ToolsActive)))
+            if (sender == null || (System.Array.IndexOf(BaseTools, itemId) < 0 && !(TFItemsMod.ToolsActive && (itemId == SchematicTablet.ItemId || itemId == Paint.PaintToolGiver.FindPaintToolItem()?.id))))
                 return;
             TrackedPlayerServer player = GameServices.PlayersServer?.GetTrackedPlayerFromConnectionId(sender.ClientId);
             if (player == null)
                 return;
             var drop = new ItemDrop { ItemId = itemId, Quantity = 1 };
-            if (!player.HasItemsInInventory(new[] { drop }))
+            bool owned = player.HasItemsInInventory(new[] { drop });
+            if (!owned)
                 player.AddItemToInventory(drop);
+            TFNet.SendTo(sender, TFMessageKind.ToolGiven, itemId, (ushort)(owned ? 0 : 1), "");
         }
     }
 
@@ -257,8 +260,23 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             ModMenu.Open(() => _open = false);
         }
 
+        private static string _notice;
+        private static float _noticeUntil;
+
+        /// <summary>The host's answer: the tool is in the inventory now, or was already.</summary>
+        public static void Notify(uint itemId, bool given)
+        {
+            string name = itemId == SchematicTablet.ItemId ? Loc.Pick("Tablette schématique", "Schematic tablet", "Tableta esquemática") : ToolName(itemId);
+            _notice = given
+                ? Loc.Pick($"{name} : ajouté à ton inventaire.", $"{name}: added to your inventory.", $"{name}: añadido a tu inventario.")
+                : Loc.Pick($"{name} : tu en as déjà un (inventaire ou barre d'outils).", $"{name}: you already have one (inventory or toolbar).", $"{name}: ya tienes uno (inventario o barra de herramientas).");
+            _noticeUntil = Time.unscaledTime + 4f;
+        }
+
         public static void Draw()
         {
+            if (_notice != null && Time.unscaledTime < _noticeUntil)
+                DeviceUi.Toast(Screen.width, Screen.height, _notice);
             if (!_open || !ModMenu.IsOpen)
                 return;
             float scale = Mathf.Clamp(Screen.height / 1080f, 0.7f, 2.5f);
@@ -285,6 +303,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             }
             else if (TFItemsMod.ToolsActive)
             {
+                if (GUILayout.Button(Loc.Pick("Pistolet à peinture", "Paint gun", "Pistola de pintura"), DeviceUi.Button, GUILayout.Height(44f)))
+                {
+                    ToolRack.RequestTool(Paint.PaintToolGiver.FindPaintToolItem()?.id ?? 3u);
+                    ModMenu.Close();
+                }
+                GUILayout.Space(6f);
                 if (GUILayout.Button(Loc.Pick("Tablette schématique", "Schematic tablet", "Tableta esquemática"), DeviceUi.Button, GUILayout.Height(44f)))
                 {
                     ToolRack.RequestTool(SchematicTablet.ItemId);

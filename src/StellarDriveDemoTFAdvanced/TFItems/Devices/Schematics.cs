@@ -27,6 +27,7 @@ using WorldTracking.Interface.Model.Spaces;
 using WorldTracking.Interface.Model.Spaces.Common;
 using WorldTracking.Services;
 using WorldTracking.Spaces;
+using StellarDriveDemoTFAdvanced.TFItems.Paint;
 using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
 
 namespace StellarDriveDemoTFAdvanced.TFItems.Devices
@@ -226,7 +227,22 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 parts = snapshots.Values.Sum(s => s.StatefulParts.Count() + s.HullParts.Count()),
                 game = JsonUtility.ToJson(data)
             };
-            // (paint belongs to the TF mod: without it a copy carries none)
+            foreach (KeyValuePair<PartKey, PaintData> paint in PaintNet.Server.All)
+            {
+                if (!snapshots.ContainsKey(paint.Key.ShipId))
+                    continue;
+                PaintData value = paint.Value;
+                file.paint.Add(new SavedPaint
+                {
+                    ship = paint.Key.ShipId,
+                    part = paint.Key.PartId,
+                    color = $"{value.Color.r:X2}{value.Color.g:X2}{value.Color.b:X2}",
+                    finish = value.Finish.Enabled,
+                    gloss = value.Finish.Gloss,
+                    metal = value.Finish.Metal,
+                    glow = value.Finish.Glow
+                });
+            }
             foreach (KeyValuePair<PartKey, string> capsule in TeleportCapsule.ServerNames)
             {
                 if (snapshots.ContainsKey(capsule.Key.ShipId))
@@ -437,7 +453,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 TFMod.Log.Warning($"schematic '{file.name}': {droppedParts.Count} rotor(s) left out, their turning part was not saved; copy the ship again");
 
             // TF extras follow the ships to their new ids
-            // (the paint a schematic carries needs the TF mod: left out here)
+            foreach (SavedPaint paint in file.paint ?? new List<SavedPaint>())
+            {
+                if (!newIds.TryGetValue(paint.ship, out uint ship) || !ColorUtility.TryParseHtmlString("#" + paint.color, out Color color))
+                    continue;
+                var finish = paint.finish ? new PaintFinish { Enabled = true, Gloss = paint.gloss, Metal = paint.metal, Glow = paint.glow } : PaintFinish.None;
+                PaintNet.ServerSet(new PartKey(ship, paint.part), new PaintData(PaintNet.ToColor32(color), finish));
+            }
             foreach (SavedName capsule in file.capsules ?? new List<SavedName>())
             {
                 if (newIds.TryGetValue(capsule.ship, out uint ship))

@@ -22,7 +22,7 @@ using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
 namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 {
     /// <summary>
-    /// The teleport capsule: a pad with pillars and glowing rings. Look at it and press the use
+    /// The teleport capsule (model and animation in <see cref="CapsuleModel"/>). Look at it and press the use
     /// key to pick another capsule (on this ship or any other) and be sent there. It only works
     /// with at least two capsules in the world. The host moves the player, the same way the game
     /// respawns a player at a ship.
@@ -107,65 +107,14 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         {
             Transform visuals = DeviceModels.Build(settings, prefab, Loc.Pick("Capsule de téléportation", "Teleport capsule", "Cápsula de teletransporte"),
                 Loc.Pick("Entre dans la capsule, regarde-la et appuie sur la touche d'utilisation (T) pour choisir une autre capsule et t'y téléporter, sur ce vaisseau ou un autre. Il faut au moins deux capsules.", "Step into the capsule, look at it and press the use key (T) to pick another capsule and teleport there, on this ship or another. Needs at least two capsules.", "Entra en la cápsula, mírala y pulsa la tecla de uso (T) para elegir otra cápsula y teletransportarte allí, en esta nave o en otra. Hacen falta al menos dos cápsulas."),
-                60f, new[] { (101u, 10), (112u, 6), (102u, 4), (103u, 2) }, BoundsCenter, BoundsSize, Shapes(), Materials());
+                60f, new[] { (101u, 10), (112u, 6), (102u, 4), (103u, 2) }, BoundsCenter, BoundsSize, Shapes(), CapsuleModel.Materials());
             DeviceModels.FlattenColliders(prefab, new Vector3(1.2f, 0.1f, 1.2f));
             UsablePart.AddBox(visuals, BoundsCenter, BoundsSize);
             visuals.gameObject.AddComponent<TeleportCapsuleVisuals>();
+            visuals.gameObject.AddComponent<CapsuleAnimation>();
         }
 
-        private static Dictionary<string, DeviceMaterial> Materials() => new Dictionary<string, DeviceMaterial>
-        {
-            ["TF_Capsule_Frame"] = new DeviceMaterial(new Color(0.86f, 0.88f, 0.91f), 0.5f, 0.7f),
-            ["TF_NoPaint_CapsuleBase"] = new DeviceMaterial(new Color(0.16f, 0.17f, 0.2f), 0.7f, 0.5f),
-            ["TF_NoPaint_CapsuleGlow"] = new DeviceMaterial(new Color(0.4f, 0.9f, 1f), 0f, 0.8f, new Color(0.3f, 0.85f, 1f) * 4f)
-        };
-
-        internal static Dictionary<string, MeshBuilder> Shapes()
-        {
-            var frame = new MeshBuilder();
-            var dark = new MeshBuilder();
-            var glow = new MeshBuilder();
-            const float radius = 0.6f, height = 2.25f;
-
-            // Floor pad with a glowing ring, and the same at the roof
-            dark.Cylinder(Vector3.zero, new Vector3(0f, 0.08f, 0f), radius, radius - 0.03f, 32);
-            glow.Cylinder(new Vector3(0f, 0.08f, 0f), new Vector3(0f, 0.095f, 0f), radius - 0.08f, radius - 0.08f, 32, false, true);
-            dark.Cylinder(new Vector3(0f, 0.095f, 0f), new Vector3(0f, 0.1f, 0f), radius - 0.16f, radius - 0.16f, 32, false, true);
-            dark.Cylinder(new Vector3(0f, height - 0.12f, 0f), new Vector3(0f, height, 0f), radius - 0.03f, radius, 32);
-            glow.Cylinder(new Vector3(0f, height - 0.135f, 0f), new Vector3(0f, height - 0.12f, 0f), radius - 0.08f, radius - 0.08f, 32, true, false);
-
-            // Three pillars at the back and sides; the front (-z) stays open as the door
-            foreach (float degrees in new[] { 90f, 210f, 330f })
-            {
-                float angle = degrees * Mathf.Deg2Rad;
-                var at = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * (radius - 0.07f);
-                frame.Cylinder(at + Vector3.up * 0.08f, at + Vector3.up * (height - 0.12f), 0.045f, 0.045f, 10);
-                // A glowing strip down each pillar, on the inside
-                Vector3 inward = -at.normalized * 0.04f;
-                glow.Box(at + inward + Vector3.up * (height / 2f), new Vector3(0.025f, height - 0.5f, 0.025f));
-            }
-            // Rings tying the pillars together at waist and head height, open at the door (210 to 330 degrees)
-            foreach (float y in new[] { 1.05f, 1.95f })
-            {
-                for (int i = 0; i < 16; i++)
-                {
-                    float a0 = (330f + i * 15f) * Mathf.Deg2Rad, a1 = (330f + (i + 1) * 15f) * Mathf.Deg2Rad;
-                    var p0 = new Vector3(Mathf.Cos(a0), 0f, Mathf.Sin(a0)) * (radius - 0.07f) + Vector3.up * y;
-                    var p1 = new Vector3(Mathf.Cos(a1), 0f, Mathf.Sin(a1)) * (radius - 0.07f) + Vector3.up * y;
-                    frame.Cylinder(p0, p1, 0.022f, 0.022f, 8);
-                }
-            }
-            // Control panel on the back pillar
-            dark.Box(new Vector3(0f, 1.3f, radius - 0.14f), new Vector3(0.22f, 0.3f, 0.04f));
-            glow.Box(new Vector3(0f, 1.32f, radius - 0.165f), new Vector3(0.16f, 0.18f, 0.01f));
-
-            return new Dictionary<string, MeshBuilder>
-            {
-                ["TF_Capsule_Frame"] = frame,
-                ["TF_NoPaint_CapsuleBase"] = dark,
-                ["TF_NoPaint_CapsuleGlow"] = glow
-            };
-        }
+        internal static Dictionary<string, MeshBuilder> Shapes() => CapsuleModel.Shapes();
 
         /// <summary>Every capsule this client knows about, in a stable order.</summary>
         public static List<PartKey> KnownCapsules()
@@ -357,6 +306,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         {
             ModMenu.Close();
             _flashUntil = Time.unscaledTime + 0.8f;
+            CapsuleAnimation.FlareUntil = Time.unscaledTime + 2.5f;
             TFNet.SendToServer(TFMessageKind.Teleport, capsule.ShipId, capsule.PartId, "");
         }
     }
