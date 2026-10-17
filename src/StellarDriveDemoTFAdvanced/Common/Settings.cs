@@ -47,6 +47,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> DevFieldDoorTest { get; private set; }
         public static MelonPreferences_Entry<int> DevLandingGearTest { get; private set; }
         public static MelonPreferences_Entry<string> DevOutfit { get; private set; }
+        public static MelonPreferences_Entry<bool> DevTeleporterTest { get; private set; }
         public static MelonPreferences_Entry<string> DevSnapshotParts { get; private set; }
         public static MelonPreferences_Entry<string> DevShowcase { get; private set; }
         public static MelonPreferences_Entry<bool> DevBuildMenu { get; private set; }
@@ -124,6 +125,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevWorld, ask the build tool where parts go when aimed at placed parts, and photograph the result.");
             DevDockingTest = _category.CreateEntry("DevDockingTest", false,
                 description: "For mod development: with DevWorld, two ships with docking modules try to dock high in the air.");
+            DevTeleporterTest = _category.CreateEntry("DevTeleporterTest", false,
+                description: "For mod development: with DevWorld, list the teleporter's destinations, photograph its window, go to TF Gaia then to a station.");
             DevOutfit = _category.CreateEntry("DevOutfit", "",
                 description: "For mod development: with DevWorld, wear this outfit (cabin format) and photograph the cabin's window.");
             DevLandingGearTest = _category.CreateEntry("DevLandingGearTest", 0,

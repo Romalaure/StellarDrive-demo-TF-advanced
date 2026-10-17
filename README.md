@@ -267,6 +267,10 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Téléporteur (v0.35)
+
+- **Téléporteur** : objet **7419** sans recette, à se donner avec une commande give. Tenu en main, clic gauche : liste des **planètes** (posé sur la terre ferme, côté jour), des **stations** et des **balises** (posé à côté de la balise).
+
 ## Correctifs, train par signal, laser bûcheron (v0.34)
 
 - **Miniatures** du menu de construction : caméra, capsule, radio et râtelier ont de nouveau leurs couleurs ; la cabine cosmétique apparaît dans l'onglet TF Équipement.

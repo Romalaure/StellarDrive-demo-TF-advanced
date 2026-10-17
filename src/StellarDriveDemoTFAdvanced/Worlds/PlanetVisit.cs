@@ -235,13 +235,16 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             Move(planet, up, Quaternion.LookRotation(local.normalized, Vector3.up));
         }
 
-        private static void Move(Planet planet, Vector3 up, Quaternion look, float height = 1.5f)
+        private static void Move(Planet planet, Vector3 up, Quaternion look, float height = 1.5f) =>
+            MoveConnection(planet, up, look, height, InstanceFinder.ClientManager.Connection);
+
+        /// <summary>Host: sets a player (by connection) down on a planet's surface, looking along <paramref name="look"/>.</summary>
+        internal static void MoveConnection(Planet planet, Vector3 up, Quaternion look, float height, FishNet.Connection.NetworkConnection connection)
         {
             ISpacesServerProvider spaces = ServiceLocator.GetService<ISpacesServerProvider>();
             PlayersServerTracker players = ServiceLocator.GetService<PlayersServerTracker>();
             PlayerRespawnService respawn = Object.FindFirstObjectByType<PlayerRespawnService>();
-            var connection = InstanceFinder.ClientManager.Connection;
-            TrackedPlayerServer player = players?.GetTrackedPlayerFromConnectionId(connection.ClientId);
+            TrackedPlayerServer player = connection != null ? players?.GetTrackedPlayerFromConnectionId(connection.ClientId) : null;
             if (spaces == null || player == null || respawn == null || NotifyAtSurface == null)
             {
                 AdvancedMod.Log.Warning("dev: cannot move the player");

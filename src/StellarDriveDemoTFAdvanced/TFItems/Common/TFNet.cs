@@ -32,6 +32,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         Outfit = 20,
         /// <summary>Client to server: force field door A/B, Text is "width height on" (the host writes its state).</summary>
         FieldDoor = 25,
+        /// <summary>Client to server: send me the teleporter's destinations.</summary>
+        TeleporterList = 40,
+        /// <summary>Server to one client: the destinations, one "kind|a|b|name" per line.</summary>
+        TeleporterDestinations = 41,
+        /// <summary>Client to server: teleport me to Text = p (planet A) or s/b (ship A, beacon part B).</summary>
+        TeleporterGo = 42,
 
         /// <summary>Client to server: copy the ship A (and what is attached to it) as schematic Text.</summary>
         SchematicCopy = 30,

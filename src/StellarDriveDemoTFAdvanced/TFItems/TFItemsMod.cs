@@ -61,6 +61,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.ToolRack.Install();
             Power.FieldDoor.Install();
             Devices.Outfits.Install();
+            Devices.Teleporter.Install();
             if (ToolsActive)
             {
                 Paint.PaintNet.InstallSerializers();
@@ -99,6 +100,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Common.TFNet.Update();
             Common.UsableParts.Update();
             Devices.Outfits.Update();
+            Devices.Teleporter.Update();
             Devices.RadioSound.Update();
             if (ToolsActive)
             {
@@ -128,6 +130,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Power.FieldDoorMenu.Draw();
             Power.FieldDoorManagerMenu.Draw();
             Devices.CabinMenu.Draw();
+            Devices.TeleporterMenu.Draw();
+            Devices.Teleporter.DrawHint();
             if (ToolsActive)
             {
                 Paint.PaintHud.Draw();
