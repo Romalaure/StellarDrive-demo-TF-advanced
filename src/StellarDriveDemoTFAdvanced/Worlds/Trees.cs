@@ -284,15 +284,19 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     break;
                 case TreeKind.Palm:
                 {
-                    // A trunk curving up in five segments, a crown of drooping fronds
+                    // A ringed trunk curving up, a crown of feathery fronds arching out and down
                     Vector3 p = Vector3.zero;
                     for (int i = 0; i < 5; i++)
                     {
                         Vector3 next = p + new Vector3(0.45f + i * 0.12f, 2.8f, 0.1f);
                         mesh.Trunk(p, next, 0.42f - i * 0.04f, 0.38f - i * 0.04f);
+                        // The scars of old fronds: a swollen ring at each joint
+                        Vector3 axis = (next - p).normalized;
+                        mesh.Trunk(next - axis * 0.12f, next + axis * 0.12f, 0.43f - i * 0.04f, 0.43f - i * 0.04f);
                         p = next;
                     }
-                    mesh.Fronds(p, 11, 6.5f, BigBranch);
+                    for (int i = 0; i < 13; i++)
+                        mesh.PalmFrond(p, i * 360f / 13f + 11f * (i % 3), 6f + 0.6f * (i % 2), 0.55f + 0.25f * (i % 3), SmallCluster);
                     break;
                 }
                 case TreeKind.Jungle:
@@ -433,6 +437,35 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     Vector3 along = (outward - Vector3.up * droop).normalized;
                     Vector3 facing = Vector3.Cross(along, Vector3.Cross(Vector3.up, outward)).normalized;
                     Card(top, along, facing, length * (0.85f + 0.15f * (i % 2)), atlas, top + Vector3.down * 2f);
+                }
+            }
+
+            /// <summary>
+            /// A palm frond: a midrib leaving the top at a heading (degrees), rising a little then
+            /// arching down, lined on both sides with narrow leaflets that shorten toward its tip.
+            /// </summary>
+            public void PalmFrond(Vector3 top, float heading, float length, float droop, Rect atlas)
+            {
+                float a = heading * Mathf.Deg2Rad;
+                var outward = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                Vector3 side = Vector3.Cross(Vector3.up, outward).normalized;
+                Vector3 At(float t) => top + outward * length * t + Vector3.up * length * (0.3f * t - droop * t * t);
+                const int segments = 10;
+                for (int i = 1; i <= segments; i++)
+                {
+                    float t = i / (float)segments;
+                    Vector3 point = At(t);
+                    Vector3 along = (At(Mathf.Min(1f, t + 0.05f)) - At(Mathf.Max(0f, t - 0.05f))).normalized;
+                    float leaflet = 1.25f * (1f - 0.65f * t);
+                    foreach (float s in new[] { -1f, 1f })
+                    {
+                        // Leaflets sweep forward and hang a little below the midrib
+                        Vector3 up = (side * s * 0.8f + along * 0.45f + Vector3.down * 0.25f).normalized;
+                        Vector3 facing = Vector3.Cross(up, along).normalized;
+                        if (facing.y < 0f)
+                            facing = -facing;
+                        Card(point, up, facing, leaflet, atlas, top + Vector3.down * 2f);
+                    }
                 }
             }
 
