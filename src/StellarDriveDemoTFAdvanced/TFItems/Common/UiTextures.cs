@@ -29,6 +29,50 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
             padding = new RectOffset(8, 8, 4, 4)
         };
 
+        /// <summary>A rounded rectangle with an edge of its own color, 9-sliced like <see cref="Rounded"/>.</summary>
+        public static Texture2D Framed(Color fill, Color edge, int radius, int width)
+        {
+            int size = radius * 2 + 4;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.HideAndDontSave };
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float dx = Mathf.Max(0f, Mathf.Max(radius - (x + 0.5f), (x + 0.5f) - (size - radius)));
+                float dy = Mathf.Max(0f, Mathf.Max(radius - (y + 0.5f), (y + 0.5f) - (size - radius)));
+                float distance = Mathf.Sqrt(dx * dx + dy * dy);
+                float coverage = Mathf.Clamp01(radius + 0.5f - distance);
+                // How far inside the outline: the edge covers the outer `width` pixels
+                float inside = Mathf.Min(Mathf.Min(x + 0.5f, size - x - 0.5f), Mathf.Min(y + 0.5f, size - y - 0.5f));
+                float depth = distance > 0f ? radius - distance : inside;
+                float edgeAmount = Mathf.Clamp01(width + 0.5f - depth);
+                Color color = Color.Lerp(fill, edge, edgeAmount);
+                texture.SetPixel(x, y, new Color(color.r, color.g, color.b, color.a * coverage));
+            }
+            texture.Apply();
+            return texture;
+        }
+
+        public static GUIStyle FramedStyle(Color fill, Color edge, int radius, int width) => new GUIStyle
+        {
+            normal = { background = Framed(fill, edge, radius, width) },
+            border = new RectOffset(radius + 1, radius + 1, radius + 1, radius + 1),
+            padding = new RectOffset(8, 8, 4, 4)
+        };
+
+        /// <summary>Yellow and black diagonal stripes, like the corners of the game's menus.</summary>
+        public static Texture2D Hazard()
+        {
+            const int w = 60, h = 12;
+            var texture = new Texture2D(w, h, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.HideAndDontSave };
+            var yellow = new Color(0.98f, 0.78f, 0.12f);
+            var black = new Color(0.08f, 0.08f, 0.08f);
+            for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+                texture.SetPixel(x, y, ((x + y) / 6) % 2 == 0 ? yellow : black);
+            texture.Apply();
+            return texture;
+        }
+
         public static Texture2D Solid(Color color)
         {
             var texture = new Texture2D(1, 1) { hideFlags = HideFlags.HideAndDontSave };

@@ -267,6 +267,14 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Interface au style du jeu, recherche, nouveaux modèles (v0.31)
+
+- **Interface** : les fenêtres du mod (portes, radio, râtelier, capsule, schémas, gestionnaire, peinture, tablette caméra) prennent le style des menus de StellarDrive : panneau bleu nuit, cadre métal arrondi avec bandes jaune et noir, boutons bleus, police du jeu.
+- **Recherche dans le menu de construction** : une barre en haut du panneau ; quelques lettres affichent les pièces de tous les onglets dont le nom les contient (accents ignorés), avec les boutons du jeu.
+- **Radio** : nouveau modèle moderne (enceinte capsule sur socle, écran vitré avec égaliseur qui bouge en rythme, haut-parleurs à anneaux lumineux, bande LED, aileron d'antenne).
+- **Caméra de surveillance** : nouveau modèle futuriste (socle à anneau lumineux, étrier, nacelle effilée, objectif à bagues et iris lumineux, ailettes, antenne).
+- **Optimisation** : l'invite « [T] ... » et l'aide de la tablette ne créent plus une texture à chaque image.
+
 ## Portes à champ de force, flamme, radio (v0.30)
 
 - **Porte à champ de force** : couleur au pistolet à peinture, **valeurs négatives** (largeur → de l'autre côté, hauteur → vers le bas depuis un plafond), **état solide** (un mur que personne ne traverse, l'air reste retenu).

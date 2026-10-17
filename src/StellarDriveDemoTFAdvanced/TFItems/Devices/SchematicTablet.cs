@@ -94,16 +94,14 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             if (!_holding || ModMenu.IsOpen)
                 return;
             if (_hint == null)
-            {
-                _hint = new GUIStyle(GUI.skin.label) { fontSize = 16, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
-                _hint.normal.textColor = new Color(0.95f, 0.96f, 0.98f);
-            }
+                _hint = new GUIStyle(DeviceUi.Text) { fontSize = 16, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter, wordWrap = false };
             float scale = Mathf.Clamp(Screen.height / 1080f, 0.7f, 2.5f);
             Matrix4x4 previous = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
             float width = Screen.width / scale, height = Screen.height / scale;
             var rect = new Rect(width / 2f - 220f, height - 150f, 440f, 34f);
-            GUI.Box(rect, GUIContent.none, UiTextures.RoundedStyle(new Color(0.05f, 0.06f, 0.08f, 0.82f), 10));
+            // (made once: a style built here each frame left a texture behind every frame)
+            DeviceUi.Panel(rect);
             GUI.Label(rect, Loc.Pick("Tablette schématique  ·  clic gauche pour l'ouvrir", "Schematic tablet  ·  left click to open it", "Tableta esquemática  ·  clic izquierdo para abrirla"), _hint);
             GUI.matrix = previous;
         }

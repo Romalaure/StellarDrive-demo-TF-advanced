@@ -86,6 +86,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
             _handle = host.AddComponent<MenuHandle>();
         }
 
+        /// <summary>Re-reads which player controls are on (after <see cref="Parts.BuildSearch.Typing"/> changed).</summary>
+        public static void RefreshControls() => ReloadControls();
+
         private static readonly System.Reflection.MethodInfo Reload = AccessTools.Method(typeof(PlayerControlsActivator), "ReloadEnabledScripts");
 
         private static void ReloadControls()
@@ -116,7 +119,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
     {
         private static void Postfix(MonoBehaviour script, ref bool __result)
         {
-            if (__result && ModMenu.IsOpen && !(script is PlayerEscapeControl))
+            if (__result && (ModMenu.IsOpen || Parts.BuildSearch.Typing) && !(script is PlayerEscapeControl))
                 __result = false;
         }
     }

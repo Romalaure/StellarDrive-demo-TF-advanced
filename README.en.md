@@ -33,6 +33,14 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Game-style interface, search, new models (v0.31)
+
+- **Interface**: the mod's windows (doors, radio, rack, capsule, schematics, manager, paint, camera tablet) take the look of StellarDrive's menus: night blue panel, rounded metal frame with yellow and black stripes, blue buttons, the game's font.
+- **Search in the build menu**: a bar at the top of the panel; a few letters show the parts of every tab whose name holds them (accents ignored), as the game's buttons.
+- **Radio**: new modern model (capsule speaker on a plinth, glass screen with an equalizer moving to the beat, drivers in lit rings, LED strip, antenna fin).
+- **Surveillance camera**: new futuristic model (base with a lit ring, yoke, sleek pod, lens in rings with a lit iris, fins, antenna).
+- **Optimization**: the "[T] ..." prompt and the tablet's hint no longer create a texture every frame.
+
 ## Force field doors, flame, radio (v0.30)
 
 - **Force field door**: color from the paint gun, **negative values** (width → to the other side, height → down from a ceiling), **solid state** (a wall nobody walks through, the air stays in).

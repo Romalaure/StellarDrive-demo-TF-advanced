@@ -21,13 +21,14 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
         private const float CardWidth = 300f;
         private const int PickerSize = 176;
 
-        private static readonly Color Panel = new Color(0.075f, 0.08f, 0.1f, 0.94f);
-        private static readonly Color Card = new Color(0.13f, 0.14f, 0.17f, 1f);
-        private static readonly Color Chip = new Color(0.18f, 0.19f, 0.23f, 1f);
-        private static readonly Color ChipHover = new Color(0.25f, 0.27f, 0.32f, 1f);
-        private static readonly Color Accent = new Color(0.98f, 0.5f, 0.12f);
-        private static readonly Color TextColor = new Color(0.93f, 0.94f, 0.96f);
-        private static readonly Color MutedText = new Color(0.6f, 0.63f, 0.69f);
+        // The game's menu palette (night blue panels, blue accent, pale blue text), as DeviceUi
+        private static readonly Color Panel = new Color(0.05f, 0.12f, 0.19f, 0.93f);
+        private static readonly Color Card = new Color(0.08f, 0.19f, 0.29f, 1f);
+        private static readonly Color Chip = new Color(0.1f, 0.27f, 0.42f, 1f);
+        private static readonly Color ChipHover = new Color(0.14f, 0.36f, 0.56f, 1f);
+        private static readonly Color Accent = new Color(0.2f, 0.56f, 0.9f);
+        private static readonly Color TextColor = new Color(0.86f, 0.94f, 1f);
+        private static readonly Color MutedText = new Color(0.55f, 0.7f, 0.82f);
 
         private static readonly Color[] QuickColors =
         {
@@ -661,19 +662,29 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
             _swatchFrame = Rounded(new Color(1f, 1f, 1f, 0.18f), 5);
 
             _title = new GUIStyle(GUI.skin.label) { fontSize = 15, fontStyle = FontStyle.Bold };
+            if (Devices.DeviceUi.GameFont != null)
+                _title.font = Devices.DeviceUi.GameFont;
             _title.normal.textColor = TextColor;
             _section = new GUIStyle(GUI.skin.label) { fontSize = 11, fontStyle = FontStyle.Bold };
+            if (Devices.DeviceUi.GameFont != null)
+                _section.font = Devices.DeviceUi.GameFont;
             _section.normal.textColor = Accent;
             _label = new GUIStyle(GUI.skin.label) { fontSize = 13, wordWrap = false, clipping = TextClipping.Clip };
+            if (Devices.DeviceUi.GameFont != null)
+                _label.font = Devices.DeviceUi.GameFont;
             _label.normal.textColor = TextColor;
             _muted = new GUIStyle(_label) { fontSize = 11, wordWrap = true };
             _muted.normal.textColor = MutedText;
             _big = new GUIStyle(_label) { fontSize = 22, fontStyle = FontStyle.Bold };
             _field = new GUIStyle(GUI.skin.textField) { fontSize = 13, padding = new RectOffset(8, 8, 5, 5) };
+            if (Devices.DeviceUi.GameFont != null)
+                _field.font = Devices.DeviceUi.GameFont;
             _field.normal.background = _field.focused.background = _field.hover.background = RoundedTexture(new Color(0.03f, 0.035f, 0.045f, 1f), 6);
             _field.border = new RectOffset(8, 8, 8, 8);
             _field.normal.textColor = _field.focused.textColor = _field.hover.textColor = TextColor;
             _toggle = new GUIStyle(GUI.skin.toggle) { fontSize = 13 };
+            if (Devices.DeviceUi.GameFont != null)
+                _toggle.font = Devices.DeviceUi.GameFont;
             _toggle.normal.textColor = _toggle.onNormal.textColor = _toggle.hover.textColor = _toggle.onHover.textColor = TextColor;
         }
 

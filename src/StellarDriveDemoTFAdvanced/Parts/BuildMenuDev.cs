@@ -52,6 +52,14 @@ namespace StellarDriveDemoTFAdvanced.Parts
             Dump(container, 0, dump);
             System.IO.File.WriteAllText(System.IO.Path.Combine(DevHarness.Folder, "buildmenu_tabs.txt"), dump.ToString());
             DevHarness.Screenshot("buildmenu_0");
+            // The search bar: a word found in several tabs
+            BuildSearch.DevSearch(menu, "champ");
+            yield return new WaitForSecondsRealtime(1f);
+            DevHarness.Screenshot("buildmenu_search");
+            AdvancedMod.Log.Msg($"dev: build menu: search shows {menu.GetComponentsInChildren<UI.BuildMenu.BuildPartButton>().Length} part(s): {string.Join(", ", menu.GetComponentsInChildren<UI.BuildMenu.BuildPartButton>().Select(b => b.partSettings?.fullLabel))}");
+            yield return new WaitForSecondsRealtime(0.5f);
+            BuildSearch.DevSearch(menu, "");
+            yield return new WaitForSecondsRealtime(0.5f);
             yield return new WaitForSecondsRealtime(0.5f);
             foreach (Transform row in container.parent)
                 dump.AppendLine($"ROW {row.name} scale {row.localScale} pos {((RectTransform)row).anchoredPosition} size {((RectTransform)row).rect.size}");

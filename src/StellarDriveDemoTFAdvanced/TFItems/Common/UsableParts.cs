@@ -64,15 +64,15 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 return;
             if (_prompt == null)
             {
-                _prompt = new GUIStyle(GUI.skin.label) { fontSize = 16, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
-                _prompt.normal.textColor = new Color(0.95f, 0.96f, 0.98f);
+                _prompt = new GUIStyle(Devices.DeviceUi.Text) { fontSize = 17, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter, wordWrap = false };
             }
             float scale = Mathf.Clamp(Screen.height / 1080f, 0.7f, 2.5f);
             Matrix4x4 previous = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
             float width = Screen.width / scale, height = Screen.height / scale;
-            var rect = new Rect(width / 2f - 170f, height / 2f + 46f, 340f, 34f);
-            GUI.Box(rect, GUIContent.none, UiTextures.RoundedStyle(new Color(0.05f, 0.06f, 0.08f, 0.82f), 10));
+            var rect = new Rect(width / 2f - 180f, height / 2f + 46f, 360f, 38f);
+            // (the game's panel, its textures made once)
+            Devices.DeviceUi.Panel(rect);
             GUI.Label(rect, $"[{UseKey.Label}]  {_target.Label}", _prompt);
             GUI.matrix = previous;
         }

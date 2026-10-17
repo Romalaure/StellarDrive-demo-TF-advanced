@@ -326,16 +326,24 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             if (_bezel != null)
                 return;
             _white = UiTextures.Solid(Color.white);
-            _bezel = UiTextures.RoundedStyle(new Color(0.07f, 0.075f, 0.09f, 0.97f), 18);
+            _bezel = UiTextures.FramedStyle(new Color(0.05f, 0.12f, 0.19f, 0.97f), new Color(0.62f, 0.66f, 0.7f, 1f), 18, 4);
             _screen = UiTextures.RoundedStyle(new Color(0.02f, 0.025f, 0.03f, 1f), 4);
             var text = new Color(0.93f, 0.94f, 0.96f);
             _title = new GUIStyle(GUI.skin.label) { fontSize = 15, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleLeft };
+            if (Devices.DeviceUi.GameFont != null)
+                _title.font = Devices.DeviceUi.GameFont;
             _title.normal.textColor = text;
             _text = new GUIStyle(GUI.skin.label) { fontSize = 13, wordWrap = true, alignment = TextAnchor.MiddleCenter };
+            if (Devices.DeviceUi.GameFont != null)
+                _text.font = Devices.DeviceUi.GameFont;
             _text.normal.textColor = text;
             _small = new GUIStyle(GUI.skin.label) { fontSize = 12 };
+            if (Devices.DeviceUi.GameFont != null)
+                _small.font = Devices.DeviceUi.GameFont;
             _small.normal.textColor = new Color(0.85f, 0.9f, 0.85f);
             _hint = new GUIStyle(GUI.skin.label) { fontSize = 12, alignment = TextAnchor.MiddleCenter };
+            if (Devices.DeviceUi.GameFont != null)
+                _hint.font = Devices.DeviceUi.GameFont;
             _hint.normal.textColor = new Color(0.6f, 0.63f, 0.69f);
         }
     }
