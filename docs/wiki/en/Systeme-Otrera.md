@@ -12,5 +12,6 @@ The starting star and its planets: the demo's planet (442 Otrera b) and the seve
 | [TF Glacia](TF-Glacia.md) | glacial | 1 g | breathable | cryonite, titanium, asteroids |
 | [TF Nexora](TF-Nexora.md) | futuristic | 0.85 g | breathable | quantum core, Nexoran alloy, quartz |
 | [TF Sylvara](TF-Sylvara.md) | jungle | 1.05 g | breathable | amber, plenty of wood |
+| [TF Gaïa](TF-Gaia.md) | like the Earth: oceans, deserts, prairies, savannas, forests, mountains | 1 g | breathable | amber, plenty of wood |
 
 Two black holes (Petra, Glacia) and three abandoned stations (Kepler, Orion, Hadès): see [Black holes](Trous-noirs.md) and [Abandoned stations](Stations-abandonnees.md).

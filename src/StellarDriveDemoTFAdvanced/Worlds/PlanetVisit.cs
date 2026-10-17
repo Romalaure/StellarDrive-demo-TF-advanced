@@ -70,6 +70,17 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     continue;
                 Place(planet, up, 0f);
                 AdvancedMod.Log.Msg($"dev: landed on {planet.name}, ground {Elevation(planet, up):0} m above the radius");
+                // How high its ground is over the whole planet (to set the altitude bands)
+                var heights = new List<float>();
+                var random = new System.Random(7);
+                for (int k = 0; k < 1500; k++)
+                {
+                    var direction = new Vector3((float)(random.NextDouble() * 2 - 1), (float)(random.NextDouble() * 2 - 1), (float)(random.NextDouble() * 2 - 1));
+                    if (direction.sqrMagnitude > 0.01f)
+                        heights.Add(Elevation(planet, direction));
+                }
+                heights.Sort();
+                AdvancedMod.Log.Msg($"dev: {planet.name} ground heights: " + string.Join(", ", new[] { 0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100 }.Select(q => $"p{q} {heights[Mathf.Min(heights.Count - 1, q * heights.Count / 100)]:0}")));
                 yield return Wait(18f);
                 int frames = Time.frameCount;
                 float start = Time.unscaledTime;

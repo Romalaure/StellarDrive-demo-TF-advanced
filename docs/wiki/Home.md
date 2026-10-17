@@ -17,6 +17,7 @@ En jeu, la **[table de cartographie](Machines.md#table-de-cartographie)** affich
 | [TF Glacia](TF-Glacia.md) | glaciaire  | 1 g | respirable | cryonite, titane, astéroïdes |
 | [TF Nexora](TF-Nexora.md) | futuriste  | 0,85 g | respirable | noyau quantique, alliage nexorien, quartz |
 | [TF Sylvara](TF-Sylvara.md) | jungle  | 1,05 g | respirable | ambre, bois en quantité |
+| [TF Gaïa](TF-Gaia.md) | comme la Terre : océans, déserts, prairies, savanes, forêts, montagnes | 1 g | respirable | ambre, bois en quantité |
 
 ### Galaxie d'Érèbe
 | Planète | Biome | Gravité | Air | À y chercher |

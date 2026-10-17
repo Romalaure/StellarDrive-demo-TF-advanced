@@ -17,6 +17,7 @@ En el juego, la **[mesa de cartografía](Machines.md#mesa-de-cartografía)** mue
 | [TF Glacia](TF-Glacia.md) | glacial | 1 g | respirable | criónita, titanio, asteroides |
 | [TF Nexora](TF-Nexora.md) | futurista | 0,85 g | respirable | núcleo cuántico, aleación nexoriana, cuarzo |
 | [TF Sylvara](TF-Sylvara.md) | jungla | 1,05 g | respirable | ámbar, madera en abundancia |
+| [TF Gaïa](TF-Gaia.md) | como la Tierra: océanos, desiertos, praderas, sabanas, bosques, montañas | 1 g | respirable | ámbar, madera en abundancia |
 
 ### Galaxia de Érebo
 | Planeta | Bioma | Gravedad | Aire | Qué buscar |

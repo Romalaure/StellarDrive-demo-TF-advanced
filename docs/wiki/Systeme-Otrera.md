@@ -12,5 +12,6 @@ L'étoile de départ et ses planètes : la planète de la démo (442 Otrera b) e
 | [TF Glacia](TF-Glacia.md) | glaciaire  | 1 g | respirable | cryonite, titane, astéroïdes |
 | [TF Nexora](TF-Nexora.md) | futuriste  | 0,85 g | respirable | noyau quantique, alliage nexorien, quartz |
 | [TF Sylvara](TF-Sylvara.md) | jungle  | 1,05 g | respirable | ambre, bois en quantité |
+| [TF Gaïa](TF-Gaia.md) | comme la Terre : océans, déserts, prairies, savanes, forêts, montagnes | 1 g | respirable | ambre, bois en quantité |
 
 Deux trous noirs (Petra, Glacia) et trois stations abandonnées (Kepler, Orion, Hadès) : voir [Trous noirs](Trous-noirs.md) et [Stations abandonnées](Stations-abandonnees.md).

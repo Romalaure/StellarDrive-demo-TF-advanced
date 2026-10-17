@@ -267,6 +267,10 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## TF Gaïa, une planète comme la Terre (v0.32)
+
+- **TF Gaïa** (système 442 Otrera) : océans et lacs, plages et déserts de sable dans les basses terres, prairies fleuries au-dessus, avec des forêts (sapins, chênes, bouleaux), des savanes d'acacias et des palmeraies chacune dans ses régions, et des montagnes couvertes de sapins enneigés. Villages, ruines, épaves ; ambre, quartz, bois. Le moteur de terrain du jeu ne dessine que trois textures de sol (eau, sable, herbe) : la neige est sur les arbres des sommets, pas au sol.
+
 ## Interface au style du jeu, recherche, nouveaux modèles (v0.31)
 
 - **Interface** : les fenêtres du mod (portes, radio, râtelier, capsule, schémas, gestionnaire, peinture, tablette caméra) prennent le style des menus de StellarDrive : panneau bleu nuit, cadre métal arrondi avec bandes jaune et noir, boutons bleus, police du jeu.

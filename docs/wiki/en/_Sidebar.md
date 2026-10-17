@@ -9,6 +9,7 @@
 - [TF Glacia](TF-Glacia.md)
 - [TF Nexora](TF-Nexora.md)
 - [TF Sylvara](TF-Sylvara.md)
+- [TF Gaïa](TF-Gaia.md)
 
 **Erebus**
 - [Pyros](Pyros.md)

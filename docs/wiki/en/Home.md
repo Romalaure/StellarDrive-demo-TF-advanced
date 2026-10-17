@@ -17,6 +17,7 @@ In game, the **[cartography table](Machines.md#cartography-table)** shows the ca
 | [TF Glacia](TF-Glacia.md) | glacial | 1 g | breathable | cryonite, titanium, asteroids |
 | [TF Nexora](TF-Nexora.md) | futuristic | 0.85 g | breathable | quantum core, Nexoran alloy, quartz |
 | [TF Sylvara](TF-Sylvara.md) | jungle | 1.05 g | breathable | amber, plenty of wood |
+| [TF Gaïa](TF-Gaia.md) | like the Earth: oceans, deserts, prairies, savannas, forests, mountains | 1 g | breathable | amber, plenty of wood |
 
 ### Erebus galaxy
 | Planet | Biome | Gravity | Air | Look for |

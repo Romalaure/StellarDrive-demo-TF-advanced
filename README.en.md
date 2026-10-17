@@ -33,6 +33,10 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## TF Gaïa, an Earth-like planet (v0.32)
+
+- **TF Gaïa** (442 Otrera system): oceans and lakes, sand beaches and deserts in the lowlands, flowering prairies above, with forests (firs, oaks, birches), acacia savannas and palm groves each in their own regions, and mountains under snowy firs. Villages, ruins, wrecks; amber, quartz, wood. The game's terrain engine draws three ground textures only (water, sand, grass): the snow is on the trees up high, not on the ground.
+
 ## Game-style interface, search, new models (v0.31)
 
 - **Interface**: the mod's windows (doors, radio, rack, capsule, schematics, manager, paint, camera tablet) take the look of StellarDrive's menus: night blue panel, rounded metal frame with yellow and black stripes, blue buttons, the game's font.
