@@ -284,19 +284,26 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     break;
                 case TreeKind.Palm:
                 {
-                    // A ringed trunk curving up, a crown of feathery fronds arching out and down
-                    Vector3 p = Vector3.zero;
-                    for (int i = 0; i < 5; i++)
+                    // A smooth trunk bending in one gentle curve (short segments meeting end to end, no
+                    // gaps), thinning upward, faint rings of old frond scars; a crown of feathery fronds
+                    const int pieces = 12;
+                    Vector3 Spine(float t) => new Vector3(2.4f * t * t, 13.5f * t, 0.3f * t);
+                    for (int i = 0; i < pieces; i++)
                     {
-                        Vector3 next = p + new Vector3(0.45f + i * 0.12f, 2.8f, 0.1f);
-                        mesh.Trunk(p, next, 0.42f - i * 0.04f, 0.38f - i * 0.04f);
-                        // The scars of old fronds: a swollen ring at each joint
-                        Vector3 axis = (next - p).normalized;
-                        mesh.Trunk(next - axis * 0.12f, next + axis * 0.12f, 0.43f - i * 0.04f, 0.43f - i * 0.04f);
-                        p = next;
+                        float t0 = i / (float)pieces, t1 = (i + 1) / (float)pieces;
+                        float r0 = Mathf.Lerp(0.42f, 0.24f, t0), r1 = Mathf.Lerp(0.42f, 0.24f, t1);
+                        mesh.Trunk(Spine(t0), Spine(t1), r0, r1);
+                        if (i % 2 == 1)
+                        {
+                            Vector3 axis = (Spine(t1) - Spine(t0)).normalized;
+                            mesh.Trunk(Spine(t1) - axis * 0.05f, Spine(t1) + axis * 0.05f, r1 * 1.07f, r1 * 1.07f);
+                        }
                     }
-                    for (int i = 0; i < 13; i++)
-                        mesh.PalmFrond(p, i * 360f / 13f + 11f * (i % 3), 6f + 0.6f * (i % 2), 0.55f + 0.25f * (i % 3), SmallCluster);
+                    Vector3 top = Spine(1f);
+                    // The crown's heart: a bulge where the fronds leave the trunk
+                    mesh.Trunk(top - Vector3.up * 0.4f, top + Vector3.up * 0.25f, 0.32f, 0.2f);
+                    for (int i = 0; i < 14; i++)
+                        mesh.PalmFrond(top, i * 360f / 14f + 9f * (i % 3), 5.6f + 0.7f * (i % 2), 0.5f + 0.22f * (i % 3), BigBranch);
                     break;
                 }
                 case TreeKind.Jungle:
@@ -450,13 +457,13 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 var outward = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
                 Vector3 side = Vector3.Cross(Vector3.up, outward).normalized;
                 Vector3 At(float t) => top + outward * length * t + Vector3.up * length * (0.3f * t - droop * t * t);
-                const int segments = 10;
+                const int segments = 14;
                 for (int i = 1; i <= segments; i++)
                 {
                     float t = i / (float)segments;
                     Vector3 point = At(t);
                     Vector3 along = (At(Mathf.Min(1f, t + 0.05f)) - At(Mathf.Max(0f, t - 0.05f))).normalized;
-                    float leaflet = 1.25f * (1f - 0.65f * t);
+                    float leaflet = 1.5f * (1f - 0.6f * t);
                     foreach (float s in new[] { -1f, 1f })
                     {
                         // Leaflets sweep forward and hang a little below the midrib
