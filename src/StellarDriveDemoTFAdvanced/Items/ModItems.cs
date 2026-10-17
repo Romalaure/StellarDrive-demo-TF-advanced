@@ -51,7 +51,7 @@ namespace StellarDriveDemoTFAdvanced.Items
         // Game items
         public const uint Iron = 101, Glass = 102, StellarShard = 103, Aluminum = 104, Wood = 110, Copper = 112, GoldBar = 158, Key = 151;
 
-        public static readonly ModItem[] All =
+        public static ModItem[] All =
         {
             new ModItem { Id = Titanium, Name = Loc.Pick("Minerai de titane", "Titanium ore", "Mineral de titanio"), Mass = 2.5f, MaterialFrom = Iron, Tint = new Color(0.72f, 0.8f, 0.95f), Model = OreChunk },
             new ModItem { Id = Quartz, Name = Loc.Pick("Cristal de quartz", "Quartz crystal", "Cristal de cuarzo"), Mass = 1.5f, MaterialFrom = Glass, Tint = new Color(1f, 0.68f, 0.86f), Model = m => Crystals(m, 5, 0.3f) },
@@ -75,6 +75,28 @@ namespace StellarDriveDemoTFAdvanced.Items
         private static GameObject _holder;
 
         public static ModItem Get(uint id) => All.FirstOrDefault(i => i.Id == id);
+
+        /// <summary>An item of another mod, made like the mod's own (call from OnInitializeMelon).</summary>
+        public static void Add(ModItem item)
+        {
+            if (All.Any(i => i.Id == item.Id))
+                return;
+            All = All.Concat(new[] { item }).ToArray();
+            // The mod's own items were made already: this one now
+            if (All[0].Settings != null)
+            {
+                ItemSettings settings = ScriptableObject.CreateInstance<ItemSettings>();
+                settings.name = "TFA_Item" + item.Id;
+                settings.hideFlags = HideFlags.DontUnloadUnusedAsset;
+                settings.id = item.Id;
+                settings.itemName = item.Name;
+                settings.mass = item.Mass;
+                settings.maxStackSize = 255;
+                settings.isFluid = item.Fluid;
+                settings.fluidColor = item.FluidColor;
+                item.Settings = settings;
+            }
+        }
 
         public static ItemSettings Settings(uint id) => Get(id)?.Settings;
 

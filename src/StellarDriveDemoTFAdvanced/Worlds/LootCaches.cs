@@ -75,6 +75,22 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             public string Prefix;
             public Kind Kind;
             public Vector3[] Spots;
+            /// <summary>Another mod's building: its own loot case and contents.</summary>
+            public int? CasePart;
+            public Func<ulong, System.Random, List<(uint Item, int Quantity)>> Loot;
+        }
+
+        private static readonly List<Site> ExtraSites = new List<Site>();
+
+        /// <summary>
+        /// A building of another mod gets chests like the mod's own: at <paramref name="spots"/> (its own
+        /// frame), the game's loot case <paramref name="casePart"/> (400 + 10 x color + finish), filled by
+        /// <paramref name="loot"/> (planet id, seeded random; at most 10 stacks).
+        /// </summary>
+        public static void AddSite(string prefix, Vector3[] spots, int casePart, Func<ulong, System.Random, List<(uint Item, int Quantity)>> loot)
+        {
+            ExtraSites.RemoveAll(s => s.Prefix == prefix);
+            ExtraSites.Add(new Site { Prefix = prefix, Kind = Kind.Village, Spots = spots, CasePart = casePart, Loot = loot });
         }
 
         // Chest spots in each building's own frame (meters, on the inside floor)
@@ -144,7 +160,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             if (!GameServices.IsServer || toSpawn?.Prefab == null)
                 return;
             string name = toSpawn.Prefab.name;
-            Site site = Sites.FirstOrDefault(s => name.StartsWith(s.Prefix, StringComparison.Ordinal));
+            Site site = Sites.Concat(ExtraSites).FirstOrDefault(s => name.StartsWith(s.Prefix, StringComparison.Ordinal));
             if (site == null)
                 return;
             ulong planetId = toSpawn.ObjectId.PlanetId;
@@ -200,7 +216,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             var probe = new PlanetSurfaceSpace { PlanetId = planetId, Center = (Vector3Double)point };
             (uint spaceId, ISpace _) = spaces.GetOrCreateSpaceForPosition(probe);
 
-            string json = ChestShipJson(CasePart(site.Kind, site.Prefix, planetId), LootFor(site.Kind, planetId, random));
+            string json = site.Loot != null
+                ? ChestShipJson(site.CasePart ?? 400, site.Loot(planetId, random).Take(10).ToList())
+                : ChestShipJson(CasePart(site.Kind, site.Prefix, planetId), LootFor(site.Kind, planetId, random));
             var data = JsonUtility.FromJson<ShipImportExportUtils.ShipImportExportData>(json);
             SavedShipState state = new ShipsConverter().ConvertToState(data.ships).States.Cast<SavedShipState>().Single();
             state.Id = ids.CreateUniqueIdForObject();
