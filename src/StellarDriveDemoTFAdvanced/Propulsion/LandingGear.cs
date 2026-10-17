@@ -3,6 +3,7 @@ using Core.Services;
 using FishNet.Connection;
 using HarmonyLib;
 using Ships;
+using Ships.Parts.Common;
 using Ships.Interface.Model.Joints;
 using Ships.Interface.Model.Parts;
 using Ships.Interface.Model.Parts.Common;
@@ -33,8 +34,8 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
     /// meets the ground, pushes the ship up with a spring and a damper (stiffness from the ship's
     /// mass and its number of legs, so any ship sits about 30 cm into its travel at 1 g), plus a
     /// friction that keeps it from sliding. Retracted, the leg folds flat against the hull and
-    /// does nothing. Every gear of a ship (and what is docked to it) deploys or retracts together:
-    /// the use key (T) on any of them, or <see cref="Settings.LandingGearKey"/> anywhere aboard.
+    /// does nothing. Deploying and retracting:
+    /// each leg follows the signal on its socket (a lever, a pilot seat, an advanced control...).
     /// State: ConstantState, 1 deployed, 0 retracted.
     /// </summary>
     internal static class LandingGear
@@ -56,61 +57,46 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
         public static void Configure(PartSettings settings, GameObject prefab)
         {
             PartFactory.Describe(settings, Loc.Pick("Train d'atterrissage", "Landing gear", "Tren de aterrizaje"),
-                Loc.Pick("Une jambe rétractable à amortisseur, à fixer sous la coque (elle sort vers le sol). Sortie, elle porte le vaisseau comme une suspension : le ressort et l'amortisseur absorbent l'atterrissage et le vaisseau se pose sur ses jambes sans glisser. Rentrée, elle se replie à plat contre la coque. Tous les trains du vaisseau sortent et rentrent ensemble : touche d'utilisation (T) sur l'un d'eux, ou touche L n'importe où à bord (au pilotage aussi). Mets-en au moins trois, écartés.",
-                    "A retractable leg with a shock absorber, fixed under the hull (it comes out toward the ground). Deployed, it carries the ship like a suspension: the spring and damper soak up the landing and the ship stands on its legs without sliding. Retracted, it folds flat against the hull. All the ship's gear comes out and goes in together: use key (T) on one of them, or the L key anywhere aboard (when piloting too). Fit at least three, spread apart.",
-                    "Una pata retráctil con amortiguador, fijada bajo el casco (sale hacia el suelo). Desplegada, sostiene la nave como una suspensión: el muelle y el amortiguador absorben el aterrizaje y la nave se apoya en sus patas sin deslizar. Recogida, se pliega contra el casco. Todos los trenes de la nave salen y entran a la vez: tecla de uso (T) sobre uno de ellos, o la tecla L en cualquier lugar a bordo (también al pilotar). Pon al menos tres, separados."),
+                Loc.Pick("Une jambe rétractable à amortisseur, à fixer sous la coque (elle sort vers le sol). Sortie, elle porte le vaisseau comme une suspension : le ressort et l'amortisseur absorbent l'atterrissage et le vaisseau se pose sur ses jambes sans glisser. Rentrée, elle se replie à plat contre la coque. Il sort et rentre selon le signal de sa prise : branche sa prise de commande (celle de droite) à un levier, un siège de pilotage, un contrôle avancé ou tout ce qui donne un signal (sorti au-dessus de 0,5) ; sans câble, il reste sorti. La prise de gauche donne son état (1 sorti). Mets-en au moins trois, écartés.",
+                    "A retractable leg with a shock absorber, fixed under the hull (it comes out toward the ground). Deployed, it carries the ship like a suspension: the spring and damper soak up the landing and the ship stands on its legs without sliding. Retracted, it folds flat against the hull. It comes out and goes in with the signal on its socket: wire its command socket (the right one) to a lever, a pilot seat, an advanced control or anything giving a signal (out above 0.5); unwired, it stays out. The left socket gives its state (1 out). Fit at least three, spread apart.",
+                    "Una pata retráctil con amortiguador, fijada bajo el casco (sale hacia el suelo). Desplegada, sostiene la nave como una suspensión: el muelle y el amortiguador absorben el aterrizaje y la nave se apoya en sus patas sin deslizar. Recogida, se pliega contra el casco. Sale y entra con la señal de su toma: conecta su toma de mando (la derecha) a una palanca, un asiento de piloto, un control avanzado o cualquier cosa que dé una señal (fuera por encima de 0,5); sin cable, se queda fuera. La toma izquierda da su estado (1 fuera). Pon al menos tres, separados."),
                 30f, new[] { (101u, 10), (112u, 4), (Items.ModItems.Titanium, 3) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, 0.14f, 0f), new Vector3(0.7f, 0.28f, 0.7f));
             LandingGearModel.Build(visuals);
-            UsablePart.AddBox(visuals, new Vector3(0f, 0.6f, 0f), new Vector3(0.8f, 1.3f, 0.8f));
             visuals.gameObject.AddComponent<LandingGearVisuals>();
+            // The signal socket on the plate's edge, the cable running along the hull
+            PowerParts.GraftRow(prefab, prefab.GetComponent<ShipPartBounds>(), 0.04f, -0.33f, 0.2f,
+                (StatusSocket, CableType.Signal), (CommandSocket, CableType.Signal));
         }
 
-        // ---- Deploying and retracting (host): every gear of the ship together
+        // ---- Deploying and retracting (host): by the signal on its socket
 
-        public static void Install() => TFNet.OnServer(TFMessageKind.LandingGear, OnRequest);
+        /// <summary>
+        /// Its signals: 0 gives its state out (1 deployed, the part emits its ConstantState there),
+        /// 1 takes the command (a lever, a pilot seat, an advanced control...). The game numbers a
+        /// part's sockets from 0 without gaps, and an input on the emitting socket would mix with it.
+        /// </summary>
+        public const byte StatusSocket = 0, CommandSocket = 1;
 
-        /// <summary>Asks the host to deploy or retract the gear of this ship (and what it is docked to).</summary>
-        public static void Toggle(uint shipId) => TFNet.SendToServer(TFMessageKind.LandingGear, shipId, 0, "");
-
-        private static void OnRequest(NetworkConnection sender, TFMessageKind kind, uint shipId, ushort partId, string text)
+        /// <summary>
+        /// Host, every power tick: each leg follows its command socket (out above 0.5). A leg with
+        /// no cable stays out, like a fixed gear.
+        /// </summary>
+        public static void Command(ShipsServerTracker ships, Ships.Cables.ConnectionsServerTracker connections)
         {
-            var ships = StellarDriveDemoTFAdvanced.Common.GameServices.ShipsServer;
-            if (ships == null || !ships.TryGetRootShip(shipId, out IShipStateRead root))
-                return;
-            var gear = new List<(TrackedShipServer Ship, StatefulPart Part)>();
-            foreach (RootRelativeShipData data in ships.GetRootConnectedShips(root.Id))
+            foreach (TrackedShipServer ship in ships.LoadedShipsWithChildren)
             {
-                if (!(ships.GetShip(data.Ship.Id) is TrackedShipServer ship))
-                    continue;
                 foreach (StatefulPart part in ship.GetAllStatefulParts<ConstantState>())
                 {
-                    if (part.Settings != null && part.Settings.id == Id)
-                        gear.Add((ship, part));
+                    if (part.Settings == null || part.Settings.id != Id)
+                        continue;
+                    var socket = new EntityPartSocket(ship.Id, part.Id, CommandSocket);
+                    bool deploy = !connections.IsSocketPhysicallyOccupied(socket) || connections.GetSignalValue(socket) > 0.5;
+                    if (deploy != Deployed(part.State))
+                        ship.UpdatePartState(part.Id, (ConstantState)part.State with { ConstantValue = deploy ? 1.0 : 0.0 });
                 }
             }
-            if (gear.Count == 0)
-                return;
-            // Any leg in: all out; else all in
-            bool deploy = gear.Exists(g => !Deployed(g.Part.State));
-            foreach ((TrackedShipServer ship, StatefulPart part) in gear)
-                ship.UpdatePartState(part.Id, (ConstantState)part.State with { ConstantValue = deploy ? 1.0 : 0.0 });
-            AdvancedMod.Log.Msg($"landing gear of ship {root.Id}: {gear.Count} leg(s) {(deploy ? "deployed" : "retracted")}");
-        }
-
-        /// <summary>The key aboard a ship (walking or piloting): the gear of that ship.</summary>
-        private static readonly KeySetting Key = new KeySetting(() => TFItems.Common.Settings.LandingGearKey);
-
-        public static void Update()
-        {
-            if (ModMenu.IsOpen || BuildSearch.Typing || !Key.WasPressed)
-                return;
-            uint? space = TFItems.Common.GameServices.PlayersClient?.LocalPlayerPhysicsStateSpaceId;
-            var spaces = StellarDriveDemoTFAdvanced.Common.GameServices.Spaces;
-            if (space == null || spaces == null || !spaces.TryGetSpace(space.Value, out ISpace current) || !(current is ShipRelativeSpace aboard))
-                return;
-            Toggle(aboard.ShipId);
         }
 
         // ---- The suspension (host physics)

@@ -103,7 +103,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
         private static void DrawCard(IPlayerPaintToolSelectionTracker selection, float width, float height)
         {
             var rect = new Rect(width - CardWidth - 28f, height - 214f, CardWidth, 178f);
-            GUI.Box(rect, GUIContent.none, _panelStyle);
+            Devices.DeviceUi.Panel(rect);
             Fill(new Rect(rect.x + 14f, rect.y, 46f, 3f), Accent);
 
             GUILayout.BeginArea(new Rect(rect.x + 16f, rect.y + 12f, rect.width - 32f, rect.height - 22f));
@@ -137,7 +137,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
         {
             float panelHeight = Mathf.Min(height - 60f, 860f);
             var rect = new Rect(width - PanelWidth - 28f, (height - panelHeight) / 2f, PanelWidth, panelHeight);
-            GUI.Box(rect, GUIContent.none, _panelStyle);
+            Devices.DeviceUi.Panel(rect);
             Fill(new Rect(rect.x + 18f, rect.y, 60f, 3f), Accent);
 
             GUILayout.BeginArea(new Rect(rect.x + 18f, rect.y + 14f, rect.width - 36f, rect.height - 28f));

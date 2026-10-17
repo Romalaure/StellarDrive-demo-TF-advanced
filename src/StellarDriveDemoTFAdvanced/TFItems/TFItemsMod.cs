@@ -60,7 +60,6 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.Radio.Install();
             Devices.ToolRack.Install();
             Power.FieldDoor.Install();
-            Propulsion.LandingGear.Install();
             Devices.Outfits.Install();
             if (ToolsActive)
             {
@@ -99,7 +98,6 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Cameras.CameraTablet.Update();
             Common.TFNet.Update();
             Common.UsableParts.Update();
-            Propulsion.LandingGear.Update();
             Devices.Outfits.Update();
             Devices.RadioSound.Update();
             if (ToolsActive)

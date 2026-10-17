@@ -123,7 +123,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             float screenWidth = Screen.width / scale, screenHeight = Screen.height / scale;
             List<(PartKey Key, FieldDoor.Config Config)> doors = FieldDoorManager.Doors(_console.ShipId);
             int up = doors.FindAll(d => d.Config.Sealed).Count, on = doors.FindAll(d => d.Config.On).Count;
-            Rect area = DeviceUi.Window(screenWidth, screenHeight, 640f, 600f, Loc.Pick("GESTIONNAIRE DE PORTES À CHAMP DE FORCE", "FORCE FIELD DOOR MANAGER", "GESTOR DE PUERTAS DE CAMPO DE FUERZA"));
+            Rect area = DeviceUi.Window(screenWidth, screenHeight, 720f, 640f, Loc.Pick("GESTIONNAIRE DE PORTES À CHAMP DE FORCE", "FORCE FIELD DOOR MANAGER", "GESTOR DE PUERTAS DE CAMPO DE FUERZA"));
             GUILayout.BeginArea(area);
             GUILayout.Label(Loc.Pick($"{doors.Count} porte(s) connectée(s) au vaisseau, {up} active(s), {on} allumée(s).", $"{doors.Count} door(s) connected to the ship, {up} up, {on} switched on.", $"{doors.Count} puerta(s) conectada(s) a la nave, {up} activa(s), {on} encendida(s)."), DeviceUi.Text);
             GUILayout.Space(8f);
@@ -139,7 +139,9 @@ namespace StellarDriveDemoTFAdvanced.Power
                 GUILayout.Label(Loc.Pick($"Porte {i + 1}", $"Door {i + 1}", $"Puerta {i + 1}"), DeviceUi.Text, GUILayout.Width(80f));
                 GUILayout.Label($"{config.SignedWidth} × {config.SignedHeight} m{(config.Solid ? Loc.Pick(", solide", ", solid", ", sólida") : "")}", DeviceUi.Muted, GUILayout.Width(130f));
                 GUILayout.Label(Short(config), DeviceUi.Muted, GUILayout.ExpandWidth(true));
-                if (GUILayout.Button(config.On ? Loc.Pick("Couper", "Off", "Apagar") : Loc.Pick("Activer", "On", "Activar"), config.On ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Width(100f), GUILayout.Height(30f)))
+                if (GUILayout.Button(config.Solid ? Loc.Pick("Solide", "Solid", "Sólida") : Loc.Pick("Traversable", "Walk-through", "Atravesable"), config.Solid ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Width(120f), GUILayout.Height(30f)))
+                    FieldDoor.Request(key, WithSolid(config, !config.Solid), config.On);
+                if (GUILayout.Button(config.On ? Loc.Pick("Couper", "Off", "Apagar") : Loc.Pick("Activer", "On", "Activar"), config.On ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Width(90f), GUILayout.Height(30f)))
                     FieldDoor.Request(key, config, !config.On);
                 GUILayout.EndHorizontal();
                 GUILayout.Space(3f);
@@ -158,9 +160,23 @@ namespace StellarDriveDemoTFAdvanced.Power
             if (GUILayout.Button(Loc.Pick("Fermer (Échap)", "Close (Esc)", "Cerrar (Esc)"), DeviceUi.Button, GUILayout.Height(36f)))
                 ModMenu.Close();
             GUILayout.EndHorizontal();
+            GUILayout.Space(4f);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(Loc.Pick("Tout solide", "All solid", "Todas sólidas"), DeviceUi.Button, GUILayout.Height(32f)))
+                foreach ((PartKey key, FieldDoor.Config config) in doors)
+                    if (!config.Solid)
+                        FieldDoor.Request(key, WithSolid(config, true), config.On);
+            if (GUILayout.Button(Loc.Pick("Tout traversable", "All walk-through", "Todas atravesables"), DeviceUi.Button, GUILayout.Height(32f)))
+                foreach ((PartKey key, FieldDoor.Config config) in doors)
+                    if (config.Solid)
+                        FieldDoor.Request(key, WithSolid(config, false), config.On);
+            GUILayout.EndHorizontal();
             GUILayout.EndArea();
             GUI.matrix = previous;
         }
+
+        private static FieldDoor.Config WithSolid(FieldDoor.Config config, bool solid) =>
+            new FieldDoor.Config(config.SignedWidth, config.SignedHeight, config.Status, config.Side, solid);
 
         private static string Short(FieldDoor.Config config)
         {

@@ -7,6 +7,7 @@ Sur place, la lumière, le jour et la nuit et la carte stellaire suivent Érèbe
 | Planète | Biome | Gravité | Air | À y chercher |
 |---|---|---|---|---|
 | [Pyros](Pyros.md) | volcanique  | 1,2 g | toxique | météorite (beaucoup), titane |
+| [TF Gaïa](TF-Gaia.md) | comme la Terre : océans, déserts, prairies, savanes, forêts, montagnes | 1 g | respirable | ambre, bois en quantité |
 | [Thalassa](Thalassa.md) | océanique  | 0,9 g | respirable | quartz, ambre, bois de palmier |
 | [Mycélia](Mycelia.md) | fongique  | 0,8 g | toxique (spores) | météorite, cryonite, bois de champignon |
 | [Cristallis](Cristallis.md) | cristalline  | 0,6 g | trop mince | quartz (beaucoup), cryonite, météorite |

@@ -88,6 +88,10 @@ namespace StellarDriveDemoTFAdvanced.Power
             var all = Object.FindObjectsByType<Planets.Objects.MinablePlanetObject>(FindObjectsSortMode.None);
             AdvancedMod.Log.Msg($"dev: mining laser test: {all.Length} minable objects loaded, feet {feet}; nearest: " + string.Join("; ", all.OrderBy(m => Vector3.Distance(m.transform.position, feet)).Take(4)
                 .Select(m => $"{m.name} at {Vector3.Distance(m.transform.position, feet):0} m scene {m.gameObject.scene.name} colliders {string.Join(",", m.GetComponentsInChildren<Collider>(true).Select(c => c.tag + "/" + c.gameObject.layer + "/" + c.enabled + "/" + c.gameObject.scene.name))}")));
+            // DevDisable lasertree: the nearest tree instead (wood into the chest)
+            if (DevHarness.Off("lasertree"))
+                rock = all.Where(m => m.name.Contains("Tree") || m.name.Contains("Fir")).OrderBy(m => Vector3.Distance(m.transform.position, feet))
+                    .SelectMany(m => m.GetComponentsInChildren<Collider>()).FirstOrDefault(c => c.enabled && Vector3.Distance(c.bounds.center, feet) < 150f);
             if (rock == null)
                 rock = all.OrderBy(m => Vector3.Distance(m.transform.position, feet)).SelectMany(m => m.GetComponentsInChildren<Collider>()).FirstOrDefault(c => c.enabled && Vector3.Distance(c.bounds.center, feet) < 150f);
             if (rock == null)

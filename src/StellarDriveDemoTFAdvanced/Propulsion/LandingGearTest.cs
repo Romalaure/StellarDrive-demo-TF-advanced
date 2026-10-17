@@ -8,6 +8,7 @@ using Planets;
 using Saving.Services.Converters;
 using Saving.Services.Model.State;
 using Ships;
+using Ships.Cables;
 using Ships.Interface.Model.Parts;
 using Ships.Interface.Model.Parts.State;
 using Ships.Services;
@@ -27,7 +28,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
     /// </summary>
     internal static class LandingGearTest
     {
-        private const int Floor = 1;
+        private const int Floor = 1, Constant = 46;
 
         public static void Install()
         {
@@ -68,6 +69,17 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             state.RelativeSpaceId = spaces.GetOrCreateShipRelativeSpace(state.Id);
             ships.LoadShip(state);
             uint id = state.Id;
+            var cables = ServiceLocator.GetService<Ships.Cables.CablesServerTracker>();
+            foreach (var cable in CablesConverter.ConvertToState(data.cables))
+            {
+                var c = cable.State;
+                var pa = c.PlugA; var pb = c.PlugB;
+                var sa = pa.EntityPartSocket; sa.EntityId = id; pa.EntityPartSocket = sa;
+                var sb = pb.EntityPartSocket; sb.EntityId = id; pb.EntityPartSocket = sb;
+                c.PlugA = pa;
+                c.PlugB = pb;
+                cables?.AddCable(c);
+            }
             AdvancedMod.Log.Msg($"dev: landing gear test ship {id} dropped 5 m above the ground");
             for (int i = 0; i < 24; i++)
             {
@@ -76,7 +88,11 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                 if (i == 19)
                     yield return Parts.Showcase.Photograph(id, "gear_down");
             }
-            LandingGear.Toggle(id);
+            // The constants on the legs' sockets to 0: the gear retracts
+            TrackedShipServer dropped = ships.GetShip(id);
+            if (dropped != null)
+                foreach (StatefulPart constant in dropped.GetAllStatefulParts<ConstantState>().Where(p => p.Settings.id == Constant).ToList())
+                    dropped.UpdatePartState(constant.Id, (ConstantState)constant.State with { ConstantValue = 0.0 });
             for (int i = 0; i < 10; i++)
             {
                 yield return StationVisit.Wait(0.5f);
@@ -96,7 +112,13 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             var physics = ship.PhysicsState.LocalPhysicsState;
             float height = Vector3.Dot(physics.Position - start, upward);
             float tilt = Vector3.Angle(physics.Rotation * Vector3.up, upward);
-            string legs = string.Join(",", ship.GetAllStatefulParts<ConstantState>().Where(p => p.Settings.id == LandingGear.Id).Select(p => LandingGear.Deployed(p.State) ? "out" : "in"));
+            var connections = ServiceLocator.GetService<ConnectionsServerTracker>();
+            string legs = string.Join(",", ship.GetAllStatefulParts<ConstantState>().Where(p => p.Settings.id == LandingGear.Id).Select(p =>
+            {
+                var socket = new Ships.Interface.Model.Parts.Common.EntityPartSocket(id, p.Id, LandingGear.CommandSocket);
+                string wire = connections == null ? "?" : connections.IsSocketPhysicallyOccupied(socket) ? $"wired {connections.GetSignalValue(socket):0.#}" : "unwired";
+                return (LandingGear.Deployed(p.State) ? "out" : "in") + " " + wire;
+            }));
             AdvancedMod.Log.Msg($"dev: landing gear test {when}: height {height:0.00} m from the drop point, vertical speed {Vector3.Dot(physics.Velocity, upward):0.00} m/s, speed {physics.Velocity.magnitude:0.00}, tilt {tilt:0.0}°, legs {legs}");
         }
 
@@ -115,12 +137,16 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             }
             string Part(int id, float x, float z) => string.Format(CultureInfo.InvariantCulture,
                 "{{\"id\":{0},\"settingsId\":{1},\"coord\":{{\"x\":{2},\"y\":{3},\"z\":{4}}},\"forwardOrientationId\":0,\"upOrientationId\":5}}", id, LandingGear.Id, x, -0.5f, z);
-            string parts = string.Join(",", Part(1, -1.5f, 1.5f), Part(2, 2.5f, 1.5f), Part(3, -1.5f, 4.5f), Part(4, 2.5f, 4.5f));
+            string Box(int id, float x, float z) => string.Format(CultureInfo.InvariantCulture,
+                "{{\"id\":{0},\"settingsId\":{1},\"coord\":{{\"x\":{2},\"y\":-0.46,\"z\":{3}}},\"forwardOrientationId\":2,\"upOrientationId\":4}}", id, Constant, x, z);
+            string parts = string.Join(",", Part(1, -1.5f, 1.5f), Part(2, 2.5f, 1.5f), Part(3, -1.5f, 4.5f), Part(4, 2.5f, 4.5f),
+                Box(5, -1.5f, 2.5f), Box(6, 2.5f, 2.5f), Box(7, -1.5f, 3.5f), Box(8, 2.5f, 3.5f));
+            string Cable(int cable, int gear) => $"{{\"id\":{cable},\"type\":0,\"plugA\":{{\"shipId\":1,\"partId\":{gear + 4},\"socketId\":0}},\"plugB\":{{\"shipId\":1,\"partId\":{gear},\"socketId\":1}}}}";
             var sb = new StringBuilder();
-            sb.Append("{\"rootShipId\":1,\"cables\":[],\"ships\":[{");
+            sb.Append("{\"rootShipId\":1,\"cables\":[").Append(string.Join(",", Enumerable.Range(1, 4).Select(g => Cable(g, g)))).Append("],\"ships\":[{");
             sb.Append("\"id\":1,\"relativeSpaceId\":0,\"spaceId\":0,\"position\":{\"x\":0,\"y\":0,\"z\":0},\"velocity\":{\"x\":0,\"y\":0,\"z\":0},\"rotation\":{\"x\":0,\"y\":0,\"z\":0,\"w\":1},");
             sb.Append("\"rooms\":[],\"hullParts\":[").Append(hull).Append("],\"statefulFloatingParts\":[").Append(parts).Append("],\"statefulHullParts\":[],\"thrustersStates\":[],\"storageStates\":[],\"fluidTankStates\":[],");
-            sb.Append("\"constantStates\":[").Append(string.Join(",", Enumerable.Range(1, 4).Select(i => $"{{\"partId\":{i},\"constantValue\":1.0}}"))).Append("],");
+            sb.Append("\"constantStates\":[").Append(string.Join(",", Enumerable.Range(1, 8).Select(i => $"{{\"partId\":{i},\"constantValue\":{"1.0"}}}"))).Append("],");
             foreach (string empty in new[] { "dockingDoorStates", "beaconStates", "leverStates", "warpDriveStates", "targeterStates", "mathGateStates",
                          "unaryMathGateStates", "memoryRegisterStates", "transmitterStates", "rotorStates", "electrolyzerStates",
                          "woodThrusterStates", "woodGeneratorStates", "ethanolDistillerStates" })

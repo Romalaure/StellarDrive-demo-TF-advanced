@@ -267,6 +267,15 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Correctifs, train par signal, laser bûcheron (v0.34)
+
+- **Miniatures** du menu de construction : caméra, capsule, radio et râtelier ont de nouveau leurs couleurs ; la cabine cosmétique apparaît dans l'onglet TF Équipement.
+- **Train d'atterrissage** commandé par **signal** (levier, siège de pilotage, contrôle avancé...) sur sa prise de commande, plus par T ; sans câble il reste sorti ; une prise donne son état.
+- **Laser de minage embarqué** : rayon centré sur le canon ; il abat aussi les **arbres** et envoie le **bois** dans le coffre.
+- **Portes à champ de force** : l'émetteur reste peignable et démontable champ allumé (on passe toujours dessus) ; le gestionnaire rend chaque porte (ou toutes) **solide ou traversable**.
+- **Interfaces** : le HUD de peinture et la tablette caméra prennent le même cadre que les autres fenêtres.
+- **TF Gaïa** passe dans la galaxie d'**Érèbe**.
+
 ## Trains d'atterrissage, cabine cosmétique (v0.33)
 
 - **Train d'atterrissage** rétractable à amortisseur (onglet TF Avancé, rangée propulsion) : à fixer sous la coque. Sorti, il porte le vaisseau comme une suspension (ressort, amortisseur, patins qui tiennent au sol même en pente) ; rentré, il se replie contre la coque. Tous les trains sortent et rentrent ensemble : T sur l'un d'eux ou touche L à bord, au pilotage aussi.

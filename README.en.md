@@ -33,6 +33,15 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Fixes, signal gear, lumberjack laser (v0.34)
+
+- Build menu **thumbnails**: camera, capsule, radio and rack have their colors again; the cosmetic cabin shows in the TF Equipment tab.
+- **Landing gear** driven by a **signal** (lever, pilot seat, advanced control...) on its command socket, no longer by T; unwired it stays out; a socket gives its state.
+- **Ship mining laser**: beam centred on the barrel; it also fells **trees** and sends the **wood** to the chest.
+- **Force field doors**: the emitter can be painted and taken down with the field on (you still walk over it); the manager makes each door (or all) **solid or walk-through**.
+- **Interfaces**: the paint HUD and the camera tablet take the same frame as the other windows.
+- **TF Gaïa** moves to the **Erebus** galaxy.
+
 ## Landing gear, cosmetic cabin (v0.33)
 
 - Retractable **landing gear** with a shock absorber (TF Advanced tab, propulsion row): fixed under the hull. Out, it carries the ship like a suspension (spring, damper, pads that grip even on a slope); in, it folds against the hull. All gear comes out and goes in together: T on one of them or the L key aboard, when piloting too.

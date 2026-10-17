@@ -88,8 +88,12 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
     /// is out the piston slides into its cylinder and the spring shortens as the ground pushes on
     /// the pad (the client casts its own ray, like the host does for the force).
     /// </summary>
-    internal sealed class LandingGearVisuals : UsablePart
+    internal sealed class LandingGearVisuals : Ships.Parts.Common.DefaultShipPartVisuals, Ships.Parts.Common.Model.IContextAwarePart
     {
+        private bool HasContext;
+
+        public void SetContext(Ships.Parts.Common.Utils.ShipPartContext context) => HasContext = true;
+
         private Transform _pivot, _piston, _spring;
         private Vector3 _pistonRest;
         private bool _deployed;
@@ -98,13 +102,8 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
         private MaterialPropertyBlock _block;
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor"), EmissionColorId = Shader.PropertyToID("_EmissionColor");
 
-        public override string Label => _deployed ? Loc.Pick("Rentrer le train d'atterrissage", "Retract the landing gear", "Recoger el tren de aterrizaje") : Loc.Pick("Sortir le train d'atterrissage", "Deploy the landing gear", "Desplegar el tren de aterrizaje");
-
-        public override void Use() => LandingGear.Toggle(Key.ShipId);
-
-        protected override void Awake()
+        private void Awake()
         {
-            base.Awake();
             _pivot = transform.Find(LandingGearModel.PivotName);
             _piston = _pivot != null ? _pivot.Find(LandingGearModel.PistonName) : null;
             _spring = _pivot != null ? _pivot.Find(LandingGearModel.SpringName) : null;

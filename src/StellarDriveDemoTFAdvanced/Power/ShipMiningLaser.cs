@@ -166,9 +166,9 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             if (!Ray(shipId, part, out Ray ray, out Transform shipBody))
                 return null;
-            return Cast(ray, shipBody, out RaycastHit hit) && hit.collider.CompareTag("PlanetSurfaceObject")
-                ? hit.collider.GetComponentInParent<IMinableObject>()
-                : null;
+            // Rocks, ore and trees alike (trees are not tagged as surface objects): their drop,
+            // wood for a tree, goes into the chests
+            return Cast(ray, shipBody, out RaycastHit hit) ? hit.collider.GetComponentInParent<IMinableObject>() : null;
         }
 
         /// <summary>The beam in the client physics scene: from the muzzle, out of the part's surface.</summary>

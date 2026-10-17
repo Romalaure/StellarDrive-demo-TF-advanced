@@ -51,7 +51,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
         {
             if (!__result && part != null && (LampCatalog.IsLamp(part.id) || part.id == Cameras.CameraParts.CameraId
                 || part.id == Devices.TeleportCapsule.CapsuleId || part.id == Devices.Radio.RadioId
-                || part.id == Devices.ToolRack.RackId))
+                || part.id == Devices.ToolRack.RackId || part.id == Devices.CosmeticCabin.CabinId))
                 __result = true;
         }
     }

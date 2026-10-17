@@ -16,7 +16,7 @@
 
 ## Ship mining laser
 
-The player's mining laser, scaled up, on a turret that bolts to the hull (floor, wall, ceiling, the ship's underside). Its beam goes straight out of the surface it is placed on, up to **40 m**, and mines the rocks, crystals and asteroid ores it hits, **3 times faster** than the tool. What it mines does not go to your inventory: it goes into the **chest linked by an item line**.
+The player's mining laser, scaled up, on a turret that bolts to the hull (floor, wall, ceiling, the ship's underside). Its beam goes straight out of the surface it is placed on, up to **40 m**, and mines the rocks, crystals, asteroid ores and **trees** (for wood) it hits, **3 times faster** than the tool. What it mines does not go to your inventory: it goes into the **chest linked by an item line**.
 
 1. Place the laser, the turret facing what you want to mine.
 2. Plug power into one of its power sockets (**800 W** while it fires).
@@ -62,9 +62,9 @@ An emitter you set **on the floor, in the middle of an opening in the hull**, fa
 - **Negative values**: a negative width sends the field to the other side; a negative height makes it go down from the emitter (set on a ceiling).
 - **Solid**: the "Solid" setting in the window makes the field a wall, nobody gets through (the air stays in).
 - **Color**: paint the door with the paint gun, the field takes its color.
-- **Door manager** (same row): a console listing every door of the ship and of what is docked to it (how many, which ones are up) and switching them on or off one by one or all together. No cable.
+- **Door manager** (same row): a console listing every door of the ship and of what is docked to it (how many, which ones are up) switching them on or off and making them solid or walk-through, one by one or all together. No cable.
 - **Side**: the field spreads on both sides of the emitter, or only to its left or its right (seen facing the emitter, from the side without plugs): then set it against one side of the opening.
-- The field is thick (20 cm) and goes down to the floor. While it is up the rail has no collision: you walk over it without bumping (switch it off to take it down).
+- The field is thick (20 cm) and goes down to the floor. While it is up the rail has no collision: you walk over it without bumping, and it can be painted and taken down even when on.
 - Take the opening's size: the field overlaps the hull around by half a meter, and settles into the hull's plane by itself.
 - Research **Artifact technology**, force field row of the TF Advanced tab.
 
@@ -74,7 +74,7 @@ A retractable leg with a shock absorber (TF Advanced tab, propulsion row, Advanc
 
 - **Deployed**, it carries the ship like a suspension: spring and damper soak up the landing (tested: a 5 m drop), the pad grips the ground without sliding, even on a slope.
 - **Retracted**, it folds flat against the hull.
-- All the ship's gear comes out and goes in **together**: **T** on one of them, or **L** anywhere aboard, when piloting too (setting `LandingGearKey`).
+- It comes out and goes in with the **signal** on its command socket (the right one): wire it to a lever, a pilot seat, an advanced control or anything giving a signal (out above 0.5). Unwired, it stays out. The left socket gives its state (1 out).
 - Fit at least three, spread apart. The stiffness adapts to the ship's mass and the number of legs.
 
 ## Nuclear power

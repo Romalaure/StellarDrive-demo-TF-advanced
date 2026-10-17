@@ -1,6 +1,6 @@
 # TF Gaïa
 
-*System: [442 Otrera](Systeme-Otrera.md)*
+*System: [Erebus](Galaxie-Erebe.md)*
 
 | | |
 |---|---|

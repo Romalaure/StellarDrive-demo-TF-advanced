@@ -16,7 +16,7 @@ Pestaña de construcción **TF Avancé**. Las máquinas se desbloquean en la [me
 
 ## Láser de minería de nave
 
-El láser de minería del jugador, en grande, sobre una torreta que se fija al casco (suelo, pared, techo, bajo la nave). Su rayo sale recto de la superficie donde se coloca, hasta **40 m**, y mina las rocas, cristales y minerales de asteroide que toca, **3 veces más rápido** que la herramienta. Lo que extrae no va a tu inventario: va al **cofre unido por una línea de objetos**.
+El láser de minería del jugador, en grande, sobre una torreta que se fija al casco (suelo, pared, techo, bajo la nave). Su rayo sale recto de la superficie donde se coloca, hasta **40 m**, y mina las rocas, cristales, minerales de asteroide y **árboles** (para la madera) que toca, **3 veces más rápido** que la herramienta. Lo que extrae no va a tu inventario: va al **cofre unido por una línea de objetos**.
 
 1. Coloca el láser, con la torreta mirando hacia lo que quieres minar.
 2. Conecta energía a una de sus tomas eléctricas (**800 W** mientras dispara).
@@ -62,9 +62,9 @@ Un emisor que se coloca **en el suelo, en medio de una abertura del casco**, de 
 - **Valores negativos**: un ancho negativo lleva el campo al otro lado; un alto negativo lo hace bajar desde el emisor (colocado en el techo).
 - **Sólido**: el ajuste «Sólido» de la ventana convierte el campo en un muro, nadie pasa (el aire sigue retenido).
 - **Color**: pinta la puerta con la pistola de pintura, el campo toma su color.
-- **Gestor de puertas** (misma fila): una consola que lista todas las puertas de la nave y de lo acoplado a ella (cuántas, cuáles están activas) y las enciende o apaga una a una o todas a la vez. Sin cable.
+- **Gestor de puertas** (misma fila): una consola que lista todas las puertas de la nave y de lo acoplado a ella (cuántas, cuáles están activas) las enciende o apaga y las vuelve sólidas o atravesables, una a una o todas a la vez. Sin cable.
 - **Lado**: el campo se extiende a ambos lados del emisor, o solo a su izquierda o a su derecha (visto de frente al emisor, desde el lado sin tomas): colócalo entonces contra un lado de la abertura.
-- El campo es grueso (20 cm) y baja hasta el suelo. Mientras está activo, el riel no tiene colisión: se pasa por encima sin tropezar (apágalo para desmontarlo).
+- El campo es grueso (20 cm) y baja hasta el suelo. Mientras está activo, el riel no tiene colisión: se pasa por encima sin tropezar, y se puede pintar y desmontar incluso encendido.
 - Toma el tamaño de la abertura: el campo se solapa medio metro con el casco alrededor y se ajusta solo al plano del casco.
 - Investigación **Tecnología de artefactos**, fila de los campos de fuerza de la pestaña TF Avanzado.
 
@@ -74,7 +74,7 @@ Una pata retráctil con amortiguador (pestaña TF Avanzado, fila de propulsión,
 
 - **Desplegada**, sostiene la nave como una suspensión: muelle y amortiguador absorben el aterrizaje (probado: caída de 5 m), la base se agarra al suelo sin deslizar, incluso en pendiente.
 - **Recogida**, se pliega contra el casco.
-- Todos los trenes salen y entran **a la vez**: **T** sobre uno de ellos, o **L** en cualquier lugar a bordo, también al pilotar (ajuste `LandingGearKey`).
+- Sale y entra con la **señal** de su toma de mando (la derecha): conéctala a una palanca, un asiento de piloto, un control avanzado o cualquier cosa que dé una señal (fuera por encima de 0,5). Sin cable, se queda fuera. La toma izquierda da su estado (1 fuera).
 - Pon al menos tres, separados. La rigidez se ajusta sola según la masa de la nave y el número de patas.
 
 ## Energía nuclear

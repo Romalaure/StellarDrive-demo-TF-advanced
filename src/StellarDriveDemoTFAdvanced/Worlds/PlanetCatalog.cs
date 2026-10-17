@@ -243,7 +243,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
             new PlanetSpec
             {
-                Id = 108, Name = "TF Gaïa", MapColor = new Color(0.3f, 0.6f, 0.95f), Biome = "comme la Terre : océans, déserts, prairies, savanes, forêts, montagnes", OrbitAngle = -70f, OrbitScale = 1.25f, Gravity = 1f, RotationHours = 1.2f,
+                Id = 108, Name = "TF Gaïa", System = PlanetWiki.Erebos, MapColor = new Color(0.3f, 0.6f, 0.95f), Biome = "comme la Terre : océans, déserts, prairies, savanes, forêts, montagnes", OrbitAngle = -150f, OrbitScale = 1.2f, Gravity = 1f, RotationHours = 1.2f,
                 Shape = p =>
                 {
                     // An Earth: deep blue oceans and lakes; sand beaches and deserts in the lowlands;

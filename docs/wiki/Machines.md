@@ -16,7 +16,7 @@ Onglet de construction **TF Avancé**. Les machines se débloquent à la [table 
 
 ## Laser de minage embarqué
 
-Le laser de minage du joueur, en grand, sur une tourelle à fixer sur la coque (sol, mur, plafond, dessous du vaisseau). Son rayon part tout droit de la surface où on le pose, jusqu'à **40 m**, et mine les rochers, cristaux et minerais d'astéroïde qu'il touche, **3 fois plus vite** que l'outil. Ce qu'il extrait ne va pas dans votre inventaire : il va dans le **coffre relié par une ligne d'objets**.
+Le laser de minage du joueur, en grand, sur une tourelle à fixer sur la coque (sol, mur, plafond, dessous du vaisseau). Son rayon part tout droit de la surface où on le pose, jusqu'à **40 m**, et mine les rochers, cristaux, minerais d'astéroïde et **arbres** (pour le bois) qu'il touche, **3 fois plus vite** que l'outil. Ce qu'il extrait ne va pas dans votre inventaire : il va dans le **coffre relié par une ligne d'objets**.
 
 1. Posez le laser, la tourelle tournée vers ce que vous voulez miner.
 2. Branchez du courant sur une de ses prises électriques (**800 W** pendant qu'il tire).
@@ -62,9 +62,9 @@ Un émetteur à poser **au sol, au milieu d'une ouverture de la coque**, face à
 - **Valeurs négatives** : largeur négative = le champ part de l'autre côté ; hauteur négative = il descend depuis l'émetteur (posé au plafond).
 - **Solide** : réglage « Solide » dans la fenêtre : le champ devient un mur, personne ne passe (l'air reste retenu).
 - **Couleur** : peins la porte au pistolet à peinture, le champ prend sa couleur.
-- **Gestionnaire de portes** (même rangée) : une console qui liste toutes les portes du vaisseau et de ce qui y est amarré (combien, lesquelles sont actives) et les allume ou les coupe une par une ou toutes ensemble. Pas de câble.
+- **Gestionnaire de portes** (même rangée) : une console qui liste toutes les portes du vaisseau et de ce qui y est amarré (combien, lesquelles sont actives) les allume ou les coupe, et les rend solides ou traversables, une par une ou toutes ensemble. Pas de câble.
 - **Côté** : le champ part des deux côtés de l'émetteur, ou seulement à sa gauche ou à sa droite (vu face à l'émetteur, du côté sans prises) : pose-le alors contre un bord de l'ouverture.
-- Le champ est épais (20 cm) et descend jusqu'au sol. Quand il est actif, le rail n'a plus de collision : on passe dessus sans buter (éteins-le pour le démonter).
+- Le champ est épais (20 cm) et descend jusqu'au sol. Quand il est actif, le rail n'a plus de collision : on passe dessus sans buter, et il se peint et se démonte même allumé.
 - Prends la taille de l'ouverture : le champ déborde d'un demi-mètre sur la coque autour, et se cale de lui-même dans le plan de la coque.
 - Recherche **Technologie des artefacts**, rangée des champs de force de l'onglet TF Avancé.
 
@@ -74,7 +74,7 @@ Une jambe rétractable à amortisseur (onglet TF Avancé, rangée propulsion, re
 
 - **Sortie**, elle porte le vaisseau comme une suspension : ressort et amortisseur absorbent l'atterrissage (testé : chute de 5 m amortie), le patin tient au sol sans glisser, même en pente.
 - **Rentrée**, elle se replie à plat contre la coque.
-- Tous les trains du vaisseau sortent et rentrent **ensemble** : touche **T** sur l'un d'eux, ou touche **L** n'importe où à bord, au pilotage aussi (réglage `LandingGearKey`).
+- Il sort et rentre selon le **signal** de sa prise de commande (celle de droite) : branche-la à un levier, un siège de pilotage, un contrôle avancé ou tout ce qui donne un signal (sorti au-dessus de 0,5). Sans câble, il reste sorti. La prise de gauche donne son état (1 sorti).
 - Mets-en au moins trois, bien écartés. La raideur se règle seule selon la masse du vaisseau et le nombre de jambes.
 
 ## Énergie nucléaire

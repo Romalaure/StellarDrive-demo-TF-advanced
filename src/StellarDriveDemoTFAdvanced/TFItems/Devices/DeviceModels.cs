@@ -56,8 +56,14 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             for (int i = 0; i < shader.GetPropertyCount(); i++)
             {
                 if (shader.GetPropertyType(i) == ShaderPropertyType.Texture)
-                    material.SetTexture(shader.GetPropertyNameId(i), _white);
+                {
+                    if (StellarDriveDemoTFAdvanced.Common.DevHarness.Active && GameLook.Count == 0)
+                        TFMod.Log.Msg($"dev: part shader texture {shader.GetPropertyName(i)} = {source.GetTexture(shader.GetPropertyNameId(i))?.name}");
+                }
             }
+            foreach (string texture in new[] { "_Albedo", "_ColorPalette", "_MainTex", "_BaseMap" })
+                if (material.HasProperty(texture))
+                    material.SetTexture(texture, _white);
             foreach (string property in new[] { "_Color", "_BaseColor" })
                 if (material.HasProperty(property))
                     material.SetColor(property, color);

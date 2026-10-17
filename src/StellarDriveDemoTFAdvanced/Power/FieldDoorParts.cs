@@ -28,9 +28,9 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             float w = PowerCatalog.FieldDoorWattsPerSquareMeter.Value;
             PartFactory.Describe(settings, Loc.Pick("Porte à champ de force", "Force field door", "Puerta de campo de fuerza"),
-                Loc.Pick($"Un émetteur à poser au sol, au milieu d'une ouverture de la coque, face à l'ouverture. Regarde-le et appuie sur la touche d'utilisation (T) pour choisir la taille du champ (de 1 × 1 à {FieldDoor.MaxSize} × {FieldDoor.MaxSize} m, par exemple 2 × 2 ou 10 × 20), s'il part des deux côtés de l'émetteur ou seulement à sa gauche ou à sa droite (valeurs négatives : de l'autre côté, ou vers le bas depuis un plafond), s'il est traversable ou solide, et l'allumer. Sa couleur se change au pistolet à peinture. Le champ garde l'oxygène comme une porte fermée ; traversable, on passe à travers, et l'émetteur aussi (éteins-le pour le démonter). Il consomme {w:0} W par m² sur ses prises électriques (le réseau doit pouvoir les fournir en entier) ; sans courant, il s'éteint et l'air s'échappe.",
-                    $"An emitter set on the floor in the middle of an opening in the hull, facing the opening. Look at it and press the use key (T) to choose the field's size (from 1 × 1 to {FieldDoor.MaxSize} × {FieldDoor.MaxSize} m, for example 2 × 2 or 10 × 20), whether it spreads on both sides of the emitter or only to its left or its right (negative values: to the other side, or down from a ceiling), whether it is walk-through or solid, and switch it on. Its color changes with the paint gun. The field holds the oxygen like a closed door, but you walk through it, and through the emitter too (switch it off to take it down). It draws {w:0} W per m² on its power sockets (the grid must be able to supply all of it); without power it goes out and the air escapes.",
-                    $"Un emisor que se coloca en el suelo, en medio de una abertura del casco, de cara a la abertura. Míralo y pulsa la tecla de uso (T) para elegir el tamaño del campo (de 1 × 1 a {FieldDoor.MaxSize} × {FieldDoor.MaxSize} m, por ejemplo 2 × 2 o 10 × 20), si se extiende a ambos lados del emisor o solo a su izquierda o a su derecha (valores negativos: hacia el otro lado, o hacia abajo desde un techo), si es atravesable o sólido, y encenderlo. Su color se cambia con la pistola de pintura. El campo retiene el oxígeno como una puerta cerrada, pero se puede atravesar, y el emisor también (apágalo para desmontarlo). Consume {w:0} W por m² en sus tomas de energía (la red debe poder suministrarlos todos); sin energía se apaga y el aire se escapa."),
+                Loc.Pick($"Un émetteur à poser au sol, au milieu d'une ouverture de la coque, face à l'ouverture. Regarde-le et appuie sur la touche d'utilisation (T) pour choisir la taille du champ (de 1 × 1 à {FieldDoor.MaxSize} × {FieldDoor.MaxSize} m, par exemple 2 × 2 ou 10 × 20), s'il part des deux côtés de l'émetteur ou seulement à sa gauche ou à sa droite (valeurs négatives : de l'autre côté, ou vers le bas depuis un plafond), s'il est traversable ou solide, et l'allumer. Sa couleur se change au pistolet à peinture. Le champ garde l'oxygène comme une porte fermée ; traversable, on passe à travers, et par-dessus l'émetteur (qui se peint et se démonte même allumé). Il consomme {w:0} W par m² sur ses prises électriques (le réseau doit pouvoir les fournir en entier) ; sans courant, il s'éteint et l'air s'échappe.",
+                    $"An emitter set on the floor in the middle of an opening in the hull, facing the opening. Look at it and press the use key (T) to choose the field's size (from 1 × 1 to {FieldDoor.MaxSize} × {FieldDoor.MaxSize} m, for example 2 × 2 or 10 × 20), whether it spreads on both sides of the emitter or only to its left or its right (negative values: to the other side, or down from a ceiling), whether it is walk-through or solid, and switch it on. Its color changes with the paint gun. The field holds the oxygen like a closed door, but you walk through it, and over the emitter (which can be painted and taken down even when on). It draws {w:0} W per m² on its power sockets (the grid must be able to supply all of it); without power it goes out and the air escapes.",
+                    $"Un emisor que se coloca en el suelo, en medio de una abertura del casco, de cara a la abertura. Míralo y pulsa la tecla de uso (T) para elegir el tamaño del campo (de 1 × 1 a {FieldDoor.MaxSize} × {FieldDoor.MaxSize} m, por ejemplo 2 × 2 o 10 × 20), si se extiende a ambos lados del emisor o solo a su izquierda o a su derecha (valores negativos: hacia el otro lado, o hacia abajo desde un techo), si es atravesable o sólido, y encenderlo. Su color se cambia con la pistola de pintura. El campo retiene el oxígeno como una puerta cerrada, pero se puede atravesar, y por encima del emisor (que se puede pintar y desmontar incluso encendido). Consume {w:0} W por m² en sus tomas de energía (la red debe poder suministrarlos todos); sin energía se apaga y el aire se escapa."),
                 40f, new[] { (Items.ModItems.Titanium, 4), (Items.ModItems.Cryonite, 2), (112u, 6), (102u, 4) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, RailHeight * 0.5f, 0f), new Vector3(RailWidth, RailHeight, RailDepth));
@@ -539,9 +539,9 @@ namespace StellarDriveDemoTFAdvanced.Power
     }
 
     /// <summary>
-    /// The door's collision, handed to the game as the part's dynamic collider: the rail, off
-    /// while the field is up (nothing bumps into it in the doorway), and the field itself while
-    /// it is up and solid.
+    /// The door's collision, handed to the game as the part's dynamic collider: the rail, flush
+    /// with the floor (walked over, always there for the tools), and the field itself while it is
+    /// up and solid.
     /// </summary>
     internal sealed class FieldDoorCollider : MonoBehaviour, IShipPartDynamicCollider
     {
@@ -556,8 +556,10 @@ namespace StellarDriveDemoTFAdvanced.Power
             root.transform.SetParent(prefab.transform, false);
             var rail = new GameObject(RailName) { layer = ship, tag = "ShipFloatingPart" };
             rail.transform.SetParent(root.transform, false);
-            rail.transform.localPosition = new Vector3(0f, 0.03f, 0f);
-            rail.AddComponent<BoxCollider>().size = new Vector3(FieldDoorParts.RailWidth, 0.06f, FieldDoorParts.RailDepth);
+            // Flush with the floor: walked over without a bump, and still what the paint gun, the
+            // recycler and the build tool aim at, field up or not
+            rail.transform.localPosition = new Vector3(0f, 0.015f, 0f);
+            rail.AddComponent<BoxCollider>().size = new Vector3(FieldDoorParts.RailWidth, 0.03f, FieldDoorParts.RailDepth);
             var field = new GameObject(FieldName) { layer = ship, tag = "ShipFloatingPart" };
             field.transform.SetParent(root.transform, false);
             field.AddComponent<BoxCollider>().enabled = false;
@@ -569,11 +571,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             FieldDoor.Config config = FieldDoor.Decode(state);
             foreach (BoxCollider box in GetComponentsInChildren<BoxCollider>(true))
             {
-                if (box.name == RailName)
-                {
-                    box.enabled = !config.Sealed;
-                }
-                else if (box.name == FieldName)
+                if (box.name == FieldName)
                 {
                     box.enabled = config.Sealed && config.Solid;
                     float up = config.FlipHeight ? -1f : 1f;

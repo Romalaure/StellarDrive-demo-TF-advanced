@@ -32,8 +32,6 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         Outfit = 20,
         /// <summary>Client to server: force field door A/B, Text is "width height on" (the host writes its state).</summary>
         FieldDoor = 25,
-        /// <summary>Client to server: deploy or retract the landing gear of ship A (and what it is docked to).</summary>
-        LandingGear = 26,
 
         /// <summary>Client to server: copy the ship A (and what is attached to it) as schematic Text.</summary>
         SchematicCopy = 30,

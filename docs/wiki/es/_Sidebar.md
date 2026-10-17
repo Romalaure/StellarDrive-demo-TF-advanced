@@ -9,10 +9,10 @@
 - [TF Glacia](TF-Glacia.md)
 - [TF Nexora](TF-Nexora.md)
 - [TF Sylvara](TF-Sylvara.md)
-- [TF Gaïa](TF-Gaia.md)
 
 **Érebo**
 - [Pyros](Pyros.md)
+- [TF Gaïa](TF-Gaia.md)
 - [Thalassa](Thalassa.md)
 - [Mycélia](Mycelia.md)
 - [Cristallis](Cristallis.md)

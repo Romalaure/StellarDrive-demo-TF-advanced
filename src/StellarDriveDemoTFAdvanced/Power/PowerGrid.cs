@@ -116,6 +116,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 PrepareReactor(power, reactor, deltaTime);
             ForceField.BeforeTransfers(power, _ships, _connections, deltaTime);
             FieldDoor.BeforeTransfers(power, _ships, deltaTime);
+            Propulsion.LandingGear.Command(_ships, _connections);
             Condenser.BeforeTransfers(power, _ships, _connections, deltaTime);
             ShipMiningLaser.BeforeTransfers(power, _ships, _connections, deltaTime);
             DarkMatter.BeforeTransfers(power, _ships, _connections, deltaTime);

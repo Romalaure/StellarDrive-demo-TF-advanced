@@ -7,6 +7,7 @@ Once there, light, day and night and the star map follow Erebus. The star map on
 | Planet | Biome | Gravity | Air | Look for |
 |---|---|---|---|---|
 | [Pyros](Pyros.md) | volcanic | 1.2 g | toxic | meteorite (lots), titanium |
+| [TF Gaïa](TF-Gaia.md) | like the Earth: oceans, deserts, prairies, savannas, forests, mountains | 1 g | breathable | amber, plenty of wood |
 | [Thalassa](Thalassa.md) | oceanic | 0.9 g | breathable | quartz, amber, palm wood |
 | [Mycélia](Mycelia.md) | fungal | 0.8 g | toxic (spores) | meteorite, cryonite, mushroom wood |
 | [Cristallis](Cristallis.md) | crystalline | 0.6 g | too thin | quartz (lots), cryonite, meteorite |

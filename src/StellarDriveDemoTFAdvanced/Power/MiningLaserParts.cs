@@ -41,9 +41,9 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static void Configure(PartSettings settings, GameObject prefab)
         {
             PartFactory.Describe(settings, Loc.Pick("Laser de minage embarqué", "Ship mining laser", "Láser de minería de nave"),
-                Loc.Pick($"Le laser de minage du joueur, en grand, sur une tourelle à fixer sur la coque : son rayon part tout droit de la surface où on le pose et mine les rochers, cristaux et minerais d'astéroïde qu'il touche, jusqu'à {PowerCatalog.MiningLaserRange.Value:0} m. Ce qu'il extrait va dans le coffre relié à sa prise d'objets (jaune) par une ligne d'objets ; sans coffre relié, il ne tire pas. {PowerCatalog.MiningLaserWatts.Value:0} W. Prise de commande : sans câble il tire toujours, avec un câble quand le signal est au-dessus de 0. Prise d'état : 2 mine, 1 tire, 0 éteint, -1 sans courant, -2 sans coffre, -3 coffre plein.",
-                    $"The player's mining laser, scaled up, on a turret that bolts to the hull: its beam goes straight out of the surface it is placed on and mines the rocks, crystals and asteroid ores it hits, up to {PowerCatalog.MiningLaserRange.Value:0} m. What it mines goes into the chest linked to its item socket (yellow) by an item line; with no chest linked it does not fire. {PowerCatalog.MiningLaserWatts.Value:0} W. Command socket: with no cable it always fires, with a cable while the signal is above 0. Status socket: 2 mining, 1 firing, 0 off, -1 no power, -2 no chest, -3 chest full.",
-                    $"El láser de minería del jugador, en grande, sobre una torreta que se fija al casco: su rayo sale recto de la superficie donde se coloca y mina las rocas, cristales y minerales de asteroide que toca, hasta {PowerCatalog.MiningLaserRange.Value:0} m. Lo que extrae va al cofre unido a su toma de objetos (amarilla) por una línea de objetos; sin cofre unido no dispara. {PowerCatalog.MiningLaserWatts.Value:0} W. Toma de mando: sin cable dispara siempre, con cable cuando la señal es mayor que 0. Toma de estado: 2 mina, 1 dispara, 0 apagado, -1 sin energía, -2 sin cofre, -3 cofre lleno."),
+                Loc.Pick($"Le laser de minage du joueur, en grand, sur une tourelle à fixer sur la coque : son rayon part tout droit de la surface où on le pose et mine les rochers, cristaux, minerais d'astéroïde et arbres (pour le bois) qu'il touche, jusqu'à {PowerCatalog.MiningLaserRange.Value:0} m. Ce qu'il extrait va dans le coffre relié à sa prise d'objets (jaune) par une ligne d'objets ; sans coffre relié, il ne tire pas. {PowerCatalog.MiningLaserWatts.Value:0} W. Prise de commande : sans câble il tire toujours, avec un câble quand le signal est au-dessus de 0. Prise d'état : 2 mine, 1 tire, 0 éteint, -1 sans courant, -2 sans coffre, -3 coffre plein.",
+                    $"The player's mining laser, scaled up, on a turret that bolts to the hull: its beam goes straight out of the surface it is placed on and mines the rocks, crystals, asteroid ores and trees (for wood) it hits, up to {PowerCatalog.MiningLaserRange.Value:0} m. What it mines goes into the chest linked to its item socket (yellow) by an item line; with no chest linked it does not fire. {PowerCatalog.MiningLaserWatts.Value:0} W. Command socket: with no cable it always fires, with a cable while the signal is above 0. Status socket: 2 mining, 1 firing, 0 off, -1 no power, -2 no chest, -3 chest full.",
+                    $"El láser de minería del jugador, en grande, sobre una torreta que se fija al casco: su rayo sale recto de la superficie donde se coloca y mina las rocas, cristales, minerales de asteroide y árboles (para la madera) que toca, hasta {PowerCatalog.MiningLaserRange.Value:0} m. Lo que extrae va al cofre unido a su toma de objetos (amarilla) por una línea de objetos; sin cofre unido no dispara. {PowerCatalog.MiningLaserWatts.Value:0} W. Toma de mando: sin cable dispara siempre, con cable cuando la señal es mayor que 0. Toma de estado: 2 mina, 1 dispara, 0 apagado, -1 sin energía, -2 sin cofre, -3 cofre lleno."),
                 70f, new[] { (101u, 14), (112u, 8), (102u, 4) });
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             settings.snappingStyle = Ships.Interface.Model.SnappingStyle.PreciseOnAny;
@@ -114,7 +114,9 @@ namespace StellarDriveDemoTFAdvanced.Power
             if (renderers.Count == 0)
                 return null;
             // The barrel's direction: where the laser leaves the tool, else the tool's forward
-            Transform origin = root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name.ToLowerInvariant().Contains("origin") || t.name.ToLowerInvariant().Contains("muzzle"));
+            // (the tool's beam starts at "LaserBeam")
+            Transform origin = root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "LaserBeam")
+                ?? root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name.ToLowerInvariant().Contains("origin") || t.name.ToLowerInvariant().Contains("muzzle"));
             Vector3 barrel = origin != null ? root.InverseTransformDirection(origin.forward) : Vector3.forward;
             Quaternion turn = Quaternion.FromToRotation(barrel, Vector3.up);
             // Bounds of the copied meshes in tool space, to scale and centre the gun
@@ -137,8 +139,11 @@ namespace StellarDriveDemoTFAdvanced.Power
             float scale = GunLength / Mathf.Max(0.01f, box.size.y);
             var gun = new GameObject("TF_NoPaint_MiningLaserGun") { layer = layer };
             gun.transform.SetParent(visuals, false);
-            // Its middle at the fork's axle, its tip just under the muzzle
-            gun.transform.localPosition = new Vector3(0f, ShipMiningLaser.Muzzle.y - 0.02f, 0f) - box.center * scale - Vector3.up * box.extents.y * scale;
+            // The tool's beam origin exactly at the muzzle, on the part's axis: the beam comes out
+            // of the barrel's centre; without one, its tip just under the muzzle
+            gun.transform.localPosition = origin != null
+                ? ShipMiningLaser.Muzzle - turn * root.InverseTransformPoint(origin.position) * scale
+                : new Vector3(0f, ShipMiningLaser.Muzzle.y - 0.02f, 0f) - box.center * scale - Vector3.up * box.extents.y * scale;
             gun.transform.localRotation = turn;
             gun.transform.localScale = Vector3.one * scale;
             foreach (MeshRenderer renderer in renderers)

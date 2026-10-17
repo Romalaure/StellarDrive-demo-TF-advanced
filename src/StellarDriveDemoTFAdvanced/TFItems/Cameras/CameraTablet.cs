@@ -279,7 +279,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
                 ? new Rect(width - tabletWidth - 40f, height - tabletHeight - 62f, tabletWidth, tabletHeight)
                 : new Rect((width - tabletWidth) / 2f, (height - tabletHeight) / 2f, tabletWidth, tabletHeight);
             _shownWidth = screenWidth;
-            GUI.Box(tablet, GUIContent.none, _bezel);
+            Devices.DeviceUi.Panel(tablet);
             var screen = new Rect(tablet.x + border, tablet.y + border, screenWidth, screenHeight);
             GUI.Box(screen, GUIContent.none, _screen);
 

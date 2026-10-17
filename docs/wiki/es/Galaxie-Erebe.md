@@ -7,6 +7,7 @@ Una vez allí, la luz, el día y la noche y el mapa estelar siguen a Érebo. El 
 | Planeta | Bioma | Gravedad | Aire | Qué buscar |
 |---|---|---|---|---|
 | [Pyros](Pyros.md) | volcánico | 1,2 g | tóxico | meteorito (mucho), titanio |
+| [TF Gaïa](TF-Gaia.md) | como la Tierra: océanos, desiertos, praderas, sabanas, bosques, montañas | 1 g | respirable | ámbar, madera en abundancia |
 | [Thalassa](Thalassa.md) | oceánico | 0,9 g | respirable | cuarzo, ámbar, madera de palmera |
 | [Mycélia](Mycelia.md) | fúngico | 0,8 g | tóxico (esporas) | meteorito, criónita, madera de seta |
 | [Cristallis](Cristallis.md) | cristalino | 0,6 g | demasiado tenue | cuarzo (mucho), criónita, meteorito |
