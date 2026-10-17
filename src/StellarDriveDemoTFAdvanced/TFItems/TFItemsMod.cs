@@ -123,6 +123,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.RadioMenu.Draw();
             Devices.ToolRackMenu.Draw();
             Power.FieldDoorMenu.Draw();
+            Power.FieldDoorManagerMenu.Draw();
             if (ToolsActive)
             {
                 Paint.PaintHud.Draw();

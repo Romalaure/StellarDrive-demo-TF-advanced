@@ -27,10 +27,48 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
     /// <summary>
     /// Builds the radio, wardrobe and capsule: a cloned Signal Display (like the lamps) with its
     /// model replaced by meshes made here. Pieces named "TF_NoPaint_..." keep their color when
-    /// painted; the others take the paint.
+    /// painted; the others take the paint. Their surfaces use the game's part shader (plain
+    /// color, no atlas), so they are lit like every other part: the sun and the mod's lamps only,
+    /// dark in a dark ship. A URP Lit surface also took the sky's ambient light and stood out,
+    /// bright, in dark rooms. Glowing pieces keep their own emissive material.
     /// </summary>
     internal static class DeviceModels
     {
+        private static readonly Dictionary<string, Material> GameLook = new Dictionary<string, Material>();
+        private static Texture2D _white;
+
+        /// <summary>The game's part material in one flat color, or null before it is known.</summary>
+        public static Material Flat(string name, Color color, float metal, float smooth)
+        {
+            if (GameLook.TryGetValue(name, out Material cached) && cached != null)
+                return cached;
+            Material source = StellarDriveDemoTFAdvanced.Parts.GameSkin.Material;
+            if (source == null)
+                return null;
+            if (_white == null)
+            {
+                _white = new Texture2D(2, 2, TextureFormat.RGBA32, false) { name = "TF_White" };
+                _white.SetPixels(new[] { Color.white, Color.white, Color.white, Color.white });
+                _white.Apply();
+            }
+            var material = new Material(source) { name = name };
+            Shader shader = material.shader;
+            for (int i = 0; i < shader.GetPropertyCount(); i++)
+            {
+                if (shader.GetPropertyType(i) == ShaderPropertyType.Texture)
+                    material.SetTexture(shader.GetPropertyNameId(i), _white);
+            }
+            foreach (string property in new[] { "_Color", "_BaseColor" })
+                if (material.HasProperty(property))
+                    material.SetColor(property, color);
+            if (material.HasProperty("_Metalness"))
+                material.SetFloat("_Metalness", metal);
+            if (material.HasProperty("_Roughness"))
+                material.SetFloat("_Roughness", 1f - smooth);
+            GameLook[name] = material;
+            return material;
+        }
+
         public static Transform Build(PartSettings settings, GameObject prefab, string label, string description, float mass,
             (uint Item, int Count)[] cost, Vector3 boundsCenter, Vector3 boundsSize,
             Dictionary<string, MeshBuilder> shapes, Dictionary<string, DeviceMaterial> materials)
@@ -44,7 +82,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 child.transform.SetParent(visuals, false);
                 child.AddComponent<MeshFilter>().sharedMesh = entry.Value.Build(settings.id + "_" + entry.Key);
                 var renderer = child.AddComponent<MeshRenderer>();
-                renderer.sharedMaterial = LitMaterials.Get("TF_" + settings.id + "_" + entry.Key, material.Color, material.Metal, material.Smooth, material.Glow);
+                string name = "TF_" + settings.id + "_" + entry.Key;
+                renderer.sharedMaterial = (material.Glow.HasValue ? null : Flat(name, material.Color, material.Metal, material.Smooth))
+                    ?? LitMaterials.Get(name, material.Color, material.Metal, material.Smooth, material.Glow);
                 renderer.shadowCastingMode = material.Glow.HasValue ? ShadowCastingMode.Off : ShadowCastingMode.On;
             }
             return visuals;

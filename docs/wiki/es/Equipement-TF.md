@@ -11,6 +11,8 @@ Los objetos del mod **StellarDrive Demo TF** se unieron a TF Advanced (v0.18), e
 | **Soporte de herramientas** | **T**: recupera una herramienta básica perdida (construcción, reciclador, láser de minería), la pistola de pintura, la tableta esquemática; te avisa si ya la tienes |
 | **Generador, tanques de oxígeno y de etanol, cofre de recursos infinitos** | sin fin, pero **extremadamente caros**: cientos de hierro, cobre o vidrio, 8 núcleos cuánticos, 10 de materia exótica, 6 artefactos, 40 aleaciones nexorianas y 30 meteoritos cada uno |
 
+**Radio, silencio**: en la ventana de la radio, «Silenciada para mí» la apaga solo para ti. El anfitrión ve allí la lista de jugadores y puede bloquear a los que no pueden cambiar la música (`RadioLockedPlayers`).
+
 Mismos números de pieza que antes: lo ya construido en tus mundos se conserva. Mantén el mod TF actualizado (0.15 o más): deja estos objetos a TF Advanced (las sillas, el armario y las puertas de atraque siguen en el mod TF). Con un mod TF más antiguo, es él quien los conserva, sin duplicados.
 
 ## Pistola de pintura, tableta esquemática, vista en tercera persona

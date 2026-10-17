@@ -71,6 +71,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             SetCost(settings, cost);
 
             Transform visuals = prefab.transform.Find("Visuals");
+            // The game's part material, for the devices' surfaces (before the donor's model goes)
+            StellarDriveDemoTFAdvanced.Parts.GameSkin.Capture(prefab);
             Object.DestroyImmediate(visuals.GetComponent<SignalDisplayVisuals>());
             foreach (Transform child in visuals.Cast<Transform>().ToList())
                 Object.DestroyImmediate(child.gameObject);

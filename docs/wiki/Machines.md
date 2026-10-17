@@ -59,6 +59,10 @@ Un émetteur à poser **au sol, au milieu d'une ouverture de la coque**, face à
 - Allumé, le champ **retient l'oxygène comme une porte fermée**, mais **on passe à travers** (une onde part de l'endroit où tu le traverses).
 - Il consomme **25 W par m²** (réglage `FieldDoorWattsPerSquareMeter`) sur ses deux prises électriques ; le réseau doit pouvoir les fournir en entier. Sans courant, il s'éteint et l'air s'échappe.
 - Voyants du rail : cyan actif, orange clignotant pas assez de courant ou démarrage, rouge clignotant pas de réseau, éteint.
+- **Valeurs négatives** : largeur négative = le champ part de l'autre côté ; hauteur négative = il descend depuis l'émetteur (posé au plafond).
+- **Solide** : réglage « Solide » dans la fenêtre : le champ devient un mur, personne ne passe (l'air reste retenu).
+- **Couleur** : peins la porte au pistolet à peinture, le champ prend sa couleur.
+- **Gestionnaire de portes** (même rangée) : une console qui liste toutes les portes du vaisseau et de ce qui y est amarré (combien, lesquelles sont actives) et les allume ou les coupe une par une ou toutes ensemble. Pas de câble.
 - **Côté** : le champ part des deux côtés de l'émetteur, ou seulement à sa gauche ou à sa droite (vu face à l'émetteur, du côté sans prises) : pose-le alors contre un bord de l'ouverture.
 - Le champ est épais (20 cm) et descend jusqu'au sol. Quand il est actif, le rail n'a plus de collision : on passe dessus sans buter (éteins-le pour le démonter).
 - Prends la taille de l'ouverture : le champ déborde d'un demi-mètre sur la coque autour, et se cale de lui-même dans le plan de la coque.

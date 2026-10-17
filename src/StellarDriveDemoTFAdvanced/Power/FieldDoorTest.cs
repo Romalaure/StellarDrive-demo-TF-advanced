@@ -44,27 +44,37 @@ namespace StellarDriveDemoTFAdvanced.Power
             yield return new WaitForSecondsRealtime(1.5f);
             ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(DevHarness.Folder, "fielddoor_menu.png"));
             yield return new WaitForSecondsRealtime(1f);
-            FieldDoor.Request(door.Key, 4, 3, true, FieldDoor.Side.Left);
-            yield return new WaitForSecondsRealtime(1.5f);
-            ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(DevHarness.Folder, "fielddoor_left.png"));
-            AdvancedMod.Log.Msg($"dev: force field door window: after resize {Describe(door)}");
-            FieldDoor.Request(door.Key, 4, 3, false, FieldDoor.Side.Left);
-            yield return new WaitForSecondsRealtime(1.5f);
-            AdvancedMod.Log.Msg($"dev: force field door window: after switching off {Describe(door)}");
-            ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(DevHarness.Folder, "fielddoor_preview.png"));
-            yield return new WaitForSecondsRealtime(1f);
-            FieldDoor.Request(door.Key, 4, 3, true, FieldDoor.Side.Left);
-            yield return new WaitForSecondsRealtime(1.5f);
-            AdvancedMod.Log.Msg($"dev: force field door window: switched on again {Describe(door)}");
             TFItems.Common.ModMenu.Close();
+            // Solid, to the other side and downward (negative width and height)
+            FieldDoor.Request(door.Key, new FieldDoor.Config(-3, -2, FieldDoor.Status.Off, FieldDoor.Side.Left, true), true);
+            yield return new WaitForSecondsRealtime(1.5f);
+            AdvancedMod.Log.Msg($"dev: force field door window: solid, negative {Describe(door)}");
+            FieldDoor.Request(door.Key, new FieldDoor.Config(3, 3, FieldDoor.Status.Off, FieldDoor.Side.Center, true), true);
+            // Painted red
+            if (TFItems.TFItemsMod.ToolsActive)
+                TFItems.Paint.PaintNet.ServerSet(door.Key, new TFItems.Paint.PaintData(new Color32(230, 40, 60, 255), TFItems.Paint.PaintFinish.None));
+            yield return new WaitForSecondsRealtime(2f);
+            AdvancedMod.Log.Msg($"dev: force field door window: painted {FieldDoorVisuals.ColorOf(door.Key)}, {Describe(door)}");
+            // The manager console
+            FieldDoorManagerVisuals console = Object.FindObjectsByType<FieldDoorManagerVisuals>(FindObjectsSortMode.None).FirstOrDefault(d => d.HasContext);
+            if (console != null)
+            {
+                FieldDoorManagerMenu.Show(console.Key);
+                yield return new WaitForSecondsRealtime(1.5f);
+                ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(DevHarness.Folder, "fielddoor_manager.png"));
+                yield return new WaitForSecondsRealtime(1f);
+                TFItems.Common.ModMenu.Close();
+                AdvancedMod.Log.Msg($"dev: force field door manager sees {FieldDoorManager.Doors(console.Key.ShipId).Count} door(s)");
+            }
+            Parts.Showcase.PhotographAgain();
         }
 
         private static string Describe(FieldDoorVisuals door)
         {
             FieldDoor.Config config = FieldDoor.Decode(FieldDoorVisuals.Values.TryGetValue(door.Key, out double value) ? value : 0);
-            string solid = string.Join(",", Object.FindObjectsByType<FieldDoorCollider>(FindObjectsSortMode.None)
-                .Select(c => c.GetComponentInChildren<BoxCollider>(true)).Where(b => b != null).Select(b => b.enabled ? "solid" : "passable"));
-            return $"{config.Width} x {config.Height} {config.Side} {config.Status}, rail {solid}";
+            string boxes = string.Join(",", Object.FindObjectsByType<FieldDoorCollider>(FindObjectsSortMode.None)
+                .SelectMany(c => c.GetComponentsInChildren<BoxCollider>(true)).Select(b => b.name + (b.enabled ? " on" : " off")));
+            return $"{config.SignedWidth} x {config.SignedHeight} {config.Side}{(config.Solid ? " solid" : "")} {config.Status}, colliders {boxes}";
         }
 
         private static void Run()
@@ -86,13 +96,15 @@ namespace StellarDriveDemoTFAdvanced.Power
             // Emitter at the doorway's side: the field only to its left (+x) or, turned round, to its right
             Check("field to the left from the doorway's side", ship, env, (new Vector3(0.5f, -0.5f, 3.5f), Quaternion.identity, 2, 2, FieldDoor.Shift(2, FieldDoor.Side.Left)));
             Check("field to the right, turned round", ship, env, (new Vector3(0.5f, -0.5f, 3.5f), Quaternion.Euler(0f, 180f, 0f), 2, 2, FieldDoor.Shift(2, FieldDoor.Side.Right)));
+            // From the doorway's lintel (y 1.5), the field going down
+            CheckDown(ship, env);
             Check("field to the right from the doorway's side (wrong way)", ship, env, (new Vector3(0.5f, -0.5f, 3.5f), Quaternion.identity, 2, 2, FieldDoor.Shift(2, FieldDoor.Side.Right)));
             // Up, then down again: the room goes
             var tree = new ShipRoomsVoxelsTree();
             var gases = new ShipRoomsGases();
             var updater = new ShipRoomsVoxelUpdater(tree, gases, env, ship);
             Box(updater);
-            FieldDoorRooms.Voxels(new Vector3(1.5f, -0.5f, 3.5f), Quaternion.identity, 2, 2, 0f, out Vector3Int[] walls, out Vector3Int[] scan);
+            FieldDoorRooms.Voxels(new Vector3(1.5f, -0.5f, 3.5f), Quaternion.identity, 2, 2, 0f, false, out Vector3Int[] walls, out Vector3Int[] scan);
             updater.AddHullVoxel(walls, scan);
             updater.UpdateRooms();
             bool up = tree.SampleRoomAtPosition(new Vector3(1.5f, 1f, 1.5f)).RoomId != 0;
@@ -100,6 +112,18 @@ namespace StellarDriveDemoTFAdvanced.Power
             updater.UpdateRooms();
             bool down = tree.SampleRoomAtPosition(new Vector3(1.5f, 1f, 1.5f)).RoomId != 0;
             AdvancedMod.Log.Msg($"dev: force field door test: field up then down: room {(up ? "yes" : "NO")} then {(down ? "STILL" : "gone")}");
+        }
+
+        private static void CheckDown(IShipStateRead ship, IWorldEnvironmentProvider env)
+        {
+            var tree = new ShipRoomsVoxelsTree();
+            var gases = new ShipRoomsGases();
+            var updater = new ShipRoomsVoxelUpdater(tree, gases, env, ship);
+            Box(updater);
+            FieldDoorRooms.Voxels(new Vector3(1.5f, 1.5f, 3.5f), Quaternion.identity, 2, 2, 0f, true, out Vector3Int[] walls, out Vector3Int[] scan);
+            updater.AddHullVoxel(walls, scan);
+            updater.UpdateRooms();
+            AdvancedMod.Log.Msg($"dev: force field door test: field going down from the lintel: room inside {(tree.SampleRoomAtPosition(new Vector3(1.5f, 1f, 1.5f)).RoomId != 0 ? "yes" : "no")}");
         }
 
         private static void Check(string name, IShipStateRead ship, IWorldEnvironmentProvider env, (Vector3 At, Quaternion Rotation, int W, int H, float Shift)? field)
@@ -111,7 +135,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             int fieldVoxels = 0;
             if (field.HasValue)
             {
-                FieldDoorRooms.Voxels(field.Value.At, field.Value.Rotation, field.Value.W, field.Value.H, field.Value.Shift, out Vector3Int[] walls, out Vector3Int[] scan);
+                FieldDoorRooms.Voxels(field.Value.At, field.Value.Rotation, field.Value.W, field.Value.H, field.Value.Shift, false, out Vector3Int[] walls, out Vector3Int[] scan);
                 updater.AddHullVoxel(walls, scan);
                 fieldVoxels = walls.Length;
             }

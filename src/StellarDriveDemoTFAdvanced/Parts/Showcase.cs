@@ -83,6 +83,10 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 }
                 yield return Worlds.StationVisit.Wait(1f);
             }
+            // DevDisable showflames: the engines' flames running for the photos
+            if (DevHarness.Off("showflames"))
+                yield return Flames(state.Id);
+            _lastShip = state.Id;
             yield return Photograph(state.Id, "showcase");
             // Rooms: a look inside each, from the doorway toward the far wall
             if (Spacing > 3f)
@@ -100,6 +104,42 @@ namespace StellarDriveDemoTFAdvanced.Parts
             if (Settings.DevInteractTest.Value)
                 yield return InteractTest(state.Id);
             AdvancedMod.Log.Msg($"dev: showcase done, ship has {ship.PartCount} parts");
+        }
+
+        private static uint _lastShip;
+
+        /// <summary>Development: the showcase photos again, prefixed "showcase2" (after a test changed the parts).</summary>
+        public static void PhotographAgain()
+        {
+            if (_lastShip != 0)
+                MelonLoader.MelonCoroutines.Start(Photograph(_lastShip, "showcase2"));
+        }
+
+        // Every particle system of the showcase ship kept playing for a few seconds (and during the photos)
+        private static IEnumerator Flames(uint shipId)
+        {
+            MelonLoader.MelonCoroutines.Start(KeepFlames(shipId, 12f));
+            yield return Worlds.StationVisit.Wait(3f);
+        }
+
+        private static IEnumerator KeepFlames(uint shipId, float seconds)
+        {
+            float end = Time.unscaledTime + seconds;
+            while (Time.unscaledTime < end)
+            {
+                Transform ship = ShipVisuals.Find(shipId);
+                if (ship != null)
+                {
+                    foreach (Ships.Parts.Thruster.ThrusterFlameVFX flame in ship.GetComponentsInChildren<Ships.Parts.Thruster.ThrusterFlameVFX>(true))
+                        flame.SetIntensity(1f);
+                    foreach (ParticleSystem particles in ship.GetComponentsInChildren<ParticleSystem>(true))
+                    {
+                        if (!particles.isPlaying)
+                            particles.Play();
+                    }
+                }
+                yield return null;
+            }
         }
 
         // StellarDriveDemoTF.Paint.PaintNet.ServerSet(new PartKey(ship, part), new PaintData(color, PaintFinish.None)), by reflection

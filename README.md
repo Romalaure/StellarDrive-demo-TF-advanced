@@ -267,6 +267,14 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Portes à champ de force, flamme, radio (v0.30)
+
+- **Porte à champ de force** : couleur au pistolet à peinture, **valeurs négatives** (largeur → de l'autre côté, hauteur → vers le bas depuis un plafond), **état solide** (un mur que personne ne traverse, l'air reste retenu).
+- **Gestionnaire de portes à champ de force** : console qui montre combien de portes sont connectées au vaisseau, lesquelles sont actives, et les allume ou les coupe (une par une ou toutes).
+- **Moteur à matière noire** : jet violet qui vire au noir.
+- **Radio et râtelier** (et autres objets TF) : éclairés comme les pièces du jeu (ils ne ressortent plus, trop clairs, dans un vaisseau sombre).
+- **Radio** : « Muet pour moi » par joueur ; l'hôte peut bloquer les joueurs qui n'ont pas le droit de changer la musique.
+
 ## Porte à champ de force : côtés, épaisseur (v0.29)
 
 - **Côté** : le champ part des deux côtés de l'émetteur, ou seulement à sa gauche ou à sa droite (à poser contre un bord de l'ouverture).

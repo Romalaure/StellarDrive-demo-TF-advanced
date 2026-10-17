@@ -59,6 +59,10 @@ Un emisor que se coloca **en el suelo, en medio de una abertura del casco**, de 
 - Encendido, el campo **retiene el oxígeno como una puerta cerrada**, pero **se puede atravesar** (una onda sale del punto por donde lo cruzas).
 - Consume **25 W por m²** (ajuste `FieldDoorWattsPerSquareMeter`) en sus dos tomas de energía; la red debe poder suministrarlos todos. Sin energía se apaga y el aire se escapa.
 - Luces del riel: cian activo, naranja parpadeante energía insuficiente o arrancando, rojo parpadeante sin red, apagado.
+- **Valores negativos**: un ancho negativo lleva el campo al otro lado; un alto negativo lo hace bajar desde el emisor (colocado en el techo).
+- **Sólido**: el ajuste «Sólido» de la ventana convierte el campo en un muro, nadie pasa (el aire sigue retenido).
+- **Color**: pinta la puerta con la pistola de pintura, el campo toma su color.
+- **Gestor de puertas** (misma fila): una consola que lista todas las puertas de la nave y de lo acoplado a ella (cuántas, cuáles están activas) y las enciende o apaga una a una o todas a la vez. Sin cable.
 - **Lado**: el campo se extiende a ambos lados del emisor, o solo a su izquierda o a su derecha (visto de frente al emisor, desde el lado sin tomas): colócalo entonces contra un lado de la abertura.
 - El campo es grueso (20 cm) y baja hasta el suelo. Mientras está activo, el riel no tiene colisión: se pasa por encima sin tropezar (apágalo para desmontarlo).
 - Toma el tamaño de la abertura: el campo se solapa medio metro con el casco alrededor y se ajusta solo al plano del casco.

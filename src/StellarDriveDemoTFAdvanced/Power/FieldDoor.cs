@@ -19,12 +19,14 @@ namespace StellarDriveDemoTFAdvanced.Power
 {
     /// <summary>
     /// Force field door: an emitter set on the floor of a doorway raises a field of the size the
-    /// player chooses (1 to <see cref="MaxSize"/> m wide and high). The field holds the air like a
-    /// closed door, but players (and anything else) go through it. It runs on the ship's power
+    /// player chooses (1 to <see cref="MaxSize"/> m wide and high, negative to go the other way).
+    /// The field holds the air like a closed door; players (and anything else) go through it,
+    /// unless it is set solid. It takes its color from the paint gun. It runs on the ship's power
     /// (<see cref="PowerCatalog.FieldDoorWattsPerSquareMeter"/> per m²).
     /// The whole setting is one value in the part's ConstantState (saved, synchronized):
-    /// (side × 10000 + width × 100 + height) × 10 + status, the side being <see cref="Side"/>
-    /// (0 for the doors of 0.28) and the status <see cref="Status"/>.
+    /// (flags × 100000 + side × 10000 + width × 100 + height) × 10 + status, flags being
+    /// 1 width negative, 2 height negative, 4 solid; the side <see cref="Side"/> (0 for the doors
+    /// of 0.28) and the status <see cref="Status"/>.
     /// The host runs the power; every game (host and players) seals its copy of the ship's rooms
     /// from the state, as the game does for its doors (<see cref="FieldDoorRooms"/>).
     /// </summary>
@@ -63,28 +65,47 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         public readonly struct Config
         {
+            /// <summary>Size in meters (always positive; see <see cref="FlipWidth"/>, <see cref="FlipHeight"/>).</summary>
             public readonly int Width, Height;
             public readonly Side Side;
             public readonly Status Status;
+            /// <summary>Negative width: the field goes to the other side.</summary>
+            public readonly bool FlipWidth;
+            /// <summary>Negative height: the field goes down from the emitter (set on a ceiling).</summary>
+            public readonly bool FlipHeight;
+            /// <summary>Solid: nothing goes through the field.</summary>
+            public readonly bool Solid;
 
-            public Config(int width, int height, Status status, Side side = Side.Center)
+            /// <summary><paramref name="width"/> and <paramref name="height"/> signed (0 counts as 1).</summary>
+            public Config(int width, int height, Status status, Side side = Side.Center, bool solid = false)
             {
-                Width = Mathf.Clamp(width, 1, MaxSize);
-                Height = Mathf.Clamp(height, 1, MaxSize);
+                FlipWidth = width < 0;
+                FlipHeight = height < 0;
+                Width = Mathf.Clamp(Mathf.Abs(width), 1, MaxSize);
+                Height = Mathf.Clamp(Mathf.Abs(height), 1, MaxSize);
                 Side = side;
                 Status = status;
+                Solid = solid;
             }
 
+            public int SignedWidth => FlipWidth ? -Width : Width;
+            public int SignedHeight => FlipHeight ? -Height : Height;
             public bool On => Status != Status.Off;
             public bool Sealed => Status == Status.Up;
-            public double Value => ((int)Side * 10000 + Width * 100 + Height) * 10 + (int)Status;
-            public Config With(Status status) => new Config(Width, Height, status, Side);
+            private int Flags => (FlipWidth ? 1 : 0) | (FlipHeight ? 2 : 0) | (Solid ? 4 : 0);
+            /// <summary>Everything but the status.</summary>
+            public long Setting => Flags * 100000L + (int)Side * 10000 + Width * 100 + Height;
+            public double Value => Setting * 10 + (int)Status;
+            public Config With(Status status) => new Config(SignedWidth, SignedHeight, status, Side, Solid);
+
+            /// <summary>The side the field really goes to: a negative width mirrors it.</summary>
+            public Side Toward => !FlipWidth ? Side : Side == Side.Left ? Side.Right : Side == Side.Right ? Side.Left : Side.Center;
 
             /// <summary>
             /// The field's middle along the emitter (its local x, m). Facing the front, the
             /// emitter's +x is on the left.
             /// </summary>
-            public float Shift => Shift(Width, Side);
+            public float Shift => Shift(Width, Toward);
         }
 
         public static float Shift(int width, Side side) => side == Side.Left ? width * 0.5f : side == Side.Right ? -width * 0.5f : 0f;
@@ -94,15 +115,21 @@ namespace StellarDriveDemoTFAdvanced.Power
             long v = (long)System.Math.Round(System.Math.Abs(value));
             int status = (int)(v % 10);
             long setting = v / 10;
-            int side = (int)(setting / 10000);
-            long size = setting % 10000;
+            int flags = (int)(setting / 100000 % 8);
+            long rest = setting % 100000;
+            int side = (int)(rest / 10000);
+            long size = rest % 10000;
             int width = (int)(size / 100), height = (int)(size % 100);
             if (width < 1 || height < 1 || width > MaxSize || height > MaxSize)
             {
                 width = DefaultWidth;
                 height = DefaultHeight;
             }
-            return new Config(width, height, status <= (int)Status.Starting ? (Status)status : Status.Off, side <= (int)Side.Right ? (Side)side : Side.Center);
+            if ((flags & 1) != 0)
+                width = -width;
+            if ((flags & 2) != 0)
+                height = -height;
+            return new Config(width, height, status <= (int)Status.Starting ? (Status)status : Status.Off, side <= (int)Side.Right ? (Side)side : Side.Center, (flags & 4) != 0);
         }
 
         public static Config Decode(IStatefulPartState state) =>
@@ -110,21 +137,18 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         public static float Watts(Config config) => Mathf.Max(0f, PowerCatalog.FieldDoorWattsPerSquareMeter.Value) * config.Width * config.Height;
 
-        // ---- Requests from the players (the menu): "width height on side"
+        // ---- Requests from the players (the door's window, the manager screen): "setting on"
 
         public static void Install() => TFNet.OnServer(TFMessageKind.FieldDoor, OnRequest);
 
-        /// <summary>Asks the host for this size and on (or off).</summary>
-        public static void Request(PartKey door, int width, int height, bool on, Side side) =>
-            TFNet.SendToServer(TFMessageKind.FieldDoor, door.ShipId, door.PartId, $"{width} {height} {(on ? 1 : 0)} {(int)side}");
+        /// <summary>Asks the host for this setting (size, side, solid) and on (or off).</summary>
+        public static void Request(PartKey door, Config config, bool on) =>
+            TFNet.SendToServer(TFMessageKind.FieldDoor, door.ShipId, door.PartId, $"{config.Setting} {(on ? 1 : 0)}");
 
         private static void OnRequest(NetworkConnection sender, TFMessageKind kind, uint shipId, ushort partId, string text)
         {
             string[] words = text.Split(' ');
-            if (words.Length < 3 || !int.TryParse(words[0], out int width) || !int.TryParse(words[1], out int height) || !int.TryParse(words[2], out int on))
-                return;
-            int side = 0;
-            if (words.Length > 3 && (!int.TryParse(words[3], out side) || side < 0 || side > (int)Side.Right))
+            if (words.Length != 2 || !long.TryParse(words[0], out long setting) || setting < 0 || setting >= 800000 || !int.TryParse(words[1], out int on))
                 return;
             var ships = StellarDriveDemoTFAdvanced.Common.GameServices.ShipsServer;
             if (ships == null || !(ships.GetShip(shipId) is TrackedShipServer ship))
@@ -133,13 +157,14 @@ namespace StellarDriveDemoTFAdvanced.Power
             if (part == null || !(part.State is ConstantState state))
                 return;
             Config old = Decode(state);
+            Config wanted = Decode(setting * 10.0);
             // On, it keeps how it runs (a resize does not drop the field); the host powers it next tick
             Status status = on == 0 ? Status.Off : old.On ? old.Status : Status.Starting;
-            var config = new Config(width, height, status, (Side)side);
+            Config config = wanted.With(status);
             if (config.Value == state.ConstantValue)
                 return;
             ship.UpdatePartState(part.Id, state with { ConstantValue = config.Value });
-            AdvancedMod.Log.Msg($"force field door {shipId}:{partId}: {config.Width} x {config.Height} m, {config.Side}, {config.Status}");
+            AdvancedMod.Log.Msg($"force field door {shipId}:{partId}: {config.SignedWidth} x {config.SignedHeight} m, {config.Side}{(config.Solid ? ", solid" : "")}, {config.Status}");
         }
 
         private static StatefulPart Find(TrackedShipServer ship, ushort partId)
@@ -308,7 +333,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 }
                 if (!seal)
                     return;
-                Voxels(part.LocalPosition, part.LocalRotation, config.Width, config.Height, config.Shift, out Vector3Int[] walls, out Vector3Int[] scan);
+                Voxels(part.LocalPosition, part.LocalRotation, config.Width, config.Height, config.Shift, config.FlipHeight, out Vector3Int[] walls, out Vector3Int[] scan);
                 if (offset.HasValue)
                 {
                     Convert(walls, offset.Value, rotation);
@@ -325,7 +350,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
         }
 
-        private static bool SameField(FieldDoor.Config a, FieldDoor.Config b) => a.Width == b.Width && a.Height == b.Height && a.Side == b.Side && a.Sealed == b.Sealed;
+        private static bool SameField(FieldDoor.Config a, FieldDoor.Config b) => a.Setting == b.Setting && a.Sealed == b.Sealed;
 
         private static Vector3Int ToVoxel(Vector3 position) => Vector3Int.RoundToInt((position + Vector3.one * 0.5f) * ShipRoomsConstants.RoomVoxelResolution);
 
@@ -333,9 +358,9 @@ namespace StellarDriveDemoTFAdvanced.Power
         /// The field's wall voxels (three voxels thick) and the voxels on both sides of it the
         /// game grows the rooms from, in the ship's room voxels (4 per meter, hull faces at k + ½ m).
         /// </summary>
-        public static void Voxels(Vector3 position, Quaternion rotation, int width, int height, float shift, out Vector3Int[] walls, out Vector3Int[] scan)
+        public static void Voxels(Vector3 position, Quaternion rotation, int width, int height, float shift, bool down, out Vector3Int[] walls, out Vector3Int[] scan)
         {
-            Vector3 right = rotation * Vector3.right, up = rotation * Vector3.up, normal = rotation * Vector3.forward;
+            Vector3 right = rotation * Vector3.right, up = rotation * (down ? Vector3.down : Vector3.up), normal = rotation * Vector3.forward;
             Vector3 center = position + right * shift;
             // Along the grid: in the plane of the nearest hull faces
             int axis = Mathf.Abs(normal.x) > Mathf.Abs(normal.y) ? (Mathf.Abs(normal.x) > Mathf.Abs(normal.z) ? 0 : 2) : (Mathf.Abs(normal.y) > Mathf.Abs(normal.z) ? 1 : 2);

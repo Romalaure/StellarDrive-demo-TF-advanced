@@ -20,6 +20,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         public static MelonPreferences_Entry<string> ThirdPersonKey { get; private set; }
         public static MelonPreferences_Entry<float> ThirdPersonDistance { get; private set; }
         public static MelonPreferences_Entry<float> RadioVolume { get; private set; }
+        public static MelonPreferences_Entry<string> RadioMuted { get; private set; }
+        public static MelonPreferences_Entry<string> RadioLockedPlayers { get; private set; }
         public static MelonPreferences_Entry<string> OutfitPrimary { get; private set; }
         public static MelonPreferences_Entry<string> OutfitSecondary { get; private set; }
 
@@ -54,6 +56,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 description: "Third person camera distance, as a multiple of the ship size. The mouse wheel changes it in flight.");
             RadioVolume = _category.CreateEntry("RadioVolume", 0.7f,
                 description: "Volume of TF radios, from 0 to 1.");
+            RadioMuted = _category.CreateEntry("RadioMuted", "",
+                description: "Radios you muted for yourself (ship:part, comma separated), set in the radio's window.");
+            RadioLockedPlayers = _category.CreateEntry("RadioLockedPlayers", "",
+                description: "When you host: players (names, comma separated) who may not change what the radios play, set in the radio's window.");
             OutfitPrimary = _category.CreateEntry("OutfitPrimary", "",
                 description: "Your suit's main color (hex, like 3A7BD5), set in the TF wardrobe. Empty keeps the game's color.");
             OutfitSecondary = _category.CreateEntry("OutfitSecondary", "",

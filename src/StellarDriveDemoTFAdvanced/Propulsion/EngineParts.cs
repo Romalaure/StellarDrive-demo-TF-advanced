@@ -61,7 +61,11 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             var model = new Power.MachineModels.Model();
             spec.Model(model, body);
             Power.MachineModels.Attach(visual, model, "Engine" + spec.Key, spec.ModelGlow, spec.ModelCore);
-            if (spec.Flame != Color.white)
+            if (spec.Key == "DarkMatter")
+            {
+                DarkFlame(prefab);
+            }
+            else if (spec.Flame != Color.white)
             {
                 foreach (ParticleSystem particles in prefab.GetComponentsInChildren<ParticleSystem>(true))
                 {
@@ -71,6 +75,93 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                     color.colorMin *= spec.Flame;
                     color.colorMax *= spec.Flame;
                     main.startColor = color;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The dark matter engine's jet: violet at the nozzle, darkening to black smoke. The game's
+        /// flame adds its light (black would not show), so it is drawn alpha blended instead, with
+        /// its own colors over its lifetime; its light turns violet.
+        /// </summary>
+        private static void DarkFlame(GameObject prefab)
+        {
+            var colors = new Gradient
+            {
+                colorKeys = new[]
+                {
+                    new GradientColorKey(new Color(0.85f, 0.45f, 1f), 0f),
+                    new GradientColorKey(new Color(0.5f, 0.08f, 0.85f), 0.25f),
+                    new GradientColorKey(new Color(0.12f, 0.01f, 0.24f), 0.45f),
+                    new GradientColorKey(new Color(0.02f, 0f, 0.04f), 1f)
+                },
+                alphaKeys = new[]
+                {
+                    new GradientAlphaKey(0.95f, 0f),
+                    new GradientAlphaKey(0.9f, 0.6f),
+                    new GradientAlphaKey(0f, 1f)
+                }
+            };
+            var materials = new Dictionary<Material, Material>();
+            foreach (ParticleSystem particles in prefab.GetComponentsInChildren<ParticleSystem>(true))
+            {
+                ParticleSystem.MainModule main = particles.main;
+                main.startColor = new ParticleSystem.MinMaxGradient(Color.white);
+                ParticleSystem.ColorOverLifetimeModule lifetime = particles.colorOverLifetime;
+                lifetime.enabled = true;
+                lifetime.color = new ParticleSystem.MinMaxGradient(colors);
+                var renderer = particles.GetComponent<ParticleSystemRenderer>();
+                if (renderer == null)
+                    continue;
+                Material[] shared = renderer.sharedMaterials;
+                for (int i = 0; i < shared.Length; i++)
+                {
+                    Material source = shared[i];
+                    if (source == null)
+                        continue;
+                    if (!materials.TryGetValue(source, out Material dark))
+                    {
+                        dark = new Material(source) { name = source.name + "_TFA_DarkFlame" };
+                        if (dark.HasProperty("_Blend"))
+                            dark.SetFloat("_Blend", 0f);
+                        if (dark.HasProperty("_SrcBlend"))
+                            dark.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                        if (dark.HasProperty("_DstBlend"))
+                            dark.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                        // (the game's flame adds its vertex color and an emission: a plain tint instead)
+                        if (dark.HasProperty("_ColorMode"))
+                            dark.SetFloat("_ColorMode", 0f);
+                        dark.DisableKeyword("_COLORADDSUBDIFF_ON");
+                        dark.DisableKeyword("_COLORCOLOR_ON");
+                        dark.DisableKeyword("_COLOROVERLAY_ON");
+                        dark.DisableKeyword("_EMISSION");
+                        dark.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                        dark.DisableKeyword("_ADDITIVE_ON");
+                        dark.DisableKeyword("_BLENDMODE_ADD");
+                        if (dark.HasProperty("_BaseColor"))
+                            dark.SetColor("_BaseColor", Color.white);
+                        if (dark.HasProperty("_TintColor"))
+                            dark.SetColor("_TintColor", new Color(0.5f, 0.5f, 0.5f, 0.5f));
+                        if (dark.HasProperty("_EmissionColor"))
+                            dark.SetColor("_EmissionColor", Color.black);
+                        materials[source] = dark;
+                        if (Common.DevHarness.Active)
+                            AdvancedMod.Log.Msg($"dev: dark flame material {source.name}: shader {source.shader?.name}, blend {(source.HasProperty("_Blend") ? source.GetFloat("_Blend") : -1)}, src {(source.HasProperty("_SrcBlend") ? source.GetFloat("_SrcBlend") : -1)}, dst {(source.HasProperty("_DstBlend") ? source.GetFloat("_DstBlend") : -1)}, keywords {string.Join(" ", source.shaderKeywords)}");
+                    }
+                    shared[i] = dark;
+                }
+                renderer.sharedMaterials = shared;
+            }
+            foreach (Light light in prefab.GetComponentsInChildren<Light>(true))
+                light.color = new Color(0.6f, 0.2f, 1f);
+            // A dense jet: three times the particles, larger
+            foreach (Ships.Parts.Thruster.ThrusterFlameVFX flame in prefab.GetComponentsInChildren<Ships.Parts.Thruster.ThrusterFlameVFX>(true))
+            {
+                foreach ((string field, float factor) in new[] { ("highRate", 3f), ("lowRate", 3f), ("highSize", 1.5f), ("lowSize", 1.4f) })
+                {
+                    var info = HarmonyLib.AccessTools.Field(typeof(Ships.Parts.Thruster.ThrusterFlameVFX), field);
+                    if (info != null)
+                        info.SetValue(flame, (float)info.GetValue(flame) * factor);
                 }
             }
         }

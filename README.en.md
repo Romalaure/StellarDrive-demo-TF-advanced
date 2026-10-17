@@ -33,6 +33,14 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Force field doors, flame, radio (v0.30)
+
+- **Force field door**: color from the paint gun, **negative values** (width → to the other side, height → down from a ceiling), **solid state** (a wall nobody walks through, the air stays in).
+- **Force field door manager**: a console showing how many doors are connected to the ship, which ones are up, and switching them on or off (one by one or all).
+- **Dark matter engine**: a violet jet turning black.
+- **Radio and tool rack** (and other TF objects): lit like the game's parts (no longer standing out, too bright, in a dark ship).
+- **Radio**: "Muted for me" per player; the host can block players who may not change the music.
+
 ## Force field door: sides, thickness (v0.29)
 
 - **Side**: the field spreads on both sides of the emitter, or only to its left or its right (set it against one side of the opening).

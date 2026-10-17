@@ -223,6 +223,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         {
             if (!IsValidState(text))
                 return;
+            // The host may stop some players from changing the radios (never itself)
+            string player = PlayerName(sender);
+            if (sender != null && !sender.IsLocalClient && player != null && IsLocked(player))
+            {
+                TFMod.Log.Msg($"radio: {player} may not change the radios");
+                return;
+            }
             var ships = ServiceLocator.GetService<IShipsServerProvider>();
             if (ships == null || !ships.TryGetShip(shipId, out IShipStateRead ship) || !ship.TryGetStatefulPart(partId, out StatefulPart part)
                 || part.Settings == null || part.Settings.id != RadioId)
@@ -233,6 +240,45 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             else
                 ServerStates[key] = text;
             TFNet.SendToAll(TFMessageKind.Radio, shipId, partId, text);
+        }
+
+        /// <summary>The name of the player on a connection (host side), or null.</summary>
+        public static string PlayerName(NetworkConnection connection)
+        {
+            if (connection == null)
+                return null;
+            var player = GameServices.PlayersServer?.ActivePlayers.FirstOrDefault(p => p != null && p.ConnectionId == connection.ClientId);
+            return player?.Name;
+        }
+
+        private static HashSet<string> Names(string list) =>
+            new HashSet<string>((list ?? "").Split(',').Select(n => n.Trim()).Where(n => n.Length > 0), StringComparer.OrdinalIgnoreCase);
+
+        public static bool IsLocked(string player) => Names(Settings.RadioLockedPlayers.Value).Contains(player);
+
+        public static void SetLocked(string player, bool locked)
+        {
+            HashSet<string> names = Names(Settings.RadioLockedPlayers.Value);
+            if (locked)
+                names.Add(player);
+            else
+                names.Remove(player);
+            Settings.RadioLockedPlayers.Value = string.Join(",", names);
+            MelonLoader.MelonPreferences.Save();
+        }
+
+        /// <summary>Whether this player muted a radio for themselves.</summary>
+        public static bool IsMuted(PartKey radio) => Names(Settings.RadioMuted.Value).Contains(radio.ToString());
+
+        public static void SetMuted(PartKey radio, bool muted)
+        {
+            HashSet<string> keys = Names(Settings.RadioMuted.Value);
+            if (muted)
+                keys.Add(radio.ToString());
+            else
+                keys.Remove(radio.ToString());
+            Settings.RadioMuted.Value = string.Join(",", keys);
+            MelonLoader.MelonPreferences.Save();
         }
 
         public static bool IsValidState(string text)
@@ -315,7 +361,25 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         private static PartKey _radio;
         private static string _link = "";
         private static string _error;
-        private static Vector2 _scroll;
+        private static Vector2 _scroll, _players;
+
+        // The other players in the world (host side)
+        private static List<string> OtherPlayers()
+        {
+            var names = new List<string>();
+            var players = GameServices.PlayersServer;
+            if (players == null)
+                return names;
+            foreach (var player in players.ActivePlayers)
+            {
+                if (player == null || player.IsHost)
+                    continue;
+                string name = player.Name;
+                if (!string.IsNullOrEmpty(name))
+                    names.Add(name);
+            }
+            return names;
+        }
 
         public static void Show(PartKey radio)
         {
@@ -336,7 +400,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
             Radio.ClientStates.TryGetValue(_radio, out string state);
             state = state ?? "";
-            Rect area = DeviceUi.Window(width, height, 600f, 640f, "RADIO");
+            bool host = TFNet.IsServer;
+            List<string> others = host ? OtherPlayers() : new List<string>();
+            Rect area = DeviceUi.Window(width, height, 600f, 700f + (others.Count > 0 ? 50f + Mathf.Min(others.Count, 4) * 36f : 0f), "RADIO");
             GUILayout.BeginArea(area);
 
             GUILayout.Label(Loc.Pick("En cours : ", "Now playing: ", "Sonando: ") + Describe(state), DeviceUi.Text);
@@ -390,6 +456,26 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 Settings.RadioVolume.Value = volume;
             GUILayout.Label(Mathf.RoundToInt(volume * 100f) + "%", DeviceUi.Muted, GUILayout.Width(44f));
             GUILayout.EndHorizontal();
+            bool muted = Radio.IsMuted(_radio);
+            if (GUILayout.Button(muted ? Loc.Pick("Muet pour moi : oui (cliquer pour réécouter)", "Muted for me: yes (click to hear it again)", "Silenciada para mí: sí (clic para volver a oírla)") : Loc.Pick("Muet pour moi : non (les autres l'entendent toujours)", "Muted for me: no (the others still hear it)", "Silenciada para mí: no (los demás la siguen oyendo)"),
+                muted ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Height(32f)))
+                Radio.SetMuted(_radio, !muted);
+            if (others.Count > 0)
+            {
+                GUILayout.Space(6f);
+                GUILayout.Label(Loc.Pick("JOUEURS (tu es l'hôte) : qui peut changer la musique des radios", "PLAYERS (you are the host): who may change what the radios play", "JUGADORES (eres el anfitrión): quién puede cambiar la música de las radios"), DeviceUi.Muted);
+                _players = GUILayout.BeginScrollView(_players, GUILayout.Height(Mathf.Min(others.Count, 4) * 36f));
+                foreach (string other in others)
+                {
+                    bool locked = Radio.IsLocked(other);
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label(other, DeviceUi.Text, GUILayout.ExpandWidth(true));
+                    if (GUILayout.Button(locked ? Loc.Pick("Bloqué", "Blocked", "Bloqueado") : Loc.Pick("Autorisé", "Allowed", "Permitido"), locked ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Width(130f), GUILayout.Height(30f)))
+                        Radio.SetLocked(other, !locked);
+                    GUILayout.EndHorizontal();
+                }
+                GUILayout.EndScrollView();
+            }
             GUILayout.FlexibleSpace();
 
             GUILayout.BeginHorizontal();
@@ -484,7 +570,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                     Vector3 offset = visuals.Center - camera.transform.position;
                     float distance = offset.magnitude;
                     float fade = Mathf.Clamp01(1f - (distance - FullVolumeDistance) / (SilentDistance - FullVolumeDistance));
-                    volume = fade * fade * Mathf.Clamp01(Settings.RadioVolume.Value);
+                    volume = Radio.IsMuted(entry.Key) ? 0f : fade * fade * Mathf.Clamp01(Settings.RadioVolume.Value);
                     if (distance > 0.5f)
                         pan = Mathf.Clamp(Vector3.Dot(offset / distance, camera.transform.right), -1f, 1f) * 0.6f;
                 }
