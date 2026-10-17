@@ -267,6 +267,11 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Trains d'atterrissage, cabine cosmétique (v0.33)
+
+- **Train d'atterrissage** rétractable à amortisseur (onglet TF Avancé, rangée propulsion) : à fixer sous la coque. Sorti, il porte le vaisseau comme une suspension (ressort, amortisseur, patins qui tiennent au sol même en pente) ; rentré, il se replie contre la coque. Tous les trains sortent et rentrent ensemble : T sur l'un d'eux ou touche L à bord, au pilotage aussi.
+- **Cabine cosmétique** (onglet TF Équipement) : couleurs de la combinaison, du casque, du sac et de la visière, chapeau, lunettes de soleil et couleur des verres, veste. Un mannequin dans la cabine porte ta tenue, et les autres joueurs te voient avec en multijoueur.
+
 ## TF Gaïa, une planète comme la Terre (v0.32)
 
 - **TF Gaïa** (système 442 Otrera) : océans et lacs, plages et déserts de sable dans les basses terres, prairies fleuries au-dessus, avec des forêts (sapins, chênes, bouleaux), des savanes d'acacias et des palmeraies chacune dans ses régions, et des montagnes couvertes de sapins enneigés. Villages, ruines, épaves ; ambre, quartz, bois. Le moteur de terrain du jeu ne dessine que trois textures de sol (eau, sable, herbe) : la neige est sur les arbres des sommets, pas au sol.

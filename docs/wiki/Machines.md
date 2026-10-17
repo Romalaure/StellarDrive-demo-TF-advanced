@@ -68,6 +68,15 @@ Un émetteur à poser **au sol, au milieu d'une ouverture de la coque**, face à
 - Prends la taille de l'ouverture : le champ déborde d'un demi-mètre sur la coque autour, et se cale de lui-même dans le plan de la coque.
 - Recherche **Technologie des artefacts**, rangée des champs de force de l'onglet TF Avancé.
 
+## Train d'atterrissage
+
+Une jambe rétractable à amortisseur (onglet TF Avancé, rangée propulsion, recherche Propulsion avancée), à fixer **sous la coque** : elle sort vers le sol.
+
+- **Sortie**, elle porte le vaisseau comme une suspension : ressort et amortisseur absorbent l'atterrissage (testé : chute de 5 m amortie), le patin tient au sol sans glisser, même en pente.
+- **Rentrée**, elle se replie à plat contre la coque.
+- Tous les trains du vaisseau sortent et rentrent **ensemble** : touche **T** sur l'un d'eux, ou touche **L** n'importe où à bord, au pilotage aussi (réglage `LandingGearKey`).
+- Mets-en au moins trois, bien écartés. La raideur se règle seule selon la masse du vaisseau et le nombre de jambes.
+
 ## Énergie nucléaire
 
 Entre l'énergie des artefacts et la matière noire. L'**uranium** se mine sur TF Aridia, TF Petra et Pyros (rochers verdâtres aux veines lumineuses).

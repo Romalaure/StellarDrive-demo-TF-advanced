@@ -68,6 +68,15 @@ An emitter you set **on the floor, in the middle of an opening in the hull**, fa
 - Take the opening's size: the field overlaps the hull around by half a meter, and settles into the hull's plane by itself.
 - Research **Artifact technology**, force field row of the TF Advanced tab.
 
+## Landing gear
+
+A retractable leg with a shock absorber (TF Advanced tab, propulsion row, Advanced propulsion research), fixed **under the hull**: it comes out toward the ground.
+
+- **Deployed**, it carries the ship like a suspension: spring and damper soak up the landing (tested: a 5 m drop), the pad grips the ground without sliding, even on a slope.
+- **Retracted**, it folds flat against the hull.
+- All the ship's gear comes out and goes in **together**: **T** on one of them, or **L** anywhere aboard, when piloting too (setting `LandingGearKey`).
+- Fit at least three, spread apart. The stiffness adapts to the ship's mass and the number of legs.
+
 ## Nuclear power
 
 Between artifact power and dark matter. **Uranium** is mined on TF Aridia, TF Petra and Pyros (greenish rocks with glowing veins).

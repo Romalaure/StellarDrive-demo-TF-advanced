@@ -33,6 +33,11 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Landing gear, cosmetic cabin (v0.33)
+
+- Retractable **landing gear** with a shock absorber (TF Advanced tab, propulsion row): fixed under the hull. Out, it carries the ship like a suspension (spring, damper, pads that grip even on a slope); in, it folds against the hull. All gear comes out and goes in together: T on one of them or the L key aboard, when piloting too.
+- **Cosmetic cabin** (TF Equipment tab): colors of the suit, helmet, backpack and visor, a hat, sunglasses and lens color, a jacket. A mannequin in the booth wears your outfit, and the other players see you in it in multiplayer.
+
 ## TF Gaïa, an Earth-like planet (v0.32)
 
 - **TF Gaïa** (442 Otrera system): oceans and lakes, sand beaches and deserts in the lowlands, flowering prairies above, with forests (firs, oaks, birches), acacia savannas and palm groves each in their own regions, and mountains under snowy firs. Villages, ruins, wrecks; amber, quartz, wood. The game's terrain engine draws three ground textures only (water, sand, grass): the snow is on the trees up high, not on the ground.

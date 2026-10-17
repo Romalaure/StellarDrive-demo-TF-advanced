@@ -60,6 +60,18 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             return new Rect(rect.x + 22f, rect.y + 54f, width - 44f, height - 72f);
         }
 
+        /// <summary>A window at the left (<paramref name="left"/> from the screen's edge), vertically centered.</summary>
+        public static Rect WindowAt(float screenWidth, float screenHeight, float left, float width, float height, string title)
+        {
+            Ensure();
+            height = Mathf.Min(height, screenHeight - 40f);
+            var rect = new Rect(left, (screenHeight - height) / 2f, width, height);
+            Panel(rect);
+            GUI.Label(new Rect(rect.x + 22f, rect.y + 14f, width - 44f, 28f), title, _title);
+            Fill(new Rect(rect.x + 22f, rect.y + 44f, width - 44f, 2f), Accent * 0.9f);
+            return new Rect(rect.x + 22f, rect.y + 54f, width - 44f, height - 72f);
+        }
+
         /// <summary>The game's panel: night blue, a grey metal frame, hazard stripes in two corners.</summary>
         public static void Panel(Rect rect)
         {

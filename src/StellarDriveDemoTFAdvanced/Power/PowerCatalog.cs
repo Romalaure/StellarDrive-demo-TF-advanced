@@ -122,7 +122,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         /// <summary>Parts whose FluidTankState carries a status, not fluid (no fluid mass).</summary>
         public static bool HoldsNoFluid(ushort partSettingsId) => IsPowerPart(partSettingsId) || ForceField.IsGenerator(partSettingsId) || partSettingsId == CondenserId
             || partSettingsId == ShipMiningLaser.Id || partSettingsId == DarkCollectorId || partSettingsId == DarkReactorId || partSettingsId == PortalId || partSettingsId == NuclearReactorId
-            || Combat.Radar.IsRadar(partSettingsId) || partSettingsId == CloakId || partSettingsId == FieldDoor.Id;
+            || Combat.Radar.IsRadar(partSettingsId) || partSettingsId == CloakId || partSettingsId == FieldDoor.Id || partSettingsId == Propulsion.LandingGear.Id;
 
         public static bool IsPowerPart(ushort partSettingsId) =>
             partSettingsId == BatteryId || partSettingsId == BreakerId || partSettingsId == ReactorId || partSettingsId == CryoBatteryId;

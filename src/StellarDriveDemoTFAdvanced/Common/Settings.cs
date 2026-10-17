@@ -45,6 +45,8 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevDockingTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevFieldDoorTest { get; private set; }
+        public static MelonPreferences_Entry<int> DevLandingGearTest { get; private set; }
+        public static MelonPreferences_Entry<string> DevOutfit { get; private set; }
         public static MelonPreferences_Entry<string> DevSnapshotParts { get; private set; }
         public static MelonPreferences_Entry<string> DevShowcase { get; private set; }
         public static MelonPreferences_Entry<bool> DevBuildMenu { get; private set; }
@@ -122,6 +124,10 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevWorld, ask the build tool where parts go when aimed at placed parts, and photograph the result.");
             DevDockingTest = _category.CreateEntry("DevDockingTest", false,
                 description: "For mod development: with DevWorld, two ships with docking modules try to dock high in the air.");
+            DevOutfit = _category.CreateEntry("DevOutfit", "",
+                description: "For mod development: with DevWorld, wear this outfit (cabin format) and photograph the cabin's window.");
+            DevLandingGearTest = _category.CreateEntry("DevLandingGearTest", 0,
+                description: "For mod development: with DevWorld, a planet id: drop a test ship on landing gear there and follow how it lands.");
             DevFieldDoorTest = _category.CreateEntry("DevFieldDoorTest", false,
                 description: "For mod development: with DevWorld, check in the game's room code that a force field door seals a doorway.");
             DevPortalTest = _category.CreateEntry("DevPortalTest", 0,

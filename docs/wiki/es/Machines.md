@@ -68,6 +68,15 @@ Un emisor que se coloca **en el suelo, en medio de una abertura del casco**, de 
 - Toma el tamaño de la abertura: el campo se solapa medio metro con el casco alrededor y se ajusta solo al plano del casco.
 - Investigación **Tecnología de artefactos**, fila de los campos de fuerza de la pestaña TF Avanzado.
 
+## Tren de aterrizaje
+
+Una pata retráctil con amortiguador (pestaña TF Avanzado, fila de propulsión, investigación Propulsión avanzada), fijada **bajo el casco**: sale hacia el suelo.
+
+- **Desplegada**, sostiene la nave como una suspensión: muelle y amortiguador absorben el aterrizaje (probado: caída de 5 m), la base se agarra al suelo sin deslizar, incluso en pendiente.
+- **Recogida**, se pliega contra el casco.
+- Todos los trenes salen y entran **a la vez**: **T** sobre uno de ellos, o **L** en cualquier lugar a bordo, también al pilotar (ajuste `LandingGearKey`).
+- Pon al menos tres, separados. La rigidez se ajusta sola según la masa de la nave y el número de patas.
+
 ## Energía nuclear
 
 Entre la energía de artefactos y la materia oscura. El **uranio** se extrae en TF Aridia, TF Petra y Pyros (rocas verdosas con vetas brillantes).

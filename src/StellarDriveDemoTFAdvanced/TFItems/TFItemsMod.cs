@@ -60,6 +60,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.Radio.Install();
             Devices.ToolRack.Install();
             Power.FieldDoor.Install();
+            Propulsion.LandingGear.Install();
+            Devices.Outfits.Install();
             if (ToolsActive)
             {
                 Paint.PaintNet.InstallSerializers();
@@ -78,6 +80,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             attempt("the infinite parts", Infinite.InfiniteParts.Register);
             attempt("the teleport capsule", Devices.TeleportCapsule.Register);
             attempt("the radio", Devices.Radio.Register);
+            attempt("the cosmetic cabin", Devices.CosmeticCabin.Register);
             attempt("the tool rack", Devices.ToolRack.Register);
         }
 
@@ -96,6 +99,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Cameras.CameraTablet.Update();
             Common.TFNet.Update();
             Common.UsableParts.Update();
+            Propulsion.LandingGear.Update();
+            Devices.Outfits.Update();
             Devices.RadioSound.Update();
             if (ToolsActive)
             {
@@ -124,6 +129,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.ToolRackMenu.Draw();
             Power.FieldDoorMenu.Draw();
             Power.FieldDoorManagerMenu.Draw();
+            Devices.CabinMenu.Draw();
             if (ToolsActive)
             {
                 Paint.PaintHud.Draw();

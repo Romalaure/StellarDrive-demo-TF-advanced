@@ -18,6 +18,17 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 if (string.IsNullOrWhiteSpace(Settings.DevPrefabDump.Value))
                     return;
                 var text = new StringBuilder();
+                // "player": the other players' avatar prefab (what other players see)
+                if (Settings.DevPrefabDump.Value.Contains("player"))
+                {
+                    foreach (var animator in Resources.FindObjectsOfTypeAll<Players.Visuals.OtherPlayerAnimator>())
+                    {
+                        text.AppendLine($"=== player avatar {animator.name} scene={animator.gameObject.scene.name}");
+                        Dump(animator.transform.root, 0, text);
+                        foreach (Renderer r in animator.transform.root.GetComponentsInChildren<Renderer>(true))
+                            text.AppendLine($"  RENDERER {r.name} {r.GetType().Name} materials {string.Join(", ", r.sharedMaterials.Select(m => m == null ? "null" : m.name + " (" + m.shader.name + ")"))} bounds {r.bounds.size}");
+                    }
+                }
                 PartSettings[] all = Resources.FindObjectsOfTypeAll<PartSettings>();
                 foreach (string token in Settings.DevPrefabDump.Value.Split(','))
                 {

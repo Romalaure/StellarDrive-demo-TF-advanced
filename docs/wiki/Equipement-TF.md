@@ -11,6 +11,8 @@ Les objets du mod **StellarDrive Demo TF** ont rejoint TF Advanced (v0.18), dans
 | **Râtelier à outils** | touche **T** : reprendre un outil de base perdu (construction, recyclage, laser de minage), le pistolet à peinture, la tablette schématique ; te dit si tu l'as déjà |
 | **Générateur, réservoirs d'oxygène et d'éthanol, coffre de ressources infinis** | sans fin, mais **extrêmement chers** : des centaines de fer, cuivre ou verre, 8 noyaux quantiques, 10 matières exotiques, 6 artefacts, 40 alliages nexoriens et 30 météorites chacun |
 
+**Cabine cosmétique** : touche T pour changer ton apparence : couleurs de la combinaison, du casque, du sac à dos et de la visière, chapeau (casquette, cowboy, haut-de-forme, bonnet, couronne), lunettes de soleil (classiques, aviateur, bandeau) et couleur des verres, veste (gilet, blouson, manteau long) et sa couleur. Le mannequin de la cabine porte ta tenue ; les autres joueurs te voient avec (réglage `Outfit`).
+
 **Radio, muet** : dans la fenêtre de la radio, « Muet pour moi » la coupe pour toi seul. L'hôte y voit la liste des joueurs et peut bloquer ceux qui n'ont pas le droit de changer la musique (`RadioLockedPlayers`).
 
 Mêmes numéros de pièces qu'avant : ce qui est déjà construit dans vos mondes reste. Gardez le mod TF à jour (0.15 ou plus) : il cède ces objets à TF Advanced (chaises, garde-robe et portes d'amarrage restent dans le mod TF). Avec un mod TF plus ancien, c'est lui qui les garde, sans doublon.

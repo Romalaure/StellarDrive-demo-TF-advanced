@@ -11,6 +11,8 @@ The objects of the **StellarDrive Demo TF** mod joined TF Advanced (v0.18), in t
 | **Tool rack** | **T**: take back a lost base tool (build tool, recycler, mining laser), the paint gun, the schematic tablet; tells you when you already have it |
 | **Infinite generator, oxygen and ethanol tanks, resource chest** | endless, but **extremely expensive**: hundreds of iron, copper or glass, 8 quantum cores, 10 exotic matter, 6 artifacts, 40 Nexoran alloys and 30 meteorites each |
 
+**Cosmetic cabin**: T to change your look: colors of the suit, helmet, backpack and visor, a hat (cap, cowboy, top hat, beanie, crown), sunglasses (classic, aviator, visor band) and lens color, a jacket (vest, jacket, long coat) and its color. The booth's mannequin wears your outfit; the other players see you in it (setting `Outfit`).
+
 **Radio, mute**: in the radio's window, "Muted for me" silences it for you alone. The host sees the players there and can block those who may not change the music (`RadioLockedPlayers`).
 
 Same part numbers as before: what is already built in your worlds stays. Keep the TF mod up to date (0.15 or later): it leaves these objects to TF Advanced (chairs, wardrobe and docking doors stay in the TF mod). With an older TF mod, it keeps them, without duplicates.
