@@ -117,7 +117,14 @@ namespace StellarDriveDemoTFAdvanced.Wiki
     /// <summary>A wiki page in the guide: shows the current page and follows its links.</summary>
     internal sealed class WikiPage : MonoBehaviour, IPointerClickHandler
     {
-        private static readonly string[] Bar = { "Home", "Systeme-Otrera", "Galaxie-Erebe", "Ressources", "Machines", "Constructions", "Stations-spatiales", "Recherche", "Itineraire" };
+        private static readonly List<string> Bar = new List<string> { "Home", "Systeme-Otrera", "Galaxie-Erebe", "Ressources", "Machines", "Constructions", "Stations-spatiales", "Recherche", "Itineraire" };
+
+        /// <summary>Adds a page of another mod to the bar of main pages (see <see cref="WikiPages.AddSource"/>).</summary>
+        public static void AddToBar(string page)
+        {
+            if (!Bar.Contains(page))
+                Bar.Add(page);
+        }
         private static readonly Stack<string> History = new Stack<string>();
         public static string Current = "Home";
 
@@ -187,6 +194,20 @@ namespace StellarDriveDemoTFAdvanced.Wiki
     {
         private static Dictionary<string, string> _pages;
         private static Loc.Language _pagesLanguage;
+        private static readonly List<System.Reflection.Assembly> Sources = new List<System.Reflection.Assembly> { typeof(WikiPages).Assembly };
+
+        /// <summary>
+        /// Another mod's pages, embedded in its assembly under the same names ("Wiki.&lt;page&gt;.md",
+        /// "Wiki.en.&lt;page&gt;.md", "Wiki.es.&lt;page&gt;.md"); <paramref name="barPages"/> join the bar of main pages.
+        /// </summary>
+        public static void AddSource(System.Reflection.Assembly assembly, params string[] barPages)
+        {
+            if (!Sources.Contains(assembly))
+                Sources.Add(assembly);
+            foreach (string page in barPages)
+                WikiPage.AddToBar(page);
+            _pages = null;
+        }
 
         private static Dictionary<string, string> Pages
         {
@@ -197,11 +218,11 @@ namespace StellarDriveDemoTFAdvanced.Wiki
                     return _pages;
                 _pages = new Dictionary<string, string>();
                 _pagesLanguage = language;
-                var assembly = typeof(WikiPages).Assembly;
                 // French pages are "Wiki.<page>.md", English ones "Wiki.en.<page>.md", Spanish ones
                 // "Wiki.es.<page>.md" (over the English ones: a page not translated yet stays in English)
                 string[] prefixes = language == Loc.Language.French ? new[] { "Wiki." }
                     : language == Loc.Language.Spanish ? new[] { "Wiki.en.", "Wiki.es." } : new[] { "Wiki.en." };
+                foreach (System.Reflection.Assembly assembly in Sources)
                 foreach (string prefix in prefixes)
                 {
                     foreach (string name in assembly.GetManifestResourceNames().Where(n => n.StartsWith(prefix) && n.EndsWith(".md")
