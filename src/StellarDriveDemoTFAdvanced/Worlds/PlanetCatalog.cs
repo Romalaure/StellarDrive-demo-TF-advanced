@@ -46,7 +46,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
     /// </summary>
     internal static class PlanetCatalog
     {
-        public static readonly PlanetSpec[] All =
+        /// <summary>Every mod planet; other mods add theirs with <see cref="Add"/> before a world loads.</summary>
+        public static PlanetSpec[] All =
         {
             new PlanetSpec
             {
@@ -417,5 +418,14 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
         /// <summary>The pirates' artificial planet in the Erebos galaxy.</summary>
         public const ulong BastionId = 115;
+
+        /// <summary>
+        /// Adds (or replaces, by id) a planet made by another mod. Called before the world loads:
+        /// the planets are built when the game's planet trackers wake up.
+        /// </summary>
+        public static void Add(PlanetSpec spec)
+        {
+            All = All.Where(p => p.Id != spec.Id).Concat(new[] { spec }).ToArray();
+        }
     }
 }
