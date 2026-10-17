@@ -73,22 +73,6 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         }
     }
 
-    [HarmonyPatch(typeof(GameSaver), "SaveGame", typeof(string))]
-    internal static class WorldDataSavePatch
-    {
-        private static void Postfix(string worldDirectoryFullName)
-        {
-            try
-            {
-                WorldData.Save(worldDirectoryFullName);
-            }
-            catch (Exception e)
-            {
-                TFMod.Log.Error("could not save TF world data: " + e);
-            }
-        }
-    }
-
     [HarmonyPatch(typeof(ServerStateLoader), "LoadWorldFromPathAndName")]
     internal static class WorldDataLoadPatch
     {

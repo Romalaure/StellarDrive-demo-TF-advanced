@@ -267,6 +267,15 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Épaves géantes, sonde Hadès, cosmétiques ajustés (v0.36)
+
+- **Épave du Vagabond** : cargo lourd de 60 m, soute à cloisons, caisses, conteneurs sur le pont, grue, passerelle vitrée, nacelles, section moteur arrachée et débris.
+- **Épave du Léviathan** : vaisseau capital de 90 m, proue en dague, lames blindées, ponts dorsaux, tourelles mortes, hangar, baie effondrée, passerelle, six tuyères.
+- **Sonde Hadès** agrandie : labos, pont d'observation vitré, flèche et observatoire, anneau gravimétrique, grande antenne, perche capteur, ailes solaires.
+- Ces trois-là sont reconstruites au chargement d'un monde plus ancien (ce qui était dedans est perdu).
+- **Cosmétiques** : la veste suit le corps (vrai maillage animé), chapeau et lunettes ajustés au casque ; ta veste se voit aussi en vue à la première personne.
+- **Sauvegarde** : le mod n'intercepte plus GameSaver.SaveGame (il écoute l'évènement de sauvegarde du jeu) : plus de refus par les mods qui protègent la sauvegarde.
+
 ## Téléporteur (v0.35)
 
 - **Téléporteur** : objet **7419** sans recette, à se donner avec une commande give. Tenu en main, clic gauche : liste des **planètes** (posé sur la terre ferme, côté jour), des **stations** et des **balises** (posé à côté de la balise).

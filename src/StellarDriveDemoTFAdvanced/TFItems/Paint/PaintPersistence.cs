@@ -120,22 +120,6 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
         }
     }
 
-    [HarmonyPatch(typeof(GameSaver), "SaveGame", typeof(string))]
-    internal static class GameSaverPatch
-    {
-        private static void Postfix(string worldDirectoryFullName)
-        {
-            try
-            {
-                PaintPersistence.Save(worldDirectoryFullName);
-            }
-            catch (Exception e)
-            {
-                TFMod.Log.Error("could not save part colors: " + e);
-            }
-        }
-    }
-
     [HarmonyPatch(typeof(ServerStateLoader), "LoadWorldFromPathAndName")]
     internal static class ServerStateLoaderPatch
     {

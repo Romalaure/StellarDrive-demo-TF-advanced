@@ -33,6 +33,15 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Giant wrecks, Hades probe, fitted cosmetics (v0.36)
+
+- **Vagabond wreck**: 60 m heavy freighter, bulkheaded hold, crates, deck containers, crane, glazed bridge, nacelles, torn-off engine section and debris.
+- **Leviathan wreck**: 90 m capital ship, dagger bow, armoured blades, dorsal decks, dead turrets, hangar, collapsed bay, bridge, six nozzles.
+- **Hades probe** made big: labs, glazed observation deck, spire and observatory, gravimetric ring, large dish, sensor boom, solar wings.
+- These three are rebuilt when an older world loads (what was inside is lost).
+- **Cosmetics**: the jacket follows the body (real animated mesh), hat and glasses fitted to the helmet; your jacket also shows in first person.
+- **Saving**: the mod no longer hooks GameSaver.SaveGame (it listens to the game's save event): no more refusals from mods that guard the save.
+
 ## Teleporter (v0.35)
 
 - **Teleporter**: item **7419** with no recipe, given with a give command. Held in the hand, left click: list of **planets** (set down on dry land, day side), **stations** and **beacons** (set down beside the beacon).

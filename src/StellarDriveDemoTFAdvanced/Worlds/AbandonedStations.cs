@@ -60,6 +60,10 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             public (uint Item, int Min, int Max, double Chance)[] Rare = new (uint, int, int, double)[0];
             /// <summary>A pirate base (with the Arsenal mod): armed, hostile, see <see cref="Combat.Pirates"/>.</summary>
             public bool Pirate;
+            /// <summary>The stations' build this one last changed in: worlds saved before it get it rebuilt.</summary>
+            public int Version = 2;
+            /// <summary>The part dressing its hull (prow, engines, plating, torn edges...), 0 for none; see <see cref="WreckDecor"/>.</summary>
+            public ushort Decor;
         }
 
         public static readonly StationSpec[] All =
@@ -103,12 +107,24 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             {
                 Name = "Sonde Hadès (trou noir)", NearBlackHole = true, Offset = new Vector3(0f, 2.4e5f, 9.0e5f), Seed = 61,
                 Band = new Color32(200, 40, 40, 255), Outside = new Color32(70, 72, 78, 255), Inside = new Color32(120, 118, 125, 255),
-                Rare = new[] { (Items.ModItems.ExoticMatter, 1, 3, 0.8), (Items.ModItems.QuantumCore, 1, 1, 0.35) },
+                Rare = new[] { (Items.ModItems.ExoticMatter, 1, 3, 0.8), (Items.ModItems.QuantumCore, 1, 1, 0.4), (Items.ModItems.Artifact, 1, 1, 0.25) },
+                Version = 3, Decor = WreckDecor.HadesId,
                 Build = b =>
                 {
-                    b.Module(-1, 0, -2, 1, 2, 2);
-                    b.Module(-1, 3, -1, 1, 3, 1);
-                    b.Entrance(0, 0, 2, 2);
+                    // A research probe: a core lab, a glazed observation deck toward the bow, two
+                    // arms to the side labs, an instrument spire with an observatory; outside, a
+                    // gravimetric ring, a big dish, a sensor boom and solar wings (the decor)
+                    b.Module(-3, 0, -3, 3, 3, 3);
+                    b.Module(-2, 0, 4, 2, 2, 9, 0.75f);
+                    b.Module(4, 0, -1, 8, 1, 1);
+                    b.Module(-8, 0, -1, -4, 1, 1);
+                    b.Module(9, 0, -3, 13, 3, 3);
+                    b.Module(-13, 0, -3, -9, 3, 3);
+                    b.Module(-1, 4, -1, 1, 9, 1);
+                    b.Module(-3, 10, -3, 3, 11, 3, 0.6f);
+                    b.Entrance(0, 0, -3, 3);
+                    b.Engine(-2, 1, -3);
+                    b.Engine(2, 1, -3);
                 }
             },
 
@@ -119,13 +135,35 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Name = "Épave du Vagabond", AnchorPlanet = 112, Offset = new Vector3(6e6f, 1.5e6f, -4e6f), Seed = 101, Breaches = 4f, DarkMatter = 12,
                 Band = new Color32(40, 160, 150, 255), Outside = new Color32(120, 118, 112, 255), Inside = new Color32(90, 88, 84, 255),
                 Rare = new[] { (Items.ModItems.Meteorite, 2, 6, 0.6), (Items.ModItems.QuantumCore, 1, 1, 0.25), (Items.ModItems.NexoranAlloy, 2, 4, 0.35) },
+                Version = 3, Decor = WreckDecor.VagabondId,
                 Build = b =>
                 {
-                    // A freighter: cockpit, a long hold, the engine section broken off behind it
-                    b.Module(-1, 0, 9, 1, 2, 11);
-                    b.Module(-2, 0, -3, 2, 3, 8);
-                    b.Module(-2, 0, -9, 2, 2, -6);
-                    b.Entrance(0, 0, -3, 3);
+                    // A heavy freighter: a long cargo hold with bulkheads, side pods, the crew deck
+                    // and the glazed cockpit forward, a bridge tower on the hold; its engine section
+                    // broke off behind it and drifts a few meters away, the hold's stern torn open
+                    b.Module(-4, 0, -18, 4, 3, 20);
+                    b.Module(-3, 0, 21, 3, 2, 28);
+                    b.Module(-2, 0, 29, 2, 2, 32, 0.7f);
+                    b.Module(-2, 4, 12, 2, 5, 17);
+                    b.Module(-3, 6, 12, 3, 7, 17, 0.65f);
+                    b.Module(5, 0, -14, 8, 2, -4);
+                    b.Module(-8, 0, -14, -5, 2, -4);
+                    b.Module(-4, 0, -28, 4, 3, -22);
+                    b.Bulkhead(-10, -4, 4, 0, 3, -1);
+                    b.Bulkhead(0, -4, 4, 0, 3, -1);
+                    b.Bulkhead(10, -4, 4, 0, 3, -1);
+                    b.Bulkhead(20, -3, 3, 0, 2, -1);
+                    b.Rupture(-3, 1, -18, 3, 3, -18);
+                    b.Rupture(-2, 1, -22, 2, 2, -22);
+                    b.Rupture(-4, 1, -8, -4, 3, -5);
+                    b.Entrance(4, 0, 6, 0);
+                    b.Cargo(-3, -17, 3, -12, 0, 0.25);
+                    b.Cargo(-3, 1, 3, 8, 0, 0.2);
+                    b.Engine(-3, 1, -28);
+                    b.Engine(0, 1, -28);
+                    b.Engine(3, 1, -28);
+                    b.Engine(-2, 3, -28);
+                    b.Engine(2, 3, -28);
                 }
             },
             new StationSpec
@@ -133,14 +171,28 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Name = "Épave du Léviathan", AnchorPlanet = 114, Offset = new Vector3(-8e6f, -2e6f, 5e6f), Seed = 117, Breaches = 5f, DarkMatter = 20,
                 Band = new Color32(140, 60, 200, 255), Outside = new Color32(70, 70, 80, 255), Inside = new Color32(100, 96, 110, 255),
                 Rare = new[] { (Items.ModItems.ExoticMatter, 1, 2, 0.4), (Items.ModItems.QuantumCore, 1, 2, 0.35), (Items.ModItems.Meteorite, 3, 8, 0.6), (Items.ModItems.Artifact, 1, 1, 0.3) },
+                Version = 3, Decor = WreckDecor.LeviathanId,
                 Build = b =>
                 {
-                    // A capital ship's spine with a broken bridge tower and side bays
-                    b.Module(-2, 0, -14, 2, 3, 14);
-                    b.Module(-1, 4, 6, 1, 7, 9);
-                    b.Module(3, 0, -4, 7, 2, 2);
-                    b.Module(-7, 0, -8, -3, 2, -2);
-                    b.Entrance(0, 0, 14, 2);
+                    // A capital ship: a long armoured spine cut by bulkheads, the bow, a hangar to
+                    // starboard (the way in), a collapsed bay to port, the bridge on its tower aft
+                    // and the engine block; its blades, turrets and engines are the decor
+                    b.Module(-3, 0, -30, 3, 3, 30);
+                    b.Module(-2, 0, 31, 2, 2, 38);
+                    b.Module(4, 0, -8, 10, 3, 6);
+                    b.Module(-9, 0, -18, -4, 3, -8);
+                    b.Module(-1, 4, -20, 1, 8, -17);
+                    b.Module(-4, 9, -21, 4, 10, -16, 0.6f);
+                    b.Module(-5, 0, -38, 5, 4, -31);
+                    foreach (int z in new[] { -24, -12, 0, 12, 24 })
+                        b.Bulkhead(z, -3, 3, 0, 3, -1);
+                    b.Bulkhead(30, -2, 2, 0, 2, -1);
+                    b.Bulkhead(-31, -3, 3, 0, 3, -1);
+                    b.Rupture(3, 1, 14, 3, 3, 19);
+                    b.Rupture(-9, 3, -18, -6, 3, -14);
+                    b.Entrance(10, 0, 0, 0);
+                    b.Cargo(5, -7, 9, 5, 0, 0.3);
+                    b.Cargo(-2, -28, 2, -26, 0, 0.2);
                 }
             },
             // ---- Pirate bases in the Erebos galaxy, around the Bastion (and one near Pyros)
@@ -241,10 +293,11 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
         /// <summary>
         /// The stations' build. Worlds saved with an older one get their stations replaced when
-        /// loaded (version 2: docking door entrance, furnishing, outside equipment); destroyed
-        /// pirate bases stay wrecks.
+        /// loaded (version 2: docking door entrance, furnishing, outside equipment; version 3: the
+        /// Vagabond, the Leviathan and the Hades probe, rebuilt big), only those whose
+        /// <see cref="StationSpec.Version"/> is newer than the world's; destroyed pirate bases stay wrecks.
         /// </summary>
-        public const int StationVersion = 2;
+        public const int StationVersion = 3;
         private const string VersionFile = "tfa_stations.txt";
         private static bool _loadingWorld;
         private static int _savedVersion = -1;
@@ -280,7 +333,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             _loadingWorld = false;
             if (_replaced > 0)
-                AdvancedMod.Log.Msg($"stations: {_replaced} station(s) from an older version left out, rebuilt with a docking door");
+                AdvancedMod.Log.Msg($"stations: {_replaced} station(s) from an older version left out, rebuilt");
         }
 
         /// <summary>Whether this saved ship is one of the mod's stations in an older build, to rebuild.</summary>
@@ -290,7 +343,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 return false;
             foreach (StatefulPart part in ship.StatefulParts)
             {
-                if (part?.State is BeaconState beacon && All.Any(s => s.Name == beacon.Name))
+                if (part?.State is BeaconState beacon && All.FirstOrDefault(s => s.Name == beacon.Name) is StationSpec spec && _savedVersion < spec.Version)
                 {
                     _replaced++;
                     return true;
@@ -465,6 +518,20 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
             private readonly HashSet<Vector3Int> _inside = new HashSet<Vector3Int>();
             private readonly HashSet<Vector3Int> _openings = new HashSet<Vector3Int>();
+            // Windows share of a module's walls (glazed bridges and decks), torn-open voxels, inner walls
+            private readonly Dictionary<Vector3Int, float> _glass = new Dictionary<Vector3Int, float>();
+            private readonly HashSet<Vector3Int> _ruptures = new HashSet<Vector3Int>();
+            private readonly List<Vector3Int> _partitions = new List<Vector3Int>();
+            private readonly List<(int X, int Y, int Z)> _engines = new List<(int, int, int)>();
+            private readonly List<(int X0, int Z0, int X1, int Z1, int Y, double Loot)> _cargo = new List<(int, int, int, int, int, double)>();
+
+            /// <summary>The outer hull faces placed (voxel, face, part), filled by <see cref="ToJson"/>: the decor dresses them.</summary>
+            public readonly List<(Vector3Int V, int Face, int Part)> Faces = new List<(Vector3Int, int, int)>();
+            /// <summary>The outer hull faces left missing (breaches and ruptures, not the doors), filled by <see cref="ToJson"/>.</summary>
+            public readonly List<(Vector3Int V, int Face)> Holes = new List<(Vector3Int, int)>();
+            public IReadOnlyList<(int x0, int y0, int z0, int x1, int y1, int z1)> Modules => _modules;
+            public bool Inside(Vector3Int v) => _inside.Contains(v);
+            public bool Ruptured(Vector3Int v) => _ruptures.Contains(v);
             private readonly List<(int x0, int y0, int z0, int x1, int y1, int z1)> _modules = new List<(int, int, int, int, int, int)>();
             private readonly System.Random _random;
 
@@ -490,15 +557,60 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 _batteries.Add((weapon, new Vector3(x, y + 0.5f + 0.04f, z), facing));
             }
 
-            /// <summary>A box of interior voxels (inclusive bounds). Touching modules open onto each other.</summary>
-            public void Module(int x0, int y0, int z0, int x1, int y1, int z1)
+            /// <summary>
+            /// A box of interior voxels (inclusive bounds). Touching modules open onto each other.
+            /// <paramref name="glass"/>: share of its walls that are windows (a bridge), 0 for the usual row.
+            /// </summary>
+            public void Module(int x0, int y0, int z0, int x1, int y1, int z1, float glass = 0f)
             {
                 _modules.Add((x0, y0, z0, x1, y1, z1));
                 for (int x = x0; x <= x1; x++)
                     for (int y = y0; y <= y1; y++)
                         for (int z = z0; z <= z1; z++)
+                        {
                             _inside.Add(new Vector3Int(x, y, z));
+                            if (glass > 0f)
+                                _glass[new Vector3Int(x, y, z)] = glass;
+                        }
             }
+
+            /// <summary>
+            /// An inner wall across the ship between z and z + 1, over x0..x1 and y0..y1, with a 2 x 2
+            /// doorway at doorX, doorX + 1 on the floor. A few of its plates are missing.
+            /// </summary>
+            public void Bulkhead(int z, int x0, int x1, int y0, int y1, int doorX)
+            {
+                for (int x = x0; x <= x1; x++)
+                {
+                    for (int y = y0; y <= y1; y++)
+                    {
+                        if ((x == doorX || x == doorX + 1) && y <= y0 + 1)
+                            continue;
+                        _partitions.Add(new Vector3Int(x, y, z));
+                    }
+                }
+                // Keep the doorway clear on both sides
+                for (int x = doorX; x <= doorX + 1; x++)
+                {
+                    _taken.Add(new Vector2Int(x, z));
+                    _taken.Add(new Vector2Int(x, z + 1));
+                }
+            }
+
+            /// <summary>A torn-open part of the hull: these voxels lose every outer face (the decor frames the hole).</summary>
+            public void Rupture(int x0, int y0, int z0, int x1, int y1, int z1)
+            {
+                for (int x = x0; x <= x1; x++)
+                    for (int y = y0; y <= y1; y++)
+                        for (int z = z0; z <= z1; z++)
+                            _ruptures.Add(new Vector3Int(x, y, z));
+            }
+
+            /// <summary>A dead main thruster on the outer -z face (the stern) of this interior voxel, pointing back.</summary>
+            public void Engine(int x, int y, int z) => _engines.Add((x, y, z));
+
+            /// <summary>Rows of supply crates on a floor (every other cell), each holding loot with this chance, empty otherwise.</summary>
+            public void Cargo(int x0, int z0, int x1, int z1, int y, double loot) => _cargo.Add((x0, z0, x1, z1, y, loot));
 
             /// <summary>
             /// The way in: an open docking door, 2 wide and 2 high, on the outer face (0 +x, 1 -x,
@@ -542,11 +654,23 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                         if (_inside.Contains(n) || _openings.Contains(v * 10 + new Vector3Int(face, 0, 0)))
                             continue;
                         bool wall = face < 4;
-                        if (_random.NextDouble() < (wall ? 0.05 : 0.03) * (Spec != null ? Spec.Breaches : 1f))
+                        if (_ruptures.Contains(v) || _random.NextDouble() < (wall ? 0.05 : 0.03) * (Spec != null ? Spec.Breaches : 1f))
+                        {
+                            Holes.Add((v, face));
                             continue;
-                        bool window = wall && v.y % 4 == 1 && _random.NextDouble() < 0.35;
-                        hull.Add(HullFace(v, face, window ? GlassWall : (face == 4 && _random.NextDouble() < 0.06 ? GlassFloor : wall ? IronWall : IronFloor)));
+                        }
+                        bool window = wall && (_glass.TryGetValue(v, out float glass) ? _random.NextDouble() < glass : v.y % 4 == 1 && _random.NextDouble() < 0.35);
+                        int part = window ? GlassWall : (face == 4 && _random.NextDouble() < 0.06 ? GlassFloor : wall ? IronWall : IronFloor);
+                        Faces.Add((v, face, part));
+                        hull.Add(HullFace(v, face, part));
                     }
+                }
+
+                // Inner walls, a few plates missing
+                foreach (Vector3Int p in _partitions)
+                {
+                    if (_inside.Contains(p) && _inside.Contains(p + Direction(2)) && _random.NextDouble() >= 0.06 * (Spec != null ? Spec.Breaches : 1f))
+                        hull.Add(HullFace(p, 2, IronWall, inner: true));
                 }
 
                 // Beacon on the roof of the first module, facing up
@@ -600,6 +724,22 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
                 Furnish(floating, storages, ref nextPart);
 
+                // Cargo rows: supply crates, most of them emptied long ago
+                foreach (var c in _cargo)
+                {
+                    for (int x = c.X0; x <= c.X1; x += 2)
+                    {
+                        for (int z = c.Z0; z <= c.Z1; z += 2)
+                        {
+                            if (!_taken.Add(new Vector2Int(x, z)))
+                                continue;
+                            floating.Add(Floating(nextPart, SupplyCrate, new Vector3(x, c.Y - 0.5f + 0.04f, z), _random.Next(0, 4), 4));
+                            storages.Add($"{{\"partId\":{nextPart},\"slots\":[{(_random.NextDouble() < c.Loot ? Loot() : EmptySlots())}]}}");
+                            nextPart++;
+                        }
+                    }
+                }
+
                 // Pirate batteries (the base's guns; only with the Arsenal mod, whose parts they are)
                 if (Spec != null && Spec.Pirate && Power.ArsenalShield.Installed)
                 {
@@ -614,6 +754,17 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     thrusters.Add($"{{\"partId\":{nextPart},\"fluidItemId\":100,\"fluidQuantity\":0.0}}");
                     nextPart++;
                 }
+                // The main engines at the stern
+                foreach ((int x, int y, int z) in _engines)
+                {
+                    floating.Add(Floating(nextPart, Thruster, new Vector3(x, y, z - 0.5f - 0.04f), 2, 4));
+                    thrusters.Add($"{{\"partId\":{nextPart},\"fluidItemId\":100,\"fluidQuantity\":0.0}}");
+                    nextPart++;
+                }
+
+                // The hull's dressing, in the ship's own frame (like the pirates' fairings)
+                if (Spec != null && Spec.Decor != 0)
+                    floating.Add(Floating(nextPart++, Spec.Decor, Vector3.zero, 0, 4));
 
                 var sb = new StringBuilder();
                 sb.Append("{\"rootShipId\":1,\"cables\":[],\"ships\":[{");
@@ -729,7 +880,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                         for (int c = from + 1; c < to; c += 3)
                             floating.Add(Floating(nextPart++, SolarSupport, alongZ ? new Vector3(cx, roof, c) : new Vector3(c, roof, cz), 0, 4));
                     }
-                    if (i > 0 && m.y0 > 0 && m.x1 - m.x0 <= 4 && m.z1 - m.z0 <= 4)
+                    // (not under another module stacked on it)
+                    if (i > 0 && m.y0 > 0 && m.x1 - m.x0 <= 4 && m.z1 - m.z0 <= 4 && !_inside.Contains(new Vector3Int((int)cx, m.y1 + 1, (int)cz)))
                     {
                         floating.Add(Floating(nextPart++, Beam, new Vector3(cx, roof, cz), 0, 4));
                         floating.Add(Floating(nextPart++, NavBeacon, new Vector3(cx, roof + 4f, cz), 0, 4));
@@ -797,7 +949,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             }
 
             // In the save format a voxel owns its floor (below), its forward wall (+z) and its right wall (+x)
-            private string HullFace(Vector3Int v, int face, int partId)
+            private string HullFace(Vector3Int v, int face, int partId, bool inner = false)
             {
                 Vector3Int at = v;
                 int type, forward, up;
@@ -818,6 +970,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Color32 inside = Spec != null ? Spec.Inside : new Color32(80, 70, 58, 255);
                 if (Spec != null && type != 0 && v.y % 4 == 2)
                     outside = Spec.Band;
+                if (inner)
+                    outside = inside;
                 int wear = _random.Next(-14, 6);
                 string front = $"{{\"x\":{Clamp(outside.r + wear)},\"y\":{Clamp(outside.g + wear)},\"z\":{Clamp(outside.b + wear)}}}";
                 string back = $"{{\"x\":{Clamp(inside.r + wear / 2)},\"y\":{Clamp(inside.g + wear / 2)},\"z\":{Clamp(inside.b + wear / 2)}}}";
@@ -853,6 +1007,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     slots.Add("{\"hasItem\":false,\"itemId\":0,\"quantity\":0}");
                 return string.Join(",", slots);
             }
+
+            private static string EmptySlots() => string.Join(",", Enumerable.Repeat("{\"hasItem\":false,\"itemId\":0,\"quantity\":0}", 10));
         }
     }
 

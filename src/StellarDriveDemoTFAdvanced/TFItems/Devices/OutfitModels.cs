@@ -8,9 +8,11 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 {
     /// <summary>
     /// Puts an outfit on the game's player avatar: its suit, helmet, backpack and visor tinted
-    /// (property blocks on its own renderers), and the accessories built here, fixed to its bones
-    /// so they follow its animation: a hat on the helmet, sunglasses over the visor, a jacket
-    /// (torso, collar, sleeves on the arm bones, tails on the hips).
+    /// (property blocks on its own renderers), and the accessories built here, fitted to it:
+    /// the jacket is the suit's own skinned mesh (torso, then the arms, then the hips and thighs
+    /// for a long coat), pushed out a little and bound to the same bones, so it follows every
+    /// animation exactly; the hat and the sunglasses are measured against the helmet and the
+    /// visor as they stand (their size and where their top and front are), then fixed to the head bone.
     /// </summary>
     internal static class OutfitModels
     {
@@ -20,13 +22,34 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
         public static readonly string[] HatNames = { "-", "cap", "cowboy", "tophat", "beanie", "crown" };
 
-        public static void Dress(Transform avatar, Outfit outfit)
+        // The suit's bones a jacket covers: the torso (vest), the arms (jacket), the hips and thighs (long coat)
+        private static readonly string[] TorsoBones = { "Spine", "Spine1", "Spine2", "Neck", "LeftShoulder", "RightShoulder" };
+        private static readonly string[] ArmBones = { "LeftArm", "LeftForeArm", "RightArm", "RightForeArm" };
+        private static readonly string[] CoatBones = { "Hips", "LeftUpLeg", "RightUpLeg" };
+
+        // Jackets cut from a suit mesh, kept per mesh and kind
+        private static readonly Dictionary<(int, int), Mesh> Jackets = new Dictionary<(int, int), Mesh>();
+
+        /// <summary>
+        /// <paramref name="firstPerson"/>: this player's own body, seen from inside the helmet: the
+        /// colors and the jacket only (a hat or glasses would sit in the camera).
+        /// </summary>
+        public static void Dress(Transform avatar, Outfit outfit, bool firstPerson = false)
         {
             foreach (Transform old in avatar.GetComponentsInChildren<Transform>(true).Where(t => t.name.StartsWith(Prefix)).ToList())
                 Object.Destroy(old.gameObject);
+            SkinnedMeshRenderer suit = null, shell = null, visor = null;
             foreach (SkinnedMeshRenderer renderer in avatar.GetComponentsInChildren<SkinnedMeshRenderer>(true))
             {
                 string name = renderer.name;
+                if (name.StartsWith(Prefix))
+                    continue;
+                if (name.StartsWith("PlayerModel") && suit == null)
+                    suit = renderer;
+                else if (name.StartsWith("Helmet2_Shell"))
+                    shell = renderer;
+                else if (name.StartsWith("Helmet2_Visor"))
+                    visor = renderer;
                 Color? tint = name.StartsWith("PlayerModel") ? outfit.Suit
                     : name.StartsWith("Helmet2_Shell") ? outfit.Helmet
                     : name.StartsWith("Helmet2_Visor") ? outfit.Visor
@@ -39,193 +62,327 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 }
                 renderer.SetPropertyBlock(Block);
             }
+
+            if (outfit.Jacket > 0 && suit != null)
+                Jacket(suit, outfit.Jacket, outfit.JacketColor);
+            if (firstPerson)
+                return;
+
             Transform head = Bone(avatar, "mixamorig:Head");
-            if (head != null && outfit.Hat > 0)
-                Attach(head, "Hat", Hat(outfit.Hat), outfit.Hat == 5 ? new Color(1f, 0.78f, 0.2f) : outfit.HatColor, outfit.Hat == 5 ? 1f : 0.1f, outfit.Hat == 5 ? 0.85f : 0.3f);
-            if (head != null && outfit.Glasses > 0)
+            if (head == null)
+                return;
+            if (outfit.Hat > 0 && shell != null && Measure(shell, avatar, head, out Shape helmet))
             {
-                (MeshBuilder frame, MeshBuilder lens) = Glasses(outfit.Glasses);
-                Attach(head, "GlassesFrame", frame, new Color(0.08f, 0.08f, 0.09f), 0.8f, 0.8f);
-                AttachLit(head, "GlassesLens", lens, outfit.Lens, 0.6f, 0.97f);
+                // Sized on the helmet's crown, sitting on its top
+                Fix(head, avatar, "Hat", Hat(outfit.Hat), helmet.Center(helmet.Top), helmet.Radius,
+                    outfit.Hat == 5 ? new Color(1f, 0.78f, 0.2f) : outfit.HatColor, outfit.Hat == 5 ? 1f : 0.1f, outfit.Hat == 5 ? 0.85f : 0.3f, lit: false);
             }
-            if (outfit.Jacket > 0)
-                Jacket(avatar, outfit.Jacket, outfit.JacketColor);
+            if (outfit.Glasses > 0 && visor != null && Measure(visor, avatar, head, out Shape glass))
+            {
+                // Over the visor's front at eye height, as wide as it
+                Vector3 at = glass.Center(glass.EyeHeight) + Vector3.forward * (glass.Front - glass.Middle.z + 0.006f);
+                (MeshBuilder frame, MeshBuilder lens) = Glasses(outfit.Glasses);
+                Fix(head, avatar, "GlassesFrame", frame, at, glass.Width, new Color(0.72f, 0.72f, 0.75f), 0.9f, 0.8f, lit: false);
+                Fix(head, avatar, "GlassesLens", lens, at, glass.Width, outfit.Lens, 0.6f, 0.97f, lit: true);
+            }
+            if (StellarDriveDemoTFAdvanced.Common.DevHarness.Active)
+                TFMod.Log.Msg($"dev: outfit on {avatar.name}: suit {(suit != null ? suit.name + " readable " + suit.sharedMesh?.isReadable : "none")}, helmet {(shell != null ? Measure(shell, avatar, head, out Shape h) ? $"top {h.Top:0.000} radius {h.Radius:0.000}, head bone at {Quaternion.Inverse(avatar.rotation) * (head.position - avatar.position)}" : "not measured" : "none")}");
         }
 
         private static Transform Bone(Transform avatar, string name) => avatar.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == name);
 
-        // In the game's part look (lit like the rest of the world), or plain URP Lit before it is known
-        private static void Attach(Transform bone, string name, MeshBuilder builder, Color color, float metal, float smooth)
+        // ---- Measures, in the avatar's frame (x right, y up, z forward, from its origin, in meters)
+
+        private struct Shape
         {
-            Material material = DeviceModels.Flat($"TF_Outfit_{ColorUtility.ToHtmlStringRGB(color)}_{metal:0.0}", color, metal, smooth)
-                ?? LitMaterials.Get($"TF_OutfitLit_{ColorUtility.ToHtmlStringRGB(color)}_{metal:0.0}", color, metal, smooth);
-            Add(bone, name, builder, material);
+            public Vector3 Middle;       // the middle of its horizontal extent
+            public float Top, Bottom, Front;
+            public float Radius;         // around its crown (the top quarter)
+            public float Width;          // half its width at eye height
+            public float EyeHeight;      // the middle of its height
+
+            public Vector3 Center(float y) => new Vector3(Middle.x, y, Middle.z);
         }
 
-        private static void AttachLit(Transform bone, string name, MeshBuilder builder, Color color, float metal, float smooth) =>
-            Add(bone, name, builder, LitMaterials.Get($"TF_OutfitGloss_{ColorUtility.ToHtmlStringRGB(color)}", color, metal, smooth));
-
-        private static void Add(Transform bone, string name, MeshBuilder builder, Material material)
+        private static bool Measure(SkinnedMeshRenderer renderer, Transform avatar, Transform head, out Shape shape)
         {
+            shape = default;
+            try
+            {
+                // Skinned by hand from the bones as they stand: exact, whatever the scales of the
+                // avatar's parents (the game's avatar is made in centimeters)
+                Mesh mesh = renderer.sharedMesh;
+                Transform[] bones = renderer.bones;
+                if (mesh == null || !mesh.isReadable || bones == null || bones.Length == 0)
+                    return false;
+                Vector3[] vertices = mesh.vertices;
+                BoneWeight[] weights = mesh.boneWeights;
+                Matrix4x4[] bind = mesh.bindposes;
+                if (vertices.Length == 0 || weights.Length != vertices.Length)
+                    return false;
+                var skin = new Matrix4x4[bones.Length];
+                for (int i = 0; i < bones.Length && i < bind.Length; i++)
+                    skin[i] = bones[i] != null ? bones[i].localToWorldMatrix * bind[i] : Matrix4x4.zero;
+                Vector3 Skin(int i)
+                {
+                    BoneWeight w = weights[i];
+                    Vector3 v = vertices[i];
+                    return skin[w.boneIndex0].MultiplyPoint3x4(v) * w.weight0 + skin[w.boneIndex1].MultiplyPoint3x4(v) * w.weight1
+                        + skin[w.boneIndex2].MultiplyPoint3x4(v) * w.weight2 + skin[w.boneIndex3].MultiplyPoint3x4(v) * w.weight3;
+                }
+                Quaternion inverse = Quaternion.Inverse(avatar.rotation);
+                var points = new Vector3[vertices.Length];
+                for (int i = 0; i < vertices.Length; i++)
+                    points[i] = inverse * (Skin(i) - avatar.position);
+                float top = points.Max(p => p.y), bottom = points.Min(p => p.y);
+                float minX = points.Min(p => p.x), maxX = points.Max(p => p.x), minZ = points.Min(p => p.z), maxZ = points.Max(p => p.z);
+                var middle = new Vector3((minX + maxX) * 0.5f, 0f, (minZ + maxZ) * 0.5f);
+                float crown = top - (top - bottom) * 0.25f, eye = (top + bottom) * 0.5f, band = (top - bottom) * 0.2f;
+                float radius = points.Where(p => p.y >= crown).Select(p => new Vector2(p.x - middle.x, p.z - middle.z).magnitude).DefaultIfEmpty(0f).Max();
+                var eyes = points.Where(p => Mathf.Abs(p.y - eye) <= band).ToList();
+                shape = new Shape
+                {
+                    Middle = middle,
+                    Top = top,
+                    Bottom = bottom,
+                    Front = eyes.Count > 0 ? eyes.Max(p => p.z) : maxZ,
+                    Radius = radius,
+                    Width = eyes.Count > 0 ? (eyes.Max(p => p.x) - eyes.Min(p => p.x)) * 0.5f : (maxX - minX) * 0.5f,
+                    EyeHeight = eye
+                };
+                return radius > 0.01f;
+            }
+            catch (System.Exception e)
+            {
+                TFMod.Log.Warning($"outfits: could not measure {renderer.name}: {e.Message}");
+                return false;
+            }
+        }
+
+        // A model built around its origin (y up, z forward, 1 unit = scale meters) placed at a point
+        // of the avatar's frame, then fixed to the head bone so it follows the head from now on
+        private static void Fix(Transform bone, Transform avatar, string name, MeshBuilder builder, Vector3 at, float scale, Color color, float metal, float smooth, bool lit)
+        {
+            Material material = lit ? LitMaterials.Get($"TF_OutfitGloss_{ColorUtility.ToHtmlStringRGB(color)}", color, metal, smooth)
+                : DeviceModels.Flat($"TF_Outfit_{ColorUtility.ToHtmlStringRGB(color)}_{metal:0.0}", color, metal, smooth)
+                  ?? LitMaterials.Get($"TF_OutfitLit_{ColorUtility.ToHtmlStringRGB(color)}_{metal:0.0}", color, metal, smooth);
             var child = new GameObject(Prefix + name) { layer = bone.gameObject.layer };
-            child.transform.SetParent(bone, false);
+            child.transform.SetPositionAndRotation(avatar.position + avatar.rotation * at, avatar.rotation);
+            child.transform.localScale = Vector3.one * scale;
+            child.transform.SetParent(bone, true);
             child.AddComponent<MeshFilter>().sharedMesh = builder.Build(Prefix + name);
             var renderer = child.AddComponent<MeshRenderer>();
             renderer.sharedMaterial = material;
             renderer.shadowCastingMode = ShadowCastingMode.On;
         }
 
-        // ---- Hats, in the head bone's frame (y up the head, z forward); the helmet's top is ~0.24 above the bone
-        private const float HelmetTop = 0.235f, HeadZ = 0.03f;
+        // ---- Hats, for a helmet of radius 1 whose top is the origin
 
         private static MeshBuilder Hat(int kind)
         {
             var m = new MeshBuilder();
-            var top = new Vector3(0f, HelmetTop, HeadZ);
             switch (kind)
             {
-                case 1: // Cap: a dome and a peak forward
-                    for (int i = 0; i < 4; i++)
+                case 1: // Cap: a soft crown down the helmet's sides, a curved peak forward, a button
+                    Dome(m, -0.48f, 0.08f, 0.97f, 0.6f, 6);
+                    for (int i = 0; i < 5; i++)
                     {
-                        float a0 = i / 4f * Mathf.PI * 0.5f, a1 = (i + 1) / 4f * Mathf.PI * 0.5f;
-                        m.Cylinder(top + Vector3.up * (Mathf.Sin(a0) * 0.07f - 0.04f), top + Vector3.up * (Mathf.Sin(a1) * 0.07f - 0.04f), 0.125f * Mathf.Cos(a0), Mathf.Max(0.001f, 0.125f * Mathf.Cos(a1)), 18, i == 0, false);
+                        float a0 = Mathf.Lerp(-0.75f, 0.75f, i / 5f), a1 = Mathf.Lerp(-0.75f, 0.75f, (i + 1) / 5f);
+                        Vector3 p0 = new Vector3(Mathf.Sin(a0) * 0.95f, -0.44f, Mathf.Cos(a0) * 0.95f), p1 = new Vector3(Mathf.Sin(a1) * 0.95f, -0.44f, Mathf.Cos(a1) * 0.95f);
+                        Vector3 q0 = new Vector3(Mathf.Sin(a0) * 1.55f, -0.56f, Mathf.Cos(a0) * 1.55f), q1 = new Vector3(Mathf.Sin(a1) * 1.55f, -0.56f, Mathf.Cos(a1) * 1.55f);
+                        Vector3 t = Vector3.up * 0.04f;
+                        m.Block(new[] { p0, p1, p0 + t, p1 + t, q0, q1, q0 + t, q1 + t });
                     }
-                    m.Box(top + new Vector3(0f, -0.035f, 0.15f), new Vector3(0.18f, 0.01f, 0.1f), Quaternion.Euler(-8f, 0f, 0f));
-                    m.Cylinder(top + Vector3.up * 0.03f, top + Vector3.up * 0.04f, 0.012f, 0.012f, 8);
+                    m.Cylinder(Vector3.up * 0.08f, Vector3.up * 0.14f, 0.1f, 0.08f, 10);
                     break;
-                case 2: // Cowboy: a pinched crown, a wide brim, a band
-                    m.Cylinder(top + Vector3.down * 0.05f, top + Vector3.down * 0.035f, 0.26f, 0.25f, 24);
-                    m.Cylinder(top + Vector3.down * 0.04f, top + Vector3.up * 0.07f, 0.12f, 0.1f, 18);
-                    m.Box(top + Vector3.up * 0.07f, new Vector3(0.05f, 0.02f, 0.18f));
-                    m.Cylinder(top + Vector3.down * 0.035f, top + Vector3.down * 0.015f, 0.123f, 0.121f, 18);
+                case 2: // Cowboy: a wide brim, a pinched crown, a band
+                    m.Cylinder(Vector3.up * -0.42f, Vector3.up * -0.36f, 1.95f, 1.9f, 28);
+                    m.Cylinder(Vector3.up * -0.4f, Vector3.up * 0.5f, 0.95f, 0.82f, 22);
+                    m.Box(Vector3.up * 0.5f, new Vector3(0.35f, 0.12f, 1.3f));
+                    m.Cylinder(Vector3.up * -0.36f, Vector3.up * -0.2f, 0.97f, 0.95f, 22);
                     break;
-                case 3: // Top hat: a tall cylinder on a brim, a band
-                    m.Cylinder(top + Vector3.down * 0.045f, top + Vector3.down * 0.035f, 0.19f, 0.19f, 24);
-                    m.Cylinder(top + Vector3.down * 0.04f, top + Vector3.up * 0.18f, 0.115f, 0.125f, 20);
-                    m.Cylinder(top + Vector3.down * 0.035f, top + Vector3.down * 0.005f, 0.118f, 0.117f, 20);
+                case 3: // Top hat: a tall crown on a brim, a band
+                    m.Cylinder(Vector3.up * -0.4f, Vector3.up * -0.34f, 1.4f, 1.4f, 28);
+                    m.Cylinder(Vector3.up * -0.38f, Vector3.up * 1.15f, 0.92f, 0.98f, 24);
+                    m.Cylinder(Vector3.up * -0.34f, Vector3.up * -0.12f, 0.94f, 0.94f, 24);
                     break;
-                case 4: // Beanie: a soft dome, a turned-up rim and a pompom
-                    m.Cylinder(top + Vector3.down * 0.06f, top + Vector3.down * 0.02f, 0.135f, 0.135f, 20);
-                    for (int i = 0; i < 4; i++)
-                    {
-                        float a0 = i / 4f * Mathf.PI * 0.5f, a1 = (i + 1) / 4f * Mathf.PI * 0.5f;
-                        m.Cylinder(top + Vector3.up * (Mathf.Sin(a0) * 0.09f - 0.02f), top + Vector3.up * (Mathf.Sin(a1) * 0.09f - 0.02f), 0.128f * Mathf.Cos(a0), Mathf.Max(0.001f, 0.128f * Mathf.Cos(a1)), 18, false, false);
-                    }
-                    m.Cylinder(top + Vector3.up * 0.065f, top + Vector3.up * 0.11f, 0.03f, 0.02f, 10);
+                case 4: // Beanie: a turned-up rim, a soft dome, a pompom
+                    m.Cylinder(Vector3.up * -0.6f, Vector3.up * -0.36f, 1.03f, 1.0f, 22);
+                    Dome(m, -0.36f, 0.18f, 0.98f, 0f, 6);
+                    m.Cylinder(Vector3.up * 0.14f, Vector3.up * 0.42f, 0.22f, 0.12f, 12);
                     break;
-                case 5: // Crown: a ring of points
-                    m.Cylinder(top + Vector3.down * 0.03f, top + Vector3.up * 0.02f, 0.12f, 0.12f, 24, false, false);
+                case 5: // Crown: an open ring of points with a jewel band
+                    m.Cylinder(Vector3.up * -0.32f, Vector3.up * 0.02f, 0.86f, 0.9f, 28, false, false);
                     for (int i = 0; i < 8; i++)
                     {
                         float a = i * Mathf.PI / 4f;
-                        Vector3 at = top + new Vector3(Mathf.Cos(a) * 0.115f, 0.02f, Mathf.Sin(a) * 0.115f);
-                        m.Cylinder(at, at + Vector3.up * 0.055f, 0.022f, 0f, 4);
+                        Vector3 at = new Vector3(Mathf.Cos(a) * 0.88f, 0.02f, Mathf.Sin(a) * 0.88f);
+                        m.Cylinder(at, at + Vector3.up * 0.42f, 0.15f, 0f, 4);
+                        m.Box(new Vector3(Mathf.Cos(a + 0.39f) * 0.9f, -0.15f, Mathf.Sin(a + 0.39f) * 0.9f), Vector3.one * 0.1f);
                     }
                     break;
             }
             return m;
         }
 
-        // ---- Sunglasses over the visor (its front ~0.15 forward of the head bone, at eye height)
+        // A dome from y0 (radius r0) up to y1, narrowing to r1
+        private static void Dome(MeshBuilder m, float y0, float y1, float r0, float r1, int steps)
+        {
+            for (int i = 0; i < steps; i++)
+            {
+                float a0 = i / (float)steps * Mathf.PI * 0.5f, a1 = (i + 1) / (float)steps * Mathf.PI * 0.5f;
+                float ra = Mathf.Lerp(r1, r0, Mathf.Cos(a0)), rb = Mathf.Lerp(r1, r0, Mathf.Cos(a1));
+                m.Cylinder(Vector3.up * Mathf.Lerp(y0, y1, Mathf.Sin(a0)), Vector3.up * Mathf.Lerp(y0, y1, Mathf.Sin(a1)), ra, Mathf.Max(0.001f, rb), 20, i == 0, i == steps - 1);
+            }
+        }
+
+        // ---- Sunglasses, for a visor of half width 1, on its front at the origin
+
         private static (MeshBuilder Frame, MeshBuilder Lens) Glasses(int kind)
         {
             var frame = new MeshBuilder();
             var lens = new MeshBuilder();
-            const float y = 0.05f, z = 0.175f;
             switch (kind)
             {
-                case 1: // Round-cornered lenses, a bridge, the arms back to the helmet
+                case 1: // Square lenses, a bridge, the arms back along the helmet
                     foreach (float s in new[] { -1f, 1f })
                     {
-                        lens.Box(new Vector3(s * 0.045f, y, z), new Vector3(0.07f, 0.045f, 0.006f));
-                        frame.Box(new Vector3(s * 0.045f, y + 0.025f, z), new Vector3(0.076f, 0.008f, 0.01f));
-                        frame.Box(new Vector3(s * 0.083f, y, z - 0.04f), new Vector3(0.006f, 0.008f, 0.09f));
+                        lens.Box(new Vector3(s * 0.32f, 0f, 0f), new Vector3(0.5f, 0.32f, 0.04f));
+                        frame.Box(new Vector3(s * 0.32f, 0.18f, 0f), new Vector3(0.56f, 0.06f, 0.06f));
+                        frame.Box(new Vector3(s * 0.6f, 0.17f, -0.3f), new Vector3(0.04f, 0.05f, 0.6f));
                     }
-                    frame.Box(new Vector3(0f, y + 0.012f, z), new Vector3(0.024f, 0.006f, 0.008f));
+                    frame.Box(new Vector3(0f, 0.08f, 0f), new Vector3(0.16f, 0.04f, 0.05f));
                     break;
-                case 2: // Aviators: drop-shaped lenses (tilted), thin gold-ish bars
+                case 2: // Aviators: drop-shaped lenses, thin bars
                     foreach (float s in new[] { -1f, 1f })
                     {
-                        lens.Cylinder(new Vector3(s * 0.046f, y, z - 0.003f), new Vector3(s * 0.046f, y, z + 0.003f), 0.034f, 0.034f, 14);
-                        lens.Box(new Vector3(s * 0.05f, y - 0.022f, z), new Vector3(0.05f, 0.02f, 0.006f), Quaternion.Euler(0f, 0f, s * 20f));
-                        frame.Box(new Vector3(s * 0.085f, y + 0.01f, z - 0.04f), new Vector3(0.005f, 0.006f, 0.09f));
+                        lens.Cylinder(new Vector3(s * 0.32f, 0f, -0.02f), new Vector3(s * 0.32f, 0f, 0.02f), 0.24f, 0.24f, 16);
+                        lens.Box(new Vector3(s * 0.35f, -0.15f, 0f), new Vector3(0.34f, 0.14f, 0.04f), Quaternion.Euler(0f, 0f, s * 20f));
+                        frame.Box(new Vector3(s * 0.6f, 0.08f, -0.3f), new Vector3(0.035f, 0.04f, 0.6f));
                     }
-                    frame.Box(new Vector3(0f, y + 0.026f, z), new Vector3(0.13f, 0.005f, 0.006f));
-                    frame.Box(new Vector3(0f, y + 0.008f, z), new Vector3(0.02f, 0.005f, 0.006f));
+                    frame.Box(new Vector3(0f, 0.19f, 0f), new Vector3(0.95f, 0.035f, 0.04f));
+                    frame.Box(new Vector3(0f, 0.06f, 0f), new Vector3(0.14f, 0.035f, 0.04f));
                     break;
-                case 3: // A wide single visor band, wrapping the helmet's front
-                    for (int i = 0; i < 6; i++)
+                case 3: // A wide single band wrapping the visor's front
+                    for (int i = 0; i < 8; i++)
                     {
-                        float a0 = Mathf.Lerp(-0.7f, 0.7f, i / 6f), a1 = Mathf.Lerp(-0.7f, 0.7f, (i + 1) / 6f);
-                        Vector3 p0 = new Vector3(Mathf.Sin(a0) * 0.13f, y, Mathf.Cos(a0) * 0.13f + 0.035f), p1 = new Vector3(Mathf.Sin(a1) * 0.13f, y, Mathf.Cos(a1) * 0.13f + 0.035f);
-                        Vector3 mid = (p0 + p1) * 0.5f, along = (p1 - p0).normalized, outward = new Vector3(mid.x, 0f, mid.z - 0.035f).normalized;
-                        lens.Box(mid, new Vector3((p1 - p0).magnitude + 0.002f, 0.05f, 0.006f), along, Vector3.up, outward);
+                        float a0 = Mathf.Lerp(-0.8f, 0.8f, i / 8f), a1 = Mathf.Lerp(-0.8f, 0.8f, (i + 1) / 8f);
+                        Vector3 p0 = new Vector3(Mathf.Sin(a0), 0f, (Mathf.Cos(a0) - 1f) * 0.9f), p1 = new Vector3(Mathf.Sin(a1), 0f, (Mathf.Cos(a1) - 1f) * 0.9f);
+                        Vector3 mid = (p0 + p1) * 0.5f, along = (p1 - p0).normalized, outward = Vector3.Cross(along, Vector3.up).normalized;
+                        if (outward.z < 0f)
+                            outward = -outward;
+                        lens.Box(mid, new Vector3((p1 - p0).magnitude + 0.01f, 0.3f, 0.04f), along, Vector3.up, outward);
                     }
                     foreach (float s in new[] { -1f, 1f })
-                        frame.Box(new Vector3(s * 0.115f, y, -0.01f), new Vector3(0.008f, 0.02f, 0.1f));
+                        frame.Box(new Vector3(s * 0.75f, 0f, -0.35f), new Vector3(0.05f, 0.12f, 0.3f));
                     break;
             }
             return (frame, lens);
         }
 
-        // ---- Jacket: torso on the spine, collar on the neck, sleeves on the arms, tails on the hips
-        private static void Jacket(Transform avatar, int kind, Color color)
+        // ---- Jacket: the suit's own skinned mesh, cut and pushed out
+
+        private static void Jacket(SkinnedMeshRenderer suit, int kind, Color color)
         {
-            Transform spine = Bone(avatar, "mixamorig:Spine1"), chest = Bone(avatar, "mixamorig:Spine2"), hips = Bone(avatar, "mixamorig:Hips");
-            if (chest != null)
+            Mesh mesh = suit.sharedMesh;
+            if (mesh == null || suit.bones == null || suit.bones.Length == 0)
+                return;
+            if (!Jackets.TryGetValue((mesh.GetInstanceID(), kind), out Mesh jacket) || jacket == null)
             {
-                var torso = new MeshBuilder();
-                // An open front: two panels, the back, the sides
-                torso.Box(new Vector3(0f, 0.05f, -0.085f), new Vector3(0.27f, 0.28f, 0.02f));
-                foreach (float s in new[] { -1f, 1f })
-                {
-                    torso.Box(new Vector3(s * 0.08f, 0.05f, 0.082f), new Vector3(0.1f, 0.28f, 0.02f));
-                    torso.Box(new Vector3(s * 0.13f, 0.05f, 0f), new Vector3(0.02f, 0.28f, 0.17f));
-                    // Lapels
-                    torso.Box(new Vector3(s * 0.045f, 0.15f, 0.094f), new Vector3(0.045f, 0.07f, 0.008f), Quaternion.Euler(0f, 0f, s * -25f));
-                }
-                if (kind >= 2)
-                    torso.Cylinder(new Vector3(0f, 0.19f, -0.005f), new Vector3(0f, 0.24f, -0.005f), 0.085f, 0.08f, 16, false, false);
-                Attach(chest, "JacketTorso", torso, color, 0.05f, 0.35f);
+                jacket = Cut(mesh, suit.bones, kind);
+                Jackets[(mesh.GetInstanceID(), kind)] = jacket;
             }
-            if (spine != null)
+            if (jacket == null)
+                return;
+            Material material = DeviceModels.Flat($"TF_Outfit_{ColorUtility.ToHtmlStringRGB(color)}_0.1", color, 0.1f, 0.3f)
+                ?? LitMaterials.Get($"TF_OutfitLit_{ColorUtility.ToHtmlStringRGB(color)}_0.1", color, 0.1f, 0.3f);
+            // Beside the suit, in the same frame, on the same bones
+            var child = new GameObject(Prefix + "Jacket") { layer = suit.gameObject.layer };
+            child.transform.SetParent(suit.transform.parent, false);
+            child.transform.localPosition = suit.transform.localPosition;
+            child.transform.localRotation = suit.transform.localRotation;
+            child.transform.localScale = suit.transform.localScale;
+            var renderer = child.AddComponent<SkinnedMeshRenderer>();
+            renderer.sharedMesh = jacket;
+            renderer.bones = suit.bones;
+            renderer.rootBone = suit.rootBone;
+            renderer.localBounds = suit.localBounds;
+            renderer.updateWhenOffscreen = suit.updateWhenOffscreen;
+            renderer.sharedMaterial = material;
+            renderer.shadowCastingMode = suit.shadowCastingMode;
+            renderer.enabled = suit.enabled;
+        }
+
+        // The triangles of the suit mostly carried by the jacket's bones, a little out along their normals
+        private static Mesh Cut(Mesh mesh, Transform[] bones, int kind)
+        {
+            if (!mesh.isReadable)
             {
-                var lower = new MeshBuilder();
-                lower.Box(new Vector3(0f, -0.02f, -0.082f), new Vector3(0.26f, 0.15f, 0.02f));
-                foreach (float s in new[] { -1f, 1f })
-                {
-                    lower.Box(new Vector3(s * 0.078f, -0.02f, 0.08f), new Vector3(0.1f, 0.15f, 0.02f));
-                    lower.Box(new Vector3(s * 0.125f, -0.02f, 0f), new Vector3(0.02f, 0.15f, 0.16f));
-                }
-                Attach(spine, "JacketWaist", lower, color, 0.05f, 0.35f);
+                TFMod.Log.Warning($"outfits: the suit's mesh {mesh.name} cannot be read, no jacket");
+                return null;
             }
-            if (kind >= 2)
+            var names = new HashSet<string>(TorsoBones.Concat(kind >= 2 ? ArmBones : new string[0]).Concat(kind >= 3 ? CoatBones : new string[0]).Select(b => "mixamorig:" + b));
+            var covered = new bool[bones.Length];
+            for (int i = 0; i < bones.Length; i++)
+                covered[i] = bones[i] != null && names.Contains(bones[i].name);
+
+            Vector3[] vertices = mesh.vertices, normals = mesh.normals;
+            Vector2[] uvs = mesh.uv;
+            BoneWeight[] weights = mesh.boneWeights;
+            if (weights.Length != vertices.Length || normals.Length != vertices.Length)
+                return null;
+            float W(int bone, float weight) => bone >= 0 && bone < covered.Length && covered[bone] ? weight : 0f;
+            var keep = new bool[vertices.Length];
+            for (int i = 0; i < vertices.Length; i++)
             {
-                foreach (string side in new[] { "Left", "Right" })
+                BoneWeight w = weights[i];
+                keep[i] = W(w.boneIndex0, w.weight0) + W(w.boneIndex1, w.weight1) + W(w.boneIndex2, w.weight2) + W(w.boneIndex3, w.weight3) >= 0.5f;
+            }
+
+            // A little thicker than the suit, in the mesh's own units
+            float push = 0.012f * mesh.bounds.size.magnitude / 2.1f;
+            var map = new Dictionary<int, int>();
+            var outVertices = new List<Vector3>();
+            var outNormals = new List<Vector3>();
+            var outUvs = new List<Vector2>();
+            var outWeights = new List<BoneWeight>();
+            var triangles = new List<int>();
+            for (int sub = 0; sub < mesh.subMeshCount; sub++)
+            {
+                int[] source = mesh.GetTriangles(sub);
+                for (int t = 0; t + 2 < source.Length; t += 3)
                 {
-                    foreach ((string bone, float length, float radius) in new[] { ("Arm", 0.2f, 0.05f), ("ForeArm", 0.17f, 0.045f) })
+                    if (!keep[source[t]] || !keep[source[t + 1]] || !keep[source[t + 2]])
+                        continue;
+                    for (int k = 0; k < 3; k++)
                     {
-                        Transform t = Bone(avatar, "mixamorig:" + side + bone);
-                        if (t == null)
-                            continue;
-                        var sleeve = new MeshBuilder();
-                        sleeve.Cylinder(Vector3.zero, Vector3.up * length, radius, radius * 0.92f, 12);
-                        Attach(t, "Sleeve" + side + bone, sleeve, color, 0.05f, 0.35f);
+                        int v = source[t + k];
+                        if (!map.TryGetValue(v, out int index))
+                        {
+                            index = outVertices.Count;
+                            map[v] = index;
+                            outVertices.Add(vertices[v] + normals[v] * push);
+                            outNormals.Add(normals[v]);
+                            outUvs.Add(uvs.Length == vertices.Length ? uvs[v] : Vector2.zero);
+                            outWeights.Add(weights[v]);
+                        }
+                        triangles.Add(index);
                     }
                 }
             }
-            if (kind == 3 && hips != null)
-            {
-                // Long coat: tails down to the knees, open at the front
-                var tails = new MeshBuilder();
-                tails.Box(new Vector3(0f, -0.2f, -0.095f), new Vector3(0.28f, 0.42f, 0.02f));
-                foreach (float s in new[] { -1f, 1f })
-                {
-                    tails.Box(new Vector3(s * 0.085f, -0.2f, 0.09f), new Vector3(0.1f, 0.42f, 0.02f));
-                    tails.Box(new Vector3(s * 0.14f, -0.2f, 0f), new Vector3(0.02f, 0.42f, 0.18f));
-                }
-                Attach(hips, "JacketTails", tails, color, 0.05f, 0.35f);
-            }
+            if (triangles.Count == 0)
+                return null;
+            var jacket = new Mesh { name = Prefix + "Jacket" + kind };
+            if (outVertices.Count > 65000)
+                jacket.indexFormat = IndexFormat.UInt32;
+            jacket.SetVertices(outVertices);
+            jacket.SetNormals(outNormals);
+            jacket.SetUVs(0, outUvs);
+            jacket.boneWeights = outWeights.ToArray();
+            jacket.bindposes = mesh.bindposes;
+            jacket.SetTriangles(triangles, 0);
+            jacket.RecalculateBounds();
+            return jacket;
         }
     }
 }

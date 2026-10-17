@@ -12,7 +12,7 @@ Stations from an older version of the mod are rebuilt (with their door) when the
 |---|---|---|
 | Station Kepler (Kepler Station) | far from TF Verdance | the biggest; quantum cores, alloy, titanium, cryonite |
 | Avant-poste Orion (Orion Outpost) | near TF Aridia | quantum cores, alloy, quartz, artifacts |
-| Sonde Hadès (Hades Probe) | near Petra's black hole | exotic matter; shelter from the black hole's gravity (3 km) |
-| Épave du Vagabond (Wanderer wreck) | Thalassa orbit (Erebus) | 12 dark matter, meteorite |
-| Épave du Léviathan (Leviathan wreck) | Cristallis orbit (Erebus) | 20 dark matter, exotic matter, artifacts |
+| Sonde Hadès (Hades Probe) | near Petra's black hole | big research probe: gravimetric ring, large dish, sensor boom, solar wings, glazed observation deck; exotic matter; shelter from the black hole's gravity (3 km) |
+| Épave du Vagabond (Wanderer wreck) | Thalassa orbit (Erebus) | 60 m heavy freighter: bulkheaded hold, containers, crane, bridge, torn-off engine section; 12 dark matter, meteorite |
+| Épave du Léviathan (Leviathan wreck) | Cristallis orbit (Erebus) | 90 m capital ship: dagger bow, armoured blades, dead turrets, hangar, collapsed bay, bridge, six nozzles; 20 dark matter, exotic matter, artifacts |
 | Épave de l'Icare (Icarus wreck) | Pyros orbit (Erebus) | 30 dark matter, exotic matter |

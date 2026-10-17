@@ -217,6 +217,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             var players = GameServices.PlayersClient;
             if (players == null)
                 return;
+            DressSelf();
             foreach (Players.TrackedPlayerOtherClient other in players.OtherPlayers)
             {
                 if (other == null || !other.IsVisualLoaded || !(VisualField?.GetValue(other) is GameObject visual) || visual == null)
@@ -227,14 +228,28 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         }
 
         /// <summary>Puts an outfit on an avatar (null: the game's look), once per change.</summary>
-        public static void Wear(GameObject avatar, Outfit outfit)
+        public static void Wear(GameObject avatar, Outfit outfit, bool firstPerson = false)
         {
             var worn = avatar.GetComponent<OutfitWorn>() ?? avatar.AddComponent<OutfitWorn>();
             string text = outfit?.ToString() ?? "";
             if (worn.Text == text)
                 return;
             worn.Text = text;
-            OutfitModels.Dress(avatar.transform, outfit ?? new Outfit());
+            OutfitModels.Dress(avatar.transform, outfit ?? new Outfit(), firstPerson);
+        }
+
+        private static GameObject _ownBody;
+
+        // This player's own body (seen looking down, the arms): PlayerCamera/PlayerRig/PlayerBodyWrapper/player
+        private static void DressSelf()
+        {
+            if (_ownBody == null)
+            {
+                var animator = UnityEngine.Object.FindFirstObjectByType<Players.Visuals.FirstPersonPlayerAnimator>(FindObjectsInactive.Include);
+                _ownBody = animator != null ? animator.gameObject : null;
+            }
+            if (_ownBody != null)
+                Wear(_ownBody, Outfits.Mine, firstPerson: true);
         }
     }
 

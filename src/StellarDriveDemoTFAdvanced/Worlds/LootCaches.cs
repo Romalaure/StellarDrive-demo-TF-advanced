@@ -327,23 +327,4 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             }
         }
     }
-
-    /// <summary>The list of buildings given a chest is saved with the world.</summary>
-    [HarmonyPatch(typeof(GameSaver), "SaveGame", typeof(string))]
-    internal static class LootCachesSavePatch
-    {
-        private static void Postfix(string worldDirectoryFullName)
-        {
-            try
-            {
-                LootCaches.SaveSites(worldDirectoryFullName);
-                AbandonedStations.SaveVersion(worldDirectoryFullName);
-                Combat.Pirates.Save(worldDirectoryFullName);
-            }
-            catch (Exception e)
-            {
-                ErrorLog.Report("loot caches save", e);
-            }
-        }
-    }
 }

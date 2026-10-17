@@ -65,6 +65,9 @@ namespace StellarDriveDemoTFAdvanced.Common
         public Mesh Build(string name, Vector2? paletteUv)
         {
             var mesh = new Mesh { name = name };
+            // Big models (a wreck's whole dressing) go past 16-bit indices
+            if (_vertices.Count > 65000)
+                mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             mesh.SetVertices(_vertices);
             mesh.SetNormals(_normals);
             mesh.SetUVs(0, _uvs);

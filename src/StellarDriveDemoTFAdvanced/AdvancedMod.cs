@@ -49,6 +49,7 @@ namespace StellarDriveDemoTFAdvanced
             Power.PortalTest.Install();
             Construction.DockingTest.Install();
             Power.FieldDoorTest.Install();
+            Common.SaveHook.Install();
             Propulsion.LandingGearTest.Install();
             Log.Msg("ready");
         }
@@ -118,6 +119,7 @@ namespace StellarDriveDemoTFAdvanced
             Try("the dark matter machines and the portal", Power.SuperiorParts.Register);
             Try("the nuclear machines", Power.NuclearParts.Register);
             Try("the pirate fairings", Combat.PirateDecor.Register);
+            Try("the wrecks' dressing", Worlds.WreckDecor.Register);
             Try("the structural parts", Construction.StructureParts.Register);
             Try("the wood, glass and iron parts", Construction.MaterialParts.Register);
             Try("the reinforced hull", Construction.ReinforcedHull.Register);
@@ -193,7 +195,8 @@ namespace StellarDriveDemoTFAdvanced
             if (_inGame && _partsRegistered)
                 UpdateRadars();
             if (_partsRegistered)
-                TFItems.TFItemsMod.Update();
+                Common.SaveHook.Update();
+            TFItems.TFItemsMod.Update();
             if (_partsRegistered && Settings.SelfTest.Value)
                 RunSelfTest();
             if (_partsRegistered && _inGame)

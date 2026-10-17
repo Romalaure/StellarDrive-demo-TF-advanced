@@ -29,7 +29,22 @@ namespace StellarDriveDemoTFAdvanced.Parts
                             text.AppendLine($"  RENDERER {r.name} {r.GetType().Name} materials {string.Join(", ", r.sharedMaterials.Select(m => m == null ? "null" : m.name + " (" + m.shader.name + ")"))} bounds {r.bounds.size}");
                     }
                 }
+                // "localplayer": the local player's own visuals in the scene (first person arms, body)
+                if (Settings.DevPrefabDump.Value.Contains("localplayer"))
+                {
+                    foreach (var animator in Object.FindObjectsByType<Players.Visuals.FirstPersonPlayerAnimator>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                    {
+                        text.AppendLine($"=== first person {animator.name} root {animator.transform.root.name}");
+                        foreach (Renderer r in animator.transform.root.GetComponentsInChildren<Renderer>(true))
+                            text.AppendLine($"  RENDERER {r.name} {r.GetType().Name} active {r.gameObject.activeInHierarchy} enabled {r.enabled} shadows {r.shadowCastingMode} layer {r.gameObject.layer} path {Path(r.transform)} mats {string.Join(", ", r.sharedMaterials.Select(m => m == null ? "null" : m.name))}");
+                    }
+                }
                 PartSettings[] all = Resources.FindObjectsOfTypeAll<PartSettings>();
+                // "novisual": parts the build menu cannot draw (no visual object), from any mod
+                if (Settings.DevPrefabDump.Value.Contains("novisual"))
+                    foreach (PartSettings settings in all.Where(p => p != null && p.part != null && !(p is Ships.Interface.Settings.HullPartSettings h && !h.hasItsOwnMesh)))
+                        if (settings.part.GetComponentInChildren<Ships.Parts.Common.Model.Reactions.IShipPartVisual>(true) == null)
+                            AdvancedMod.Log.Msg($"dev: part without a visual: {settings.id} {settings.name} ({settings.fullLabel})");
                 foreach (string token in Settings.DevPrefabDump.Value.Split(','))
                 {
                     if (!ushort.TryParse(token.Trim(), out ushort id))
@@ -44,6 +59,8 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 AdvancedMod.Log.Msg("dev: prefab dump written");
             }));
         }
+
+        private static string Path(Transform t) => t.parent == null ? t.name : Path(t.parent) + "/" + t.name;
 
         private static void Dump(Transform t, int depth, StringBuilder text)
         {

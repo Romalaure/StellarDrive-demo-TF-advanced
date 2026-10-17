@@ -12,7 +12,7 @@ Les stations d'une version plus ancienne du mod sont reconstruites (avec leur po
 |---|---|---|
 | Station Kepler | loin de TF Verdance | la plus grande ; noyaux quantiques, alliage, titane, cryonite |
 | Avant-poste Orion | près de TF Aridia | noyaux quantiques, alliage, quartz, artefacts |
-| Sonde Hadès | près du trou noir de Petra | matière exotique ; abri contre la gravité du trou noir (3 km) |
-| Épave du Vagabond | orbite de Thalassa (Érèbe) | 12 matière noire, météorite |
-| Épave du Léviathan | orbite de Cristallis (Érèbe) | 20 matière noire, matière exotique, artefacts |
+| Sonde Hadès | près du trou noir de Petra | grande sonde de recherche : anneau gravimétrique, grande antenne, perche capteur, ailes solaires, pont d'observation vitré ; matière exotique ; abri contre la gravité du trou noir (3 km) |
+| Épave du Vagabond | orbite de Thalassa (Érèbe) | cargo lourd de 60 m : soute à cloisons, conteneurs, grue, passerelle, section moteur arrachée ; 12 matière noire, météorite |
+| Épave du Léviathan | orbite de Cristallis (Érèbe) | vaisseau capital de 90 m : proue en dague, lames blindées, tourelles mortes, hangar, baie effondrée, passerelle, six tuyères ; 20 matière noire, matière exotique, artefacts |
 | Épave de l'Icare | orbite de Pyros (Érèbe) | 30 matière noire, matière exotique |
