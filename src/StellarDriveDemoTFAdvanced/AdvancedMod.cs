@@ -95,7 +95,8 @@ namespace StellarDriveDemoTFAdvanced
                 Power.ArsenalShield.Install(HarmonyInstance);
                 Construction.ReinforcedHull.InstallArsenal(HarmonyInstance);
                 Combat.Pirates.Install(HarmonyInstance);
-                Common.DevProfiler.Install(HarmonyInstance);
+                Common.OtherModsFixes.Install(HarmonyInstance);
+            Common.DevProfiler.Install(HarmonyInstance);
             }
             catch (Exception e)
             {

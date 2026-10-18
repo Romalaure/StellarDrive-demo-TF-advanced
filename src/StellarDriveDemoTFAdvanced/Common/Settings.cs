@@ -46,6 +46,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> Weather { get; private set; }
         public static MelonPreferences_Entry<bool> LowPerformance { get; private set; }
         public static MelonPreferences_Entry<bool> ClassicTextures { get; private set; }
+        public static MelonPreferences_Entry<bool> OtherModsFixes { get; private set; }
         public static MelonPreferences_Entry<string> DevWeather { get; private set; }
         public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevDockingTest { get; private set; }
@@ -170,6 +171,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "A message on screen when a radar of your ship detects an incoming pirate raid.");
             Weather = _category.CreateEntry("Weather", true,
                 description: "Weather on the mod's planets around you when you stand outside: rain and storms with lightning (Gaïa, Verdance, Sylvara, Thalassa), snow (Glacia, Gaïa up high), sandstorms (Aridia), ash (Pyros). Visual only.");
+            OtherModsFixes = _category.CreateEntry("OtherModsFixes", true,
+                description: "Fix the frame-rate costs of other mods when installed: StationKit's research check (run every frame by the submarine pack, 2.4 ms a frame) runs once every 2 s.");
             ClassicTextures = _category.CreateEntry("ClassicTextures", false,
                 description: "The mod's parts in plain colors, as before version 0.41 (no plate texture, rivets or relief). Takes effect on the next start.");
             LowPerformance = _category.CreateEntry("LowPerformance", false,

@@ -74,6 +74,8 @@ namespace StellarDriveDemoTFAdvanced.Common
             }
             if (Settings.DevProfileGame.Value)
                 AddGame(targets, mine);
+            if (Settings.DevProfileGame.Value)
+                AddModKit(targets);
             // The part state writes, and how many change nothing
             MethodInfo write = AccessTools.Method(typeof(Ships.Interface.Model.ShipState), nameof(Ships.Interface.Model.ShipState.SetPartState));
             if (write != null)
@@ -120,6 +122,55 @@ namespace StellarDriveDemoTFAdvanced.Common
         /// Markers around each phase of Unity's player loop (and around physics and rendering inside
         /// them): how long the engine spends in each, scripts or not.
         /// </summary>
+        // SDModKit's own per-frame work and the update of every mod built on it
+        private static void AddModKit(HashSet<MethodBase> targets)
+        {
+            Assembly kit = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.GetName().Name == "SDModKit");
+            if (kit == null)
+                return;
+            foreach ((string type, string method) in new[] { ("SDModKit.ContentResearch", "Tick"), ("SDModKit.KeyTips", "A"), ("SDModKit.InteractionTips", "a"),
+                         ("SDModKit.LaserTuning", "A"), ("SDModKit.ItemCables", "A"), ("SDModKit.ModKit", "A") })
+            {
+                Type t = kit.GetType(type) ?? kit.GetTypes().FirstOrDefault(x => x.FullName != null && x.FullName.EndsWith("." + type.Split('.').Last()));
+                MethodInfo m = t?.GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .FirstOrDefault(x => x.Name == method && x.GetParameters().Length == 0 && x.GetMethodBody() != null);
+                if (m != null)
+                    targets.Add(m);
+            }
+            // Inside the costliest of them (the submarine pack): what it does each frame
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GetName().Name == "SubmarineAddons" || x.GetName().Name == "StationKit"))
+            {
+                Type[] all;
+                try { all = assembly.GetTypes(); }
+                catch (ReflectionTypeLoadException e) { all = e.Types.Where(t => t != null).ToArray(); }
+                foreach (Type type in all.Where(t => t != null && !t.IsGenericTypeDefinition))
+                {
+                    foreach (MethodInfo method in type.GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                    {
+                        if ((method.Name == "Update" || method.Name == "EnsureResearch" || method.Name == "GiveToEveryone" || method.Name == "ListenOnHost" || method.Name == "LateUpdate")
+                            && !method.IsAbstract && !method.ContainsGenericParameters && method.GetMethodBody() != null)
+                            targets.Add(method);
+                    }
+                }
+            }
+            Type sdMod = kit.GetTypes().FirstOrDefault(x => x.Name == "SDMod");
+            if (sdMod == null)
+                return;
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                Type[] types;
+                try { types = assembly.GetTypes(); }
+                catch (ReflectionTypeLoadException e) { types = e.Types.Where(t => t != null).ToArray(); }
+                catch { continue; }
+                foreach (Type type in types.Where(t => t != null && t != sdMod && sdMod.IsAssignableFrom(t)))
+                {
+                    MethodInfo update = type.GetMethod("OnUpdate", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+                    if (update != null && update.GetMethodBody() != null)
+                        targets.Add(update);
+                }
+            }
+        }
+
         private static void InstallPhases()
         {
             try
