@@ -5,3 +5,4 @@ dist/
 *.user
 # Never commit game or MelonLoader assemblies
 lib/
+dist-sauvegardes/

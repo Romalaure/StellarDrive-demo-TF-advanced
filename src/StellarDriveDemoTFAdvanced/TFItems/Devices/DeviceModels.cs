@@ -67,6 +67,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             foreach (string property in new[] { "_Color", "_BaseColor" })
                 if (material.HasProperty(property))
                     material.SetColor(property, color);
+            // The plate texture (shades of white, tinted by the color)
+            if (StellarDriveDemoTFAdvanced.Common.SurfaceTextures.Enabled && material.HasProperty("_Albedo"))
+                material.SetTexture("_Albedo", metal >= 0.45f ? StellarDriveDemoTFAdvanced.Common.SurfaceTextures.Metal : StellarDriveDemoTFAdvanced.Common.SurfaceTextures.Paint);
             if (material.HasProperty("_Metalness"))
                 material.SetFloat("_Metalness", metal);
             if (material.HasProperty("_Roughness"))

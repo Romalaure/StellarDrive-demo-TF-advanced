@@ -46,6 +46,12 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Reworked textures (v0.41)
+
+- The mod's models that were in **plain colors** (wrecks, pirate fairings, machines, TF equipment, merchant terminal, station modules…) now have **textures**: metal plates with grooves, rivets, brushed metal, wear and relief. Nature scenes get a natural grain. Parts that already used the game's textures are unchanged.
+- **`ClassicTextures` setting** (on the next start): back to the plain colors of before.
+- The old version is also kept: tag `v0.40.0-anciennes-textures` and branch `sauvegarde-anciennes-textures`.
+
 ## Blender models, nature scenes (v0.40)
 
 - 3D models are now made in **Blender** (scripts in `tools/blender`, exported and built into the mod): bevelled edges, rounded shapes. First one remade: the **merchant terminal**.

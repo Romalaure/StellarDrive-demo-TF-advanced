@@ -44,6 +44,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         {
             public readonly List<Vector3> Vertices = new List<Vector3>();
             public readonly List<Vector3> Normals = new List<Vector3>();
+            public readonly List<Vector2> Uvs = new List<Vector2>();
             public readonly List<int> Triangles = new List<int>();
             public readonly Dictionary<(int, int), int> Index = new Dictionary<(int, int), int>();
         }
@@ -97,6 +98,7 @@ namespace StellarDriveDemoTFAdvanced.Common
                     mesh.indexFormat = IndexFormat.UInt32;
                 mesh.SetVertices(g.Vertices);
                 mesh.SetNormals(g.Normals);
+                mesh.SetUVs(0, g.Uvs);
                 mesh.SetTriangles(g.Triangles, 0);
                 mesh.RecalculateBounds();
                 meshes[entry.Key] = mesh;
@@ -114,7 +116,11 @@ namespace StellarDriveDemoTFAdvanced.Common
                 return index;
             index = g.Vertices.Count;
             g.Vertices.Add(positions[p]);
-            g.Normals.Add(n >= 0 ? normals[n] : Vector3.up);
+            Vector3 normal = n >= 0 ? normals[n] : Vector3.up;
+            g.Normals.Add(normal);
+            // Box projection along the normal's main axis: one surface plate per meter
+            Vector3 p3 = positions[p], a = new Vector3(Mathf.Abs(normal.x), Mathf.Abs(normal.y), Mathf.Abs(normal.z));
+            g.Uvs.Add(a.x >= a.y && a.x >= a.z ? new Vector2(p3.z, p3.y) : a.y >= a.z ? new Vector2(p3.x, p3.z) : new Vector2(p3.x, p3.y));
             g.Index[(p, n)] = index;
             return index;
         }

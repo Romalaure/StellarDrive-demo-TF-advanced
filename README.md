@@ -278,6 +278,12 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Textures retravaillées (v0.41)
+
+- Les modèles du mod qui étaient en **couleurs unies** (épaves, carénages pirates, machines, équipement TF, terminal marchand, modules de station…) ont maintenant des **textures** : plaques de tôle avec joints, rivets, métal brossé, usure et relief. Les scènes de nature ont un grain naturel. Les pièces qui utilisaient déjà les textures du jeu ne changent pas.
+- **Réglage `ClassicTextures`** (au prochain lancement) : retour aux couleurs unies d'avant.
+- L'ancienne version est aussi gardée : tag `v0.40.0-anciennes-textures` et branche `sauvegarde-anciennes-textures`.
+
 ## Modèles Blender, scènes de nature (v0.40)
 
 - Les modèles 3D sont maintenant faits dans **Blender** (scripts dans `tools/blender`, exportés et intégrés au mod) : arêtes biseautées, formes arrondies. Premier refait : le **terminal marchand**.

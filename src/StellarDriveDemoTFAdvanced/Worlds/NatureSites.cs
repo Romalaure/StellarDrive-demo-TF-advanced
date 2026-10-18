@@ -114,7 +114,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             }
             var material = new Material(stone) { name = "TFA_Nature_" + key };
             if (material.HasProperty("_Albedo"))
-                material.SetTexture("_Albedo", _white);
+                material.SetTexture("_Albedo", SurfaceTextures.Enabled ? SurfaceTextures.Grain : _white);
             if (material.HasProperty("_Normal"))
                 material.SetTexture("_Normal", Texture2D.normalTexture);
             if (material.HasProperty("_Metalness"))

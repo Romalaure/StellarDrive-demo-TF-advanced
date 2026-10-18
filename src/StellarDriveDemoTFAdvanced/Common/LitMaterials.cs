@@ -38,6 +38,8 @@ namespace StellarDriveDemoTFAdvanced.Common
             material.SetFloat("_Surface", 0f);
             material.SetFloat("_AlphaClip", 0f);
             material.renderQueue = 2000;
+            if (!emission.HasValue)
+                StellarDriveDemoTFAdvanced.Common.SurfaceTextures.Apply(material, metallic);
             if (emission.HasValue)
             {
                 material.EnableKeyword("_EMISSION");
