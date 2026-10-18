@@ -59,57 +59,61 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
         }
     }
 
-    /// <summary>Propellant actually burnt, and spool-up: thrust level moves toward what the lines can feed.</summary>
+    /// <summary>
+    /// Propellant actually burnt, and spool-up: thrust level moves toward what the lines can feed.
+    /// Replaces the game's thruster update (same propellant use for its own thrusters) so each
+    /// thruster's state is written once, and only when it changes: the game wrote every thruster
+    /// at every physics step, and an engine held at 0 by its pilot seat was written twice a step
+    /// (the game's fed level, then 0), each change sent over the network (10 dark matter engines:
+    /// ~1 500 writes/s, 20 ms a frame on the host).
+    /// </summary>
     [HarmonyPatch(typeof(ShipThrustersUpdater), nameof(ShipThrustersUpdater.Update))]
     internal static class EngineFuelUsePatch
     {
-        private static readonly Dictionary<ushort, float> PreviousLevels = new Dictionary<ushort, float>();
-
-        private static void Prefix(IShipStateWrite ____ship)
+        private static bool Prefix(ShipThrustersUpdater __instance, float deltaTime, IShipStateWrite ____ship, Ships.Cables.ConnectionsServerTracker ____connections)
         {
-            PreviousLevels.Clear();
-            foreach (StatefulPart part in ____ship.GetAllStatefulParts<ThrusterState>())
-            {
-                if (EngineCatalog.TryGet(part.Settings.id, out _))
-                    PreviousLevels[part.Id] = ((ThrusterState)part.State).ThrusterStrength;
-            }
-        }
-
-        private static void Postfix(ShipThrustersUpdater __instance, float deltaTime, IShipStateWrite ____ship, Ships.Cables.ConnectionsServerTracker ____connections)
-        {
-            if (PreviousLevels.Count == 0 || DevHarness.Off("engines"))
-                return;
+            if (DevHarness.Off("engines") || ____ship == null)
+                return true;
             try
             {
+                float gameQuantity = 0.05f * deltaTime;
                 float baseQuantity = EngineCatalog.BaseFlow * deltaTime;
                 foreach (StatefulPart part in ____ship.GetAllStatefulParts<ThrusterState>())
                 {
-                    if (!EngineCatalog.TryGet(part.Settings.id, out EngineSpec spec) || !PreviousLevels.TryGetValue(part.Id, out float previous))
-                        continue;
                     var state = (ThrusterState)part.State;
-                    // What the game just computed: the share of the demand the lines could feed
-                    float fed = state.ThrusterStrength;
-                    // Spool-up only slows rising thrust: an engine never burns more than its lines feed it
-                    // Nuclear and dark matter engines fed straight from their tanks answer the pilot's
-                    // seat: they push only while someone at a seat of the ship asks for thrust their
-                    // way. Fed through a valve or a pump, the valve (a seat, a transmitter...) rules
-                    // A signal wired to their command socket sets their thrust instead
-                    float target = fed;
-                    var command = new Ships.Interface.Model.Parts.Common.EntityPartSocket(____ship.Id, part.Id, EngineCatalog.CommandSocket);
-                    bool groups = FluidGroups.TryGet(__instance, part.Id, out FluidGroupServerState ga, out FluidGroupServerState gb);
-                    // (a cable, or a part plugged straight into the socket like a small transmitter)
-                    if (spec.Fuel != 0 && ____connections != null && ____connections.TryGetSignalConnectionGroupWithSocket(command, out Ships.Cables.Model.ConnectionGroup commandGroup))
-                        target = Mathf.Min(fed, Mathf.Clamp01((float)System.Math.Max(____connections.GetSignalValue(command), Channels.Relayed(____ship, ____connections, commandGroup))));
-                    else if (spec.Fuel != 0 && Settings.EngineSeatControl.Value && !(groups && ValveLines.Feeds(____ship, ____connections, ga, gb)))
-                        target = Mathf.Min(fed, PilotControl.Command(____ship, ThrustMath.Direction(part)));
-                    float level = spec.SpoolSeconds > 0f && target > previous ? Mathf.MoveTowards(previous, target, deltaTime / spec.SpoolSeconds) : target;
-                    if (FluidGroups.TryGet(__instance, part.Id, out FluidGroupServerState a, out FluidGroupServerState b))
+                    float previous = state.ThrusterStrength;
+                    // What the game computes: the share of the demand the lines can feed
+                    bool groups = FluidGroups.TryGet(__instance, part.Id, out FluidGroupServerState a, out FluidGroupServerState b);
+                    float fed = groups ? Mathf.Min(a.EffectiveConsumptionRate, b.EffectiveConsumptionRate) : 0f;
+                    if (groups && fed > 0f)
                     {
-                        // The game removed fed x 1x; the engine burns level x its own flow
-                        a.RemoveFluid((level * spec.FlowOn(a.FluidItemId) - fed) * baseQuantity);
-                        b.RemoveFluid((level * spec.FlowOn(b.FluidItemId) - fed) * baseQuantity);
+                        a.RemoveFluid(fed * gameQuantity);
+                        b.RemoveFluid(fed * gameQuantity);
                     }
-                    if (!Mathf.Approximately(level, fed))
+                    float level = fed;
+                    if (EngineCatalog.TryGet(part.Settings.id, out EngineSpec spec))
+                    {
+                        // Spool-up only slows rising thrust: an engine never burns more than its lines feed it
+                        // Nuclear and dark matter engines fed straight from their tanks answer the pilot's
+                        // seat: they push only while someone at a seat of the ship asks for thrust their
+                        // way. Fed through a valve or a pump, the valve (a seat, a transmitter...) rules
+                        // A signal wired to their command socket sets their thrust instead
+                        float target = fed;
+                        var command = new Ships.Interface.Model.Parts.Common.EntityPartSocket(____ship.Id, part.Id, EngineCatalog.CommandSocket);
+                        // (a cable, or a part plugged straight into the socket like a small transmitter)
+                        if (spec.Fuel != 0 && ____connections != null && ____connections.TryGetSignalConnectionGroupWithSocket(command, out Ships.Cables.Model.ConnectionGroup commandGroup))
+                            target = Mathf.Min(fed, Mathf.Clamp01((float)System.Math.Max(____connections.GetSignalValue(command), Channels.Relayed(____ship, ____connections, commandGroup))));
+                        else if (spec.Fuel != 0 && Settings.EngineSeatControl.Value && !(groups && ValveLines.Feeds(____ship, ____connections, a, b)))
+                            target = Mathf.Min(fed, PilotControl.Command(____ship, ThrustMath.Direction(part)));
+                        level = spec.SpoolSeconds > 0f && target > previous ? Mathf.MoveTowards(previous, target, deltaTime / spec.SpoolSeconds) : target;
+                        if (groups)
+                        {
+                            // The game's share (fed x 1x) is burnt above; the engine burns level x its own flow
+                            a.RemoveFluid((level * spec.FlowOn(a.FluidItemId) - fed) * baseQuantity);
+                            b.RemoveFluid((level * spec.FlowOn(b.FluidItemId) - fed) * baseQuantity);
+                        }
+                    }
+                    if (Mathf.Abs(level - previous) > 0.0005f || (level == 0f && previous != 0f))
                         ____ship.UpdatePartState(part.Id, state with { ThrusterStrength = level });
                 }
             }
@@ -117,6 +121,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             {
                 ErrorLog.Report("engine fuel use", e);
             }
+            return false;
         }
     }
 

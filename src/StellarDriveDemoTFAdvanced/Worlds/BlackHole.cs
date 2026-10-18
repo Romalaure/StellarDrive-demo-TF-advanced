@@ -292,7 +292,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         }
     }
 
-    /// <summary>The holes' pull, added to the game's gravity (which is zero off planet ground) for ships and players.</summary>
+    /// <summary>
+    /// The holes' pull, added to the game's gravity (which is zero off planet ground) for ships and
+    /// players in open space, times the BlackHolePull setting (the real pull is too weak to feel
+    /// at the distances one flies by). Inside a ship the game's artificial gravity rules: the ship
+    /// is pulled, and its crew with it.
+    /// </summary>
     [HarmonyPatch(typeof(EnvironmentProvider), nameof(EnvironmentProvider.GetGravityAtPosition))]
     internal static class BlackHoleGravityPatch
     {
@@ -324,7 +329,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 }
                 // (the shelter test costs transpositions: only made when a hole pulls)
                 if (pull != Vector3.zero && !AbandonedStations.IsSheltered(_transpose, spaceId, position))
-                    __result += pull;
+                    __result += pull * Mathf.Clamp(Settings.BlackHolePull.Value, 1f, 20f);
             }
             catch (Exception e)
             {

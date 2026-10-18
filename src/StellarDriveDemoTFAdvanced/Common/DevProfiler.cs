@@ -271,6 +271,37 @@ namespace StellarDriveDemoTFAdvanced.Common
                         targets.Add(method);
                 }
             }
+            // What the network loop runs: every message handler of the game and the mods (FishNet
+            // RPC readers, broadcast handlers), and the ships' server physics steps
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                string assemblyName = assembly.GetName().Name;
+                if (assembly.IsDynamic || assemblyName.StartsWith("UnityEngine") || assemblyName.StartsWith("Unity.") || assemblyName.StartsWith("System") || assemblyName == "mscorlib"
+                    || assemblyName.StartsWith("FishNet") || assemblyName.StartsWith("MelonLoader") || assemblyName.Contains("Harmony") || assemblyName.StartsWith("Mono."))
+                    continue;
+                Type[] all;
+                try
+                {
+                    all = assembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException e)
+                {
+                    all = e.Types.Where(t => t != null).ToArray();
+                }
+                foreach (Type type in all)
+                {
+                    if (type.IsGenericTypeDefinition)
+                        continue;
+                    bool physics = type.FullName == "Ships.Physics.ShipServerPhysics" || type.FullName == "Ships.Services.ShipsServerTracker";
+                    foreach (MethodInfo method in type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                    {
+                        if (method.IsAbstract || method.ContainsGenericParameters || method.GetMethodBody() == null)
+                            continue;
+                        if (method.Name.StartsWith("RpcReader___") || method.Name.StartsWith("RpcLogic___") || (physics && !method.Name.StartsWith("get_") && !method.Name.StartsWith("set_")))
+                            targets.Add(method);
+                    }
+                }
+            }
             // Each planet's visual update and the steps in it
             Type planet = AccessTools.TypeByName("Planets.Network.TrackedPlanetClient");
             if (planet == null)

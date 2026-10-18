@@ -18,6 +18,7 @@ using StellarDriveDemoTFAdvanced.Common;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using WorldTracking.Interface.Model.Spaces;
+using WorldTracking.Interface.Model.Spaces.Common;
 using WorldTracking.Interface.Services;
 
 namespace StellarDriveDemoTFAdvanced.Worlds
@@ -84,6 +85,24 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             IEnumerator photos = BlackHoleVisuals.DevPhotos();
             while (photos.MoveNext())
                 yield return photos.Current;
+            AdvancedMod.Log.Msg("dev: hole fall: start");
+            IEnumerator fall = HoleFall();
+            while (true)
+            {
+                object current;
+                try
+                {
+                    if (!fall.MoveNext())
+                        break;
+                    current = fall.Current;
+                }
+                catch (System.Exception e)
+                {
+                    AdvancedMod.Log.Warning("dev: hole fall failed: " + e);
+                    break;
+                }
+                yield return current;
+            }
             Planet petra = PlanetFactory.Planets.FirstOrDefault(p => p.Id == 102);
             if (petra == null)
                 yield break;
@@ -96,6 +115,48 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 IEnumerator shot = WorldDevSteps.ShootAt(hole, "blackhole_petra_" + i);
                 while (shot.MoveNext())
                     yield return shot.Current;
+            }
+        }
+
+        // A player let go 150 km from the first hole, in open space: does it pull them in?
+        private static IEnumerator HoleFall()
+        {
+            Hole hole = BlackHole.Placed.FirstOrDefault();
+            ISpacesServerProvider spaces = ServiceLocator.GetService<ISpacesServerProvider>();
+            PlayersServerTracker players = ServiceLocator.GetService<PlayersServerTracker>();
+            TrackedPlayerServer player = players?.GetTrackedPlayerFromConnectionId(InstanceFinder.ClientManager.Connection.ClientId);
+            IWorldTranspose transpose = ServiceLocator.GetService<IWorldTransposeServer>() as IWorldTranspose;
+            if (hole == null || spaces == null || player == null || transpose == null)
+            {
+                AdvancedMod.Log.Warning("dev: hole fall: nothing to test with");
+                yield break;
+            }
+            AdvancedMod.Log.Msg($"dev: hole fall: moving player {player.Id} from space {player.SpaceId}");
+            try
+            {
+                spaces.MoveWorldObject(player, new FixedWorldSpace { Position = hole.Space.Position + new Vector3Double(150000.0, 0.0, 0.0) });
+            }
+            catch (System.Exception e)
+            {
+                AdvancedMod.Log.Warning("dev: hole fall: move failed: " + e);
+                yield break;
+            }
+            yield return Wait(1f);
+            for (int i = 0; i <= 12; i++)
+            {
+                try
+                {
+                    Vector3 to = hole.Offset(transpose, player.SpaceId, player.Position);
+                    spaces.TryGetSpace(player.SpaceId, out ISpace space);
+                    var environment = ServiceLocator.GetService<WorldProvision.Services.EnvironmentProvider>();
+                    Vector3 gravity = environment != null ? environment.GetGravityAtPosition(player.SpaceId, player.Position) : Vector3.zero;
+                    AdvancedMod.Log.Msg($"dev: hole fall {i * 2} s: {to.magnitude / 1000f:0.000} km from {hole.Name}, speed {player.PhysicsState.Velocity.magnitude:0.0} m/s, gravity {gravity.magnitude:0.00} m/s² (toward {Vector3.Dot(gravity.normalized, to.normalized):0.00}), space {player.SpaceId} {space?.GetType().Name}, env {environment != null}");
+                }
+                catch (System.Exception e)
+                {
+                    AdvancedMod.Log.Warning($"dev: hole fall {i * 2} s: {e.Message}");
+                }
+                yield return Wait(2f);
             }
         }
 
