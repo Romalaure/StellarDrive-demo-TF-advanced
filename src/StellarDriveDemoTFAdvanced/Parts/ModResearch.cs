@@ -64,6 +64,8 @@ namespace StellarDriveDemoTFAdvanced.Parts
                 Parts = Range(7421, 7429).Concat(Range(7431, 7439)).ToArray(), Cost = new[] { (Iron, 40), (Glass, 20), (ModItems.Titanium, 10) } },
             new Tech { Id = 7515, Name = Loc.Pick("Minage embarqué", "Ship mining", "Minería embarcada"), Requires = new ushort[] { 7506 }, Position = new Vector2Int(7, 4),
                 Parts = new ushort[] { 7399 }, Cost = new[] { (Iron, 25), (Copper, 15) } },
+            new Tech { Id = 7516, Name = Loc.Pick("Saut stellaire compact", "Compact stellar jump", "Salto estelar compacto"), Requires = new ushort[] { 20 }, Position = new Vector2Int(6, 4),
+                Parts = new ushort[] { Propulsion.MiniWarpCore.Id }, Cost = new[] { (Iron, 20), (Copper, 10), (Glass, 5) } },
         };
 
         private static readonly HashSet<ushort> Locked = new HashSet<ushort>();

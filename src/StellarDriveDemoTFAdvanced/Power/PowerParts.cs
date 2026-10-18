@@ -35,6 +35,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
             PartFactory.Register(FieldDoor.Id, "SignalDisplay", AdvancedTab.Name, AdvancedTab.ShieldRow, FieldDoorParts.Configure);
             PartFactory.Register(Propulsion.LandingGear.Id, "SignalDisplay", AdvancedTab.Name, AdvancedTab.PropulsionRow, Propulsion.LandingGear.Configure);
+            PartFactory.Register(Propulsion.MiniWarpCore.Id, "WarpDrive", AdvancedTab.Name, AdvancedTab.PropulsionRow, Propulsion.MiniWarpCore.Configure);
             PartFactory.Register(FieldDoorManager.Id, "SignalDisplay", AdvancedTab.Name, AdvancedTab.ShieldRow, FieldDoorManager.Configure);
             PartFactory.Register(PowerCatalog.CondenserId, "SignalDisplay", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureCondenser);
             PartFactory.Register(PowerCatalog.QuantumGyroId, "Gyroscope", AdvancedTab.ArtifactsName, AdvancedTab.ArtifactsPowerRow, ConfigureQuantumGyro);
