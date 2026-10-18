@@ -45,6 +45,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> SteadyFrameRate { get; private set; }
         public static MelonPreferences_Entry<bool> Weather { get; private set; }
         public static MelonPreferences_Entry<bool> LowPerformance { get; private set; }
+        public static MelonPreferences_Entry<bool> FastFlightShadows { get; private set; }
         public static MelonPreferences_Entry<bool> ClassicTextures { get; private set; }
         public static MelonPreferences_Entry<bool> OtherModsFixes { get; private set; }
         public static MelonPreferences_Entry<string> DevWeather { get; private set; }
@@ -175,6 +176,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "Fix the frame-rate costs of other mods when installed: StationKit's research check (run every frame by the submarine pack, 2.4 ms a frame) runs once every 2 s.");
             ClassicTextures = _category.CreateEntry("ClassicTextures", false,
                 description: "The mod's parts in plain colors, as before version 0.41 (no plate texture, rivets or relief). Takes effect on the next start.");
+            FastFlightShadows = _category.CreateEntry("FastFlightShadows", true,
+                description: "Above 120 m/s near a planet, shadows are drawn up to 150 m only (the ground passes in a blur): a steadier frame rate at speed.");
             LowPerformance = _category.CreateEntry("LowPerformance", false,
                 description: "For modest computers: one forest per planet instead of several (TF Gaïa), lighter rain and snow, no auroras. The forests change on the next start.");
             DevWeather = _category.CreateEntry("DevWeather", "",

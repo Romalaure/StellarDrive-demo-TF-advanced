@@ -20,9 +20,13 @@ namespace StellarDriveDemoTFAdvanced.Common
         private sealed class Entry
         {
             public string Name;
-            public long Ticks;
+            public long Ticks, FrameTicks;
             public int Calls;
         }
+
+        // The methods run since the last frame, to show what a slow frame was made of
+        private static readonly List<Entry> Touched = new List<Entry>();
+        private static int _spikes;
 
         private static readonly Dictionary<MethodBase, Entry> Entries = new Dictionary<MethodBase, Entry>();
         private static readonly string[] FrameNames = { "Update", "LateUpdate", "FixedUpdate", "OnGUI", "OnUpdate", "OnLateUpdate", "OnFixedUpdate",
@@ -75,7 +79,10 @@ namespace StellarDriveDemoTFAdvanced.Common
             if (Settings.DevProfileGame.Value)
                 AddGame(targets, mine);
             if (Settings.DevProfileGame.Value)
+            {
                 AddModKit(targets);
+                AddInside(targets);
+            }
             // The part state writes, and how many change nothing
             MethodInfo write = AccessTools.Method(typeof(Ships.Interface.Model.ShipState), nameof(Ships.Interface.Model.ShipState.SetPartState));
             if (write != null)
@@ -117,6 +124,8 @@ namespace StellarDriveDemoTFAdvanced.Common
 
         private static readonly Dictionary<string, long> PhaseTicks = new Dictionary<string, long>();
         private static readonly Dictionary<string, long> PhaseStart = new Dictionary<string, long>();
+        private static readonly Dictionary<string, long> PhaseFrame = new Dictionary<string, long>();
+        private static int _gcLast;
 
         /// <summary>
         /// Markers around each phase of Unity's player loop (and around physics and rendering inside
@@ -187,7 +196,7 @@ namespace StellarDriveDemoTFAdvanced.Common
                         string subName = sub.type?.Name ?? "";
                         // The heavy engine steps, timed on their own
                         bool watch = subName.Contains("Physics") || subName.Contains("Render") || subName.Contains("Canvas") || subName.Contains("Director")
-                            || subName.Contains("Animator") || subName.Contains("ScriptRun") || subName.Contains("Gfx") || subName.Contains("Particle") || subName.Contains("Finish");
+                            || subName.Contains("Animator") || subName.Contains("ScriptRun") || subName.Contains("Gfx") || subName.Contains("Particle") || subName.Contains("Finish") || subName.Contains("Present") || subName.Contains("Wait");
                         if (watch)
                             list.Add(Marker(phase + "." + subName, true));
                         list.Add(sub);
@@ -221,7 +230,10 @@ namespace StellarDriveDemoTFAdvanced.Common
                     if (PhaseStart.TryGetValue(name, out long from))
                     {
                         PhaseTicks.TryGetValue(name, out long sum);
-                        PhaseTicks[name] = sum + Stopwatch.GetTimestamp() - from;
+                        long spent = Stopwatch.GetTimestamp() - from;
+                        PhaseTicks[name] = sum + spent;
+                        PhaseFrame.TryGetValue(name, out long frame);
+                        PhaseFrame[name] = frame + spent;
                     }
                 }
         };
@@ -240,6 +252,40 @@ namespace StellarDriveDemoTFAdvanced.Common
         /// DevProfileGame: also the per-frame callbacks of the game and of the other mods (every
         /// MonoBehaviour's Update, LateUpdate, FixedUpdate and OnGUI, every Melon's OnUpdate...).
         /// </summary>
+        // The steps inside the game's heaviest per-frame and per-tick updaters
+        private static void AddInside(HashSet<MethodBase> targets)
+        {
+            foreach (string name in new[] { "Managers.Client.ClientVisualsUpdater", "Managers.Client.Services.ClientWorldVisualsUpdater",
+                         "Managers.Server.WorldPhysicsServerUpdater", "Managers.Client.WorldPhysicsClientUpdater",
+                         "Planets.Services.PlanetColliders", "Planets.Terrain.Meshes.Colliders.PlanetMeshCollider",
+                         "Planets.EnvironmentGeneration.PlanetDenseEnvironmentPhysics", "Planets.EnvironmentGeneration.PlanetHotspotsEnvironmentPhysics",
+                         "Planets.EnvironmentGeneration.PlanetStaticEnvironmentPhysics", "Planets.Terrain.Meshes.Colliders.PlanetMeshColliderChunk", "Planets.Terrain.Meshes.PlanetMeshCpuGenerator", "Planets.Terrain.Evaluation.Services.PlanetTerrainPointCpuCalculator" })
+            {
+                Type type = AccessTools.TypeByName(name);
+                if (type == null)
+                    continue;
+                foreach (MethodInfo method in type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                {
+                    if (!method.IsAbstract && !method.ContainsGenericParameters && method.GetMethodBody() != null && !method.Name.StartsWith("NetworkInitialize")
+                        && !method.Name.StartsWith("Awake") && !method.Name.StartsWith("get_") && !method.Name.StartsWith("set_"))
+                        targets.Add(method);
+                }
+            }
+            // Each planet's visual update and the steps in it
+            Type planet = AccessTools.TypeByName("Planets.Network.TrackedPlanetClient");
+            if (planet == null)
+                return;
+            var steps = new HashSet<string> { "GetCollidersToSpawnAtPosition", "SpawnCollider", "UpdateVisuals", "UpdateVisibleObjectsCreation", "UpdateVisibleObjects", "TraverseQuadTree", "BeforeTraversal" };
+            foreach (Type type in new[] { planet, AccessTools.TypeByName("Planets.Network.TrackedPlanet") }.Where(t => t != null).Concat(planet.GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Select(f => f.FieldType)).Distinct())
+            {
+                foreach (MethodInfo method in type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                {
+                    if (steps.Contains(method.Name) && !method.IsAbstract && !method.ContainsGenericParameters && method.GetMethodBody() != null)
+                        targets.Add(method);
+                }
+            }
+        }
+
         private static void AddGame(HashSet<MethodBase> targets, Assembly mine)
         {
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -313,9 +359,33 @@ namespace StellarDriveDemoTFAdvanced.Common
         {
             if (Entries.TryGetValue(__originalMethod, out Entry entry))
             {
-                entry.Ticks += Stopwatch.GetTimestamp() - __state;
+                long spent = Stopwatch.GetTimestamp() - __state;
+                if (entry.FrameTicks == 0)
+                    Touched.Add(entry);
+                entry.Ticks += spent;
+                entry.FrameTicks += spent;
                 entry.Calls++;
             }
+        }
+
+        // A frame over 25 ms: the timed methods that took most of it (8 per report at most)
+        private static void Spike()
+        {
+            float ms = Time.unscaledDeltaTime * 1000f;
+            if (ms > 25f && _spikes < 8 && Time.unscaledTime > 30f)
+            {
+                _spikes++;
+                var top = Touched.OrderByDescending(e => e.FrameTicks).Take(6)
+                    .Select(e => $"{e.Name} {e.FrameTicks * 1000.0 / Stopwatch.Frequency:0.0}");
+                var phases = PhaseFrame.OrderByDescending(p => p.Value).Take(8)
+                    .Select(p => $"{p.Key} {p.Value * 1000.0 / Stopwatch.Frequency:0.0}");
+                AdvancedMod.Log.Msg($"dev: profile spike {ms:0} ms (GCs {GC.CollectionCount(0) - _gcLast}): {string.Join(", ", top)} | {string.Join(", ", phases)}");
+            }
+            _gcLast = GC.CollectionCount(0);
+            PhaseFrame.Clear();
+            foreach (Entry e in Touched)
+                e.FrameTicks = 0;
+            Touched.Clear();
         }
 
         /// <summary>Every frame (from the mod's update): counts frames, reports every 15 s.</summary>
@@ -330,8 +400,10 @@ namespace StellarDriveDemoTFAdvanced.Common
                 return;
             }
             _frames++;
+            Spike();
             if (now < _nextReport)
                 return;
+            _spikes = 0;
             float seconds = now - _since;
             double frames = Math.Max(1, _frames);
             double totalMs = 0;

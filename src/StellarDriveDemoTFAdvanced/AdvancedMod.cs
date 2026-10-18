@@ -181,6 +181,7 @@ namespace StellarDriveDemoTFAdvanced
             DevProfiler.Frame();
             DevHarness.Update();
             FramePacing.Update();
+            Worlds.FastFlight.Update();
             if (_inGame)
                 StabilityProbe.Update();
             if (_inGame && Worlds.BlackHole.EnsureAnchor())
