@@ -303,6 +303,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private static bool _loadingWorld;
         private static int _savedVersion = -1;
         private static readonly HashSet<uint> DeadBases = new HashSet<uint>();
+        /// <summary>Ships a saved player stands in: never left out (the player would be lost in a space that no longer exists).</summary>
+        private static readonly HashSet<uint> Occupied = new HashSet<uint>();
         private static int _replaced;
 
         /// <summary>Host, while the game loads a world's ships.</summary>
@@ -312,6 +314,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             _replaced = 0;
             _savedVersion = 0;
             DeadBases.Clear();
+            Occupied.Clear();
+            FindOccupiedShips();
             string directory = WorldDirectory();
             if (directory == null)
                 return;
@@ -340,7 +344,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         /// <summary>Whether this saved ship is one of the mod's stations in an older build, to rebuild.</summary>
         public static bool ShouldReplace(IShipState ship)
         {
-            if (!_loadingWorld || _savedVersion >= StationVersion || ship?.StatefulParts == null || DeadBases.Contains(ship.Id))
+            if (!_loadingWorld || _savedVersion >= StationVersion || ship?.StatefulParts == null || DeadBases.Contains(ship.Id) || Occupied.Contains(ship.Id))
                 return false;
             foreach (StatefulPart part in ship.StatefulParts)
             {
@@ -351,6 +355,32 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 }
             }
             return false;
+        }
+
+        // The save's players and the ships whose inside spaces they are in
+        private static void FindOccupiedShips()
+        {
+            try
+            {
+                string save = Managers.Interface.MainGameSceneLoadData.SaveFileFullName;
+                if (string.IsNullOrEmpty(save) || !File.Exists(save))
+                    return;
+                string text = File.ReadAllText(save);
+                int players = text.IndexOf("\"players\":[", StringComparison.Ordinal);
+                int ships = players >= 0 ? text.IndexOf("\"ships\":[", players, StringComparison.Ordinal) : -1;
+                if (players < 0 || ships < 0)
+                    return;
+                var spaces = new HashSet<uint>();
+                foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(text.Substring(players, ships - players), @"""spaceId"":(\d+)"))
+                    spaces.Add(uint.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture));
+                foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(text, @"\{""id"":(\d+),""shipId"":(\d+)\}"))
+                    if (spaces.Contains(uint.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture)))
+                        Occupied.Add(uint.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture));
+            }
+            catch (Exception e)
+            {
+                ErrorLog.Report("stations occupied", e);
+            }
         }
 
         /// <summary>After the game saved the world: the stations' build goes beside it.</summary>
