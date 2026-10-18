@@ -278,7 +278,16 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
-## Vaisseau marchand, fps plus stables (v0.42)
+## Trou noir réaliste, mini cœur stellaire, lunettes, fps (v0.40)
+
+- **Trou noir refait** : le disque d'accrétion est dessiné là où sa lumière arrive après avoir été courbée par le trou noir (lentille gravitationnelle calculée) : la partie arrière du disque forme un arc au-dessus et en dessous de l'ombre, avec un anneau de photons et une seconde image fine. Le gaz tourne plus vite près du centre (spirales), bleu-blanc au centre et rouge au bord, plus lumineux du côté qui vient vers toi.
+- **Attraction des trous noirs** : réglage `BlackHolePull` (×5 par défaut, 1 = réaliste) : l'attraction réelle ne se sentait presque pas à quelques centaines de km. Elle tire les vaisseaux et les joueurs en combinaison dans l'espace.
+- **Mini cœur stellaire** : le Stellar Core du jeu à 55 % de sa taille, peu coûteux (12 fer, 6 cuivre, 4 verre, 2 éclats) et accessible tôt (tech **Saut stellaire compact**), mais son saut est 20 fois plus lent (50 000 km/s au maximum).
+- **Menu de construction** : les pièces de l'onglet TF Avancé gardent leur taille normale (elles étaient réduites de moitié).
+- **Lunettes de soleil** : devant la visière, avec une monture complète bien visible (elles étaient cachées dans le casque).
+- **Fps près des vaisseaux** : les propulseurs ne sont plus écrits qu'une fois par pas physique et seulement quand leur poussée change (les moteurs du mod au repos envoyaient ~1 500 changements par seconde sur le réseau).
+
+## Vaisseau marchand, fps plus stables (v0.40)
 
 - **Comptoir Hermès** refait en **cargo marchand** modélisé dans Blender : proue sous la passerelle vitrée, visière, dôme de capteurs, parabole, antenne avec feu, emblème doré, cadre d'amarrage éclairé, conteneurs sur le toit et dans des racks sur les flancs, grue, panneaux solaires, trois tuyères et deux nacelles moteur, radiateurs, feux de navigation rouge/vert. À l'intérieur : passerelle, hall de commerce (terminal marchand face à la porte), soute (deuxième terminal), salle des machines. Seules les grosses pièces ont des collisions ; une seule pièce de décor, rien de plus à synchroniser en multijoueur, et moins de pièces que l'ancien comptoir.
 - Le comptoir est reconstruit au prochain chargement d'un monde (sauf si un joueur est dedans ou si un vaisseau y est amarré).
@@ -287,11 +296,10 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 - **Ombres courtes en vol rapide** : au-dessus de 120 m/s près d'une planète, les ombres vont jusqu'à 150 m (réglage `FastFlightShadows`). Environ +5 fps à 400 m/s.
 - **StationKit** (mod Submarine) : sa vérification de recherche tournait à chaque image (2,4 ms) ; une fois toutes les 2 s maintenant (réglage `OtherModsFixes`). Sur un écran 165 Hz, le jeu tient **82 fps stables** au lieu de 55 en temps normal.
 
-## Textures retravaillées (v0.41)
+## Textures retravaillées (v0.40)
 
 - Les modèles du mod qui étaient en **couleurs unies** (épaves, carénages pirates, machines, équipement TF, terminal marchand, modules de station…) ont maintenant des **textures** : plaques de tôle avec joints, rivets, métal brossé, usure et relief. Les scènes de nature ont un grain naturel. Les pièces qui utilisaient déjà les textures du jeu ne changent pas.
 - **Réglage `ClassicTextures`** (au prochain lancement) : retour aux couleurs unies d'avant.
-- L'ancienne version est aussi gardée : tag `v0.40.0-anciennes-textures` et branche `sauvegarde-anciennes-textures`.
 
 ## Modèles Blender, scènes de nature (v0.40)
 
@@ -302,7 +310,7 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
   - **amas de rochers** : grandes pierres dressées, herbe sur leurs sommets.
 - On les trouve sur Gaïa, Verdance, Sylvara (sous-bois) et Altis (rochers). Les plantes et champignons se traversent, les troncs, tentes et rochers bloquent.
 
-## Missions, réputation, hangar automatique, aurores, vol rapide fluide (v0.39)
+## Missions, réputation, hangar automatique, aurores, vol rapide fluide (v0.40)
 
 - **Livraisons du jour** au terminal marchand : 3 commandes par jour (ex. 30 cryonite → 2 noyaux quantiques), une fois chacune pour tout le monde, renouvelées chaque jour.
 - **Réputation** auprès du marchand : +1 par vaisseau pirate détruit, +5 par base pirate, +3 par livraison. Chaque point baisse ses prix de 2 % (jusqu'à −40 %). Elle est gardée avec le monde.
@@ -311,13 +319,13 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 - **Vol rapide fluide** : le jeu recréait les collisions des arbres et des points d'intérêt autour de chaque vaisseau, même haut dans le ciel (environ mille arbres par seconde à grande vitesse). Au-dessus de 100 m du sol, plus d'arbres, au-dessus de 200 m, plus de points d'intérêt. Sur Gaïa à 300 m/s : environ 53 fps au lieu de 47. Les forêts secondaires de Gaïa s'affichent moins loin.
 - Réglage **`LowPerformance`** pour les PC modestes : une seule forêt par planète, pluie et neige allégées, pas d'aurores.
 
-## Météo, station marchande, hangar à vaisseaux (v0.38)
+## Météo, station marchande, hangar à vaisseaux (v0.40)
 
 - **Météo** sur les planètes du mod quand tu es dehors : pluie et **orages avec éclairs** (Gaïa, Verdance, Sylvara, Thalassa), **neige** (Glacia, et Gaïa au-dessus de la limite des neiges), **tempêtes de sable** (Aridia), **cendres et braises** (Pyros). Le temps change toutes les 10 minutes, le même pour tous les joueurs. Réglage `Weather` pour la couper.
 - **Comptoir Hermès** : une station marchande près de TF Sylvara (balise à son nom). Son **terminal marchand** (touche T) échange tes minerais contre des trouvailles rares : noyau quantique, matière exotique, alliage nexorien, artefact, lingots d'or. On peut aussi revendre. C'est l'hôte qui fait l'échange.
-- **Hangar à vaisseaux** (retiré en v0.42) : un module de 12 × 8 × 20 m. Un vaisseau entier y entre par une grande porte de 10,8 × 7,2 m et s'amarre par sa porte d'amarrage au collier magnétique du mur du fond. Le Comptoir Hermès en a un, avec un terminal marchand dedans.
+- **Hangar à vaisseaux** (retiré depuis) : un module de 12 × 8 × 20 m. Un vaisseau entier y entre par une grande porte de 10,8 × 7,2 m et s'amarre par sa porte d'amarrage au collier magnétique du mur du fond. Le Comptoir Hermès en a un, avec un terminal marchand dedans.
 
-## Gaïa comme la Terre, fluidité, stations corrigées (v0.37)
+## Gaïa comme la Terre, fluidité, stations corrigées (v0.40)
 
 - **Fini le 1 image/seconde sur Gaïa** : ses quatre forêts plaçaient des arbres les uns dans les autres ; leur physique les faisait tomber en bûches, qui renversaient les voisins, en chaîne (des centaines par seconde). Sur les planètes du mod un arbre ne tombe plus qu'à un vrai choc (un vaisseau) ; le laser et les outils le coupent comme avant.
 - **Gaïa retravaillée** : océans, prairies et forêts tempérées, savanes, côtes à palmiers, **taïga** de sapins enneigés, **toundra** et **montagnes enneigées**. La limite des neiges suit le climat de chaque région : basse dans les régions froides, seulement sur les hauts sommets dans les chaudes. Plus de reliefs.

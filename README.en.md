@@ -46,7 +46,16 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
-## Merchant freighter, steadier frame rate (v0.42)
+## Realistic black hole, mini Stellar Core, sunglasses, fps (v0.40)
+
+- **Black hole remade**: the accretion disk is drawn where its light reaches you after being bent by the hole (computed gravitational lensing): the far side of the disk forms an arc over and under the shadow, with a photon ring and a thin second image. The gas turns faster near the center (spirals), blue-white inside and red at the edge, brighter on the side coming toward you.
+- **Black hole pull**: setting `BlackHolePull` (x5 by default, 1 = real): the real pull was barely felt a few hundred km away. It pulls ships and players in suits in open space.
+- **Mini Stellar Core**: the game's Stellar Core at 55% of its size, cheap (12 iron, 6 copper, 4 glass, 2 shards) and reached early (tech **Compact stellar jump**), but its warp is 20 times slower (50,000 km/s at most).
+- **Build menu**: the TF Advanced tab's parts keep their normal size (they were shrunk by half).
+- **Sunglasses**: in front of the visor with a full, visible frame (they were hidden inside the helmet).
+- **Fps near ships**: thrusters are written once per physics step and only when their thrust changes (the mod's idle engines sent ~1,500 changes a second over the network).
+
+## Merchant freighter, steadier frame rate (v0.40)
 
 - **Comptoir Hermès** rebuilt as a **merchant freighter** modelled in Blender: a prow under the glazed bridge, a visor, a sensor dome, a dish, an antenna with a beacon, a gold emblem, a lit docking frame, containers on the roof and in racks along the flanks, a crane, solar wings, three main nozzles and two engine nacelles, radiators, red/green navigation lights. Inside: the bridge, the trading hall (merchant terminal facing the door), the cargo hold (a second terminal), the engine room. Only the big pieces collide; it is one decor part, nothing more to sync in multiplayer, and fewer parts than the old trading post.
 - The trading post is rebuilt the next time a world loads (unless a player is inside or a ship is docked to it).
@@ -55,11 +64,10 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 - **Shorter shadows in fast flight**: above 120 m/s near a planet, shadows reach 150 m (setting `FastFlightShadows`). About +5 fps at 400 m/s.
 - **StationKit** (Submarine mod): its research check ran every frame (2.4 ms); now once every 2 s (setting `OtherModsFixes`). On a 165 Hz screen the game holds a **steady 82 fps** instead of 55 in normal play.
 
-## Reworked textures (v0.41)
+## Reworked textures (v0.40)
 
 - The mod's models that were in **plain colors** (wrecks, pirate fairings, machines, TF equipment, merchant terminal, station modules…) now have **textures**: metal plates with grooves, rivets, brushed metal, wear and relief. Nature scenes get a natural grain. Parts that already used the game's textures are unchanged.
 - **`ClassicTextures` setting** (on the next start): back to the plain colors of before.
-- The old version is also kept: tag `v0.40.0-anciennes-textures` and branch `sauvegarde-anciennes-textures`.
 
 ## Blender models, nature scenes (v0.40)
 
@@ -70,7 +78,7 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
   - **boulder heaps**: tall standing stones, grass on their tops.
 - They are on Gaia, Verdance, Sylvara (forest floors) and Altis (boulders). Plants and mushrooms can be walked through, trunks, tents and rocks block.
 
-## Missions, reputation, automatic hangar, auroras, smooth fast flight (v0.39)
+## Missions, reputation, automatic hangar, auroras, smooth fast flight (v0.40)
 
 - **Today's deliveries** at the merchant terminal: 3 orders a day (e.g. 30 cryonite → 2 quantum cores), once each for everyone, new ones every day.
 - **Reputation** with the trader: +1 per pirate ship destroyed, +5 per pirate base, +3 per delivery. Each point lowers his prices by 2% (down to −40%). It is kept with the world.
@@ -79,13 +87,13 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 - **Smooth fast flight**: the game made the colliders of the trees and points of interest again around every ship, even high in the sky (about a thousand trees a second at speed). Above 100 m over the ground no trees, above 200 m no points of interest. Over Gaia at 300 m/s: about 53 fps instead of 47. Gaia's secondary forests draw nearer.
 - **`LowPerformance`** setting for modest computers: one forest per planet, lighter rain and snow, no auroras.
 
-## Weather, trading station, ship hangar (v0.38)
+## Weather, trading station, ship hangar (v0.40)
 
 - **Weather** on the mod's planets when you are outside: rain and **thunderstorms with lightning** (Gaia, Verdance, Sylvara, Thalassa), **snow** (Glacia, and Gaia above the snowline), **sandstorms** (Aridia), **ash and embers** (Pyros). The weather changes every 10 minutes, the same for every player. Setting `Weather` turns it off.
 - **Hermès trading post**: a trading station near TF Sylvara (beacon under its name). Its **merchant terminal** (T key) trades your ores for rare finds: quantum core, exotic matter, Nexoran alloy, artifact, gold bars. You can also sell back. The host makes the trade.
-- **Ship hangar** (retired in v0.42): a 12 × 8 × 20 m module. A whole ship flies in through a 10.8 × 7.2 m door and docks with its docking door to the magnetic collar on the back wall. The Hermès trading post has one, with a merchant terminal inside.
+- **Ship hangar** (since retired): a 12 × 8 × 20 m module. A whole ship flies in through a 10.8 × 7.2 m door and docks with its docking door to the magnetic collar on the back wall. The Hermès trading post has one, with a merchant terminal inside.
 
-## An Earth-like Gaia, smoothness, fixed stations (v0.37)
+## An Earth-like Gaia, smoothness, fixed stations (v0.40)
 
 - **No more 1 frame per second on Gaia**: its four forests placed trees inside each other; their physics knocked them down as logs, which knocked their neighbours down, in a chain (hundreds per second). On the mod's planets a tree now only falls to a real impact (a ship); the laser and the tools cut it as before.
 - **Gaia reworked**: oceans, prairies and temperate woods, savannas, palm coasts, a **taiga** of snowy firs, **tundra** and **snowy mountains**. The snowline follows each region's climate: low in the cold ones, only on the high peaks in the warm ones. More relief.
