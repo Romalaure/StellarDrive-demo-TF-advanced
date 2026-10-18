@@ -79,11 +79,20 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             }
             if (outfit.Glasses > 0 && visor != null && Measure(visor, avatar, head, out Shape glass))
             {
-                // Over the visor's front at eye height, as wide as it
-                Vector3 at = glass.Center(glass.EyeHeight) + Vector3.forward * (glass.Front - glass.Middle.z + 0.006f);
+                // Over the visor at eye height, as wide as it, but in front of the helmet's rim:
+                // the visor sits recessed in the shell, glasses on it would be hidden inside
+                float front = glass.Front;
+                if (shell != null && Measure(shell, avatar, head, out Shape rim, glass.EyeHeight))
+                    front = Mathf.Max(front, rim.Front);
+                Vector3 at = glass.Center(glass.EyeHeight) + Vector3.forward * (front - glass.Middle.z + 0.065f);
+                float width = glass.Width * 1.22f;
                 (MeshBuilder frame, MeshBuilder lens) = Glasses(outfit.Glasses);
-                Fix(head, avatar, "GlassesFrame", frame, at, glass.Width, new Color(0.72f, 0.72f, 0.75f), 0.9f, 0.8f, lit: false);
-                Fix(head, avatar, "GlassesLens", lens, at, glass.Width, outfit.Lens, 0.6f, 0.97f, lit: true);
+                // A faint glow of their own: on the dark visor, in a dark ship, they still read
+                var metal = new Color(0.86f, 0.86f, 0.9f);
+                Fix(head, avatar, "GlassesFrame", frame, at, width, metal, 0.5f, 0.85f, lit: true, glow: metal * 0.32f);
+                Fix(head, avatar, "GlassesLens", lens, at, width, outfit.Lens, 0.6f, 0.97f, lit: true, glow: Color.Lerp(outfit.Lens, new Color(0.55f, 0.75f, 1f), 0.35f) * 0.3f);
+                if (StellarDriveDemoTFAdvanced.Common.DevHarness.Active)
+                    TFMod.Log.Msg($"dev: outfit glasses: visor front {glass.Front:0.000}, helmet front {front:0.000}, eye {glass.EyeHeight:0.000}, width {width:0.000}");
             }
             if (StellarDriveDemoTFAdvanced.Common.DevHarness.Active)
                 TFMod.Log.Msg($"dev: outfit on {avatar.name}: suit {(suit != null ? suit.name + " readable " + suit.sharedMesh?.isReadable : "none")}, helmet {(shell != null ? Measure(shell, avatar, head, out Shape h) ? $"top {h.Top:0.000} radius {h.Radius:0.000}, head bone at {Quaternion.Inverse(avatar.rotation) * (head.position - avatar.position)}" : "not measured" : "none")}");
@@ -104,7 +113,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             public Vector3 Center(float y) => new Vector3(Middle.x, y, Middle.z);
         }
 
-        private static bool Measure(SkinnedMeshRenderer renderer, Transform avatar, Transform head, out Shape shape)
+        private static bool Measure(SkinnedMeshRenderer renderer, Transform avatar, Transform head, out Shape shape, float? eyeAt = null)
         {
             shape = default;
             try
@@ -137,7 +146,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 float top = points.Max(p => p.y), bottom = points.Min(p => p.y);
                 float minX = points.Min(p => p.x), maxX = points.Max(p => p.x), minZ = points.Min(p => p.z), maxZ = points.Max(p => p.z);
                 var middle = new Vector3((minX + maxX) * 0.5f, 0f, (minZ + maxZ) * 0.5f);
-                float crown = top - (top - bottom) * 0.25f, eye = (top + bottom) * 0.5f, band = (top - bottom) * 0.2f;
+                float crown = top - (top - bottom) * 0.25f, eye = eyeAt ?? (top + bottom) * 0.5f, band = eyeAt.HasValue ? 0.02f : (top - bottom) * 0.2f;
                 float radius = points.Where(p => p.y >= crown).Select(p => new Vector2(p.x - middle.x, p.z - middle.z).magnitude).DefaultIfEmpty(0f).Max();
                 var eyes = points.Where(p => Mathf.Abs(p.y - eye) <= band).ToList();
                 shape = new Shape
@@ -161,9 +170,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
         // A model built around its origin (y up, z forward, 1 unit = scale meters) placed at a point
         // of the avatar's frame, then fixed to the head bone so it follows the head from now on
-        private static void Fix(Transform bone, Transform avatar, string name, MeshBuilder builder, Vector3 at, float scale, Color color, float metal, float smooth, bool lit)
+        private static void Fix(Transform bone, Transform avatar, string name, MeshBuilder builder, Vector3 at, float scale, Color color, float metal, float smooth, bool lit, Color? glow = null)
         {
-            Material material = lit ? LitMaterials.Get($"TF_OutfitGloss_{ColorUtility.ToHtmlStringRGB(color)}", color, metal, smooth)
+            Material material = glow.HasValue ? LitMaterials.Get($"TF_OutfitGlow_{ColorUtility.ToHtmlStringRGB(color)}_{ColorUtility.ToHtmlStringRGB(glow.Value)}", color, metal, smooth, glow.Value)
+                : lit ? LitMaterials.Get($"TF_OutfitGloss_{ColorUtility.ToHtmlStringRGB(color)}", color, metal, smooth)
                 : DeviceModels.Flat($"TF_Outfit_{ColorUtility.ToHtmlStringRGB(color)}_{metal:0.0}", color, metal, smooth)
                   ?? LitMaterials.Get($"TF_OutfitLit_{ColorUtility.ToHtmlStringRGB(color)}_{metal:0.0}", color, metal, smooth);
             var child = new GameObject(Prefix + name) { layer = bone.gameObject.layer };
@@ -244,24 +254,31 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             var lens = new MeshBuilder();
             switch (kind)
             {
-                case 1: // Square lenses, a bridge, the arms back along the helmet
+                case 1: // Square lenses in full rims, a bridge, short arms to the helmet's side
                     foreach (float s in new[] { -1f, 1f })
                     {
-                        lens.Box(new Vector3(s * 0.32f, 0f, 0f), new Vector3(0.5f, 0.32f, 0.04f));
-                        frame.Box(new Vector3(s * 0.32f, 0.18f, 0f), new Vector3(0.56f, 0.06f, 0.06f));
-                        frame.Box(new Vector3(s * 0.6f, 0.17f, -0.3f), new Vector3(0.04f, 0.05f, 0.6f));
+                        lens.Box(new Vector3(s * 0.34f, 0f, 0f), new Vector3(0.5f, 0.34f, 0.04f));
+                        Rim(frame, new Vector3(s * 0.34f, 0f, 0f), 0.56f, 0.4f, 0.07f);
+                        frame.Box(new Vector3(s * 0.64f, 0.14f, -0.3f), new Vector3(0.06f, 0.07f, 0.6f));
                     }
-                    frame.Box(new Vector3(0f, 0.08f, 0f), new Vector3(0.16f, 0.04f, 0.05f));
+                    frame.Box(new Vector3(0f, 0.1f, 0f), new Vector3(0.14f, 0.06f, 0.07f));
                     break;
                 case 2: // Aviators: drop-shaped lenses, thin bars
                     foreach (float s in new[] { -1f, 1f })
                     {
                         lens.Cylinder(new Vector3(s * 0.32f, 0f, -0.02f), new Vector3(s * 0.32f, 0f, 0.02f), 0.24f, 0.24f, 16);
                         lens.Box(new Vector3(s * 0.35f, -0.15f, 0f), new Vector3(0.34f, 0.14f, 0.04f), Quaternion.Euler(0f, 0f, s * 20f));
-                        frame.Box(new Vector3(s * 0.6f, 0.08f, -0.3f), new Vector3(0.035f, 0.04f, 0.6f));
+                        // A thin round rim around each drop
+                        for (int i = 0; i < 16; i++)
+                        {
+                            float a = i * Mathf.PI / 8f;
+                            var at = new Vector3(s * 0.32f + Mathf.Cos(a) * 0.27f, Mathf.Sin(a) * 0.27f - (Mathf.Sin(a) < 0f ? 0.06f : 0f), 0.01f);
+                            frame.Box(at, new Vector3(0.11f, 0.045f, 0.05f), Quaternion.Euler(0f, 0f, a * Mathf.Rad2Deg + 90f));
+                        }
+                        frame.Box(new Vector3(s * 0.62f, 0.12f, -0.3f), new Vector3(0.05f, 0.05f, 0.6f));
                     }
-                    frame.Box(new Vector3(0f, 0.19f, 0f), new Vector3(0.95f, 0.035f, 0.04f));
-                    frame.Box(new Vector3(0f, 0.06f, 0f), new Vector3(0.14f, 0.035f, 0.04f));
+                    frame.Box(new Vector3(0f, 0.24f, 0.01f), new Vector3(1.05f, 0.045f, 0.05f));
+                    frame.Box(new Vector3(0f, 0.08f, 0.01f), new Vector3(0.16f, 0.045f, 0.05f));
                     break;
                 case 3: // A wide single band wrapping the visor's front
                     for (int i = 0; i < 8; i++)
@@ -273,11 +290,31 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                             outward = -outward;
                         lens.Box(mid, new Vector3((p1 - p0).magnitude + 0.01f, 0.3f, 0.04f), along, Vector3.up, outward);
                     }
+                    // Bright edges along the band, top and bottom, and the hinges
+                    for (int i = 0; i < 8; i++)
+                    {
+                        float a0 = Mathf.Lerp(-0.8f, 0.8f, i / 8f), a1 = Mathf.Lerp(-0.8f, 0.8f, (i + 1) / 8f);
+                        Vector3 p0 = new Vector3(Mathf.Sin(a0), 0f, (Mathf.Cos(a0) - 1f) * 0.9f), p1 = new Vector3(Mathf.Sin(a1), 0f, (Mathf.Cos(a1) - 1f) * 0.9f);
+                        Vector3 mid = (p0 + p1) * 0.5f + Vector3.forward * 0.01f, along = (p1 - p0).normalized, outward = Vector3.Cross(along, Vector3.up).normalized;
+                        if (outward.z < 0f)
+                            outward = -outward;
+                        foreach (float y in new[] { -0.16f, 0.16f })
+                            frame.Box(mid + Vector3.up * y, new Vector3((p1 - p0).magnitude + 0.02f, 0.05f, 0.06f), along, Vector3.up, outward);
+                    }
                     foreach (float s in new[] { -1f, 1f })
-                        frame.Box(new Vector3(s * 0.75f, 0f, -0.35f), new Vector3(0.05f, 0.12f, 0.3f));
+                        frame.Box(new Vector3(s * 0.74f, 0f, -0.32f), new Vector3(0.07f, 0.2f, 0.16f));
                     break;
             }
             return (frame, lens);
+        }
+
+        // A rectangular rim of bars around a lens centered at c (w x h outside, bar thickness t)
+        private static void Rim(MeshBuilder m, Vector3 c, float w, float h, float t)
+        {
+            m.Box(c + new Vector3(0f, (h - t) * 0.5f, 0.01f), new Vector3(w, t, 0.06f));
+            m.Box(c + new Vector3(0f, -(h - t) * 0.5f, 0.01f), new Vector3(w, t, 0.06f));
+            m.Box(c + new Vector3((w - t) * 0.5f, 0f, 0.01f), new Vector3(t, h, 0.06f));
+            m.Box(c + new Vector3(-(w - t) * 0.5f, 0f, 0.01f), new Vector3(t, h, 0.06f));
         }
 
         // ---- Jacket: the suit's own skinned mesh, cut and pushed out

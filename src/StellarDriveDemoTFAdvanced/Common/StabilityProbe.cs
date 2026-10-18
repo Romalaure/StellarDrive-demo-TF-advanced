@@ -33,6 +33,9 @@ namespace StellarDriveDemoTFAdvanced.Common
 
         private static bool Prepare() => DevHarness.Active;
 
+        /// <summary>The ship the player is on (0: none yet).</summary>
+        public static uint VisualShip => _visualShip;
+
         private static void Postfix(IStatefulPartState state)
         {
             string key = state?.GetType().Name ?? "null";

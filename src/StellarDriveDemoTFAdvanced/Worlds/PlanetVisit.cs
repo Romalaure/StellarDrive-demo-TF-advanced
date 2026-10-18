@@ -81,6 +81,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         // From airless TF Petra, look for the black hole from six spots around the planet
         private static IEnumerator BlackHoleTour()
         {
+            IEnumerator photos = BlackHoleVisuals.DevPhotos();
+            while (photos.MoveNext())
+                yield return photos.Current;
             Planet petra = PlanetFactory.Planets.FirstOrDefault(p => p.Id == 102);
             if (petra == null)
                 yield break;
