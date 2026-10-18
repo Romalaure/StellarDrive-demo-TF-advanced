@@ -66,6 +66,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<string> DevPrefabDump { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitBlackHole { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitStations { get; private set; }
+        public static MelonPreferences_Entry<int> DevVisitStationSeed { get; private set; }
         public static MelonPreferences_Entry<string> DevWorld { get; private set; }
         public static MelonPreferences_Entry<string> DevDisable { get; private set; }
         public static MelonPreferences_Entry<bool> DevProfile { get; private set; }
@@ -202,6 +203,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevWorld, features switched off (comma separated): engines, torque, gravity, gyro, sync, pirates.");
             DevVisitBlackHole = _category.CreateEntry("DevVisitBlackHole", false,
                 description: "For mod development: with DevWorld, look for the black hole from TF Petra and take screenshots.");
+            DevVisitStationSeed = _category.CreateEntry("DevVisitStationSeed", 0,
+                description: "For mod development: with DevVisitStations, only the station of this seed (0: all).");
             DevVisitStations = _category.CreateEntry("DevVisitStations", false,
                 description: "For mod development: with DevWorld, list beacons and visit the abandoned stations, taking screenshots.");
             DevWorld = _category.CreateEntry("DevWorld", "",

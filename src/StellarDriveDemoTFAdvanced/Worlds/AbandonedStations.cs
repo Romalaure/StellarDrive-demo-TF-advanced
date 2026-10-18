@@ -64,7 +64,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             public int Version = 4;
             /// <summary>The part dressing its hull (prow, engines, plating, torn edges...), 0 for none; see <see cref="WreckDecor"/>.</summary>
             public ushort Decor;
-            /// <summary>A trading station: a ship hangar on the first module's +x side, merchant terminals in the hangar and the first module.</summary>
+            /// <summary>A trading ship: merchant terminals in its first module (the trading hall) and in its cargo hold.</summary>
             public bool Merchant;
         }
 
@@ -92,19 +92,25 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             },
             new StationSpec
             {
-                // Still kept up by a trader: lit, whole, a hangar to park in and two counters
-                Name = "Comptoir Hermès (marchand)", AnchorPlanet = 107, Offset = new Vector3(-9e6f, 2e6f, -1.1e7f), Seed = 131, Breaches = 0.1f, Merchant = true,
+                // A merchant freighter at anchor, kept up by its trader: lit, whole, two counters.
+                // Its bow, sensors, containers, solar wings and engines are its dressing (Blender)
+                Name = "Comptoir Hermès (marchand)", AnchorPlanet = 107, Offset = new Vector3(-9e6f, 2e6f, -1.1e7f), Seed = 131, Breaches = 0f, Merchant = true,
                 Band = new Color32(230, 180, 40, 255), Outside = new Color32(70, 80, 100, 255), Inside = new Color32(190, 180, 160, 255),
                 Rare = new[] { (Items.ModItems.GoldBar, 1, 2, 0.3), (Items.ModItems.Titanium, 3, 8, 0.4) },
+                Decor = WreckDecor.HermesId, Version = 5,
                 Build = b =>
                 {
-                    // The trading hall (the hangar on its +x side), a corridor, the trader's quarters
-                    // with the docking door at the far end, a lookout tower
-                    b.Module(-3, 0, -3, 3, 3, 3, 0.4f);
-                    b.Module(-10, 0, -1, -4, 2, 1);
-                    b.Module(-15, 0, -3, -11, 3, 3);
-                    b.Module(-1, 4, -1, 1, 6, 1, 0.8f);
-                    b.Entrance(-15, 0, -1, 1);
+                    // Bow to stern: the trading hall first (its counters), the glazed bridge and its
+                    // corridor forward, the cargo hold and the engine room aft; the docking door on
+                    // the hall's starboard side. Kept small: every hull face is a part to sync
+                    b.Module(-3, 0, 2, 3, 3, 9, 0.3f);
+                    b.Module(-1, 0, 10, 1, 2, 12);
+                    b.Module(-2, 0, 13, 2, 2, 16, 0.7f);
+                    b.Module(-1, 0, -1, 1, 2, 1);
+                    b.Module(-3, 0, -10, 3, 2, -2);
+                    b.Module(-2, 0, -13, 2, 2, -11);
+                    b.Entrance(3, 0, 5, 0);
+                    b.Cargo(-2, -9, 2, -4, 0, 0.15);
                 }
             },
             new StationSpec
@@ -314,15 +320,19 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         /// The stations' build. Worlds saved with an older one get their stations replaced when
         /// loaded (version 2: docking door entrance, furnishing, outside equipment; version 3: the
         /// Vagabond, the Leviathan and the Hades probe, rebuilt big; version 4: furniture kept out of
-        /// the passages between modules and off the shafts, wreck dressings solid), only those whose
+        /// the passages between modules and off the shafts, wreck dressings solid; version 5: the
+        /// Comptoir Hermès a merchant freighter, without its hangar), only those whose
         /// <see cref="StationSpec.Version"/> is newer than the world's; destroyed pirate bases stay wrecks.
         /// </summary>
-        public const int StationVersion = 4;
+        public const int StationVersion = 5;
         private const string VersionFile = "tfa_stations.txt";
         private static bool _loadingWorld;
         private static int _savedVersion = -1;
         private static readonly HashSet<uint> DeadBases = new HashSet<uint>();
-        /// <summary>Ships a saved player stands in: never left out (the player would be lost in a space that no longer exists).</summary>
+        /// <summary>
+        /// Ships a saved player stands in, and ships docked to another: never left out (the player
+        /// would be lost in a space that no longer exists, a docked ship held by a missing one).
+        /// </summary>
         private static readonly HashSet<uint> Occupied = new HashSet<uint>();
         private static int _replaced;
 
@@ -395,6 +405,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(text, @"\{""id"":(\d+),""shipId"":(\d+)\}"))
                     if (spaces.Contains(uint.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture)))
                         Occupied.Add(uint.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture));
+                // A player's ship docked to a station (its hangar before 0.42, or a door)
+                foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(text, @"""isDocked"":true,""dockedShipId"":(\d+)"))
+                    Occupied.Add(uint.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture));
             }
             catch (Exception e)
             {
@@ -867,26 +880,19 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             }
 
             /// <summary>
-            /// The trading station's own parts: a ship hangar against the first module's +x wall,
-            /// its mouth facing out, a merchant terminal by its back wall, another in the hall.
+            /// The trading ship's counters: a merchant terminal against the trading hall's port wall,
+            /// facing the docking door across the room, another in the cargo hold (the fifth module).
             /// </summary>
             private void Merchant(List<string> floating, ref int nextPart)
             {
-                var hall = _modules[0];
-                // The hangar's frame: its bay along +x (forward 1), its width along z; the docking
-                // collar's point is 0.5 m to the side and 0.25 m out of the frame's origin
-                var origin = new Vector3(hall.x1 + 0.6f, hall.y0, Mathf.Round((hall.z0 + hall.z1) * 0.5f) + 0.5f);
-                floating.Add(Floating(nextPart, Construction.StationModules.HangarId, origin, 1, 4));
-                _collars.Add(nextPart);
-                nextPart++;
                 if (!TFItems.TFItemsMod.Active)
                     return;
-                // In the hangar, between the collar and the small back door, its counter facing into
-                // the bay (the terminal's front is its -z: turned to -x, the front looks +x)
-                floating.Add(Floating(nextPart++, TFItems.Devices.Trader.TerminalId, origin + new Vector3(1.15f, -0.33f, 1.9f), 3, 4));
-                // In the hall, against the far wall from the hangar, facing the room
+                var hall = _modules[0];
+                // The terminal's front is its -z: turned to -x (facing 3) its front looks +x
                 if (Take(hall, hall.x0, (hall.z0 + hall.z1) / 2) is Vector2Int counter)
                     floating.Add(Floating(nextPart++, TFItems.Devices.Trader.TerminalId, new Vector3(counter.x, hall.y0 - 0.5f + 0.04f, counter.y), 3, 4));
+                if (_modules.Count > 4 && Take(_modules[4], _modules[4].x0, (_modules[4].z0 + _modules[4].z1) / 2) is Vector2Int hold)
+                    floating.Add(Floating(nextPart++, TFItems.Devices.Trader.TerminalId, new Vector3(hold.x, _modules[4].y0 - 0.5f + 0.04f, hold.y), 3, 4));
             }
 
             // A free floor cell of a module, or null
@@ -961,6 +967,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             private void Furnish(List<string> floating, List<string> storages, ref int nextPart)
             {
                 bool wreck = Spec != null && Spec.Breaches >= 4f;
+                // The merchant freighter's outside is all in its dressing (and fewer parts to sync)
+                bool dressed = Spec != null && Spec.Merchant;
                 for (int i = 0; i < _modules.Count; i++)
                 {
                     var m = _modules[i];
@@ -1009,6 +1017,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                             floating.Add(Floating(nextPart++, ResearchTable, new Vector3(table.x, floor, table.y), Facing(m, table), 4));
                     }
 
+                    if (dressed)
+                        continue;
                     // Outside: solar arrays along the corridors' roofs, an antenna on top of a tower
                     if (corridor)
                     {
@@ -1032,6 +1042,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     }
                 }
 
+                if (dressed)
+                    return;
                 // The core's roof: a truss mast with solar supports around it, beams to the corners
                 var core = _modules[0];
                 float rx = Mathf.Round((core.x0 + core.x1) * 0.5f), rz = Mathf.Round((core.z0 + core.z1) * 0.5f);

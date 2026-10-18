@@ -43,6 +43,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             ShipsServerTracker ships = ServiceLocator.GetService<ShipsServerTracker>();
             foreach (AbandonedStations.StationSpec spec in AbandonedStations.All)
             {
+                if (Settings.DevVisitStationSeed.Value != 0 && spec.Seed != Settings.DevVisitStationSeed.Value)
+                    continue;
                 TrackedShipServer station = ships.Ships.FirstOrDefault(s => s.GetAllStatefulParts<BeaconState>().Any(p => ((BeaconState)p.State).Name == spec.Name));
                 if (station == null)
                 {
@@ -91,13 +93,16 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(DevHarness.Folder, "trader_missions.png"));
                     yield return Wait(0.5f);
                     TFItems.Common.ModMenu.Close();
-                    // From the hangar's mouth, looking in
+                    // The freighter from its bow, its port side, its stern and above; its hall and hold
                     var hall = plan.Modules[0];
-                    Vector3 mouth = new Vector3(hall.x1 + 0.6f + 19f, hall.y0 + 1.5f, (hall.z0 + hall.z1) * 0.5f);
-                    yield return Parts.Showcase.PhotographFrom(station.Id, $"station_{tag}_hangar", new System.Collections.Generic.List<(Vector3, Vector3)>
+                    yield return Parts.Showcase.PhotographFrom(station.Id, $"station_{tag}_ship", new System.Collections.Generic.List<(Vector3, Vector3)>
                     {
-                        (mouth + new Vector3(6f, 2f, 0f), Vector3.left),
-                        (mouth + new Vector3(-3f, 0.5f, 3f), new Vector3(-1f, -0.2f, -0.6f))
+                        (new Vector3(9f, 3f, 30f), new Vector3(-9f, -2f, -28f)),
+                        (new Vector3(-24f, 6f, 2f), new Vector3(24f, -5f, -2f)),
+                        (new Vector3(10f, 5f, -32f), new Vector3(-10f, -4f, 30f)),
+                        (new Vector3(14f, 22f, -4f), new Vector3(-14f, -20f, 4f)),
+                        (new Vector3(hall.x1 - 0.3f, hall.y0 + 1.2f, hall.z1 - 0.3f), new Vector3(-1f, -0.15f, -0.8f)),
+                        (new Vector3(2.5f, 1.2f, -2.5f), new Vector3(-0.6f, -0.15f, -1f))
                     });
                 }
                 AdvancedMod.Log.Msg($"dev: visited {spec.Name} (ship {station.Id}, {station.PartCount} parts)");

@@ -76,6 +76,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
         internal sealed class Spec
         {
             public ushort Id;
+            /// <summary>No longer built (not in the build menu): kept only so the ones already placed still load.</summary>
+            public bool Retired;
             public string Label;
             public string Description;
             public float Mass;
@@ -248,7 +250,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
             },
             new Spec
             {
-                Id = HangarId, Label = Loc.Pick("Hangar à vaisseaux", "Ship hangar", "Hangar de naves"), Mass = 6500f,
+                // Retired in 0.42: no longer in the build menu, the ones already built stay
+                Id = HangarId, Retired = true, Label = Loc.Pick("Hangar à vaisseaux", "Ship hangar", "Hangar de naves"), Mass = 6500f,
                 Size = new Vector3(HangarWidth, HangarHeight, HangarLength), Row = 3, StateClass = "DockingDoorState", AirSocket = 1,
                 Doors = new[] { new Door(Side.Back, -4f), new Door(Side.Front, 0f, 0, MouthWidth, MouthHeight) },
                 // The docking collar on the back wall, facing into the bay: the game docks at (0.5, 0.5, 0.25) of a docking door's frame
@@ -273,7 +276,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             foreach (Spec module in All)
             {
                 Spec spec = module;
-                PartFactory.Register(spec.Id, spec.Donor, AdvancedTab.StationName, AdvancedTab.StationRow + spec.Row, (settings, prefab) => Configure(spec, settings, prefab));
+                PartFactory.Register(spec.Id, spec.Donor, spec.Retired ? "" : AdvancedTab.StationName, AdvancedTab.StationRow + spec.Row, (settings, prefab) => Configure(spec, settings, prefab));
             }
             PartFactory.Register(SolarId, "SignalDisplay", AdvancedTab.StationName, AdvancedTab.StationRow, Solar.Configure);
             PartFactory.Register(ControlSeatId, "MainControlAdvanced", AdvancedTab.StationName, AdvancedTab.StationRow + 3, ControlSeat.Configure);

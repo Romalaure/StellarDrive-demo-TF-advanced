@@ -46,6 +46,15 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Merchant freighter, steadier frame rate (v0.42)
+
+- **Comptoir Hermès** rebuilt as a **merchant freighter** modelled in Blender: a prow under the glazed bridge, a visor, a sensor dome, a dish, an antenna with a beacon, a gold emblem, a lit docking frame, containers on the roof and in racks along the flanks, a crane, solar wings, three main nozzles and two engine nacelles, radiators, red/green navigation lights. Inside: the bridge, the trading hall (merchant terminal facing the door), the cargo hold (a second terminal), the engine room. Only the big pieces collide; it is one decor part, nothing more to sync in multiplayer, and fewer parts than the old trading post.
+- The trading post is rebuilt the next time a world loads (unless a player is inside or a ship is docked to it).
+- **Ship hangar retired**: no longer in the build menu. The ones already built stay (worlds load as before).
+- **Fewer hitches at high speed**: the ground's colliders around a fast ship were worked out all at once (10 to 15 ms in one frame), twice on a host. They are now kept, shared and made ahead on a background thread (checked against the game's own result).
+- **Shorter shadows in fast flight**: above 120 m/s near a planet, shadows reach 150 m (setting `FastFlightShadows`). About +5 fps at 400 m/s.
+- **StationKit** (Submarine mod): its research check ran every frame (2.4 ms); now once every 2 s (setting `OtherModsFixes`). On a 165 Hz screen the game holds a **steady 82 fps** instead of 55 in normal play.
+
 ## Reworked textures (v0.41)
 
 - The mod's models that were in **plain colors** (wrecks, pirate fairings, machines, TF equipment, merchant terminal, station modules…) now have **textures**: metal plates with grooves, rivets, brushed metal, wear and relief. Nature scenes get a natural grain. Parts that already used the game's textures are unchanged.
@@ -74,7 +83,7 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 
 - **Weather** on the mod's planets when you are outside: rain and **thunderstorms with lightning** (Gaia, Verdance, Sylvara, Thalassa), **snow** (Glacia, and Gaia above the snowline), **sandstorms** (Aridia), **ash and embers** (Pyros). The weather changes every 10 minutes, the same for every player. Setting `Weather` turns it off.
 - **Hermès trading post**: a trading station near TF Sylvara (beacon under its name). Its **merchant terminal** (T key) trades your ores for rare finds: quantum core, exotic matter, Nexoran alloy, artifact, gold bars. You can also sell back. The host makes the trade.
-- **Ship hangar** (TF Station tab): a 12 × 8 × 20 m module. A whole ship flies in through a 10.8 × 7.2 m door and docks with its docking door to the magnetic collar on the back wall. The Hermès trading post has one, with a merchant terminal inside.
+- **Ship hangar** (retired in v0.42): a 12 × 8 × 20 m module. A whole ship flies in through a 10.8 × 7.2 m door and docks with its docking door to the magnetic collar on the back wall. The Hermès trading post has one, with a merchant terminal inside.
 
 ## An Earth-like Gaia, smoothness, fixed stations (v0.37)
 

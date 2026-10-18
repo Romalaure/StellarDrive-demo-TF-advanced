@@ -24,7 +24,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
     /// </summary>
     internal static class WreckDecor
     {
-        public const ushort VagabondId = 7461, LeviathanId = 7462, HadesId = 7463;
+        public const ushort VagabondId = 7461, LeviathanId = 7462, HadesId = 7463, HermesId = 7466;
 
         private const int GlassWall = 7;
 
@@ -55,7 +55,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
         public static void Register()
         {
-            foreach (ushort id in new[] { VagabondId, LeviathanId, HadesId })
+            foreach (ushort id in new[] { VagabondId, LeviathanId, HadesId, HermesId })
             {
                 ushort part = id;
                 PartFactory.Register(part, "SignalDisplay", "", 0, (settings, prefab) => Configure(part, settings, prefab));
@@ -66,8 +66,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private static void Configure(ushort id, PartSettings settings, GameObject prefab)
         {
             AbandonedStations.StationSpec spec = AbandonedStations.All.First(s => s.Decor == id);
-            PartFactory.Describe(settings, Loc.Pick("Carcasse : " + spec.Name, spec.Name + " (hull)", "Casco: " + spec.Name),
-                Loc.Pick("L'habillage d'une épave.", "The dressing of a wreck.", "El revestimiento de un pecio."), 60f, new (uint, int)[0]);
+            if (spec.Merchant)
+                PartFactory.Describe(settings, Loc.Pick("Coque : " + spec.Name, spec.Name + " (hull)", "Casco: " + spec.Name),
+                    Loc.Pick("L'habillage d'un cargo marchand.", "The dressing of a merchant freighter.", "El revestimiento de un carguero mercante."), 60f, new (uint, int)[0]);
+            else
+                PartFactory.Describe(settings, Loc.Pick("Carcasse : " + spec.Name, spec.Name + " (hull)", "Casco: " + spec.Name),
+                    Loc.Pick("L'habillage d'une épave.", "The dressing of a wreck.", "El revestimiento de un pecio."), 60f, new (uint, int)[0]);
             settings.internalStateClass = PowerCatalog.MachineStateClass;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, Vector3.zero, Vector3.one * 0.3f);
             foreach (Collider collider in prefab.GetComponentsInChildren<Collider>(true))
@@ -103,7 +107,70 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             Color[] cargo = { new Color(0.62f, 0.2f, 0.12f), new Color(0.15f, 0.3f, 0.52f), new Color(0.72f, 0.52f, 0.12f) };
             for (int i = 0; i < kit.Cargo.Length; i++)
                 Add(visuals, layer, key + "Cargo" + i, kit.Cargo[i], LitMaterials.Get("TFA_WreckCargo" + i, cargo[i], 0.4f, 0.3f));
-            DecorColliders.Attach(prefab, kit.Solids.Select((s, i) => s.Build(key + "Solid" + i)));
+            var solids = kit.Solids.Select((s, i) => s.Build(key + "Solid" + i)).ToList();
+            if (id == HermesId)
+                solids.AddRange(Hermes(visuals, layer, spec));
+            DecorColliders.Attach(prefab, solids);
+        }
+
+        // The merchant freighter's outside, modelled in Blender (tools/blender/merchant_hermes.py):
+        // one renderer per look, the big pieces' convex colliders in the Solid_N groups
+        private static IEnumerable<Mesh> Hermes(Transform visuals, int layer, AbandonedStations.StationSpec spec)
+        {
+            Dictionary<string, Mesh> meshes = ObjModels.Load("merchant_hermes");
+            if (meshes == null)
+                return Enumerable.Empty<Mesh>();
+            Color outside = spec.Outside, band = spec.Band;
+            Color gold = new Color(0.86f, 0.64f, 0.2f), engine = new Color(0.35f, 0.75f, 1f);
+            var looks = new Dictionary<string, Material>
+            {
+                ["Hull"] = LitMaterials.Get("TFA_HermesHull", outside * 0.95f, 0.5f, 0.4f),
+                ["Plate"] = LitMaterials.Get("TFA_HermesPlate", Color.Lerp(outside * 0.75f, new Color(0.3f, 0.3f, 0.33f), 0.3f), 0.55f, 0.45f),
+                ["Dark"] = LitMaterials.Get("TFA_WreckDark", new Color(0.06f, 0.06f, 0.07f), 0.4f, 0.55f),
+                ["Trim"] = LitMaterials.Get("TFA_WreckTrim", new Color(0.52f, 0.52f, 0.5f), 0.75f, 0.45f),
+                ["Gold"] = LitMaterials.Get("TFA_HermesGold", gold, 0.9f, 0.7f),
+                ["Glow"] = LitMaterials.Get("TFA_HermesGlow", band, 0f, 0.8f, band * 1.2f),
+                ["Engine"] = LitMaterials.Get("TFA_HermesEngine", engine, 0f, 0.8f, engine * 2.4f),
+                ["NavRed"] = LitMaterials.Get("TFA_WreckRed", new Color(1f, 0.12f, 0.06f), 0f, 0.8f, new Color(1f, 0.12f, 0.06f) * 2.2f),
+                ["NavGreen"] = LitMaterials.Get("TFA_HermesGreen", new Color(0.1f, 1f, 0.25f), 0f, 0.8f, new Color(0.1f, 1f, 0.25f) * 2.2f),
+                ["Beacon"] = LitMaterials.Get("TFA_HermesBeacon", Color.white, 0f, 0.8f, Color.white * 2.5f),
+                ["Solar"] = LitMaterials.Get("TFA_WreckSolar", new Color(0.05f, 0.08f, 0.2f), 0.4f, 0.85f),
+                ["Glass"] = LitMaterials.Get("TFA_HermesGlass", new Color(0.08f, 0.25f, 0.3f), 0.2f, 0.95f),
+                ["Hazard"] = LitMaterials.Get("TFA_WreckHazard", new Color(0.85f, 0.62f, 0.06f), 0.2f, 0.4f),
+                ["Cargo0"] = LitMaterials.Get("TFA_HermesCargo0", new Color(0.62f, 0.2f, 0.12f), 0.4f, 0.3f),
+                ["Cargo1"] = LitMaterials.Get("TFA_HermesCargo1", new Color(0.15f, 0.3f, 0.52f), 0.4f, 0.3f),
+                ["Cargo2"] = LitMaterials.Get("TFA_HermesCargo2", new Color(0.72f, 0.52f, 0.12f), 0.4f, 0.3f)
+            };
+            // Its pieces are big: plates of 1.5 m instead of the small parts' 0.5 m
+            foreach (string big in new[] { "Hull", "Plate", "Cargo0", "Cargo1", "Cargo2" })
+            {
+                Material material = looks[big];
+                foreach (string map in new[] { "_BaseMap", "_BumpMap" })
+                {
+                    if (material.HasProperty(map))
+                        material.SetTextureScale(map, new Vector2(0.33f, 0.33f));
+                }
+            }
+            var solids = new List<Mesh>();
+            foreach (KeyValuePair<string, Mesh> group in meshes)
+            {
+                if (group.Key.StartsWith("Solid_"))
+                {
+                    solids.Add(group.Value);
+                    continue;
+                }
+                if (!looks.TryGetValue(group.Key, out Material look))
+                    continue;
+                var child = new GameObject("TF_NoPaint_Hermes" + group.Key) { layer = layer };
+                child.transform.SetParent(visuals, false);
+                child.AddComponent<MeshFilter>().sharedMesh = group.Value;
+                var renderer = child.AddComponent<MeshRenderer>();
+                renderer.sharedMaterial = look;
+                // The lights and small trims cast no shadow: fewer to draw
+                bool shadow = group.Key == "Hull" || group.Key == "Plate" || group.Key.StartsWith("Cargo") || group.Key == "Solar" || group.Key == "Dark";
+                renderer.shadowCastingMode = shadow && !Settings.LowPerformance.Value ? ShadowCastingMode.On : ShadowCastingMode.Off;
+            }
+            return solids;
         }
 
         private static void Add(Transform parent, int layer, string name, MeshBuilder builder, Material material)

@@ -278,6 +278,15 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Vaisseau marchand, fps plus stables (v0.42)
+
+- **Comptoir Hermès** refait en **cargo marchand** modélisé dans Blender : proue sous la passerelle vitrée, visière, dôme de capteurs, parabole, antenne avec feu, emblème doré, cadre d'amarrage éclairé, conteneurs sur le toit et dans des racks sur les flancs, grue, panneaux solaires, trois tuyères et deux nacelles moteur, radiateurs, feux de navigation rouge/vert. À l'intérieur : passerelle, hall de commerce (terminal marchand face à la porte), soute (deuxième terminal), salle des machines. Seules les grosses pièces ont des collisions ; une seule pièce de décor, rien de plus à synchroniser en multijoueur, et moins de pièces que l'ancien comptoir.
+- Le comptoir est reconstruit au prochain chargement d'un monde (sauf si un joueur est dedans ou si un vaisseau y est amarré).
+- **Hangar à vaisseaux retiré** : il n'est plus dans le menu de construction. Ceux déjà construits restent (les mondes se chargent normalement).
+- **Moins de saccades à grande vitesse** : les collisions du sol autour d'un vaisseau rapide étaient calculées d'un coup (10 à 15 ms sur une image), deux fois sur l'hôte. Elles sont maintenant gardées, partagées et préparées à l'avance en arrière-plan (résultat vérifié contre celui du jeu).
+- **Ombres courtes en vol rapide** : au-dessus de 120 m/s près d'une planète, les ombres vont jusqu'à 150 m (réglage `FastFlightShadows`). Environ +5 fps à 400 m/s.
+- **StationKit** (mod Submarine) : sa vérification de recherche tournait à chaque image (2,4 ms) ; une fois toutes les 2 s maintenant (réglage `OtherModsFixes`). Sur un écran 165 Hz, le jeu tient **82 fps stables** au lieu de 55 en temps normal.
+
 ## Textures retravaillées (v0.41)
 
 - Les modèles du mod qui étaient en **couleurs unies** (épaves, carénages pirates, machines, équipement TF, terminal marchand, modules de station…) ont maintenant des **textures** : plaques de tôle avec joints, rivets, métal brossé, usure et relief. Les scènes de nature ont un grain naturel. Les pièces qui utilisaient déjà les textures du jeu ne changent pas.
@@ -306,7 +315,7 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 - **Météo** sur les planètes du mod quand tu es dehors : pluie et **orages avec éclairs** (Gaïa, Verdance, Sylvara, Thalassa), **neige** (Glacia, et Gaïa au-dessus de la limite des neiges), **tempêtes de sable** (Aridia), **cendres et braises** (Pyros). Le temps change toutes les 10 minutes, le même pour tous les joueurs. Réglage `Weather` pour la couper.
 - **Comptoir Hermès** : une station marchande près de TF Sylvara (balise à son nom). Son **terminal marchand** (touche T) échange tes minerais contre des trouvailles rares : noyau quantique, matière exotique, alliage nexorien, artefact, lingots d'or. On peut aussi revendre. C'est l'hôte qui fait l'échange.
-- **Hangar à vaisseaux** (onglet TF Station) : un module de 12 × 8 × 20 m. Un vaisseau entier y entre par une grande porte de 10,8 × 7,2 m et s'amarre par sa porte d'amarrage au collier magnétique du mur du fond. Le Comptoir Hermès en a un, avec un terminal marchand dedans.
+- **Hangar à vaisseaux** (retiré en v0.42) : un module de 12 × 8 × 20 m. Un vaisseau entier y entre par une grande porte de 10,8 × 7,2 m et s'amarre par sa porte d'amarrage au collier magnétique du mur du fond. Le Comptoir Hermès en a un, avec un terminal marchand dedans.
 
 ## Gaïa comme la Terre, fluidité, stations corrigées (v0.37)
 
