@@ -737,6 +737,8 @@ namespace StellarDriveDemoTFAdvanced.Combat
             if (pirate.IsBase)
                 DeadBases.Add(pirate.ShipId);
             AdvancedMod.Log.Msg($"pirates: {pirate.Design.Name} {pirate.ShipId} destroyed");
+            if (TFItems.TFItemsMod.Active)
+                TFItems.Devices.TraderLedger.PirateDestroyed(pirate.IsBase);
             TrackedShipServer ship = ships?.GetShip(pirate.ShipId);
             Type explosives = AccessTools.TypeByName("Arsenal.Weapons.Explosives");
             MethodInfo explode = explosives != null ? AccessTools.Method(explosives, "ServerExplode") : null;

@@ -73,6 +73,7 @@ namespace StellarDriveDemoTFAdvanced.Common
             Run("loot caches", () => Worlds.LootCaches.SaveSites(directory));
             Run("stations", () => Worlds.AbandonedStations.SaveVersion(directory));
             Run("pirates", () => Combat.Pirates.Save(directory));
+            Run("trader", () => { if (TFItems.TFItemsMod.Active) TFItems.Devices.TraderLedger.Save(directory); });
         }
 
         // The folder the game saves the current world in, found the way the game does

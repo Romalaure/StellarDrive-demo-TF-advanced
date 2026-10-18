@@ -32,6 +32,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             AccessTools.FieldRefAccess<PlanetDensePlacementConfig, ComputeBuffer>("_noiseConfigBuffer");
         private static readonly System.Reflection.MethodInfo ShallowCopy = AccessTools.Method(typeof(object), "MemberwiseClone");
 
+        private static readonly AccessTools.FieldRef<PlanetDensePlacementConfig, float> ViewRange =
+            AccessTools.FieldRefAccess<PlanetDensePlacementConfig, float>("viewRange");
+
         private static readonly AccessTools.FieldRef<PlanetPhysicalProperties, bool> HasAtmosphere =
             AccessTools.FieldRefAccess<PlanetPhysicalProperties, bool>("hasAtmosphere");
 
@@ -67,6 +70,10 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     : step is AddStep a ? $"input2 {a.inputId2}" : "";
                 AdvancedMod.Log.Msg($"dev: terrain {name}: {step.GetType().Name} {step.inputId} -> {step.outputId} {detail}");
             }
+            var flora = terrain.GetComponent<PlanetDenseEnvironment>();
+            var viewRange = AccessTools.Field(typeof(PlanetDensePlacementConfig), "viewRange");
+            foreach (PlanetDensePlacementConfig dense in flora.configs)
+                AdvancedMod.Log.Msg($"dev: terrain {name}: dense level {dense.level} view {viewRange.GetValue(dense)} physics {dense.hasPhysics} range {dense.physicsRange} objects {dense.objectsSpawn.Length} coverage {dense.approximateCoverageRatio} offset {dense.noiseOffset}");
             for (int i = 0; i < terrain.materials.Length; i++)
                 AdvancedMod.Log.Msg($"dev: terrain {name}: material {i} {terrain.materials[i].albedoTexture?.name} tint {terrain.materials[i].albedoColor} tile {terrain.materials[i].tile}");
         }
@@ -273,7 +280,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             public void AddForest(Vector3 noiseShift, float noiseOffset, float elevationMin, params (GameObject Prefab, int Weight, float Bias)[] trees)
             {
                 trees = trees.Where(t => t.Prefab != null).ToArray();
-                if (trees.Length == 0)
+                if (trees.Length == 0 || Common.DevHarness.Off("forests") || Common.Settings.LowPerformance.Value)
                     return;
                 PlanetDensePlacementConfig copy = (PlanetDensePlacementConfig)ShallowCopy.Invoke(Flora.configs[0], null);
                 // Its own spawn table and noise buffer (the copy would share the fir forest's)
@@ -286,6 +293,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 copy.noiseConfig = noise;
                 copy.noiseOffset = noiseOffset;
                 copy.elevationMin = elevationMin;
+                // Each forest is generated and drawn over its whole view range, again for every
+                // config: the extra ones draw nearer (the first, seen from space, keeps the full
+                // range) and collide nearer. Flying fast over TF Gaïa (four forests) cost 41 fps
+                // instead of 48 without the extra ones.
+                ViewRange(copy) = Mathf.Min(ViewRange(copy), 1800f);
+                copy.physicsRange = Mathf.Min(copy.physicsRange, 80f);
                 copy.objectsSpawn = trees.Select(t => new PlanetDensePlacementConfig.DenseObjectPlacementType
                 {
                     prefab = t.Prefab,

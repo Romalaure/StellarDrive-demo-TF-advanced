@@ -123,6 +123,13 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 LoadSites();
         }
 
+        /// <summary>The folder of the world being played, or null.</summary>
+        public static string WorldDirectory()
+        {
+            string save = MainGameSceneLoadData.SaveFileFullName;
+            return string.IsNullOrEmpty(save) ? null : Path.GetDirectoryName(save);
+        }
+
         private static string SitesPath()
         {
             string save = MainGameSceneLoadData.SaveFileFullName;

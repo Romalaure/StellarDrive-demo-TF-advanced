@@ -33,6 +33,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private static bool _outside;
         private static Texture2D _soft;
 
+        /// <summary>The player stands near the ground of a mod planet (not in a ship): its id, the local up, the height over its radius.</summary>
+        public static bool Outside => _outside;
+        public static Vector3 Up => _up;
+        public static ulong PlanetId { get; private set; }
+        public static float Elevation { get; private set; }
+
         /// <summary>What is falling right now on this planet at this height, for the planet's weather plan.</summary>
         public static WeatherKind Plan(ulong planetId, float elevation)
         {
@@ -69,6 +75,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             if (!Settings.Weather.Value)
             {
                 Clear();
+                _outside = false;
                 return;
             }
             if (Time.unscaledTime >= _nextCheck)
@@ -121,6 +128,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             if (planet == null || elevation > 4000f)
                 return;
             _up = fromCenter.normalized;
+            PlanetId = surface.PlanetId;
+            Elevation = elevation;
             _kind = Plan(surface.PlanetId, elevation);
             _outside = true;
         }
@@ -130,7 +139,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             if (system == null)
                 return;
             ParticleSystem.EmissionModule emission = system.emission;
-            emission.rateOverTime = rate * _intensity;
+            emission.rateOverTime = rate * _intensity * (Settings.LowPerformance.Value ? 0.35f : 1f);
         }
 
         private static void Clear()

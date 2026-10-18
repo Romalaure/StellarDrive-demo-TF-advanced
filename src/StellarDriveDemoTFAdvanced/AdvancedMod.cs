@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.38.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.39.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -158,6 +158,8 @@ namespace StellarDriveDemoTFAdvanced
             _inGame = sceneName == "MainGame";
             Worlds.AbandonedStations.OnSceneLoaded(_inGame);
             Worlds.LootCaches.OnSceneLoaded(_inGame);
+            if (_inGame && TFItems.TFItemsMod.Active)
+                TFItems.Devices.TraderLedger.Load(Worlds.LootCaches.WorldDirectory());
             Combat.Pirates.OnSceneLoaded(_inGame);
             Combat.Radar.OnSceneLoaded();
             Combat.LootPing.OnSceneLoaded();
@@ -194,6 +196,8 @@ namespace StellarDriveDemoTFAdvanced
                 Combat.LootPing.Update();
             if (_inGame)
                 Worlds.Weather.Update();
+            if (_inGame)
+                Worlds.Aurora.Update();
             if (_inGame && _partsRegistered)
                 UpdateRadars();
             if (_partsRegistered)

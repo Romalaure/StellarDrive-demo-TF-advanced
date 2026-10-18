@@ -80,7 +80,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         public static void Install()
         {
             TFNet.OnServer(TFMessageKind.Trade, ServerTrade);
+            TFNet.OnServer(TFMessageKind.TraderMission, ServerMission);
+            TFNet.OnServer(TFMessageKind.TraderInfo, ServerInfo);
             TFNet.OnClient(TFMessageKind.TradeResult, (kind, a, b, text) => TraderMenu.Result(text));
+            TFNet.OnClient(TFMessageKind.TraderInfoReply, (kind, a, b, text) => TraderMenu.Info(text));
         }
 
         private static void Configure(PartSettings settings, GameObject prefab)
@@ -138,33 +141,179 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             };
         }
 
+        // ---- Daily missions: deliveries the trader asks for, each once a day in a world
+
+        /// <summary>A delivery: bring Count of Item, get Gets of Reward and reputation.</summary>
+        internal struct Mission
+        {
+            public uint Item;
+            public int Count;
+            public uint Reward;
+            public int Gets;
+            public Mission(uint item, int count, uint reward, int gets) { Item = item; Count = count; Reward = reward; Gets = gets; }
+        }
+
+        private static readonly Mission[] MissionPool =
+        {
+            new Mission(ModItems.Cryonite, 30, ModItems.QuantumCore, 2),
+            new Mission(ModItems.Titanium, 40, ModItems.ExoticMatter, 1),
+            new Mission(ModItems.Amber, 20, ModItems.Artifact, 2),
+            new Mission(ModItems.Meteorite, 15, ModItems.GoldBar, 3),
+            new Mission(ModItems.Uranium, 20, ModItems.QuantumCore, 2),
+            new Mission(ModItems.Quartz, 30, ModItems.ExoticMatter, 2),
+            new Mission(ModItems.Wood, 60, ModItems.NexoranAlloy, 3),
+            new Mission(ModItems.Iron, 50, ModItems.QuantumCore, 1),
+            new Mission(ModItems.NexoranAlloy, 10, ModItems.ExoticMatter, 2)
+        };
+
+        public const int MissionsPerDay = 3, MissionReputation = 3;
+
+        /// <summary>Days since 1970 (UTC): the trader's day.</summary>
+        public static int Today => (int)(System.DateTimeOffset.UtcNow.ToUnixTimeSeconds() / 86400);
+
+        /// <summary>The day's missions: three different ones of the pool, drawn by the day.</summary>
+        public static Mission[] MissionsOf(int day)
+        {
+            var random = new System.Random(day * 7307 + 11);
+            return MissionPool.OrderBy(m => random.Next()).Take(MissionsPerDay).ToArray();
+        }
+
+        // ---- Reputation: pirates destroyed and missions done make the trader's prices lower
+
+        /// <summary>The trader's discount for a reputation: 2 % a point, 40 % at most.</summary>
+        public static float Discount(int reputation) => Mathf.Min(0.4f, Mathf.Max(0, reputation) * 0.02f);
+
+        /// <summary>What an offer asks at this reputation (at least one).</summary>
+        public static int Price(Offer offer, int reputation) => Mathf.Max(1, Mathf.CeilToInt(offer.Count * (1f - Discount(reputation))));
+
         /// <summary>Asks the host for <paramref name="times"/> times the offer <paramref name="index"/>.</summary>
         public static void Request(int index, int times) => TFNet.SendToServer(TFMessageKind.Trade, (uint)index, (ushort)times, "");
 
-        // Host: the exchange, if the player has what it takes (as many times as they can, up to what was asked)
+        /// <summary>Asks the host to deliver the day's mission <paramref name="index"/>.</summary>
+        public static void Deliver(int index) => TFNet.SendToServer(TFMessageKind.TraderMission, (uint)index, 0, "");
+
+        /// <summary>Asks the host for the reputation and the day's missions done.</summary>
+        public static void AskInfo() => TFNet.SendToServer(TFMessageKind.TraderInfo, 0, 0, "");
+
+        private static TrackedPlayerServer Player(NetworkConnection sender) =>
+            sender == null ? null : GameServices.PlayersServer?.GetTrackedPlayerFromConnectionId(sender.ClientId);
+
+        private static bool Pay(TrackedPlayerServer player, uint item, int count)
+        {
+            var cost = new[] { new ItemDrop { ItemId = item, Quantity = (byte)Mathf.Clamp(count, 1, 255) } };
+            if (!player.HasItemsInInventory(cost))
+                return false;
+            player.RemoveItemsFromInventory(cost);
+            return true;
+        }
+
+        // Host: the exchange at the world's reputation price, as many times as the player can pay, up to what was asked
         private static void ServerTrade(NetworkConnection sender, TFMessageKind kind, uint index, ushort times, string text)
         {
-            if (sender == null || index >= Offers.Length)
-                return;
-            TrackedPlayerServer player = GameServices.PlayersServer?.GetTrackedPlayerFromConnectionId(sender.ClientId);
-            if (player == null)
+            TrackedPlayerServer player = Player(sender);
+            if (player == null || index >= Offers.Length)
                 return;
             Offer offer = Offers[index];
-            int done = 0;
+            int price = Price(offer, TraderLedger.Reputation), done = 0;
             for (int i = 0; i < Mathf.Clamp(times, 1, 10); i++)
             {
-                var cost = new[] { new ItemDrop { ItemId = offer.Give, Quantity = (byte)offer.Count } };
-                if (!player.HasItemsInInventory(cost))
+                if (!Pay(player, offer.Give, price))
                     break;
-                player.RemoveItemsFromInventory(cost);
                 player.AddItemToInventory(new ItemDrop { ItemId = offer.Get, Quantity = (byte)offer.Gets });
                 done++;
             }
             string result = done == 0
-                ? Loc.Pick($"Il te faut {offer.Count} × {ItemName(offer.Give)}.", $"You need {offer.Count} × {ItemName(offer.Give)}.", $"Necesitas {offer.Count} × {ItemName(offer.Give)}.")
+                ? Loc.Pick($"Il te faut {price} × {ItemName(offer.Give)}.", $"You need {price} × {ItemName(offer.Give)}.", $"Necesitas {price} × {ItemName(offer.Give)}.")
                 : Loc.Pick($"Échange fait : +{offer.Gets * done} × {ItemName(offer.Get)}.", $"Trade done: +{offer.Gets * done} × {ItemName(offer.Get)}.", $"Intercambio hecho: +{offer.Gets * done} × {ItemName(offer.Get)}.");
             TFNet.SendTo(sender, TFMessageKind.TradeResult, index, (ushort)done, result);
-            TFMod.Log.Msg($"trader: {player.Name} traded offer {index} x{done}");
+            TFMod.Log.Msg($"trader: {player.Name} traded offer {index} x{done} at {price}");
+        }
+
+        // Host: a mission delivered, once a day in this world
+        private static void ServerMission(NetworkConnection sender, TFMessageKind kind, uint index, ushort b, string text)
+        {
+            TrackedPlayerServer player = Player(sender);
+            if (player == null || index >= MissionsPerDay)
+                return;
+            int day = Today;
+            Mission mission = MissionsOf(day)[index];
+            string result;
+            if (TraderLedger.IsDone(day, (int)index))
+                result = Loc.Pick("Cette livraison est déjà faite aujourd'hui.", "This delivery is already done today.", "Esta entrega ya está hecha hoy.");
+            else if (!Pay(player, mission.Item, mission.Count))
+                result = Loc.Pick($"Il te faut {mission.Count} × {ItemName(mission.Item)}.", $"You need {mission.Count} × {ItemName(mission.Item)}.", $"Necesitas {mission.Count} × {ItemName(mission.Item)}.");
+            else
+            {
+                player.AddItemToInventory(new ItemDrop { ItemId = mission.Reward, Quantity = (byte)mission.Gets });
+                TraderLedger.Complete(day, (int)index);
+                TraderLedger.Reputation += MissionReputation;
+                result = Loc.Pick($"Livraison faite : +{mission.Gets} × {ItemName(mission.Reward)}, réputation +{MissionReputation}.",
+                    $"Delivery done: +{mission.Gets} × {ItemName(mission.Reward)}, reputation +{MissionReputation}.",
+                    $"Entrega hecha: +{mission.Gets} × {ItemName(mission.Reward)}, reputación +{MissionReputation}.");
+                TFMod.Log.Msg($"trader: {player.Name} delivered mission {index} of day {day}");
+            }
+            TFNet.SendTo(sender, TFMessageKind.TradeResult, index, 0, result);
+            ServerInfo(sender, kind, 0, 0, "");
+        }
+
+        // Host: "reputation|day|done indexes"
+        private static void ServerInfo(NetworkConnection sender, TFMessageKind kind, uint a, ushort b, string text)
+        {
+            if (sender == null)
+                return;
+            int day = Today;
+            string done = string.Join(",", Enumerable.Range(0, MissionsPerDay).Where(i => TraderLedger.IsDone(day, i)));
+            TFNet.SendTo(sender, TFMessageKind.TraderInfoReply, 0, 0, $"{TraderLedger.Reputation}|{day}|{done}");
+        }
+    }
+
+    /// <summary>
+    /// The trader's book for the world (host): the reputation and the missions done, kept next to
+    /// the world save (tfa_trader.txt). Pirates destroyed raise the reputation.
+    /// </summary>
+    internal static class TraderLedger
+    {
+        private const string FileName = "tfa_trader.txt";
+        public static int Reputation;
+        private static readonly HashSet<string> Done = new HashSet<string>();
+
+        public static bool IsDone(int day, int index) => Done.Contains(day + ":" + index);
+
+        public static void Complete(int day, int index)
+        {
+            Done.Add(day + ":" + index);
+            // Older days are of no use
+            Done.RemoveWhere(k => int.TryParse(k.Split(':')[0], out int d) && d < day - 1);
+        }
+
+        /// <summary>A pirate ship destroyed: +1, a pirate base: +5.</summary>
+        public static void PirateDestroyed(bool isBase) => Reputation += isBase ? 5 : 1;
+
+        public static void Load(string worldDirectory)
+        {
+            Reputation = 0;
+            Done.Clear();
+            string path = string.IsNullOrEmpty(worldDirectory) ? null : System.IO.Path.Combine(worldDirectory, FileName);
+            if (path == null || !System.IO.File.Exists(path))
+                return;
+            foreach (string line in System.IO.File.ReadAllLines(path))
+            {
+                string[] f = line.Split(' ');
+                if (f.Length == 2 && f[0] == "reputation" && int.TryParse(f[1], out int r))
+                    Reputation = r;
+                else if (f.Length == 2 && f[0] == "done")
+                    Done.Add(f[1]);
+            }
+            TFMod.Log.Msg($"trader: reputation {Reputation}, {Done.Count} mission(s) done lately");
+        }
+
+        public static void Save(string worldDirectory)
+        {
+            if (string.IsNullOrEmpty(worldDirectory) || (Reputation == 0 && Done.Count == 0))
+                return;
+            var lines = new List<string> { "reputation " + Reputation };
+            lines.AddRange(Done.Select(d => "done " + d));
+            System.IO.File.WriteAllLines(System.IO.Path.Combine(worldDirectory, FileName), lines);
         }
     }
 
@@ -175,21 +324,41 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         public override void Use() => TraderMenu.Show();
     }
 
-    /// <summary>The merchant terminal's window: the offers, a trade button for one and for five.</summary>
+    /// <summary>The merchant terminal's window: two tabs, the trades (at the reputation's prices) and the day's deliveries.</summary>
     internal static class TraderMenu
     {
         private static bool _open;
+        private static int _tab;
         private static Vector2 _scroll;
         private static string _result = "";
+        private static int _reputation, _day = -1;
+        private static readonly HashSet<int> Done = new HashSet<int>();
 
         public static void Show()
         {
             _open = true;
             _result = "";
+            Trader.AskInfo();
             ModMenu.Open(() => _open = false);
         }
 
         public static void Result(string text) => _result = text ?? "";
+
+        /// <summary>Development: the tab shown (0 trades, 1 deliveries).</summary>
+        public static int Tab { set => _tab = value; }
+
+        public static void Info(string text)
+        {
+            string[] f = (text ?? "").Split('|');
+            if (f.Length < 3)
+                return;
+            int.TryParse(f[0], out _reputation);
+            int.TryParse(f[1], out _day);
+            Done.Clear();
+            foreach (string d in f[2].Split(new[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries))
+                if (int.TryParse(d, out int i))
+                    Done.Add(i);
+        }
 
         public static void Draw()
         {
@@ -199,22 +368,53 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             Matrix4x4 previous = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
             float width = Screen.width / scale, height = Screen.height / scale;
-            Rect area = DeviceUi.Window(width, height, 700f, 660f, Loc.Pick("COMPTOIR MARCHAND", "TRADING COUNTER", "MOSTRADOR COMERCIAL"));
+            Rect area = DeviceUi.Window(width, height, 720f, 680f, Loc.Pick("COMPTOIR MARCHAND", "TRADING COUNTER", "MOSTRADOR COMERCIAL"));
             GUILayout.BeginArea(area);
-            GUILayout.Label(Loc.Pick("Ce que tu donnes, ce que tu reçois. Les objets viennent de ton inventaire.", "What you give, what you get. Items come from your inventory.", "Lo que das, lo que recibes. Los objetos salen de tu inventario."), DeviceUi.Muted);
+            GUILayout.BeginHorizontal();
+            string[] tabs = { Loc.Pick("Échanges", "Trades", "Intercambios"), Loc.Pick("Livraisons du jour", "Today's deliveries", "Entregas del día") };
+            for (int i = 0; i < tabs.Length; i++)
+                if (GUILayout.Button(tabs[i], i == _tab ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Height(32f)))
+                    _tab = i;
+            GUILayout.EndHorizontal();
+            int discount = Mathf.RoundToInt(Trader.Discount(_reputation) * 100f);
+            GUILayout.Label(Loc.Pick($"Réputation : {_reputation}  ·  remise {discount} % (pirates détruits, livraisons faites)",
+                $"Reputation: {_reputation}  ·  discount {discount}% (pirates destroyed, deliveries made)",
+                $"Reputación: {_reputation}  ·  descuento {discount} % (piratas destruidos, entregas hechas)"), DeviceUi.Muted);
             GUILayout.Space(6f);
             _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.ExpandHeight(true));
-            for (int i = 0; i < Trader.Offers.Length; i++)
+            if (_tab == 0)
             {
-                Trader.Offer offer = Trader.Offers[i];
-                GUILayout.BeginHorizontal();
-                GUILayout.Label($"{offer.Count} × {Trader.ItemName(offer.Give)}   →   {offer.Gets} × {Trader.ItemName(offer.Get)}", DeviceUi.Text, GUILayout.Width(470f));
-                if (GUILayout.Button(Loc.Pick("Échanger", "Trade", "Cambiar"), DeviceUi.Button, GUILayout.Height(30f), GUILayout.Width(100f)))
-                    Trader.Request(i, 1);
-                if (GUILayout.Button("× 5", DeviceUi.Button, GUILayout.Height(30f), GUILayout.Width(60f)))
-                    Trader.Request(i, 5);
-                GUILayout.EndHorizontal();
-                GUILayout.Space(3f);
+                for (int i = 0; i < Trader.Offers.Length; i++)
+                {
+                    Trader.Offer offer = Trader.Offers[i];
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label($"{Trader.Price(offer, _reputation)} × {Trader.ItemName(offer.Give)}   →   {offer.Gets} × {Trader.ItemName(offer.Get)}", DeviceUi.Text, GUILayout.Width(490f));
+                    if (GUILayout.Button(Loc.Pick("Échanger", "Trade", "Cambiar"), DeviceUi.Button, GUILayout.Height(30f), GUILayout.Width(100f)))
+                        Trader.Request(i, 1);
+                    if (GUILayout.Button("× 5", DeviceUi.Button, GUILayout.Height(30f), GUILayout.Width(60f)))
+                        Trader.Request(i, 5);
+                    GUILayout.EndHorizontal();
+                    GUILayout.Space(3f);
+                }
+            }
+            else
+            {
+                Trader.Mission[] missions = Trader.MissionsOf(_day >= 0 ? _day : Trader.Today);
+                GUILayout.Label(Loc.Pick("Le marchand a besoin de ces livraisons aujourd'hui (une fois chacune pour tout le monde, renouvelées chaque jour) :",
+                    "The trader needs these deliveries today (once each for everyone, new ones every day):",
+                    "El comerciante necesita estas entregas hoy (una vez cada una para todos, nuevas cada día):"), DeviceUi.Muted);
+                for (int i = 0; i < missions.Length; i++)
+                {
+                    Trader.Mission mission = missions[i];
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label($"{mission.Count} × {Trader.ItemName(mission.Item)}   →   {mission.Gets} × {Trader.ItemName(mission.Reward)}  (+{Trader.MissionReputation})", DeviceUi.Text, GUILayout.Width(530f));
+                    if (Done.Contains(i))
+                        GUILayout.Label(Loc.Pick("Faite", "Done", "Hecha"), DeviceUi.Muted, GUILayout.Width(120f));
+                    else if (GUILayout.Button(Loc.Pick("Livrer", "Deliver", "Entregar"), DeviceUi.Button, GUILayout.Height(30f), GUILayout.Width(120f)))
+                        Trader.Deliver(i);
+                    GUILayout.EndHorizontal();
+                    GUILayout.Space(3f);
+                }
             }
             GUILayout.EndScrollView();
             if (_result.Length > 0)

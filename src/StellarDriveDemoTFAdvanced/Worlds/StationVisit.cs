@@ -83,7 +83,13 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     TFItems.Devices.TraderMenu.Show();
                     TFItems.Devices.Trader.Request(0, 1);
                     yield return Wait(1.5f);
-                    DevHarness.Screenshot("trader_menu");
+                    // (the window is drawn by OnGUI: a screen capture, not a camera render)
+                    ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(DevHarness.Folder, "trader_menu.png"));
+                    yield return Wait(0.5f);
+                    TFItems.Devices.TraderMenu.Tab = 1;
+                    yield return Wait(0.5f);
+                    ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(DevHarness.Folder, "trader_missions.png"));
+                    yield return Wait(0.5f);
                     TFItems.Common.ModMenu.Close();
                     // From the hangar's mouth, looking in
                     var hall = plan.Modules[0];

@@ -278,6 +278,15 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Missions, réputation, hangar automatique, aurores, vol rapide fluide (v0.39)
+
+- **Livraisons du jour** au terminal marchand : 3 commandes par jour (ex. 30 cryonite → 2 noyaux quantiques), une fois chacune pour tout le monde, renouvelées chaque jour.
+- **Réputation** auprès du marchand : +1 par vaisseau pirate détruit, +5 par base pirate, +3 par livraison. Chaque point baisse ses prix de 2 % (jusqu'à −40 %). Elle est gardée avec le monde.
+- **Hangar automatique** : quand un vaisseau est amarré au collier du hangar, un champ de force ferme la grande porte ; il s'ouvre quand le vaisseau se détache.
+- **Aurores boréales** la nuit sur TF Glacia et dans les endroits froids de TF Gaïa (en altitude, près des pôles).
+- **Vol rapide fluide** : le jeu recréait les collisions des arbres et des points d'intérêt autour de chaque vaisseau, même haut dans le ciel (environ mille arbres par seconde à grande vitesse). Au-dessus de 100 m du sol, plus d'arbres, au-dessus de 200 m, plus de points d'intérêt. Sur Gaïa à 300 m/s : environ 53 fps au lieu de 47. Les forêts secondaires de Gaïa s'affichent moins loin.
+- Réglage **`LowPerformance`** pour les PC modestes : une seule forêt par planète, pluie et neige allégées, pas d'aurores.
+
 ## Météo, station marchande, hangar à vaisseaux (v0.38)
 
 - **Météo** sur les planètes du mod quand tu es dehors : pluie et **orages avec éclairs** (Gaïa, Verdance, Sylvara, Thalassa), **neige** (Glacia, et Gaïa au-dessus de la limite des neiges), **tempêtes de sable** (Aridia), **cendres et braises** (Pyros). Le temps change toutes les 10 minutes, le même pour tous les joueurs. Réglage `Weather` pour la couper.

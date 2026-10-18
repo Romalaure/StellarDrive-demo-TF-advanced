@@ -46,6 +46,15 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Missions, reputation, automatic hangar, auroras, smooth fast flight (v0.39)
+
+- **Today's deliveries** at the merchant terminal: 3 orders a day (e.g. 30 cryonite → 2 quantum cores), once each for everyone, new ones every day.
+- **Reputation** with the trader: +1 per pirate ship destroyed, +5 per pirate base, +3 per delivery. Each point lowers his prices by 2% (down to −40%). It is kept with the world.
+- **Automatic hangar**: when a ship is docked to the hangar's collar, a force field closes the big door; it opens when the ship lets go.
+- **Auroras** at night on TF Glacia and in TF Gaia's cold places (high up, near the poles).
+- **Smooth fast flight**: the game made the colliders of the trees and points of interest again around every ship, even high in the sky (about a thousand trees a second at speed). Above 100 m over the ground no trees, above 200 m no points of interest. Over Gaia at 300 m/s: about 53 fps instead of 47. Gaia's secondary forests draw nearer.
+- **`LowPerformance`** setting for modest computers: one forest per planet, lighter rain and snow, no auroras.
+
 ## Weather, trading station, ship hangar (v0.38)
 
 - **Weather** on the mod's planets when you are outside: rain and **thunderstorms with lightning** (Gaia, Verdance, Sylvara, Thalassa), **snow** (Glacia, and Gaia above the snowline), **sandstorms** (Aridia), **ash and embers** (Pyros). The weather changes every 10 minutes, the same for every player. Setting `Weather` turns it off.

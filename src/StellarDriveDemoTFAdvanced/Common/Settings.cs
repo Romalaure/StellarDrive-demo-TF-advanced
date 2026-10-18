@@ -25,6 +25,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> DevPlanetsNearby { get; private set; }
         public static MelonPreferences_Entry<bool> DevVisitPlanets { get; private set; }
         public static MelonPreferences_Entry<int> DevVisitPlanetId { get; private set; }
+        public static MelonPreferences_Entry<float> DevSpeedTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevMachineTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevMiningLaserTest { get; private set; }
         public static MelonPreferences_Entry<int> DevMachineShield { get; private set; }
@@ -43,6 +44,7 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<float> LootPingMinutes { get; private set; }
         public static MelonPreferences_Entry<bool> SteadyFrameRate { get; private set; }
         public static MelonPreferences_Entry<bool> Weather { get; private set; }
+        public static MelonPreferences_Entry<bool> LowPerformance { get; private set; }
         public static MelonPreferences_Entry<string> DevWeather { get; private set; }
         public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevDockingTest { get; private set; }
@@ -167,6 +169,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "A message on screen when a radar of your ship detects an incoming pirate raid.");
             Weather = _category.CreateEntry("Weather", true,
                 description: "Weather on the mod's planets around you when you stand outside: rain and storms with lightning (Gaïa, Verdance, Sylvara, Thalassa), snow (Glacia, Gaïa up high), sandstorms (Aridia), ash (Pyros). Visual only.");
+            LowPerformance = _category.CreateEntry("LowPerformance", false,
+                description: "For modest computers: one forest per planet instead of several (TF Gaïa), lighter rain and snow, no auroras. The forests change on the next start.");
             DevWeather = _category.CreateEntry("DevWeather", "",
                 description: "For mod development: force the weather (Clear, Rain, Storm, Snow, Sand, Ash). Empty: the planets' own.");
             SteadyFrameRate = _category.CreateEntry("SteadyFrameRate", true,
@@ -175,6 +179,8 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For mod development: with DevWorld, an engine part id: a wired test ship with a centrifuge, a nuclear reactor and that engine.");
             DevMachineShield = _category.CreateEntry("DevMachineShield", 0,
                 description: "For mod development: with DevMachineTest, the force field generator's part id (0: the basic one).");
+            DevSpeedTest = _category.CreateEntry("DevSpeedTest", 0f,
+                description: "For mod development: with DevWorld and DevVisitPlanetId, carry the player low over that planet at this speed (m/s) for 40 s and log the frame rate.");
             DevVisitPlanetId = _category.CreateEntry("DevVisitPlanetId", 0,
                 description: "For mod development: with DevVisitPlanets, visit only this planet (0: all).");
             DevFlyTest = _category.CreateEntry("DevFlyTest", false,

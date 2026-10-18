@@ -42,6 +42,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         Trade = 50,
         /// <summary>Server to one client: how the trade went (B = times done), Text is for the player.</summary>
         TradeResult = 51,
+        /// <summary>Client to server: send me the trader's reputation and the day's missions done.</summary>
+        TraderInfo = 52,
+        /// <summary>Server to one client: Text is "reputation|day|done indexes".</summary>
+        TraderInfoReply = 53,
+        /// <summary>Client to server: deliver the day's mission A.</summary>
+        TraderMission = 54,
 
         /// <summary>Client to server: copy the ship A (and what is attached to it) as schematic Text.</summary>
         SchematicCopy = 30,

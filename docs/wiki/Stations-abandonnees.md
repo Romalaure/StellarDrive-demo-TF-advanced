@@ -10,7 +10,7 @@ Les stations d'une version plus ancienne du mod sont reconstruites (avec leur po
 
 | Nom | Où | Particularité |
 |---|---|---|
-| Comptoir Hermès (marchand) | près de TF Sylvara | **station marchande** entretenue : hangar à vaisseaux, deux terminaux marchands (touche T) pour échanger minerais et trouvailles rares |
+| Comptoir Hermès (marchand) | près de TF Sylvara | **station marchande** entretenue : hangar à vaisseaux, deux terminaux marchands (touche T) pour échanger minerais et trouvailles rares, 3 livraisons par jour, une réputation (pirates détruits, livraisons) qui baisse les prix |
 | Station Kepler | loin de TF Verdance | la plus grande ; noyaux quantiques, alliage, titane, cryonite |
 | Avant-poste Orion | près de TF Aridia | noyaux quantiques, alliage, quartz, artefacts |
 | Sonde Hadès | près du trou noir de Petra | grande sonde de recherche : anneau gravimétrique, grande antenne, perche capteur, ailes solaires, pont d'observation vitré ; matière exotique ; abri contre la gravité du trou noir (3 km) |

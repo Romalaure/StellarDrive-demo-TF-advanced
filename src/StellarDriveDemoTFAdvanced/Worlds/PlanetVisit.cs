@@ -39,7 +39,43 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     MelonLoader.MelonCoroutines.Start(VisitAll());
                 else if (Settings.DevVisitBlackHole.Value)
                     MelonLoader.MelonCoroutines.Start(BlackHoleTour());
+                else if (Settings.DevSpeedTest.Value > 0f)
+                    MelonLoader.MelonCoroutines.Start(SpeedRun());
             }));
+        }
+
+        // Flying fast and low over a planet (like a ship at speed): the frame rate, 5 s at a time
+        private static IEnumerator SpeedRun()
+        {
+            Planet planet = PlanetFactory.Planets.FirstOrDefault(p => p != null && p.Id == (ulong)Settings.DevVisitPlanetId.Value);
+            if (planet == null || !TryFindLand(planet, out Vector3 up))
+                yield break;
+            Place(planet, up, 0f);
+            yield return Wait(15f);
+            Vector3 axis = Vector3.Cross(up, Vector3.up).normalized;
+            if (axis.sqrMagnitude < 0.01f)
+                axis = Vector3.right;
+            float speed = Settings.DevSpeedTest.Value, travelled = 0f;
+            float start = Time.unscaledTime, windowStart = start, worst = 0f, last = start;
+            int frames = 0;
+            while (Time.unscaledTime - start < 40f)
+            {
+                yield return null;
+                float now = Time.unscaledTime;
+                worst = Mathf.Max(worst, now - last);
+                last = now;
+                frames++;
+                travelled += speed * Time.unscaledDeltaTime;
+                Vector3 at = Quaternion.AngleAxis(travelled / planet.Radius * Mathf.Rad2Deg, axis) * up;
+                Move(planet, at, Quaternion.identity, 150f);
+                if (now - windowStart >= 5f)
+                {
+                    AdvancedMod.Log.Msg($"dev: speed {speed:0} m/s over {planet.name}: {frames / (now - windowStart):0.0} fps, slowest frame {worst * 1000f:0} ms, {travelled / 1000f:0.0} km");
+                    windowStart = now;
+                    frames = 0;
+                    worst = 0f;
+                }
+            }
         }
 
         // From airless TF Petra, look for the black hole from six spots around the planet
