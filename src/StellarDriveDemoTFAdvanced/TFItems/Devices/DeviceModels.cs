@@ -96,6 +96,29 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             return visuals;
         }
 
+        /// <summary>The same with ready meshes (a Blender model, see <see cref="StellarDriveDemoTFAdvanced.Common.ObjModels"/>), by material key.</summary>
+        public static Transform Build(PartSettings settings, GameObject prefab, string label, string description, float mass,
+            (uint Item, int Count)[] cost, Vector3 boundsCenter, Vector3 boundsSize,
+            Dictionary<string, Mesh> meshes, Dictionary<string, DeviceMaterial> materials)
+        {
+            Transform visuals = LampParts.PrepareDonor(settings, prefab, label, description, mass, cost, boundsCenter, boundsSize);
+            int layer = visuals.gameObject.layer;
+            foreach (KeyValuePair<string, Mesh> entry in meshes)
+            {
+                if (!materials.TryGetValue(entry.Key, out DeviceMaterial material))
+                    continue;
+                var child = new GameObject(entry.Key) { layer = layer };
+                child.transform.SetParent(visuals, false);
+                child.AddComponent<MeshFilter>().sharedMesh = entry.Value;
+                var renderer = child.AddComponent<MeshRenderer>();
+                string name = "TF_" + settings.id + "_" + entry.Key;
+                renderer.sharedMaterial = (material.Glow.HasValue ? null : Flat(name, material.Color, material.Metal, material.Smooth))
+                    ?? LitMaterials.Get(name, material.Color, material.Metal, material.Smooth, material.Glow);
+                renderer.shadowCastingMode = material.Glow.HasValue ? ShadowCastingMode.Off : ShadowCastingMode.On;
+            }
+            return visuals;
+        }
+
         /// <summary>Makes every collider of the part a thin slab at its base, so players can walk into it.</summary>
         public static void FlattenColliders(GameObject prefab, Vector3 size)
         {

@@ -56,6 +56,10 @@
     <EmbeddedResource Include="..\..\docs\wiki\en\*.md" Exclude="..\..\docs\wiki\en\_Sidebar.md" LogicalName="Wiki.en.%(Filename).md" />
     <EmbeddedResource Include="..\..\docs\wiki\es\*.md" Exclude="..\..\docs\wiki\es\_Sidebar.md" LogicalName="Wiki.es.%(Filename).md" />
   </ItemGroup>
+  <!-- Models made in Blender (tools/blender/build.ps1) -->
+  <ItemGroup>
+    <EmbeddedResource Include="Models\*.obj" LogicalName="TFA.Models.%(Filename).obj" />
+  </ItemGroup>
 
   <Target Name="DeployToGameMods" AfterTargets="Build" Condition="'$(DeployToGame)' == 'true' And Exists('$(GamePath)\Mods')">
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GamePath)\Mods" />

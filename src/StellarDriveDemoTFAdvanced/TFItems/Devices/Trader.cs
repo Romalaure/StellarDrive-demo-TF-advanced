@@ -92,7 +92,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 Loc.Pick("Le comptoir de la station marchande : regarde-le et appuie sur la touche d'utilisation (T) pour échanger tes minerais contre des trouvailles rares, ou l'inverse.",
                     "The trading station's counter: look at it and press the use key (T) to trade your ores for rare finds, or the other way round.",
                     "El mostrador de la estación comercial: míralo y pulsa la tecla de uso (T) para cambiar tus minerales por hallazgos raros, o al revés."),
-                120f, new[] { (101u, 20), (102u, 8), (112u, 10) }, BoundsCenter, BoundsSize, Shapes(), Materials());
+                120f, new[] { (101u, 20), (102u, 8), (112u, 10) }, BoundsCenter, BoundsSize, Model(), Materials());
             UsablePart.AddBox(visuals, BoundsCenter, BoundsSize);
             visuals.gameObject.AddComponent<TraderVisuals>();
         }
@@ -104,6 +104,18 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             ["TF_NoPaint_TraderScreen"] = new DeviceMaterial(new Color(0.1f, 0.35f, 0.4f), 0f, 0.9f, new Color(0.2f, 0.85f, 0.9f) * 1.6f),
             ["TF_NoPaint_TraderSign"] = new DeviceMaterial(new Color(1f, 0.75f, 0.3f), 0f, 0.9f, new Color(1f, 0.7f, 0.25f) * 2.2f)
         };
+
+        // The Blender model (tools/blender/trader.py), or the simple one built here when it is missing
+        private static Dictionary<string, Mesh> Model()
+        {
+            Dictionary<string, Mesh> model = StellarDriveDemoTFAdvanced.Common.ObjModels.Load("trader");
+            if (model != null)
+                return model;
+            var simple = new Dictionary<string, Mesh>();
+            foreach (KeyValuePair<string, MeshBuilder> entry in Shapes())
+                simple[entry.Key] = entry.Value.Build("TF_Trader_" + entry.Key);
+            return simple;
+        }
 
         // A counter with a slanted screen, a gold trim, a lit sign above, a scale and goods on it
         private static Dictionary<string, MeshBuilder> Shapes()
