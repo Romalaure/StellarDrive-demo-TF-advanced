@@ -77,6 +77,23 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     views.Add((center - out_ * 3.5f, out_));
                 }
                 yield return Parts.Showcase.PhotographFrom(station.Id, $"station_{tag}_view", views);
+                if (spec.Merchant && TFItems.TFItemsMod.Active)
+                {
+                    // The trader's window, and a trade the player cannot pay for
+                    TFItems.Devices.TraderMenu.Show();
+                    TFItems.Devices.Trader.Request(0, 1);
+                    yield return Wait(1.5f);
+                    DevHarness.Screenshot("trader_menu");
+                    TFItems.Common.ModMenu.Close();
+                    // From the hangar's mouth, looking in
+                    var hall = plan.Modules[0];
+                    Vector3 mouth = new Vector3(hall.x1 + 0.6f + 19f, hall.y0 + 1.5f, (hall.z0 + hall.z1) * 0.5f);
+                    yield return Parts.Showcase.PhotographFrom(station.Id, $"station_{tag}_hangar", new System.Collections.Generic.List<(Vector3, Vector3)>
+                    {
+                        (mouth + new Vector3(6f, 2f, 0f), Vector3.left),
+                        (mouth + new Vector3(-3f, 0.5f, 3f), new Vector3(-1f, -0.2f, -0.6f))
+                    });
+                }
                 AdvancedMod.Log.Msg($"dev: visited {spec.Name} (ship {station.Id}, {station.PartCount} parts)");
                 yield return Wait(0.5f);
             }

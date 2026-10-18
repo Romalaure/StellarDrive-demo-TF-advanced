@@ -6,7 +6,7 @@ using StellarDriveDemoTFAdvanced;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.ShipComputer;
 
-[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.37.0", "Romalaure")]
+[assembly: MelonInfo(typeof(AdvancedMod), "StellarDrive Demo TF Advanced", "0.38.0", "Romalaure")]
 [assembly: MelonGame("CuriousOwlGames", "StellarDrive")]
 [assembly: MelonOptionalDependencies("SDModKit")]
 [assembly: HarmonyDontPatchAll]
@@ -192,6 +192,8 @@ namespace StellarDriveDemoTFAdvanced
                 Combat.Pirates.Update();
             if (_inGame)
                 Combat.LootPing.Update();
+            if (_inGame)
+                Worlds.Weather.Update();
             if (_inGame && _partsRegistered)
                 UpdateRadars();
             if (_partsRegistered)
@@ -219,6 +221,8 @@ namespace StellarDriveDemoTFAdvanced
                 Combat.Radar.OnGUI();
             if (_inGame)
                 Combat.LootPing.OnGUI();
+            if (_inGame)
+                Worlds.Weather.DrawFlash();
             if (_partsRegistered)
                 TFItems.TFItemsMod.OnGUI();
         }

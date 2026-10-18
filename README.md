@@ -278,6 +278,12 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Météo, station marchande, hangar à vaisseaux (v0.38)
+
+- **Météo** sur les planètes du mod quand tu es dehors : pluie et **orages avec éclairs** (Gaïa, Verdance, Sylvara, Thalassa), **neige** (Glacia, et Gaïa au-dessus de la limite des neiges), **tempêtes de sable** (Aridia), **cendres et braises** (Pyros). Le temps change toutes les 10 minutes, le même pour tous les joueurs. Réglage `Weather` pour la couper.
+- **Comptoir Hermès** : une station marchande près de TF Sylvara (balise à son nom). Son **terminal marchand** (touche T) échange tes minerais contre des trouvailles rares : noyau quantique, matière exotique, alliage nexorien, artefact, lingots d'or. On peut aussi revendre. C'est l'hôte qui fait l'échange.
+- **Hangar à vaisseaux** (onglet TF Station) : un module de 12 × 8 × 20 m. Un vaisseau entier y entre par une grande porte de 10,8 × 7,2 m et s'amarre par sa porte d'amarrage au collier magnétique du mur du fond. Le Comptoir Hermès en a un, avec un terminal marchand dedans.
+
 ## Gaïa comme la Terre, fluidité, stations corrigées (v0.37)
 
 - **Fini le 1 image/seconde sur Gaïa** : ses quatre forêts plaçaient des arbres les uns dans les autres ; leur physique les faisait tomber en bûches, qui renversaient les voisins, en chaîne (des centaines par seconde). Sur les planètes du mod un arbre ne tombe plus qu'à un vrai choc (un vaisseau) ; le laser et les outils le coupent comme avant.

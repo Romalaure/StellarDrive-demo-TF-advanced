@@ -42,6 +42,8 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<bool> RadarAlarm { get; private set; }
         public static MelonPreferences_Entry<float> LootPingMinutes { get; private set; }
         public static MelonPreferences_Entry<bool> SteadyFrameRate { get; private set; }
+        public static MelonPreferences_Entry<bool> Weather { get; private set; }
+        public static MelonPreferences_Entry<string> DevWeather { get; private set; }
         public static MelonPreferences_Entry<int> DevPortalTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevDockingTest { get; private set; }
         public static MelonPreferences_Entry<bool> DevFieldDoorTest { get; private set; }
@@ -163,6 +165,10 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "When a pirate ship is destroyed, a marker on screen shows where its loot capsule is, for this many minutes or until the capsule is gone (0: no marker).");
             RadarAlarm = _category.CreateEntry("RadarAlarm", true,
                 description: "A message on screen when a radar of your ship detects an incoming pirate raid.");
+            Weather = _category.CreateEntry("Weather", true,
+                description: "Weather on the mod's planets around you when you stand outside: rain and storms with lightning (Gaïa, Verdance, Sylvara, Thalassa), snow (Glacia, Gaïa up high), sandstorms (Aridia), ash (Pyros). Visual only.");
+            DevWeather = _category.CreateEntry("DevWeather", "",
+                description: "For mod development: force the weather (Clear, Rain, Storm, Snow, Sand, Ash). Empty: the planets' own.");
             SteadyFrameRate = _category.CreateEntry("SteadyFrameRate", true,
                 description: "With vertical sync on and the game slower than the screen (60 fps on 165 Hz), frames alternate 2 and 3 screen refreshes and turning ships jerk: wait the same number of refreshes for every frame (55 fps on 165 Hz, steady). Never under 45 fps.");
             DevNuclearTest = _category.CreateEntry("DevNuclearTest", 0,

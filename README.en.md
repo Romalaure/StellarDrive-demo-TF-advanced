@@ -46,6 +46,12 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Weather, trading station, ship hangar (v0.38)
+
+- **Weather** on the mod's planets when you are outside: rain and **thunderstorms with lightning** (Gaia, Verdance, Sylvara, Thalassa), **snow** (Glacia, and Gaia above the snowline), **sandstorms** (Aridia), **ash and embers** (Pyros). The weather changes every 10 minutes, the same for every player. Setting `Weather` turns it off.
+- **Hermès trading post**: a trading station near TF Sylvara (beacon under its name). Its **merchant terminal** (T key) trades your ores for rare finds: quantum core, exotic matter, Nexoran alloy, artifact, gold bars. You can also sell back. The host makes the trade.
+- **Ship hangar** (TF Station tab): a 12 × 8 × 20 m module. A whole ship flies in through a 10.8 × 7.2 m door and docks with its docking door to the magnetic collar on the back wall. The Hermès trading post has one, with a merchant terminal inside.
+
 ## An Earth-like Gaia, smoothness, fixed stations (v0.37)
 
 - **No more 1 frame per second on Gaia**: its four forests placed trees inside each other; their physics knocked them down as logs, which knocked their neighbours down, in a chain (hundreds per second). On the mod's planets a tree now only falls to a real impact (a ship); the laser and the tools cut it as before.

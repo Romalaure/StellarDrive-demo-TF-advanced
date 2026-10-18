@@ -31,7 +31,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
         public const ushort HabitationId = 7371, CorridorId = 7372, HubId = 7373, StorageId = 7374, SolarId = 7375, DockingId = 7376;
         public const ushort LaboratoryId = 7377, InfirmaryId = 7378, LifeSupportId = 7379, ObservatoryId = 7380;
         public const ushort AirlockId = 7382, CornerId = 7383, TeeId = 7384, UTurnId = 7385, StairsId = 7386, LongCorridorId = 7387;
-        public const ushort ControlSeatId = 7388, DomeId = 7389, TubeId = 7390;
+        public const ushort ControlSeatId = 7388, DomeId = 7389, TubeId = 7390, HangarId = 7464;
+        // The hangar: its size, and its mouth on the front wall
+        private const float HangarWidth = 12f, HangarHeight = 8f, HangarLength = 20f, MouthWidth = 10.8f, MouthHeight = 7.2f;
 
         /// <summary>A module's outline: a box, a round room under a dome, or a round tube.</summary>
         internal enum Shape { Box, Dome, Tube }
@@ -48,13 +50,20 @@ namespace StellarDriveDemoTFAdvanced.Construction
             public Side Side;
             public float Offset;
             public int Level;
+            /// <summary>A doorway of another size (a hangar's mouth), 0 for the usual 1.6 x 2.2 m.</summary>
+            public float Width, Height;
 
-            public Door(Side side, float offset = 0f, int level = 0)
+            public Door(Side side, float offset = 0f, int level = 0, float width = 0f, float height = 0f)
             {
                 Side = side;
                 Offset = offset;
                 Level = level;
+                Width = width;
+                Height = height;
             }
+
+            public float W => Width > 0f ? Width : DoorWidth;
+            public float H => Height > 0f ? Height : DoorHeight;
         }
 
         /// <summary>Outward normal of a wall in the module's frame.</summary>
@@ -239,6 +248,17 @@ namespace StellarDriveDemoTFAdvanced.Construction
             },
             new Spec
             {
+                Id = HangarId, Label = Loc.Pick("Hangar à vaisseaux", "Ship hangar", "Hangar de naves"), Mass = 6500f,
+                Size = new Vector3(HangarWidth, HangarHeight, HangarLength), Row = 3, StateClass = "DockingDoorState", AirSocket = 1,
+                Doors = new[] { new Door(Side.Back, -4f), new Door(Side.Front, 0f, 0, MouthWidth, MouthHeight) },
+                // The docking collar on the back wall, facing into the bay: the game docks at (0.5, 0.5, 0.25) of a docking door's frame
+                Offset = new Vector3(0.5f, -0.5f, 0.25f + HangarLength * 0.5f - Wall),
+                Cost = new[] { (Iron, 120), (Titanium, 40), (Copper, 20), (Glass, 10) },
+                Description = Loc.Pick("Un hangar de 12 × 8 × 20 m : un vaisseau entier y entre par la grande porte (10,8 × 7,2 m) et s'amarre par sa porte d'amarrage au collier magnétique du mur du fond (signal > 0 sur la prise de commande pour l'aimant, comme le module d'amarrage). Aire d'atterrissage, rampes de lumière, portique. Une porte normale au fond, à gauche, vers la station. Un champ de force sur la grande porte garde l'air.", "A 12 × 8 × 20 m hangar: a whole ship flies in through the big door (10.8 × 7.2 m) and docks with its docking door to the magnetic collar on the back wall (signal > 0 on the command socket for the magnet, like the docking module). Landing pad, light rails, gantry. A normal door at the back, on the left, into the station. A force field on the big door keeps the air in.", "Un hangar de 12 × 8 × 20 m: una nave entera entra por la gran puerta (10,8 × 7,2 m) y se acopla con su puerta de atraque al collar magnético de la pared del fondo (señal > 0 en la toma de mando para el imán, como el módulo de atraque). Plataforma de aterrizaje, rieles de luz, pórtico. Una puerta normal al fondo, a la izquierda, hacia la estación. Un campo de fuerza en la gran puerta guarda el aire."),
+                Interior = Hangar
+            },
+            new Spec
+            {
                 Id = TubeId, Label = Loc.Pick("Couloir cylindrique", "Cylindrical corridor", "Pasillo cilíndrico"), Mass = 420f, Size = new Vector3(3.4f, 3.25f, 4f), Openings = Side.Back | Side.Front, Row = 3, Shape = Shape.Tube,
                 Cost = new[] { (Iron, 18), (Titanium, 5) },
                 Description = Loc.Pick("Un couloir en tube de 4 m, rond comme un module de station orbitale, avec des arceaux lumineux.", "A 4 m tube corridor, round like an orbital station module, with lit hoops.", "Un pasillo tubular de 4 m, redondo como un módulo de estación orbital, con aros iluminados."),
@@ -284,7 +304,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             // Furniture takes the interior color of the module's paint
             shell.Inside = true;
             spec.Interior?.Invoke(shell);
-            if (spec.Id != AirlockId && spec.Id != DockingId)
+            if (spec.Id != AirlockId && spec.Id != DockingId && spec.Id != HangarId)
                 Usable.SwitchPlate(spec, shell);
             shell.Attach(visuals, "Module" + spec.Id, spec.Offset);
             shell.AttachColliders(prefab, spec.Offset);
@@ -300,7 +320,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 Usable.Console(prefab, spec.Offset + new Vector3(0f, 0.85f, 0f), new Vector3(1.8f, 0.3f, 1.8f));
             if (spec.Id == LaboratoryId)
                 Usable.Console(prefab, spec.Offset + new Vector3(-(size.x * 0.5f - Wall - 0.35f), 1.1f, -0.3f), new Vector3(0.65f, 0.4f, 2f));
-            if (spec.Id != AirlockId && spec.Id != DockingId)
+            if (spec.Id != AirlockId && spec.Id != DockingId && spec.Id != HangarId)
                 Usable.LightSwitch(spec, prefab, shell);
             if (spec.Id == AirlockId)
                 prefab.transform.Find("TFA_ModuleColliders")?.gameObject.AddComponent<AirlockColliders>();
@@ -317,7 +337,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             var bounds = prefab.GetComponent<ShipPartBounds>();
             // The oxygen supply under the floor at the back; the docking magnet's command beside it
             PowerParts.GraftSeated(prefab, bounds, spec.AirSocket, CableType.Fluid, spec.Offset + new Vector3(0.4f, Wall * 0.5f, -size.z * 0.5f), Vector3.back);
-            if (spec.Id == DockingId)
+            if (spec.Id == DockingId || spec.Id == HangarId)
                 PowerParts.GraftSeated(prefab, bounds, 0, CableType.Signal, spec.Offset + new Vector3(-0.4f, Wall * 0.5f, -size.z * 0.5f), Vector3.back);
             if (spec.Id == LifeSupportId)
             {
@@ -709,6 +729,57 @@ namespace StellarDriveDemoTFAdvanced.Construction
             s.Solid(new Vector3(rx, top * 0.5f, z - 0.125f), new Vector3(0.25f, top, 0.25f));
         }
 
+        // A ship hangar: the docking collar on the back wall, a landing pad, light rails, a gantry
+        private static void Hangar(Shell s)
+        {
+            float w = s.Size.x, h = s.Size.y, l = s.Size.z;
+            float back = -l * 0.5f + Wall;
+            // The magnetic collar (2 x 2 m like the game's docking door) on the back wall, its frame
+            // standing out into the bay, amber lights on it, a dark recess behind it
+            float rx = 1.1f, top = 2.1f;
+            s.Dark.Box(new Vector3(0f, 1.05f, back + 0.01f), new Vector3(2.2f, 2.1f, 0.02f));
+            foreach (float x in new[] { -rx, rx })
+            {
+                s.Armor.Box(new Vector3(x, top * 0.5f, back + 0.125f), new Vector3(0.25f, top, 0.25f));
+                s.Solid(new Vector3(x, top * 0.5f, back + 0.125f), new Vector3(0.25f, top, 0.25f));
+                for (int i = 0; i < 6; i++)
+                    s.Amber.Box(new Vector3(x, 0.2f + (i + 0.5f) / 6f * (top - 0.4f), back + 0.26f), new Vector3(0.12f, 0.06f, 0.02f));
+            }
+            s.Armor.Box(new Vector3(0f, top, back + 0.125f), new Vector3(2f * rx + 0.25f, 0.25f, 0.25f));
+            // The landing pad: a ring and a cross in the middle of the bay, hazard stripes along the walls
+            Vector3 pad = new Vector3(0f, Wall + 0.004f, 1f);
+            for (int i = 0; i < 32; i++)
+            {
+                float a = i * Mathf.PI * 2f / 32f;
+                s.Amber.Box(pad + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * 3.4f, new Vector3(0.7f, 0.008f, 0.18f), Quaternion.Euler(0f, -a * Mathf.Rad2Deg + 90f, 0f));
+            }
+            s.Light.Box(pad, new Vector3(0.25f, 0.008f, 4.6f));
+            s.Light.Box(pad, new Vector3(4.6f, 0.008f, 0.25f));
+            foreach (float side in new[] { -1f, 1f })
+            {
+                for (float z = back + 0.5f; z < l * 0.5f - 0.3f; z += 1f)
+                    (Mathf.RoundToInt(z) % 2 == 0 ? s.Amber : s.Dark).Box(new Vector3(side * (w * 0.5f - Wall - 0.5f), Wall + 0.004f, z), new Vector3(0.6f, 0.008f, 0.5f));
+                // Light rails up the walls, guiding lights along the floor toward the collar
+                for (float z = back + 2f; z < l * 0.5f - 0.5f; z += 3f)
+                    s.Light.Box(new Vector3(side * (w * 0.5f - Wall - 0.02f), h * 0.5f, z), new Vector3(0.03f, h - 1.2f, 0.08f));
+                for (float z = back + 1.5f; z < l * 0.5f; z += 2.2f)
+                    s.Glow.Box(new Vector3(side * 1.6f, Wall + 0.02f, z), new Vector3(0.18f, 0.03f, 0.18f));
+            }
+            // A gantry under the ceiling: two rails along the bay and a crossbeam with a hoist
+            foreach (float side in new[] { -1f, 1f })
+                s.Armor.Box(new Vector3(side * (w * 0.5f - 1.2f), h - Wall - 0.35f, 0f), new Vector3(0.3f, 0.4f, l - 0.6f));
+            s.Armor.Box(new Vector3(0f, h - Wall - 0.75f, -2f), new Vector3(w - 2.2f, 0.35f, 0.5f));
+            s.Dark.Box(new Vector3(2f, h - Wall - 1.2f, -2f), new Vector3(0.7f, 0.55f, 0.7f));
+            s.Dark.Cylinder(new Vector3(2f, h - Wall - 1.45f, -2f), new Vector3(2f, h - 3.4f, -2f), 0.03f, 0.03f, 6);
+            s.Amber.Box(new Vector3(2f, h - 3.5f, -2f), new Vector3(0.35f, 0.2f, 0.35f));
+            // Crates by the back wall, right side
+            s.Crate.Box(new Vector3(w * 0.5f - 1.4f, Wall + 0.5f, back + 0.9f), new Vector3(1f, 1f, 1f));
+            s.Crate.Box(new Vector3(w * 0.5f - 1.4f, Wall + 1.35f, back + 0.9f), new Vector3(0.7f, 0.7f, 0.7f));
+            s.Crate.Box(new Vector3(w * 0.5f - 2.6f, Wall + 0.4f, back + 0.8f), new Vector3(0.8f, 0.8f, 0.8f));
+            s.Solid(new Vector3(w * 0.5f - 1.4f, Wall + 0.85f, back + 0.9f), new Vector3(1f, 1.7f, 1f));
+            s.Solid(new Vector3(w * 0.5f - 2.6f, Wall + 0.4f, back + 0.8f), new Vector3(0.8f, 0.8f, 0.8f));
+        }
+
         /// <summary>
         /// A module's hull: floor, ceiling, walls with doorways and windows, ribs outside and lights
         /// inside. Gathers the model and the collider boxes.
@@ -994,10 +1065,10 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     float u = -length * 0.5f;
                     foreach (Door door in doors.Where(d => d.Level == level).OrderBy(d => d.Offset))
                     {
-                        float a = door.Offset - DoorWidth * 0.5f, b = door.Offset + DoorWidth * 0.5f;
+                        float a = door.Offset - door.W * 0.5f, b = door.Offset + door.W * 0.5f;
                         Band(spec, side, u, a, y0, y1, windows);
-                        Panel(side, a, b, y0 + DoorHeight, y1);
-                        DoorFrame(At(side, door.Offset, y0, 0f), Along(side), Normal(side));
+                        Panel(side, a, b, y0 + door.H, y1);
+                        DoorFrame(At(side, door.Offset, y0, 0f), Along(side), Normal(side), door.W, door.H);
                         u = b;
                     }
                     Band(spec, side, u, length * 0.5f, y0, y1, windows);
@@ -1056,21 +1127,22 @@ namespace StellarDriveDemoTFAdvanced.Construction
             }
 
             // A white-edged frame and a yellow-black threshold around a doorway
-            private void DoorFrame(Vector3 at, Vector3 along, Vector3 outward)
+            private void DoorFrame(Vector3 at, Vector3 along, Vector3 outward, float width = DoorWidth, float height = DoorHeight)
             {
                 Vector3 across = Vector3.Cross(Vector3.up, along);
                 Vector3 Size3(float a, float up, float o) => along * a + Vector3.up * up + new Vector3(Mathf.Abs(across.x), 0f, Mathf.Abs(across.z)) * o;
                 Vector3 Abs(Vector3 v) => new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
                 foreach (float s in new[] { -1f, 1f })
                 {
-                    Armor.Box(at + along * s * (DoorWidth * 0.5f + 0.04f) + Vector3.up * DoorHeight * 0.5f, Abs(Size3(0.08f, DoorHeight, Wall + 0.06f)));
-                    Light.Box(at + along * s * (DoorWidth * 0.5f) + Vector3.up * DoorHeight * 0.5f + outward * 0.0f, Abs(Size3(0.012f, DoorHeight - 0.1f, Wall + 0.08f)));
+                    Armor.Box(at + along * s * (width * 0.5f + 0.04f) + Vector3.up * height * 0.5f, Abs(Size3(0.08f, height, Wall + 0.06f)));
+                    Light.Box(at + along * s * (width * 0.5f) + Vector3.up * height * 0.5f + outward * 0.0f, Abs(Size3(0.012f, height - 0.1f, Wall + 0.08f)));
                 }
-                Armor.Box(at + Vector3.up * (DoorHeight + 0.04f), Abs(Size3(DoorWidth + 0.16f, 0.08f, Wall + 0.06f)));
-                for (int i = 0; i < 6; i++)
+                Armor.Box(at + Vector3.up * (height + 0.04f), Abs(Size3(width + 0.16f, 0.08f, Wall + 0.06f)));
+                int stripes = Mathf.Max(6, Mathf.RoundToInt(width / 0.27f) / 2 * 2);
+                for (int i = 0; i < stripes; i++)
                 {
                     MeshBuilder stripe = i % 2 == 0 ? Amber : Dark;
-                    stripe.Box(at + along * (-DoorWidth * 0.5f + DoorWidth * (i + 0.5f) / 6f) + Vector3.up * (Wall + 0.004f), Abs(Size3(DoorWidth / 6f, 0.008f, Wall)));
+                    stripe.Box(at + along * (-width * 0.5f + width * (i + 0.5f) / stripes) + Vector3.up * (Wall + 0.004f), Abs(Size3(width / stripes, 0.008f, Wall)));
                 }
             }
 

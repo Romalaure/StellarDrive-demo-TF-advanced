@@ -17,6 +17,7 @@ Onglet **TF Station**. Un module se pose **seul, directement dans l'espace ou au
 | Sas de dépressurisation | 3 × 3 m | deux portes étanches et un levier (voir plus bas) |
 | Module de stockage | 4 × 4 m | étagères ; terminal d'inventaire au fond (10 emplacements) |
 | Module d'amarrage | 3 × 4 m | sas avec collier d'amarrage magnétique au bout |
+| Hangar à vaisseaux | 12 × 8 × 20 m | un vaisseau entier entre par la grande porte (10,8 × 7,2 m) et s'amarre au collier du mur du fond ; aire d'atterrissage, portique |
 | Support de panneaux solaires | mât et deux ailes de 3 m | jusqu'à 3 000 W au soleil |
 | Laboratoire | 4 × 4 m | une **vraie table de recherche** (on y fait sa recherche), paillasses, flacons, étagères ; hublots |
 | Infirmerie de clonage | 4 × 4 m | une **vraie capsule de clonage** (point de réapparition), deux lits médicaux, écrans, armoire à pharmacie |

@@ -38,6 +38,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         TeleporterDestinations = 41,
         /// <summary>Client to server: teleport me to Text = p (planet A) or s/b (ship A, beacon part B).</summary>
         TeleporterGo = 42,
+        /// <summary>Client to server: make the merchant offer A, B times.</summary>
+        Trade = 50,
+        /// <summary>Server to one client: how the trade went (B = times done), Text is for the player.</summary>
+        TradeResult = 51,
 
         /// <summary>Client to server: copy the ship A (and what is attached to it) as schematic Text.</summary>
         SchematicCopy = 30,

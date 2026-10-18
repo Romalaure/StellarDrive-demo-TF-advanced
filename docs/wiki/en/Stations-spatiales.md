@@ -17,6 +17,7 @@
 | Airlock | 3 × 3 m | two airtight doors and a lever (see below) |
 | Storage module | 4 × 4 m | shelves; inventory terminal at the far end (10 slots) |
 | Docking module | 3 × 4 m | airlock with a magnetic docking collar at its end |
+| Ship hangar | 12 × 8 × 20 m | a whole ship flies in through the big door (10.8 × 7.2 m) and docks to the collar on the back wall; landing pad, gantry |
 | Solar panel mount | mast and two 3 m wings | up to 3,000 W in sunlight |
 | Laboratory | 4 × 4 m | a **real research table** (you research there), benches, flasks, shelves; portholes |
 | Cloning infirmary | 4 × 4 m | a **real clone pod** (respawn point), two medical beds, screens, medicine cabinet |

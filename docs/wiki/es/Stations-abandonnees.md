@@ -10,6 +10,7 @@ Las estaciones de una versión anterior del mod se reconstruyen (con su puerta) 
 
 | Nombre de la baliza | Dónde | Notas |
 |---|---|---|
+| Comptoir Hermès (puesto comercial Hermès) | cerca de TF Sylvara | **estación comercial** cuidada: hangar de naves, dos terminales de comercio (tecla T) para cambiar minerales por hallazgos raros |
 | Station Kepler (Estación Kepler) | lejos de TF Verdance | la más grande; núcleos cuánticos, aleación, titanio, criónita |
 | Avant-poste Orion (Puesto avanzado Orión) | cerca de TF Aridia | núcleos cuánticos, aleación, cuarzo, artefactos |
 | Sonde Hadès (Sonda Hades) | cerca del agujero negro de Petra | gran sonda de investigación: anillo gravimétrico, gran antena, pértiga de sensores, alas solares; materia exótica; refugio contra la gravedad del agujero negro (3 km) |

@@ -17,6 +17,7 @@ Pestaña **TF Station**. Un módulo se puede colocar **solo, directamente en el 
 | Esclusa | 3 × 3 m | dos puertas estancas y una palanca (ver abajo) |
 | Módulo de almacén | 4 × 4 m | estanterías; terminal de inventario al fondo (10 casillas) |
 | Módulo de atraque | 3 × 4 m | esclusa con un collar de atraque magnético en su extremo |
+| Hangar de naves | 12 × 8 × 20 m | una nave entera entra por la gran puerta (10,8 × 7,2 m) y se acopla al collar de la pared del fondo; plataforma de aterrizaje, pórtico |
 | Soporte de paneles solares | mástil y dos alas de 3 m | hasta 3.000 W a pleno sol |
 | Laboratorio | 4 × 4 m | una **mesa de investigación real** (se investiga allí), bancos, matraces, estanterías; ojos de buey |
 | Enfermería de clonación | 4 × 4 m | una **cápsula de clonación real** (punto de reaparición), dos camas médicas, pantallas, botiquín |

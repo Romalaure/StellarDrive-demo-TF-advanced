@@ -64,6 +64,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             public int Version = 4;
             /// <summary>The part dressing its hull (prow, engines, plating, torn edges...), 0 for none; see <see cref="WreckDecor"/>.</summary>
             public ushort Decor;
+            /// <summary>A trading station: a ship hangar on the first module's +x side, merchant terminals in the hangar and the first module.</summary>
+            public bool Merchant;
         }
 
         public static readonly StationSpec[] All =
@@ -86,6 +88,23 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     b.Module(-17, 0, -2, -12, 3, 2);
                     b.Module(-1, 4, -1, 1, 8, 1);           // tower
                     b.Entrance(0, 0, 16, 2);
+                }
+            },
+            new StationSpec
+            {
+                // Still kept up by a trader: lit, whole, a hangar to park in and two counters
+                Name = "Comptoir Hermès (marchand)", AnchorPlanet = 107, Offset = new Vector3(-9e6f, 2e6f, -1.1e7f), Seed = 131, Breaches = 0.1f, Merchant = true,
+                Band = new Color32(230, 180, 40, 255), Outside = new Color32(70, 80, 100, 255), Inside = new Color32(190, 180, 160, 255),
+                Rare = new[] { (Items.ModItems.GoldBar, 1, 2, 0.3), (Items.ModItems.Titanium, 3, 8, 0.4) },
+                Build = b =>
+                {
+                    // The trading hall (the hangar on its +x side), a corridor, the trader's quarters
+                    // with the docking door at the far end, a lookout tower
+                    b.Module(-3, 0, -3, 3, 3, 3, 0.4f);
+                    b.Module(-10, 0, -1, -4, 2, 1);
+                    b.Module(-15, 0, -3, -11, 3, 3);
+                    b.Module(-1, 4, -1, 1, 6, 1, 0.8f);
+                    b.Entrance(-15, 0, -1, 1);
                 }
             },
             new StationSpec
@@ -568,6 +587,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
             private readonly List<(ushort Weapon, Vector3 At, int Forward)> _batteries = new List<(ushort, Vector3, int)>();
             private readonly List<(int X, int Y, int Z, int Face)> _doors = new List<(int, int, int, int)>();
+            // Floating parts with a docking collar (the hangar): their door states
+            private readonly List<int> _collars = new List<int>();
 
             /// <summary>The docking doors (interior voxel, outer face), for the development photos.</summary>
             public IReadOnlyList<(int X, int Y, int Z, int Face)> Doors => _doors;
@@ -763,6 +784,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 }
 
                 Furnish(floating, storages, ref nextPart);
+                if (Spec != null && Spec.Merchant)
+                    Merchant(floating, ref nextPart);
 
                 // Cargo rows: supply crates, most of them emptied long ago
                 foreach (var c in _cargo)
@@ -816,6 +839,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 sb.Append("\"statefulFloatingParts\":[").Append(string.Join(",", floating)).Append("],");
                 var doors = new List<string>();
                 var doorStates = new List<string>();
+                foreach (int collar in _collars)
+                    doorStates.Add($"{{\"partId\":{collar},\"isOpen\":true,\"isDocked\":false,\"dockedShipId\":0,\"dockedPartId\":0}}");
                 foreach ((int x, int y, int z, int face) in _doors)
                 {
                     // In the save format a wall belongs to the voxel behind it on its -z / -x side
@@ -839,6 +864,29 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 sb.Length--;
                 sb.Append("}]}");
                 return sb.ToString();
+            }
+
+            /// <summary>
+            /// The trading station's own parts: a ship hangar against the first module's +x wall,
+            /// its mouth facing out, a merchant terminal by its back wall, another in the hall.
+            /// </summary>
+            private void Merchant(List<string> floating, ref int nextPart)
+            {
+                var hall = _modules[0];
+                // The hangar's frame: its bay along +x (forward 1), its width along z; the docking
+                // collar's point is 0.5 m to the side and 0.25 m out of the frame's origin
+                var origin = new Vector3(hall.x1 + 0.6f, hall.y0, Mathf.Round((hall.z0 + hall.z1) * 0.5f) + 0.5f);
+                floating.Add(Floating(nextPart, Construction.StationModules.HangarId, origin, 1, 4));
+                _collars.Add(nextPart);
+                nextPart++;
+                if (!TFItems.TFItemsMod.Active)
+                    return;
+                // In the hangar, between the collar and the small back door, its counter facing into
+                // the bay (the terminal's front is its -z: turned to -x, the front looks +x)
+                floating.Add(Floating(nextPart++, TFItems.Devices.Trader.TerminalId, origin + new Vector3(1.15f, -0.33f, 1.9f), 3, 4));
+                // In the hall, against the far wall from the hangar, facing the room
+                if (Take(hall, hall.x0, (hall.z0 + hall.z1) / 2) is Vector2Int counter)
+                    floating.Add(Floating(nextPart++, TFItems.Devices.Trader.TerminalId, new Vector3(counter.x, hall.y0 - 0.5f + 0.04f, counter.y), 3, 4));
             }
 
             // A free floor cell of a module, or null

@@ -62,6 +62,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Power.FieldDoor.Install();
             Devices.Outfits.Install();
             Devices.Teleporter.Install();
+            Devices.Trader.Install();
             if (ToolsActive)
             {
                 Paint.PaintNet.InstallSerializers();
@@ -81,6 +82,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             attempt("the teleport capsule", Devices.TeleportCapsule.Register);
             attempt("the radio", Devices.Radio.Register);
             attempt("the cosmetic cabin", Devices.CosmeticCabin.Register);
+            attempt("the merchant terminal", Devices.Trader.Register);
             attempt("the tool rack", Devices.ToolRack.Register);
         }
 
@@ -131,6 +133,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Power.FieldDoorManagerMenu.Draw();
             Devices.CabinMenu.Draw();
             Devices.TeleporterMenu.Draw();
+            Devices.TraderMenu.Draw();
             Devices.Teleporter.DrawHint();
             if (ToolsActive)
             {

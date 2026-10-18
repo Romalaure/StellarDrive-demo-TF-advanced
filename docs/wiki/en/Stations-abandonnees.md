@@ -10,6 +10,7 @@ Stations from an older version of the mod are rebuilt (with their door) when the
 
 | Beacon name | Where | Notes |
 |---|---|---|
+| Comptoir Hermès (Hermès trading post) | near TF Sylvara | **trading station**, kept up: a ship hangar, two merchant terminals (T key) to trade ores for rare finds |
 | Station Kepler (Kepler Station) | far from TF Verdance | the biggest; quantum cores, alloy, titanium, cryonite |
 | Avant-poste Orion (Orion Outpost) | near TF Aridia | quantum cores, alloy, quartz, artifacts |
 | Sonde Hadès (Hades Probe) | near Petra's black hole | big research probe: gravimetric ring, large dish, sensor boom, solar wings, glazed observation deck; exotic matter; shelter from the black hole's gravity (3 km) |
