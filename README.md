@@ -10,6 +10,17 @@ Mods avancés du groupe TF pour **StellarDrive Demo** : ordinateur de bord, mote
 
 Rapport technique (moteur, systèmes du jeu, faisabilité de chaque projet) : [docs/AUDIT.md](docs/AUDIT.md).
 
+### Mods à installer
+
+| Mod | | Pourquoi |
+|---|---|---|
+| **MelonLoader 0.7.3** | **obligatoire** | le chargeur de mods du jeu |
+| **SDModKit** | **obligatoire** | sans lui, les pièces du mod, les câbles d'objets et la caméra ne fonctionnent pas (erreurs et pièces manquantes) |
+| **Arsenal** | recommandé | les armes du jeu : sans lui, pas de pirates ni de raids, et les champs de force n'arrêtent pas les tirs |
+| TF (`StellarDriveDemoTF`) | facultatif | si vous l'avez, **version 0.15 ou plus** (les plus anciennes entrent en conflit avec l'équipement TF de ce mod) |
+
+En multijoueur, tous les joueurs doivent avoir **la même version** de TF Advanced et de SDModKit.
+
 ## En images
 
 ![Vue d'ensemble du mod](docs/images/overview.jpg)

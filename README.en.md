@@ -4,7 +4,20 @@
 
 *[Version française](README.md)*
 
-Advanced mods by the TF group for **StellarDrive Demo**, in a single MelonLoader DLL, independent of the `StellarDriveDemoTF` mod:
+Advanced mods by the TF group for **StellarDrive Demo**, in a single MelonLoader DLL, independent of the `StellarDriveDemoTF` mod.
+
+### Mods to install
+
+| Mod | | Why |
+|---|---|---|
+| **MelonLoader 0.7.3** | **required** | the game's mod loader |
+| **SDModKit** | **required** | without it the mod's parts, item cables and camera do not work (errors and missing parts) |
+| **Arsenal** | recommended | the weapons: without it there are no pirates or raids, and force fields do not stop shots |
+| TF (`StellarDriveDemoTF`) | optional | if you have it, **version 0.15 or newer** (older ones clash with this mod's TF equipment) |
+
+In multiplayer, every player needs **the same version** of TF Advanced and SDModKit.
+
+What it adds:
 
 - **ship computer** screens showing live data from the game (flight, propulsion, power, diagnostics);
 - **engines**: vector thruster, heavy, precision, efficient, exotic matter, nuclear and dark matter engines;
