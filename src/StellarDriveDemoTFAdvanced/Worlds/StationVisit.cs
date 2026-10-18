@@ -57,7 +57,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     .Where(r => r.name.StartsWith("ship " + station.Id + " ")))
                 {
                     var colliders = root.GetComponentsInChildren<Collider>(true);
-                    AdvancedMod.Log.Msg($"dev:   {root.name} scene {root.scene.name} active {root.activeInHierarchy}: {colliders.Length} colliders ({colliders.Count(c => c.enabled && c.gameObject.activeInHierarchy)} active), {root.GetComponentsInChildren<Renderer>(true).Length} renderers");
+                    AdvancedMod.Log.Msg($"dev:   {root.name} scene {root.scene.name} active {root.activeInHierarchy}: {colliders.Length} colliders ({colliders.Count(c => c.enabled && c.gameObject.activeInHierarchy)} active), {root.GetComponentsInChildren<Renderer>(true).Length} renderers, "
+                        + $"{root.GetComponentsInChildren<DecorColliders>(true).Length} dressing(s) with {colliders.Count(c => c.GetComponentInParent<DecorColliders>() != null)} solid pieces");
                 }
                 yield return Wait(0.5f);
                 Move(station, new Vector3(18f, 10f, -32f), Quaternion.LookRotation(new Vector3(-18f, -9f, 32f).normalized, Vector3.up));

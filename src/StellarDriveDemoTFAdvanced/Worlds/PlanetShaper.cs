@@ -44,6 +44,31 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             physics.gravityInG = spec.Gravity;
             physics.rotationPeriod = spec.RotationHours;
             spec.Shape?.Invoke(new Context(planet));
+            if (Common.DevHarness.Active && spec.Id == 108)
+                LogTerrainGraph(planet.GetComponent<PlanetTerrain>(), spec.Name);
+        }
+
+        // Development: the terrain graph's steps, in their buffer order
+        private static void LogTerrainGraph(PlanetTerrain terrain, string name)
+        {
+            TerrainConfig c = terrain.terrainConfig;
+            var steps = new List<TerrainGenerationStep>();
+            steps.AddRange(c.noiseSteps ?? new NoiseStep[0]);
+            steps.AddRange(c.clampSteps ?? new ClampStep[0]);
+            steps.AddRange(c.absSteps ?? new AbsStep[0]);
+            steps.AddRange(c.craterSteps ?? new CraterStep[0]);
+            steps.AddRange(c.colorElevationSteps ?? new ColorElevationStep[0]);
+            steps.AddRange(c.addSteps ?? new AddStep[0]);
+            foreach (TerrainGenerationStep step in steps)
+            {
+                string detail = step is NoiseStep n ? $"strength {n.noiseConfig.strength} freq {n.noiseConfig.frequency} oct {n.noiseConfig.octaves} gain {n.noiseConfig.gain} lac {n.noiseConfig.lacunarity}"
+                    : step is ClampStep k ? $"min {k.min} max {k.max} smooth {k.smoothness}"
+                    : step is ColorElevationStep e ? $"below {e.bellowThreshold} smooth {e.smoothness} material {e.materialIndex}"
+                    : step is AddStep a ? $"input2 {a.inputId2}" : "";
+                AdvancedMod.Log.Msg($"dev: terrain {name}: {step.GetType().Name} {step.inputId} -> {step.outputId} {detail}");
+            }
+            for (int i = 0; i < terrain.materials.Length; i++)
+                AdvancedMod.Log.Msg($"dev: terrain {name}: material {i} {terrain.materials[i].albedoTexture?.name} tint {terrain.materials[i].albedoColor} tile {terrain.materials[i].tile}");
         }
 
         /// <summary>What a planet's shaping code can change.</summary>
@@ -79,6 +104,59 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 target.albedoColor = tint;
                 if (tile.HasValue)
                     target.tile = tile.Value;
+            }
+
+            /// <summary>
+            /// Several slots at once, each taking another slot's texture as it was before any of
+            /// them changed (to swap textures between slots) and a tint.
+            /// </summary>
+            public void Remap(params (int Slot, int TextureFrom, Color Tint)[] slots)
+            {
+                TerrainMaterialConfig[] materials = Terrain.materials;
+                var originals = materials.Select(m => (m.albedoTexture, m.normalMap, m.roughnessTexture, m.footstepSoundParam, m.tile)).ToArray();
+                foreach ((int slot, int from, Color tint) in slots)
+                {
+                    TerrainMaterialConfig target = materials[slot];
+                    (target.albedoTexture, target.normalMap, target.roughnessTexture, target.footstepSoundParam, target.tile) = originals[from];
+                    target.albedoColor = tint;
+                }
+            }
+
+            /// <summary>
+            /// Regional climates. The ground is <paramref name="cold"/> (the slot shown above every
+            /// threshold: snow) above a snowline that a broad noise field raises in warm regions and
+            /// lowers in cold ones (tundra there, snow only on the peaks elsewhere); below it
+            /// <paramref name="land"/>; below <paramref name="sea"/> (the real elevation),
+            /// <paramref name="seaSlot"/>. The noise is added to the elevation for the snowline's
+            /// coloring only and taken off right after, so the relief stays the same.
+            /// </summary>
+            public void Climate(float snowline, float sea, int land, int seaSlot, float strength, float frequency, Vector3 shift)
+            {
+                TerrainConfig config = Terrain.terrainConfig;
+                ColorElevationStep[] colors = config.colorElevationSteps;
+                if (colors.Length < 2 || config.noiseSteps.Length == 0)
+                    return;
+                ColorElevationStep band = colors[0], water = colors[1];
+                int input = StepIds.Input(band), output = StepIds.Output(band);
+                const int warmed = 81, colored = 82;
+                Planets.Terrain.Model.NoiseConfig climate = config.noiseSteps[0].noiseConfig;
+                climate.strength = strength;
+                climate.frequency = frequency;
+                // One octave: broad climate regions, and a cheap extra term for every terrain height the CPU evaluates
+                climate.octaves = 1;
+                climate.center += shift;
+                var add = new NoiseStep { noiseConfig = climate };
+                climate.strength = -strength;
+                var remove = new NoiseStep { noiseConfig = climate };
+                StepIds.Set(add, input, warmed);
+                StepIds.Set(band, warmed, colored);
+                StepIds.Set(remove, colored, output);
+                band.bellowThreshold = snowline;
+                band.smoothness = 40f;
+                band.materialIndex = land;
+                water.bellowThreshold = sea;
+                water.materialIndex = seaSlot;
+                config.noiseSteps = config.noiseSteps.Concat(new[] { add, remove }).ToArray();
             }
 
             /// <summary>Relief: noise strength and frequency multipliers, and a shift of the noise field (another landscape).</summary>

@@ -244,37 +244,40 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
             new PlanetSpec
             {
-                Id = 108, Name = "TF Gaïa", System = PlanetWiki.Erebos, MapColor = new Color(0.3f, 0.6f, 0.95f), Biome = "comme la Terre : océans, déserts, prairies, savanes, forêts, montagnes", OrbitAngle = -150f, OrbitScale = 1.2f, Gravity = 1f, RotationHours = 1.2f,
+                Id = 108, Name = "TF Gaïa", System = PlanetWiki.Erebos, MapColor = new Color(0.3f, 0.6f, 0.95f), Biome = "comme la Terre : océans, prairies, forêts, savanes, taïga, toundra, montagnes enneigées, grottes", OrbitAngle = -150f, OrbitScale = 1.2f, Gravity = 1f, RotationHours = 1.2f,
                 Shape = p =>
                 {
-                    // An Earth: deep blue oceans and lakes; sand beaches and deserts in the lowlands;
-                    // prairies, savannas and forests above, each in its own regions; high mountains
-                    // under snowy conifers (the game's terrain shader draws three ground textures:
-                    // water, sand and grass, so the snow is on the trees, not the ground)
-                    p.Relief(1.35f, 1.25f, new Vector3(-0.27f, 0.41f, 0.12f));
-                    p.Ceiling(4200f);
-                    p.Material(PlanetShaper.Ground, PlanetShaper.Ground, new Color(0.5f, 0.72f, 0.34f));
-                    p.Material(PlanetShaper.Shore, PlanetShaper.Shore, new Color(0.98f, 0.84f, 0.58f));
-                    p.Material(PlanetShaper.Water, PlanetShaper.Water, new Color(0.08f, 0.32f, 0.72f));
-                    p.Shoreline(250f, 150f);
+                    // An Earth. The terrain shader draws three ground textures: the ice texture,
+                    // whitened (its blue taken out by the tint), is the snow (shown above the snowline), the grass texture the land,
+                    // the sand texture tinted deep blue the sea floor. The snowline follows the
+                    // regions' climate: low in the cold ones (tundra and taiga), only on the high
+                    // peaks in the warm ones (prairies, broadleaf forests, savannas, palm coasts)
+                    p.Relief(1.5f, 1.25f, new Vector3(-0.27f, 0.41f, 0.12f));
+                    p.Ceiling(4600f);
+                    p.Remap((PlanetShaper.Ground, PlanetShaper.Water, new Color(1.7f, 1.38f, 1.08f)),
+                        (PlanetShaper.Shore, PlanetShaper.Ground, new Color(0.5f, 0.72f, 0.34f)),
+                        (PlanetShaper.Water, PlanetShaper.Shore, new Color(0.1f, 0.3f, 0.66f)));
+                    p.Climate(950f, 150f, PlanetShaper.Shore, PlanetShaper.Water, 420f, 30f, new Vector3(1.9f, -0.6f, 2.7f));
                     p.Sky(new Vector3(0.06f, 0.14f, 0.33f), 2.4f, 0.25f, 1f, clouds: true, breathable: true);
-                    // Forests: conifers and oak-birch woods in their own regions, autumn spots
-                    GameObject oak = p.Tree(TreeKind.Oak), birch = p.Tree(TreeKind.Birch), autumnOak = p.Tree(TreeKind.AutumnOak);
-                    p.Trees((p.TreePrefab("FirTreeTall1"), 80, 0.85f), (p.TreePrefab("FirTreeShort1"), 50, 0.7f),
-                        (oak, 90, 0.5f), (birch, 60, 0.2f), (autumnOak, 20, 0.4f));
-                    p.ForestDensity(0.35f);
-                    // Savannas: acacias, far apart, in their own regions
-                    p.AddForest(new Vector3(3.1f, -1.7f, 2.4f), -0.15f, 262f, (p.Tree(TreeKind.Acacia), 100, 0.2f), (p.TreePrefab("FirTreeDead1"), 15, 0f));
-                    // Tropical patches near the coasts: palms
-                    p.AddForest(new Vector3(-2.2f, 0.9f, -3.3f), -0.25f, 252f, (p.Tree(TreeKind.Palm), 100, 0f));
-                    // Mountains: dense snowy conifers (white firs) above 600 m
-                    p.AddForest(new Vector3(1.4f, 2.6f, -0.8f), 0.6f, 600f,
-                        (PlanetShaper.Tinted(p.TreePrefab("FirTreeTall1"), "snowy", new Color(1.7f, 1.8f, 1.9f)), 100, 0.8f),
-                        (PlanetShaper.Tinted(p.TreePrefab("FirTreeShort1"), "snowy", new Color(1.7f, 1.8f, 1.9f)), 60, 0.6f));
-                    // Prairies everywhere above the beaches: grass, flowers, bushes
+                    GameObject snowyTall = PlanetShaper.Tinted(p.TreePrefab("FirTreeTall1"), "snowy", new Color(1.7f, 1.8f, 1.9f));
+                    GameObject snowyShort = PlanetShaper.Tinted(p.TreePrefab("FirTreeShort1"), "snowy", new Color(1.7f, 1.8f, 1.9f));
+                    // Temperate woods: oaks, birches and firs, autumn spots (seen from space)
+                    p.Trees((p.Tree(TreeKind.Oak), 90, 0.5f), (p.Tree(TreeKind.Birch), 60, 0.2f), (p.Tree(TreeKind.AutumnOak), 20, 0.4f),
+                        (p.TreePrefab("FirTreeTall1"), 45, 0.85f), (p.TreePrefab("FirTreeShort1"), 30, 0.7f));
+                    p.ForestDensity(0.3f);
+                    // Taiga: dense snowy conifers in the cold regions' hills
+                    p.AddForest(new Vector3(1.9f, -0.6f, 2.7f), 0.45f, 520f, (snowyTall, 100, 0.85f), (snowyShort, 70, 0.6f), (p.TreePrefab("FirTreeTall1"), 25, 0.9f));
+                    // Savannas: acacias, far apart, dead trees in the dry spots
+                    p.AddForest(new Vector3(3.1f, -1.7f, 2.4f), -0.15f, 165f, (p.Tree(TreeKind.Acacia), 100, 0.2f), (p.TreePrefab("FirTreeDead1"), 15, 0f));
+                    // Tropical coasts: palms
+                    p.AddForest(new Vector3(-2.2f, 0.9f, -3.3f), -0.25f, 152f, (p.Tree(TreeKind.Palm), 100, 0f));
+                    // Prairies: grass, flowers, bushes
                     p.Undergrowth(0.6f, (PlanetShaper.Tinted(p.GrassPrefab, "prairie", new Color(0.95f, 1.08f, 0.7f)), 100),
                         (p.Plant(PlantKind.YellowFlowers), 10), (p.Plant(PlantKind.RedFlowers), 6), (p.Plant(PlantKind.WhiteFlowers), 6), (p.Plant(PlantKind.Bush), 8));
-                    p.FloraElevation(258f, 253f);
+                    p.FloraElevation(156f, 153f);
+                    // Caves in the hills, ice caves in the snowy mountains
+                    PointsOfInterest.Caves(p, CaveStyle.Rock, 0.7f, 380f, OreKind.Quartz);
+                    PointsOfInterest.Caves(p, CaveStyle.Ice, 0.6f, 1000f, OreKind.Cryonite);
                     PointsOfInterest.Village(p, RuinStyle.Mossy, 0.6f);
                     PointsOfInterest.Ruins(p, RuinStyle.Sandstone, 0.5f);
                     PointsOfInterest.Wrecks(p, 0.5f);

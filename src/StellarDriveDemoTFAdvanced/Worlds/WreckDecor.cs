@@ -19,7 +19,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
     /// the Vagabond's prow, ribs, container stacks, crane, torn-off engine section and nacelles;
     /// the Leviathan's dagger bow and blades, dorsal decks, dead turrets, bridge, hangar mouth and
     /// engine bank; the probe's gravimetric ring, dish, sensor boom and solar wings.
-    /// It has no collider (like the pirates' fairings).
+    /// Its big solid pieces collide (convex colliders, <see cref="DecorColliders"/>); the small
+    /// ones (greebles, torn plating, cables) do not.
     /// </summary>
     internal static class WreckDecor
     {
@@ -41,6 +42,15 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             public readonly MeshBuilder Solar = new MeshBuilder { DoubleSided = true };
             public readonly MeshBuilder Hazard = new MeshBuilder();
             public readonly MeshBuilder[] Cargo = { new MeshBuilder(), new MeshBuilder(), new MeshBuilder() };
+            // The big solid pieces (prows, blades, containers, nacelles...): each one a convex collider
+            public readonly List<MeshBuilder> Solids = new List<MeshBuilder>();
+
+            public MeshBuilder Solid()
+            {
+                var solid = new MeshBuilder();
+                Solids.Add(solid);
+                return solid;
+            }
         }
 
         public static void Register()
@@ -93,6 +103,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             Color[] cargo = { new Color(0.62f, 0.2f, 0.12f), new Color(0.15f, 0.3f, 0.52f), new Color(0.72f, 0.52f, 0.12f) };
             for (int i = 0; i < kit.Cargo.Length; i++)
                 Add(visuals, layer, key + "Cargo" + i, kit.Cargo[i], LitMaterials.Get("TFA_WreckCargo" + i, cargo[i], 0.4f, 0.3f));
+            DecorColliders.Attach(prefab, kit.Solids.Select((s, i) => s.Build(key + "Solid" + i)));
         }
 
         private static void Add(Transform parent, int layer, string name, MeshBuilder builder, Material material)
@@ -241,6 +252,25 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private static void Hex(MeshBuilder m, Vector3 bbl, Vector3 bbr, Vector3 bfl, Vector3 bfr, Vector3 tbl, Vector3 tbr, Vector3 tfl, Vector3 tfr) =>
             m.Block(new[] { bbl, bbr, tbl, tbr, bfl, bfr, tfl, tfr });
 
+        // The same, solid
+        private static void Hex(Kit k, MeshBuilder m, Vector3 bbl, Vector3 bbr, Vector3 bfl, Vector3 bfr, Vector3 tbl, Vector3 tbr, Vector3 tfl, Vector3 tfr)
+        {
+            Hex(m, bbl, bbr, bfl, bfr, tbl, tbr, tfl, tfr);
+            Hex(k.Solid(), bbl, bbr, bfl, bfr, tbl, tbr, tfl, tfr);
+        }
+
+        // A solid ring: one convex piece per segment
+        private static void SolidRing(Kit k, Vector3 center, Vector3 axis, float radius, float tube, int segments)
+        {
+            Vector3 a = Vector3.Cross(axis, Mathf.Abs(axis.y) < 0.9f ? Vector3.up : Vector3.right).normalized;
+            Vector3 b = Vector3.Cross(axis.normalized, a);
+            for (int i = 0; i < segments; i++)
+            {
+                float t0 = i * Mathf.PI * 2f / segments, t1 = (i + 1) * Mathf.PI * 2f / segments;
+                k.Solid().Cylinder(center + (a * Mathf.Cos(t0) + b * Mathf.Sin(t0)) * radius, center + (a * Mathf.Cos(t1) + b * Mathf.Sin(t1)) * radius, tube, tube, 6);
+            }
+        }
+
         // A thin torn plate: base a-b, narrowing to a point
         private static void Shard(MeshBuilder m, Vector3 a, Vector3 b, Vector3 tip, Vector3 n, float t)
         {
@@ -295,6 +325,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             Vector3 right = q * Vector3.right, up = q * Vector3.up, forward = q * Vector3.forward;
             paint.Box(c, size, right, up, forward);
+            k.Solid().Box(c, size, right, up, forward);
             int ribs = Mathf.Max(2, (int)(size.z / 0.32f));
             for (int i = 0; i < ribs; i++)
             {
@@ -317,6 +348,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             (lit ? k.Glow : k.Dark).Cylinder(at + dir * 0.66f, at + dir * 0.76f, r * 0.7f, r * 0.7f, 20);
             float bell = broken ? r * 0.6f : r * 1.35f;
             k.Shell.Cylinder(at + dir * 0.72f, at + dir * (0.72f + bell), r * 0.72f, r * (broken ? 0.95f : 1.18f), 20, false, false);
+            k.Solid().Cylinder(at - dir * 0.05f, at + dir * 0.72f, r * 1.05f, r * 0.94f, 12);
+            k.Solid().Cylinder(at + dir * 0.72f, at + dir * (0.72f + bell), r * 0.72f, r * (broken ? 0.95f : 1.18f), 12);
             Vector3 a = Vector3.Cross(dir, Mathf.Abs(dir.y) < 0.9f ? Vector3.up : Vector3.right).normalized, b = Vector3.Cross(dir, a);
             for (int i = 0; i < 4; i++)
             {
@@ -343,6 +376,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             float depth = radius * 0.28f;
             k.Shell.Cylinder(at, at + dir * depth * 0.6f, radius * 0.18f, radius * 0.75f, 28, true, false);
             k.Shell.Cylinder(at + dir * depth * 0.6f, at + dir * depth, radius * 0.75f, radius, 28, false, false);
+            k.Solid().Cylinder(at, at + dir * depth, radius * 0.18f, radius, 16);
             Ring(k.Trim, at + dir * depth, dir, radius, 0.06f, 28, 6);
             Vector3 a = Vector3.Cross(dir, Mathf.Abs(dir.y) < 0.9f ? Vector3.up : Vector3.right).normalized, b = Vector3.Cross(dir, a);
             Vector3 focus = at + dir * (depth + radius * 0.65f);
@@ -365,8 +399,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             Quaternion q = Quaternion.Euler(0f, yaw, 0f);
             Vector3 f = q * Vector3.forward, ri = q * Vector3.right, up = Vector3.up;
             k.Dark.Cylinder(at, at + up * 0.25f, 0.95f, 0.85f, 18);
+            k.Solid().Cylinder(at, at + up * 0.25f, 0.95f, 0.85f, 12);
             Vector3 b = at + up * 0.25f;
-            Hex(k.Plate,
+            Hex(k, k.Plate,
                 b - ri * 0.75f - f * 0.9f, b + ri * 0.75f - f * 0.9f, b - ri * 0.72f + f * 0.75f, b + ri * 0.72f + f * 0.75f,
                 b + up * 0.6f - ri * 0.62f - f * 0.8f, b + up * 0.6f + ri * 0.62f - f * 0.8f, b + up * 0.42f - ri * 0.55f + f * 0.35f, b + up * 0.42f + ri * 0.55f + f * 0.35f);
             k.Trim.Box(b + up * 0.66f - f * 0.35f, new Vector3(0.3f, 0.12f, 0.3f), ri, up, f);
@@ -408,16 +443,16 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             // pods x ±(4.5..8.5) y -0.5..2.5 z -14.5..-3.5; engine section ±4.5 y -0.5..3.5 z -28.5..-21.5
 
             // Chin and prow under the cockpit, a ram, cheek armour along the crew deck
-            Hex(k.Plate,
+            Hex(k, k.Plate,
                 new Vector3(-3.7f, -1.05f, 23f), new Vector3(3.7f, -1.05f, 23f), new Vector3(-2.6f, -1f, 32.6f), new Vector3(2.6f, -1f, 32.6f),
                 new Vector3(-3.6f, -0.53f, 23f), new Vector3(3.6f, -0.53f, 23f), new Vector3(-2.55f, -0.53f, 32.6f), new Vector3(2.55f, -0.53f, 32.6f));
-            Hex(k.Plate,
+            Hex(k, k.Plate,
                 new Vector3(-2.6f, -1f, 32.6f), new Vector3(2.6f, -1f, 32.6f), new Vector3(-0.5f, -0.75f, 36.5f), new Vector3(0.5f, -0.75f, 36.5f),
                 new Vector3(-2.55f, -0.53f, 32.6f), new Vector3(2.55f, -0.53f, 32.6f), new Vector3(-0.4f, 0.05f, 36f), new Vector3(0.4f, 0.05f, 36f));
             k.Dark.Cylinder(new Vector3(0f, -0.35f, 36.2f), new Vector3(0f, -0.35f, 38f), 0.2f, 0.02f, 8);
             k.Trim.Box(new Vector3(0f, 0.08f, 34f), new Vector3(0.12f, 0.06f, 3.4f));
             // Visor over the cockpit glass and its frame
-            Hex(k.Plate,
+            Hex(k, k.Plate,
                 new Vector3(-2.7f, 2.52f, 28.4f), new Vector3(2.7f, 2.52f, 28.4f), new Vector3(-2.4f, 2.52f, 33.4f), new Vector3(2.4f, 2.52f, 33.4f),
                 new Vector3(-2.5f, 2.95f, 28.4f), new Vector3(2.5f, 2.95f, 28.4f), new Vector3(-2.1f, 2.62f, 33.3f), new Vector3(2.1f, 2.62f, 33.3f));
             foreach (float x in new[] { -1.5f, -0.5f, 0.5f, 1.5f })
@@ -443,7 +478,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 if (z < 11f || z > 18f)
                     k.Trim.Box(new Vector3(0f, 3.62f, z), new Vector3(9.4f, 0.2f, 0.36f));
             }
-            Hex(k.Plate,
+            Hex(k, k.Plate,
                 new Vector3(-1.2f, -1.3f, -18f), new Vector3(1.2f, -1.3f, -18f), new Vector3(-1.2f, -1.3f, 20f), new Vector3(1.2f, -1.3f, 20f),
                 new Vector3(-3.5f, -0.72f, -18.2f), new Vector3(3.5f, -0.72f, -18.2f), new Vector3(-3.5f, -0.72f, 22f), new Vector3(3.5f, -0.72f, 22f));
             // Pod frames
@@ -480,6 +515,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
             // Cargo crane at the stern of the roof
             k.Plate.Cylinder(new Vector3(-2f, 3.5f, -17f), new Vector3(-2f, 4.1f, -17f), 0.6f, 0.5f, 14);
+            k.Solid().Cylinder(new Vector3(-2f, 3.5f, -17f), new Vector3(-2f, 8.3f, -17f), 0.6f, 0.5f, 8);
             Truss(k.Trim, new Vector3(-2f, 4.1f, -17f), new Vector3(-2f, 8f, -17f), 0.5f);
             Truss(k.Trim, new Vector3(-2f, 7.8f, -17.2f), new Vector3(2.5f, 9.2f, -10f), 0.4f);
             k.Dark.Cylinder(new Vector3(2.5f, 9.1f, -10f), new Vector3(2.6f, 5.8f, -10.2f), 0.025f, 0.025f, 5);
@@ -487,7 +523,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             k.Plate.Box(new Vector3(-2f, 8.3f, -17.3f), new Vector3(0.9f, 0.7f, 1f));
 
             // Bridge: visor, antenna mast, radar dish, sensor dome, lights on the corners
-            Hex(k.Plate,
+            Hex(k, k.Plate,
                 new Vector3(-3.7f, 7.52f, 11.3f), new Vector3(3.7f, 7.52f, 11.3f), new Vector3(-3.4f, 7.52f, 18.4f), new Vector3(3.4f, 7.52f, 18.4f),
                 new Vector3(-3.4f, 7.8f, 11.4f), new Vector3(3.4f, 7.8f, 11.4f), new Vector3(-3f, 7.62f, 18.2f), new Vector3(3f, 7.62f, 18.2f));
             Truss(k.Trim, new Vector3(-2f, 7.8f, 12.5f), new Vector3(-2f, 12.5f, 12.5f), 0.35f, 0.035f);
@@ -550,12 +586,13 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Vector3 front = new Vector3(s * 6.4f, 1.5f, -20.5f);
                 Vector3 back = torn ? new Vector3(s * 6.8f, 0.9f, -26.5f) : new Vector3(s * 6.4f, 1.5f, -30.5f);
                 k.Hull.Cylinder(front, back, 1.5f, 1.6f, 20, true, !torn);
+                k.Solid().Cylinder(front, back, 1.5f, 1.6f, 12);
                 k.Plate.Cylinder(front - Vector3.forward * 0.6f, front, 0.9f, 1.5f, 20);
                 Ring(k.Trim, Vector3.Lerp(front, back, 0.3f), back - front, 1.62f, 0.07f, 20, 5);
                 Ring(k.Trim, Vector3.Lerp(front, back, 0.7f), back - front, 1.65f, 0.07f, 20, 5);
                 Ring(k.Glow, Vector3.Lerp(front, back, 0.5f), back - front, 1.63f, 0.04f, 20, 5);
                 // Pylon to the hull
-                Hex(k.Plate,
+                Hex(k, k.Plate,
                     new Vector3(s * 4.5f, 0.8f, -27.5f), new Vector3(s * 5.2f, 1.1f, -27.5f), new Vector3(s * 4.5f, 0.8f, -22f), new Vector3(s * 5.2f, 1.1f, -22f),
                     new Vector3(s * 4.5f, 2.2f, -27f), new Vector3(s * 5.2f, 1.9f, -27f), new Vector3(s * 4.5f, 2.2f, -22.5f), new Vector3(s * 5.2f, 1.9f, -22.5f));
                 if (torn)
@@ -586,7 +623,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             // z -20.5..-16.5; bridge ±4.5 y 8.5..10.5 z -21.5..-15.5; engine block ±5.5 y -0.5..4.5 z -38.5..-30.5
 
             // Dagger bow over the forward module, to a ram
-            Hex(k.Plate,
+            Hex(k, k.Plate,
                 new Vector3(-2.8f, -0.85f, 38.55f), new Vector3(2.8f, -0.85f, 38.55f), new Vector3(-0.25f, -0.55f, 50f), new Vector3(0.25f, -0.55f, 50f),
                 new Vector3(-2.75f, 2.75f, 38.55f), new Vector3(2.75f, 2.75f, 38.55f), new Vector3(-0.15f, 0.25f, 50f), new Vector3(0.15f, 0.25f, 50f));
             k.Trim.Box(new Vector3(0f, 1.55f, 44.3f), new Vector3(0.14f, 0.1f, 11.6f), Quaternion.Euler(12.2f, 0f, 0f));
@@ -609,7 +646,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 foreach ((float z0, float z1) in new[] { (-30.3f, bayFrom), (bayTo, 32f) })
                 {
                     float o0 = Outer(z0), o1 = Outer(z1);
-                    Hex(k.Plate,
+                    Hex(k, k.Plate,
                         new Vector3(s * 3.52f, 0.95f, z0), new Vector3(s * o0, 1.1f, z0), new Vector3(s * 3.52f, 0.95f, z1), new Vector3(s * o1, 1.1f, z1),
                         new Vector3(s * 3.52f, 1.65f, z0), new Vector3(s * o0, 1.35f, z0), new Vector3(s * 3.52f, 1.65f, z1), new Vector3(s * o1, 1.35f, z1));
                     k.Trim.Cylinder(new Vector3(s * o0, 1.22f, z0), new Vector3(s * o1, 1.22f, z1), 0.09f, 0.09f, 6);
@@ -627,10 +664,10 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             }
 
             // Dorsal decks stepped along the spine (the beacon and its mast stand at z 0)
-            Hex(k.Hull,
+            Hex(k, k.Hull,
                 new Vector3(-2.8f, 3.53f, 2f), new Vector3(2.8f, 3.53f, 2f), new Vector3(-2.8f, 3.53f, 27f), new Vector3(2.8f, 3.53f, 27f),
                 new Vector3(-2.4f, 4.3f, 2.4f), new Vector3(2.4f, 4.3f, 2.4f), new Vector3(-2.2f, 4.3f, 25.5f), new Vector3(2.2f, 4.3f, 25.5f));
-            Hex(k.Plate,
+            Hex(k, k.Plate,
                 new Vector3(-1.8f, 4.3f, 6f), new Vector3(1.8f, 4.3f, 6f), new Vector3(-1.8f, 4.3f, 21f), new Vector3(1.8f, 4.3f, 21f),
                 new Vector3(-1.5f, 4.9f, 6.4f), new Vector3(1.5f, 4.9f, 6.4f), new Vector3(-1.4f, 4.9f, 20f), new Vector3(1.4f, 4.9f, 20f));
             for (int i = 0; i < 40; i++)
@@ -671,22 +708,22 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     (r.NextDouble() < 0.3 ? k.Red : k.Dark).Box(new Vector3(s * 3.64f, -0.25f, z + 2f), new Vector3(0.06f, 0.08f, 0.14f));
                 }
             }
-            Hex(k.Plate,
+            Hex(k, k.Plate,
                 new Vector3(-0.8f, -1.6f, -30f), new Vector3(0.8f, -1.6f, -30f), new Vector3(-0.6f, -1.3f, 31f), new Vector3(0.6f, -1.3f, 31f),
                 new Vector3(-3f, -0.6f, -30.5f), new Vector3(3f, -0.6f, -30.5f), new Vector3(-2.4f, -0.6f, 33f), new Vector3(2.4f, -0.6f, 33f));
 
             // Tower and bridge: sloped skirt, bridge wings, a mast, sensor globes (one smashed)
             foreach (float s in new[] { -1f, 1f })
             {
-                Hex(k.Plate,
+                Hex(k, k.Plate,
                     new Vector3(s * 1.55f, 3.52f, -21f), new Vector3(s * 3.2f, 3.52f, -21f), new Vector3(s * 1.55f, 3.52f, -16f), new Vector3(s * 3.2f, 3.52f, -16f),
                     new Vector3(s * 1.55f, 7f, -20.6f), new Vector3(s * 1.7f, 7f, -20.6f), new Vector3(s * 1.55f, 7f, -16.4f), new Vector3(s * 1.7f, 7f, -16.4f));
-                Hex(k.Plate,
+                Hex(k, k.Plate,
                     new Vector3(s * 4.52f, 9.3f, -21.2f), new Vector3(s * 7.5f, 9.5f, -20f), new Vector3(s * 4.52f, 9.3f, -15.8f), new Vector3(s * 7.5f, 9.5f, -17f),
                     new Vector3(s * 4.52f, 10.1f, -21.2f), new Vector3(s * 7.5f, 9.8f, -20f), new Vector3(s * 4.52f, 10.1f, -15.8f), new Vector3(s * 7.5f, 9.8f, -17f));
                 k.Red.Box(new Vector3(s * 7.55f, 9.7f, -18.5f), Vector3.one * 0.12f);
             }
-            Hex(k.Plate,
+            Hex(k, k.Plate,
                 new Vector3(-4.7f, 10.52f, -21.6f), new Vector3(4.7f, 10.52f, -21.6f), new Vector3(-4.4f, 10.52f, -15.2f), new Vector3(4.4f, 10.52f, -15.2f),
                 new Vector3(-4.3f, 10.9f, -21.4f), new Vector3(4.3f, 10.9f, -21.4f), new Vector3(-4f, 10.65f, -15.4f), new Vector3(4f, 10.65f, -15.4f));
             Truss(k.Trim, new Vector3(0f, 10.9f, -20f), new Vector3(0f, 16.5f, -20f), 0.45f, 0.04f);
@@ -714,6 +751,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             foreach (float z in new[] { -7.5f, -4.5f, 3.5f, 5.5f })
                 k.Glow.Box(new Vector3(10.84f, 3.35f, z), new Vector3(0.04f, 0.12f, 0.4f));
             k.Hull.Box(new Vector3(7f, 3.62f, -1f), new Vector3(7.2f, 0.22f, 15.2f));
+            k.Solid().Box(new Vector3(7f, 3.62f, -1f), new Vector3(7.2f, 0.22f, 15.2f));
 
             // Port bay: collapsed roof, twisted girders, debris
             for (int i = 0; i < 9; i++)
@@ -738,6 +776,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             {
                 Vector3 front = new Vector3(s * 6.6f, 1.5f, -27f), back = new Vector3(s * 6.6f, 1.5f, -38.6f);
                 k.Hull.Cylinder(front, back, 1.05f, 1.1f, 18);
+                k.Solid().Cylinder(front + Vector3.forward * 1.2f, back, 1.05f, 1.1f, 12);
                 k.Plate.Cylinder(front + Vector3.forward * 1.2f, front, 0.2f, 1.05f, 18);
                 Ring(k.Trim, Vector3.Lerp(front, back, 0.35f), Vector3.back, 1.12f, 0.06f, 18, 5);
                 Ring(k.Trim, Vector3.Lerp(front, back, 0.75f), Vector3.back, 1.14f, 0.06f, 18, 5);
@@ -774,6 +813,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             Vector3 hub = new Vector3(0f, 1.5f, 0f);
             const float radius = 17f;
             Ring(k.Hull, hub, Vector3.up, radius, 0.5f, 72, 10);
+            SolidRing(k, hub, Vector3.up, radius, 0.5f, 36);
             Ring(k.Glow, hub + Vector3.up * 0.02f, Vector3.up, radius - 0.5f, 0.12f, 72, 6);
             Ring(k.Trim, hub + Vector3.up * 0.52f, Vector3.up, radius, 0.08f, 72, 5);
             Ring(k.Trim, hub - Vector3.up * 0.52f, Vector3.up, radius, 0.08f, 72, 5);
@@ -783,6 +823,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Vector3 o = new Vector3(Mathf.Cos(t), 0f, Mathf.Sin(t));
                 Vector3 at = hub + o * radius;
                 k.Plate.Box(at, new Vector3(1.3f, 1.3f, 1.3f), Quaternion.LookRotation(o, Vector3.up));
+                k.Solid().Box(at, new Vector3(1.3f, 1.3f, 1.3f), Quaternion.LookRotation(o, Vector3.up));
                 k.Dark.Cylinder(at + Vector3.up * 0.65f, at + Vector3.up * 1.4f, 0.25f, 0.12f, 10);
                 k.Red.Cylinder(at + Vector3.up * 1.4f, at + Vector3.up * 1.55f, 0.13f, 0.13f, 10);
                 k.Glow.Box(at - o * 0.66f, new Vector3(0.7f, 0.25f, 0.04f), Quaternion.LookRotation(o, Vector3.up));
@@ -795,6 +836,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
             // The big dish over the observatory, on its mount
             k.Plate.Cylinder(new Vector3(0f, 11.5f, 0f), new Vector3(0f, 12.2f, 0f), 1.2f, 0.9f, 18);
+            k.Solid().Cylinder(new Vector3(0f, 11.5f, 0f), new Vector3(0f, 13.6f, -0.3f), 1.2f, 0.3f, 10);
             k.Trim.Cylinder(new Vector3(0f, 12.2f, 0f), new Vector3(0f, 13.6f, -0.3f), 0.3f, 0.25f, 10);
             Dish(k, new Vector3(0f, 13.8f, -0.2f), new Vector3(0f, 0.45f, 0.89f).normalized, 4.6f);
 
@@ -803,12 +845,14 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             foreach (float z in new[] { 13f, 17.5f, 21.5f })
             {
                 k.Plate.Cylinder(new Vector3(0f, 1f, z - 0.8f), new Vector3(0f, 1f, z + 0.8f), 0.55f, 0.55f, 14);
+                k.Solid().Cylinder(new Vector3(0f, 1f, z - 0.8f), new Vector3(0f, 1f, z + 0.8f), 0.55f, 0.55f, 10);
                 Ring(k.Glow, new Vector3(0f, 1f, z), Vector3.forward, 0.57f, 0.05f, 14, 5);
                 k.Dark.Cylinder(new Vector3(0.55f, 1f, z), new Vector3(1.6f, 1.6f, z), 0.04f, 0.02f, 5);
             }
             Vector3 tip = new Vector3(0f, 1f, 27f);
             k.Plate.Cylinder(new Vector3(0f, 1f, 25f), tip - Vector3.forward * 0.9f, 0.4f, 0.75f, 14);
             Sphere(k.Red, tip, 0.7f);
+            k.Solid().Cylinder(new Vector3(0f, 1f, 25f), tip + Vector3.forward * 0.95f, 0.95f, 0.95f, 10);
             for (int i = 0; i < 3; i++)
                 Ring(k.Trim, tip, Quaternion.Euler(0f, i * 60f, 0f) * Vector3.right, 0.95f, 0.05f, 24, 5);
             Ring(k.Trim, tip, Vector3.up, 0.95f, 0.05f, 24, 5);
@@ -822,6 +866,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     Vector3 c = new Vector3(s * 20.8f, 3f, z);
                     Quaternion tilt = Quaternion.Euler(0f, 0f, s * 12f);
                     k.Solar.Box(c, new Vector3(12f, 0.04f, 4.2f), tilt);
+                    k.Solid().Box(c, new Vector3(12f, 0.1f, 4.2f), tilt);
                     for (float x = -5.4f; x <= 5.5f; x += 1.2f)
                         k.Trim.Box(c + tilt * new Vector3(x, 0.03f, 0f), new Vector3(0.04f, 0.02f, 4.2f), tilt);
                     k.Trim.Box(c + tilt * new Vector3(0f, 0.03f, 0f), new Vector3(12f, 0.02f, 0.05f), tilt);
@@ -846,6 +891,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 {
                     Vector3 b = new Vector3(sx * 2.1f, 3.5f, sz * 2.1f);
                     k.Plate.Cylinder(b, b + Vector3.up * 1.6f, 0.36f, 0.36f, 12);
+                    k.Solid().Cylinder(b, b + Vector3.up * 1.75f, 0.38f, 0.38f, 8);
                     k.Glow.Cylinder(b + Vector3.up * 0.5f, b + Vector3.up * 1.1f, 0.38f, 0.38f, 12);
                     k.Trim.Cylinder(b + Vector3.up * 1.6f, b + Vector3.up * 1.75f, 0.25f, 0.2f, 10);
                 }
@@ -866,6 +912,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 (Mathf.RoundToInt(x / 0.5f) % 2 == 0 ? k.Hazard : k.Dark).Box(new Vector3(x + 0.25f, 1.65f, -3.58f), new Vector3(0.5f, 0.2f, 0.04f));
             // Observation deck: its bow frame
             k.Plate.Box(new Vector3(0f, 2.62f, 6.5f), new Vector3(5.4f, 0.22f, 6.2f));
+            k.Solid().Box(new Vector3(0f, 2.62f, 6.5f), new Vector3(5.4f, 0.22f, 6.2f));
             k.Trim.Box(new Vector3(0f, 1f, 9.58f), new Vector3(5.2f, 0.08f, 0.06f));
         }
     }

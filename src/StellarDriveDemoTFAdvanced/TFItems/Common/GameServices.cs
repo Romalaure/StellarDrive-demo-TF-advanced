@@ -1,6 +1,7 @@
 using Core.Services;
 using Players.Interface.Model;
 using Players.Interface.Services;
+using Players.Inventory;
 using Players.Services;
 using Ships.Cables;
 using Ships.Services;
@@ -20,6 +21,30 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         private static readonly CachedService<IPlayerPaintToolSelectionTracker> PaintSelectionCache = new CachedService<IPlayerPaintToolSelectionTracker>();
         private static readonly CachedService<CablesClientTracker> CablesClientCache = new CachedService<CablesClientTracker>();
         private static readonly CachedService<PlayersClientTracker> PlayersClientCache = new CachedService<PlayersClientTracker>();
+
+        private static readonly CachedService<PlayerToolbarProvider> ToolbarCache = new CachedService<PlayerToolbarProvider>();
+        private static ToolBelt _belt;
+        private static float _nextBeltLookup;
+
+        public static PlayerToolbarProvider Toolbar => ToolbarCache.Get();
+
+        /// <summary>
+        /// The local player's tool belt. Searching the scene for it every frame cost about 1.5 ms
+        /// per item checking whether it is held (teleporter, schematic tablet): looked up again
+        /// at most once per second while missing.
+        /// </summary>
+        public static ToolBelt Belt
+        {
+            get
+            {
+                if (_belt == null && Time.unscaledTime >= _nextBeltLookup)
+                {
+                    _belt = Object.FindFirstObjectByType<ToolBelt>();
+                    _nextBeltLookup = Time.unscaledTime + 1f;
+                }
+                return _belt;
+            }
+        }
 
         public static CablesClientTracker CablesClient => CablesClientCache.Get();
         public static PlayersClientTracker PlayersClient => PlayersClientCache.Get();
@@ -47,6 +72,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
             PaintSelectionCache.Reset();
             CablesClientCache.Reset();
             PlayersClientCache.Reset();
+            ToolbarCache.Reset();
+            _belt = null;
+            _nextBeltLookup = 0f;
         }
 
         private sealed class CachedService<T> where T : class

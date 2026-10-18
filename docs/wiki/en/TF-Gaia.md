@@ -4,31 +4,34 @@
 
 | | |
 |---|---|
-| Biome | like the Earth: oceans, beaches and deserts, prairies, savannas, forests, mountains |
+| Biome | like the Earth: oceans, prairies, forests, savannas, taiga, tundra, snowy mountains, caves |
 | Gravity | 1 g |
 | Air | breathable |
-| Flora | firs, oaks, birches, acacias, palms, snowy firs up high, flowering prairies |
+| Flora | oaks, birches, firs, acacias, palms, snowy firs, flowering prairies |
 
 ## Biomes
 
 - Blue **oceans and lakes** in the hollows (about a quarter of the planet).
-- Sand **beaches and deserts** in the lowlands.
-- Flowering **prairies** everywhere above the beaches, with, each in its own regions:
-  - **forests** of firs, oaks and birches (autumn spots);
+- Flowering **prairies** above the coasts, with, each in its own regions:
+  - **temperate woods** of oaks, birches and firs (autumn spots);
   - **savannas** of scattered acacias;
-  - **palm groves**.
-- **Mountains** under snowy firs above 600 m.
+  - **palm coasts**.
+- **Climates**: the snowline is low in the cold regions (**tundra** and a **taiga** of snowy firs from 500 m) and high in the warm ones (snow only on the peaks).
+- **Snowy mountains** over 1,000 m.
+- **Caves** in the hills (above 380 m) and **ice caves** in the mountains (above 1,000 m): a chamber under a rock mound, stalactites, stalagmites, glowing crystals and one or two ore deposits inside.
 
 ## Resources
 
 - amber
-- quartz
-- wood (firs, oaks, birches, acacias, palms)
+- quartz (deposits, caves)
+- cryonite (ice caves)
+- wood (oaks, birches, firs, acacias, palms)
 
 ## Places
 
 - villages
 - ruins
+- caves, ice caves
 - wrecks, freighters
 
 See also: [Resources](Ressources.md), [Cartography table](Machines.md) (shows this page in game).

@@ -267,6 +267,15 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Gaïa comme la Terre, fluidité, stations corrigées (v0.37)
+
+- **Fini le 1 image/seconde sur Gaïa** : ses quatre forêts plaçaient des arbres les uns dans les autres ; leur physique les faisait tomber en bûches, qui renversaient les voisins, en chaîne (des centaines par seconde). Sur les planètes du mod un arbre ne tombe plus qu'à un vrai choc (un vaisseau) ; le laser et les outils le coupent comme avant.
+- **Gaïa retravaillée** : océans, prairies et forêts tempérées, savanes, côtes à palmiers, **taïga** de sapins enneigés, **toundra** et **montagnes enneigées**. La limite des neiges suit le climat de chaque région : basse dans les régions froides, seulement sur les hauts sommets dans les chaudes. Plus de reliefs.
+- **Grottes** dans les collines (grandes salles de roche, cristaux violets ou turquoise) et **grottes de glace** en montagne : stalactites, stalagmites, cristaux lumineux, et du minerai à l'intérieur (quartz, cryonite).
+- **Arbres** : les cartes de feuillage ne montrent plus un morceau de la branche voisine (bords droits).
+- **Stations** : l'habillage des épaves posait un bloc invisible au milieu de la station ; il a maintenant de vraies collisions sur ses grosses pièces (proue, lames, conteneurs, nacelles, tuyères, anneau, antenne, panneaux). Les meubles ne bloquent plus les passages entre modules ni le haut des puits. Les stations sont reconstruites au chargement (leur contenu est remis à neuf).
+- **Optimisation** : le téléporteur et la tablette de schémas cherchaient la ceinture d'outils dans toute la scène à chaque image (~3 ms par image) ; la position des points d'intérêt est gardée au lieu d'être recalculée.
+
 ## Épaves géantes, sonde Hadès, cosmétiques ajustés (v0.36)
 
 - **Épave du Vagabond** : cargo lourd de 60 m, soute à cloisons, caisses, conteneurs sur le pont, grue, passerelle vitrée, nacelles, section moteur arrachée et débris.

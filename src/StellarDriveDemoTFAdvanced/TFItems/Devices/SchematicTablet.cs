@@ -78,8 +78,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         {
             if (GameServices.ShipsClient == null)
                 return false;
-            ToolBelt belt = Object.FindFirstObjectByType<ToolBelt>();
-            var toolbar = ServiceLocator.GetService<PlayerToolbarProvider>();
+            ToolBelt belt = GameServices.Belt;
+            var toolbar = GameServices.Toolbar;
             if (belt == null || toolbar == null)
                 return false;
             int selected = SelectedTool(belt).Get();

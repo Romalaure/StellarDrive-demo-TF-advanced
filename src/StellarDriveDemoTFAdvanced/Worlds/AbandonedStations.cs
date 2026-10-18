@@ -61,7 +61,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             /// <summary>A pirate base (with the Arsenal mod): armed, hostile, see <see cref="Combat.Pirates"/>.</summary>
             public bool Pirate;
             /// <summary>The stations' build this one last changed in: worlds saved before it get it rebuilt.</summary>
-            public int Version = 2;
+            public int Version = 4;
             /// <summary>The part dressing its hull (prow, engines, plating, torn edges...), 0 for none; see <see cref="WreckDecor"/>.</summary>
             public ushort Decor;
         }
@@ -108,7 +108,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Name = "Sonde Hadès (trou noir)", NearBlackHole = true, Offset = new Vector3(0f, 2.4e5f, 9.0e5f), Seed = 61,
                 Band = new Color32(200, 40, 40, 255), Outside = new Color32(70, 72, 78, 255), Inside = new Color32(120, 118, 125, 255),
                 Rare = new[] { (Items.ModItems.ExoticMatter, 1, 3, 0.8), (Items.ModItems.QuantumCore, 1, 1, 0.4), (Items.ModItems.Artifact, 1, 1, 0.25) },
-                Version = 3, Decor = WreckDecor.HadesId,
+                Decor = WreckDecor.HadesId,
                 Build = b =>
                 {
                     // A research probe: a core lab, a glazed observation deck toward the bow, two
@@ -135,7 +135,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Name = "Épave du Vagabond", AnchorPlanet = 112, Offset = new Vector3(6e6f, 1.5e6f, -4e6f), Seed = 101, Breaches = 4f, DarkMatter = 12,
                 Band = new Color32(40, 160, 150, 255), Outside = new Color32(120, 118, 112, 255), Inside = new Color32(90, 88, 84, 255),
                 Rare = new[] { (Items.ModItems.Meteorite, 2, 6, 0.6), (Items.ModItems.QuantumCore, 1, 1, 0.25), (Items.ModItems.NexoranAlloy, 2, 4, 0.35) },
-                Version = 3, Decor = WreckDecor.VagabondId,
+                Decor = WreckDecor.VagabondId,
                 Build = b =>
                 {
                     // A heavy freighter: a long cargo hold with bulkheads, side pods, the crew deck
@@ -171,7 +171,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Name = "Épave du Léviathan", AnchorPlanet = 114, Offset = new Vector3(-8e6f, -2e6f, 5e6f), Seed = 117, Breaches = 5f, DarkMatter = 20,
                 Band = new Color32(140, 60, 200, 255), Outside = new Color32(70, 70, 80, 255), Inside = new Color32(100, 96, 110, 255),
                 Rare = new[] { (Items.ModItems.ExoticMatter, 1, 2, 0.4), (Items.ModItems.QuantumCore, 1, 2, 0.35), (Items.ModItems.Meteorite, 3, 8, 0.6), (Items.ModItems.Artifact, 1, 1, 0.3) },
-                Version = 3, Decor = WreckDecor.LeviathanId,
+                Decor = WreckDecor.LeviathanId,
                 Build = b =>
                 {
                     // A capital ship: a long armoured spine cut by bulkheads, the bow, a hangar to
@@ -294,10 +294,11 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         /// <summary>
         /// The stations' build. Worlds saved with an older one get their stations replaced when
         /// loaded (version 2: docking door entrance, furnishing, outside equipment; version 3: the
-        /// Vagabond, the Leviathan and the Hades probe, rebuilt big), only those whose
+        /// Vagabond, the Leviathan and the Hades probe, rebuilt big; version 4: furniture kept out of
+        /// the passages between modules and off the shafts, wreck dressings solid), only those whose
         /// <see cref="StationSpec.Version"/> is newer than the world's; destroyed pirate bases stay wrecks.
         /// </summary>
-        public const int StationVersion = 3;
+        public const int StationVersion = 4;
         private const string VersionFile = "tfa_stations.txt";
         private static bool _loadingWorld;
         private static int _savedVersion = -1;
@@ -686,10 +687,17 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     for (int i = 0; i < count; i++)
                     {
                         int x = _random.Next(m.x0, m.x1 + 1), z = _random.Next(m.z0, m.z1 + 1);
-                        for (int tries = 0; tries < 8 && _taken.Contains(new Vector2Int(x, z)); tries++)
+                        for (int tries = 0; tries < 8 && !Usable(m, x, z); tries++)
                         {
                             x = _random.Next(m.x0, m.x1 + 1);
                             z = _random.Next(m.z0, m.z1 + 1);
+                        }
+                        if (!Usable(m, x, z))
+                        {
+                            if (!(Near(m, x, z) is Vector2Int cell))
+                                continue;
+                            x = cell.x;
+                            z = cell.y;
                         }
                         _taken.Add(new Vector2Int(x, z));
                         // A loot case now and then instead of a plain chest (opened: no key needed)
@@ -704,20 +712,22 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 var tanks = new List<string>();
                 foreach (var m in _modules.Skip(1).Where(m => (m.x1 - m.x0 + 1) * (m.z1 - m.z0 + 1) >= 12 && m.y0 == 0))
                 {
-                    floating.Add(Floating(nextPart++, Bed, new Vector3(m.x1, m.y0 - 0.5f + 0.04f, m.z0), 2, 4));
-                    if (_random.NextDouble() < 0.5)
-                        floating.Add(Floating(nextPart++, Bed, new Vector3(m.x0, m.y0 - 0.5f + 0.04f, m.z0), 2, 4));
+                    if (Take(m, m.x1, m.z0) is Vector2Int bunk)
+                        floating.Add(Floating(nextPart++, Bed, new Vector3(bunk.x, m.y0 - 0.5f + 0.04f, bunk.y), 2, 4));
+                    if (_random.NextDouble() < 0.5 && Take(m, m.x0, m.z0) is Vector2Int second)
+                        floating.Add(Floating(nextPart++, Bed, new Vector3(second.x, m.y0 - 0.5f + 0.04f, second.y), 2, 4));
                 }
-                if (Spec != null && Spec.DarkMatter > 0)
+                if (Spec != null && Spec.DarkMatter > 0 && Take(core, (int)Mathf.Round(cx), core.z0) is Vector2Int dark)
                 {
-                    floating.Add(Floating(nextPart, FluidTank, new Vector3(Mathf.Round(cx), core.y0 - 0.5f + 0.04f, core.z0), 2, 4));
+                    floating.Add(Floating(nextPart, FluidTank, new Vector3(dark.x, core.y0 - 0.5f + 0.04f, dark.y), 2, 4));
                     tanks.Add(string.Format(CultureInfo.InvariantCulture, "{{\"partId\":{0},\"fluidItemId\":{1},\"fluidQuantity\":{2:0.0}}}", nextPart, Items.ModItems.DarkMatter, Spec.DarkMatter));
                     nextPart++;
                 }
                 foreach (uint fluid in new[] { Oxygen, Ethanol })
                 {
-                    int x = fluid == Oxygen ? core.x0 : core.x1;
-                    floating.Add(Floating(nextPart, FluidTank, new Vector3(x, core.y0 - 0.5f + 0.04f, core.z1), 2, 4));
+                    if (!(Take(core, fluid == Oxygen ? core.x0 : core.x1, core.z1) is Vector2Int tank))
+                        continue;
+                    floating.Add(Floating(nextPart, FluidTank, new Vector3(tank.x, core.y0 - 0.5f + 0.04f, tank.y), 2, 4));
                     tanks.Add(string.Format(CultureInfo.InvariantCulture, "{{\"partId\":{0},\"fluidItemId\":{1},\"fluidQuantity\":{2:0.0}}}", nextPart, fluid, 10 + _random.Next(0, 40)));
                     nextPart++;
                 }
@@ -731,7 +741,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     {
                         for (int z = c.Z0; z <= c.Z1; z += 2)
                         {
-                            if (!_taken.Add(new Vector2Int(x, z)))
+                            var module = _modules.FirstOrDefault(m => m.y0 == c.Y && x >= m.x0 && x <= m.x1 && z >= m.z0 && z <= m.z1);
+                            if (module == default || !Usable(module, x, z) || !_taken.Add(new Vector2Int(x, z)))
                                 continue;
                             floating.Add(Floating(nextPart, SupplyCrate, new Vector3(x, c.Y - 0.5f + 0.04f, z), _random.Next(0, 4), 4));
                             storages.Add($"{{\"partId\":{nextPart},\"slots\":[{(_random.NextDouble() < c.Loot ? Loot() : EmptySlots())}]}}");
@@ -809,10 +820,58 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     if (againstWall && x != m.x0 && x != m.x1 && z != m.z0 && z != m.z1)
                         continue;
                     var cell = new Vector2Int(x, z);
-                    if (_taken.Add(cell))
+                    if (Usable(m, x, z) && _taken.Add(cell))
                         return cell;
                 }
                 return null;
+            }
+
+            /// <summary>
+            /// Whether furniture can stand on this floor cell of a module: free, with a floor under
+            /// it (not over the shaft to a module below) and not in a passage to another module
+            /// (a part there blocks the way: players got stuck on them).
+            /// </summary>
+            private bool Usable((int x0, int y0, int z0, int x1, int y1, int z1) m, int x, int z)
+            {
+                if (_taken.Contains(new Vector2Int(x, z)) || _inside.Contains(new Vector3Int(x, m.y0 - 1, z)))
+                    return false;
+                foreach (Vector2Int d in new[] { Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down })
+                {
+                    int nx = x + d.x, nz = z + d.y;
+                    bool inModule = nx >= m.x0 && nx <= m.x1 && nz >= m.z0 && nz <= m.z1;
+                    if (!inModule && (_inside.Contains(new Vector3Int(nx, m.y0, nz)) || _inside.Contains(new Vector3Int(nx, m.y0 + 1, nz))))
+                        return false;
+                }
+                return true;
+            }
+
+            // The usable cell nearest to (x, z) in a module, or null
+            private Vector2Int? Near((int x0, int y0, int z0, int x1, int y1, int z1) m, int x, int z)
+            {
+                Vector2Int? best = null;
+                int bestDistance = int.MaxValue;
+                for (int cx = m.x0; cx <= m.x1; cx++)
+                {
+                    for (int cz = m.z0; cz <= m.z1; cz++)
+                    {
+                        int distance = Math.Abs(cx - x) + Math.Abs(cz - z);
+                        if (distance < bestDistance && Usable(m, cx, cz))
+                        {
+                            best = new Vector2Int(cx, cz);
+                            bestDistance = distance;
+                        }
+                    }
+                }
+                return best;
+            }
+
+            // The usable cell nearest to (x, z), taken, or null
+            private Vector2Int? Take((int x0, int y0, int z0, int x1, int y1, int z1) m, int x, int z)
+            {
+                Vector2Int? cell = Near(m, x, z);
+                if (cell.HasValue)
+                    _taken.Add(cell.Value);
+                return cell;
             }
 
             /// <summary>
@@ -833,7 +892,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     bool corridor = Mathf.Min(m.x1 - m.x0, m.z1 - m.z0) <= 2 && area >= 6;
 
                     // Light: ceiling lights in rooms (most of them dead in a wreck), a lit strip along corridors
-                    if (!wreck || _random.NextDouble() < 0.3)
+                    if ((!wreck || _random.NextDouble() < 0.3) && !_inside.Contains(new Vector3Int((int)cx, m.y1 + 1, (int)cz)))
                     {
                         if (corridor)
                         {

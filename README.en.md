@@ -33,6 +33,15 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## An Earth-like Gaia, smoothness, fixed stations (v0.37)
+
+- **No more 1 frame per second on Gaia**: its four forests placed trees inside each other; their physics knocked them down as logs, which knocked their neighbours down, in a chain (hundreds per second). On the mod's planets a tree now only falls to a real impact (a ship); the laser and the tools cut it as before.
+- **Gaia reworked**: oceans, prairies and temperate woods, savannas, palm coasts, a **taiga** of snowy firs, **tundra** and **snowy mountains**. The snowline follows each region's climate: low in the cold ones, only on the high peaks in the warm ones. More relief.
+- **Caves** in the hills (big rock chambers, violet or turquoise crystals) and **ice caves** in the mountains: stalactites, stalagmites, glowing crystals, ore inside (quartz, cryonite).
+- **Trees**: leaf cards no longer show a piece of the neighbouring branch (straight edges).
+- **Stations**: the wrecks' dressing left an invisible block in the middle of the station; its big pieces now collide (bow, blades, containers, nacelles, nozzles, ring, dish, panels). Furniture no longer blocks the passages between modules or the top of shafts. Stations are rebuilt on load (their contents reset).
+- **Optimization**: the teleporter and the schematic tablet searched the whole scene for the tool belt every frame (~3 ms a frame); points of interest keep their placement instead of working it out again.
+
 ## Giant wrecks, Hades probe, fitted cosmetics (v0.36)
 
 - **Vagabond wreck**: 60 m heavy freighter, bulkheaded hold, crates, deck containers, crane, glazed bridge, nacelles, torn-off engine section and debris.

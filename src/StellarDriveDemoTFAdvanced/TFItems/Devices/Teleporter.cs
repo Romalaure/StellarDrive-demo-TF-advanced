@@ -90,7 +90,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
         public static void Install()
         {
-            StellarDriveDemoTFAdvanced.Common.DevHarness.Steps.Add((30f, "teleporter test", () =>
+            StellarDriveDemoTFAdvanced.Common.DevHarness.Steps.Add((60f, "teleporter test", () =>
             {
                 if (StellarDriveDemoTFAdvanced.Common.Settings.DevTeleporterTest.Value)
                     MelonLoader.MelonCoroutines.Start(DevTest());
@@ -111,8 +111,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         {
             if (GameServices.ShipsClient == null)
                 return false;
-            ToolBelt belt = Object.FindFirstObjectByType<ToolBelt>();
-            var toolbar = ServiceLocator.GetService<PlayerToolbarProvider>();
+            ToolBelt belt = GameServices.Belt;
+            var toolbar = GameServices.Toolbar;
             if (belt == null || toolbar == null)
                 return false;
             int selected = SelectedTool(belt).Get();
@@ -198,17 +198,46 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(StellarDriveDemoTFAdvanced.Common.DevHarness.Folder, "teleporter_menu.png"));
             yield return new WaitForSecondsRealtime(1f);
             ModMenu.Close();
-            foreach (Destination target in new[] { all.FirstOrDefault(d => d.Kind == 'p' && d.A == 108), all.FirstOrDefault(d => d.Kind == 's') })
+            yield return StellarDriveDemoTFAdvanced.Common.FpsProbe.Measure("before teleport");
+            int planet = StellarDriveDemoTFAdvanced.Common.Settings.DevVisitPlanetId.Value;
+            foreach (Destination target in new[] { all.FirstOrDefault(d => d.Kind == 'p' && d.A == (planet != 0 ? planet : 108)), all.FirstOrDefault(d => d.Kind == 's') })
             {
                 if (target == null)
                     continue;
                 Go(target);
-                yield return new WaitForSecondsRealtime(8f);
+                // The frame rate on arrival (a player saw 1 fps on TF Gaia)
+                for (int i = 0; i < 12; i++)
+                    yield return StellarDriveDemoTFAdvanced.Common.FpsProbe.Measure($"after teleport to {target.Name} {i * 4}-{i * 4 + 4} s");
                 var player = GameServices.PlayersServer?.ActivePlayers.FirstOrDefault();
                 var spaces = ServiceLocator.GetService<ISpacesServerProvider>();
                 TFMod.Log.Msg($"dev: teleporter: went to {target.Name}: player space {player?.SpaceId} {(player != null && spaces != null ? spaces.GetSpace(player.SpaceId)?.ToString() : "")}");
                 StellarDriveDemoTFAdvanced.Common.DevHarness.Screenshot("teleporter_" + target.Kind);
+                if (target.Kind == 'p')
+                    DumpTerrainShader();
             }
+        }
+
+        // Development: what the planet terrain's shader takes
+        private static void DumpTerrainShader()
+        {
+            var chunk = Object.FindObjectsByType<Planets.Terrain.Meshes.PlanetChunkMeshObject>(FindObjectsSortMode.None).FirstOrDefault();
+            Material material = chunk != null ? chunk.GetComponent<MeshRenderer>().sharedMaterial : null;
+            if (material?.shader == null)
+                return;
+            var text = new System.Text.StringBuilder();
+            text.AppendLine($"shader {material.shader.name} keywords [{string.Join(" ", material.shaderKeywords)}]");
+            for (int i = 0; i < material.shader.GetPropertyCount(); i++)
+            {
+                string name = material.shader.GetPropertyName(i);
+                var type = material.shader.GetPropertyType(i);
+                string value = type == UnityEngine.Rendering.ShaderPropertyType.Texture ? material.GetTexture(name)?.name
+                    : type == UnityEngine.Rendering.ShaderPropertyType.Color || type == UnityEngine.Rendering.ShaderPropertyType.Vector ? material.GetVector(name).ToString()
+                    : material.GetFloat(name).ToString(System.Globalization.CultureInfo.InvariantCulture);
+                text.AppendLine($"{name} ({type}) = {value}");
+            }
+            foreach (string keyword in material.shader.keywordSpace.keywordNames)
+                text.AppendLine("keyword " + keyword);
+            System.IO.File.WriteAllText(System.IO.Path.Combine(StellarDriveDemoTFAdvanced.Common.DevHarness.Folder, "terrain_shader.txt"), text.ToString());
         }
 
         private static string Clean(string name) => (name ?? "").Replace("\n", " ").Replace("|", "/");

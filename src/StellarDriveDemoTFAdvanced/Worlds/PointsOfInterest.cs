@@ -194,6 +194,34 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             });
         }
 
+        /// <summary>
+        /// Caves in the hills and mountains (above <paramref name="minElevation"/>), an ore
+        /// deposit or two in their chamber.
+        /// </summary>
+        public static void Caves(PlanetShaper.Context planet, CaveStyle style, float frequency, float minElevation, OreKind ore)
+        {
+            // One placement config per style (each config costs terrain queries for every new chunk):
+            // the big chamber in the rock, the smaller one in the ice
+            GameObject cave = Worlds.Caves.Prefab(planet, style, style == CaveStyle.Rock ? 1 : 0);
+            GameObject deposit = Ores.Prefab(planet, ore);
+            AnimationCurve curve = TemplateCurve(planet);
+            if (cave == null || curve == null)
+                return;
+            var steps = new List<HotspotObjectsDistributionStep> { Step(cave, curve, 1, 1, 0f, 1f, 30f) };
+            if (deposit != null)
+                steps.Add(Step(deposit, curve, 1, 2, 2f, 5f, 3f));
+            planet.AddHotspot(new PlanetHotspotsPlacementConfig
+            {
+                placementLevel = 4,
+                loadDistance = 2000f,
+                spawnProbability = Mathf.Clamp01(frequency * 0.45f),
+                avoidDenseEnvConstraint = true,
+                minElevationConstraint = true,
+                minElevation = minElevation,
+                distributionSteps = steps.ToArray()
+            });
+        }
+
         /// <summary>A wrecked cargo ship with its debris thrown around.</summary>
         public static void CargoWrecks(PlanetShaper.Context planet, float frequency)
         {

@@ -22,8 +22,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             var origin = new Vector3(0f, -40000f, 0f);
             var shown = new List<GameObject>();
-            var prefabs = Trees.AllBuilt.Where(t => t.name.Contains("Kapok") || t.name.Contains("Palm") || t.name.Contains("Jungle")).Concat(Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None)
-                .Where(t => t.parent != null && (t.parent.name == "TFA_CityPrefabs" && (t.name.Contains("Dome") || t.name.EndsWith("Tower")) || t.parent.name == "TFA_OrePrefabs"
+            var prefabs = Trees.AllBuilt.Where(t => t.name.Contains("Kapok") || t.name.Contains("Palm") || t.name.Contains("Jungle") || t.name.EndsWith("_Oak") || t.name.EndsWith("_Birch") || t.name.EndsWith("_Acacia")).Concat(Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+                .Where(t => t.parent != null && (t.parent.name == "TFA_CavePrefabs" || t.parent.name == "TFA_CityPrefabs" && (t.name.Contains("Dome") || t.name.EndsWith("Tower")) || t.parent.name == "TFA_OrePrefabs"
                     || t.parent.name == "TFA_RuinPrefabs" && t.name.EndsWith("_Mossy") && (t.name.Contains("Hall") || t.name.Contains("House_") || t.name.Contains("Tower") || t.name.Contains("Temple"))))
                 .Select(t => t.gameObject)).ToList();
             prefabs.AddRange(Trees.AllPlants);
@@ -89,6 +89,30 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 foreach (GameObject other in shown)
                     other.SetActive(other == shown[i]);
                 camera.Render();
+            }
+            // Inside the caves: from their mouth (toward -z) into the chamber
+            foreach (GameObject cave in shown.Where(c => c.name.Contains("TFA_Cave")))
+            {
+                foreach (GameObject other in shown)
+                    other.SetActive(other == cave);
+                camera.rect = new Rect(0f, 0f, 1f, 1f);
+                camera.fieldOfView = 75f;
+                camera.nearClipPlane = 0.1f;
+                var inside = RenderTexture.GetTemporary(1280, 720, 24, RenderTextureFormat.ARGB32);
+                camera.targetTexture = inside;
+                camera.transform.position = cave.transform.position + new Vector3(0f, 1.2f, -7f);
+                camera.transform.rotation = Quaternion.LookRotation(Vector3.forward + Vector3.up * 0.15f);
+                camera.Render();
+                RenderTexture.active = inside;
+                var shot = new Texture2D(inside.width, inside.height, TextureFormat.RGB24, false);
+                shot.ReadPixels(new Rect(0, 0, inside.width, inside.height), 0, 0);
+                shot.Apply();
+                File.WriteAllBytes(Path.Combine(DevHarness.Folder, "inside_" + cave.name.Replace("TFA_DevModel_", "") + ".png"), shot.EncodeToPNG());
+                Object.Destroy(shot);
+                RenderTexture.active = null;
+                RenderTexture.ReleaseTemporary(inside);
+                camera.fieldOfView = 40f;
+                camera.targetTexture = target;
             }
             RenderTexture.active = target;
             var image = new Texture2D(target.width, target.height, TextureFormat.RGB24, false);

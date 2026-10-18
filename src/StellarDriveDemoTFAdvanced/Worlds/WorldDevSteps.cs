@@ -94,7 +94,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             AdvancedMod.Log.Msg($"dev: aimed at {target.name} ({point - far.transform.position})");
         }
 
-        private static void SaveTexture(Texture2D texture, string path)
+        internal static void SaveTexture(Texture2D texture, string path)
         {
             var rt = RenderTexture.GetTemporary(Mathf.Min(texture.width, 1024), Mathf.Min(texture.height, 1024), 0, RenderTextureFormat.ARGB32);
             Graphics.Blit(texture, rt);

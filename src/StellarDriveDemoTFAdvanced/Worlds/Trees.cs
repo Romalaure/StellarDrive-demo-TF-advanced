@@ -49,6 +49,16 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private static readonly Rect RoundCluster = new Rect(0.58f, 0.33f, 0.40f, 0.646f);
         private static readonly Rect SmallCluster = new Rect(0.718f, 0.018f, 0.244f, 0.282f);
 
+        // The outline of a card in its atlas rect (0..1 both ways, a fan from the first point): the
+        // big branch and the round cluster overlap in the atlas, so a plain rectangle shows a cut
+        // piece of the other one along a straight edge
+        private static readonly Dictionary<Rect, Vector2[]> CardOutlines = new Dictionary<Rect, Vector2[]>
+        {
+            [BigBranch] = new[] { new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0.419f), new Vector2(0.893f, 0.443f), new Vector2(0.893f, 1f), new Vector2(0f, 1f) },
+            [RoundCluster] = new[] { new Vector2(0.3f, 0f), new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0.263f) }
+        };
+        private static readonly Vector2[] Rectangle = { new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(0f, 1f) };
+
         private static readonly Dictionary<TreeKind, GameObject> Built = new Dictionary<TreeKind, GameObject>();
 
         public static IEnumerable<GameObject> AllBuilt => Built.Values.Where(t => t != null);
@@ -87,6 +97,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             visuals.id = copy.name;
             MeshRenderer lod0 = visuals.GetComponentsInChildren<MeshRenderer>(true).First(r => r.name.Contains("LOD0"));
             Material[] firMaterials = lod0.sharedMaterials;
+            if (Common.DevHarness.Active && Built.Count == 0)
+                DumpAtlas(lod0);
 
             // Model and materials
             lod0.GetComponent<MeshFilter>().sharedMesh = Model(kind);
@@ -113,6 +125,39 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 }
             }
             return copy;
+        }
+
+        // Development: the fir's leaf atlas and the UV islands of its own leaf cards
+        private static void DumpAtlas(MeshRenderer fir)
+        {
+            try
+            {
+                if (fir.sharedMaterials.Length > 1 && fir.sharedMaterials[1].GetTexture("_Albedo") is Texture2D atlas)
+                    WorldDevSteps.SaveTexture(atlas, System.IO.Path.Combine(Common.DevHarness.Folder, "tex_leaf_atlas.png"));
+                Mesh mesh = fir.GetComponent<MeshFilter>().sharedMesh;
+                if (mesh == null || !mesh.isReadable || mesh.subMeshCount < 2)
+                    return;
+                var uv = new List<Vector2>();
+                mesh.GetUVs(0, uv);
+                int[] triangles = mesh.GetTriangles(1);
+                // Islands: triangles joined by shared vertices
+                var parent = Enumerable.Range(0, uv.Count).ToArray();
+                int Find(int i) => parent[i] == i ? i : parent[i] = Find(parent[i]);
+                for (int t = 0; t < triangles.Length; t += 3)
+                {
+                    parent[Find(triangles[t + 1])] = Find(triangles[t]);
+                    parent[Find(triangles[t + 2])] = Find(triangles[t]);
+                }
+                var islands = triangles.Distinct().GroupBy(Find).Select(g => (
+                    MinX: g.Min(i => uv[i].x), MinY: g.Min(i => uv[i].y), MaxX: g.Max(i => uv[i].x), MaxY: g.Max(i => uv[i].y), Count: g.Count()));
+                var lines = islands.GroupBy(i => $"{i.MinX:0.000} {i.MinY:0.000} {i.MaxX:0.000} {i.MaxY:0.000}")
+                    .Select(g => $"uv island x {g.First().MinX:0.000}..{g.First().MaxX:0.000} y {g.First().MinY:0.000}..{g.First().MaxY:0.000}: {g.Count()} card(s), {g.First().Count} vertices");
+                System.IO.File.WriteAllLines(System.IO.Path.Combine(Common.DevHarness.Folder, "leaf_atlas_islands.txt"), lines);
+            }
+            catch (Exception e)
+            {
+                AdvancedMod.Log.Warning("dev: leaf atlas dump: " + e.Message);
+            }
         }
 
         // ---- Undergrowth: ferns, bushes and flowers on the planets' grass layer
@@ -483,27 +528,19 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 if (side.sqrMagnitude < 0.01f)
                     side = Vector3.Cross(up, Vector3.right).normalized;
                 float halfWidth = size * 0.5f * atlas.width / atlas.height;
-                Vector3[] corners =
-                {
-                    basePoint - side * halfWidth,
-                    basePoint + side * halfWidth,
-                    basePoint + side * halfWidth + up * size,
-                    basePoint - side * halfWidth + up * size
-                };
-                Vector2[] uv =
-                {
-                    new Vector2(atlas.xMin, atlas.yMin), new Vector2(atlas.xMax, atlas.yMin),
-                    new Vector2(atlas.xMax, atlas.yMax), new Vector2(atlas.xMin, atlas.yMax)
-                };
+                Vector2[] outline = CardOutlines.TryGetValue(atlas, out Vector2[] shape) ? shape : Rectangle;
                 int start = _vertices.Count;
-                for (int i = 0; i < 4; i++)
+                foreach (Vector2 p in outline)
                 {
-                    _vertices.Add(corners[i]);
+                    Vector3 corner = basePoint + side * (halfWidth * (2f * p.x - 1f)) + up * (size * p.y);
+                    _vertices.Add(corner);
                     // Soft, rounded lighting: leaves face away from the crown's middle
-                    _normals.Add((corners[i] - crownCenter).normalized);
-                    _uvs.Add(uv[i]);
+                    _normals.Add((corner - crownCenter).normalized);
+                    _uvs.Add(new Vector2(atlas.xMin + p.x * atlas.width, atlas.yMin + p.y * atlas.height));
                 }
-                (CardsInFirstMaterial ? _bark : _leaves).AddRange(new[] { start, start + 1, start + 2, start, start + 2, start + 3 });
+                List<int> triangles = CardsInFirstMaterial ? _bark : _leaves;
+                for (int i = 1; i < outline.Length - 1; i++)
+                    triangles.AddRange(new[] { start, start + i, start + i + 1 });
             }
 
             public Mesh Build(string name)

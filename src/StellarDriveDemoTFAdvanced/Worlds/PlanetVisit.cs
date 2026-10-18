@@ -115,7 +115,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 AdvancedMod.Log.Msg($"dev: {planet.name} has {objects.Length} point-of-interest objects loaded");
                 AdvancedMod.Log.Msg($"dev: {planet.name} points of interest loaded: " + string.Join(", ", objects
                     .GroupBy(o => o.name.Replace("(Clone)", "")).Select(g => g.Key + " x" + g.Count())));
-                foreach (string kind in new[] { "TFA_RuinHall", "TFA_RuinHouse", "TFA_RuinTower", "TFA_RuinTemple", "TFA_Ore", "TFA_CityTowerTall", "TFA_CityDome", "TFA_FortTowerTall", "TFA_FortTower", "TFA_FortDome" })
+                foreach (string kind in new[] { "TFA_Cave", "TFA_RuinHall", "TFA_RuinHouse", "TFA_RuinTower", "TFA_RuinTemple", "TFA_Ore", "TFA_CityTowerTall", "TFA_CityDome", "TFA_FortTowerTall", "TFA_FortTower", "TFA_FortDome" })
                 {
                     // Objects unload when the player moves: skip destroyed ones
                     PlanetObjectVisuals site = objects.Where(o => o != null && o.name.StartsWith(kind))
@@ -143,6 +143,65 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     CheckSpaces(kind);
                     yield return Wait(0.5f);
                 }
+                if (planet.Id == 108)
+                {
+                    IEnumerator tour = ClimateTour(planet);
+                    while (tour.MoveNext())
+                        yield return tour.Current;
+                }
+            }
+        }
+
+        // TF Gaia's climates: a snowy peak, the snowline in a cold region and in a warm one, the
+        // caves in the hills (looked for around each spot)
+        private static IEnumerator ClimateTour(Planet planet)
+        {
+            var random = new System.Random(108);
+            var spots = new List<(Vector3 Up, float Height)>();
+            Vector3 toStar = ToStar(planet);
+            for (int k = 0; k < 4000; k++)
+            {
+                var direction = new Vector3((float)(random.NextDouble() * 2 - 1), (float)(random.NextDouble() * 2 - 1), (float)(random.NextDouble() * 2 - 1));
+                // In daylight
+                if (direction.sqrMagnitude > 0.01f && (toStar == Vector3.zero || Vector3.Dot(direction.normalized, toStar) > 0.75f))
+                    spots.Add((direction.normalized, Elevation(planet, direction)));
+            }
+            var picks = new List<(string Name, Vector3 Up)>();
+            foreach ((string name, float min, float max) in new[] { ("peak", 1500f, 9999f), ("high", 1000f, 1400f), ("snowline", 750f, 950f), ("hills", 420f, 650f), ("hills2", 450f, 700f) })
+            {
+                var match = spots.Where(s => s.Height >= min && s.Height <= max).ToList();
+                if (match.Count == 0)
+                    continue;
+                picks.Add((name, match[random.Next(match.Count)].Up));
+            }
+            foreach ((string name, Vector3 up) in picks)
+            {
+                // Load the place from the ground first, then a look from the air before the fall gets fast
+                Place(planet, up, 90f);
+                yield return Wait(10f);
+                Move(planet, up, Quaternion.Euler(-38f, 0f, 0f), 160f);
+                yield return Wait(1.2f);
+                DevHarness.Screenshot($"climate_{name}_air");
+                Move(planet, up, Quaternion.Euler(-12f, 90f, 0f));
+                yield return Wait(3f);
+                DevHarness.Screenshot($"climate_{name}_ground");
+                GameObject hotspots = SceneManager.GetActiveScene().GetRootGameObjects().FirstOrDefault(r => r.name == planet.name + " hotspots visuals");
+                PlanetObjectVisuals cave = hotspots == null ? null : hotspots.GetComponentsInChildren<PlanetObjectVisuals>()
+                    .Where(o => o != null && o.name.StartsWith("TFA_Cave")).OrderBy(o => Vector3.Angle(o.planetRelativePos, up)).FirstOrDefault();
+                AdvancedMod.Log.Msg($"dev: climate {name}: ground {Elevation(planet, up):0} m, nearest cave {(cave == null ? "none" : cave.name + " " + (Vector3.Angle(cave.planetRelativePos, up) * Mathf.Deg2Rad * planet.Radius).ToString("0") + " m")}");
+                if (cave == null)
+                    continue;
+                // From outside, then from the middle of its chamber
+                Vector3 target = cave.planetRelativePos;
+                Vector3 side = Vector3.Cross(target.normalized, Vector3.up).normalized;
+                if (side.sqrMagnitude < 0.01f)
+                    side = Vector3.right;
+                PlaceLooking(planet, (target + side * 30f).normalized, target);
+                yield return Wait(5f);
+                DevHarness.Screenshot($"climate_{name}_cave");
+                PlaceLooking(planet, target.normalized, target + side * 8f);
+                yield return Wait(4f);
+                DevHarness.Screenshot($"climate_{name}_cave_inside");
             }
         }
 
@@ -203,11 +262,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             var random = new System.Random((int)planet.Id);
             // On the day side of the planet's own star
-            Vector3 toStar = Vector3.zero;
-            Stars.Star star = Galaxy.OrbitsErebos(planet.Id) ? Galaxy.Erebos : Galaxy.AllStars.FirstOrDefault(s => s != null && s != Galaxy.Erebos);
-            var transpose = ServiceLocator.GetService<WorldTracking.Interface.Services.IWorldTransposeServer>();
-            if (star != null && star.Space != null && transpose != null)
-                toStar = transpose.Position((WorldTracking.Interface.Model.Spaces.Common.ISpace)star.Space, planet.SurfaceSpace, Vector3.zero).normalized;
+            Vector3 toStar = ToStar(planet);
             for (int attempt = 0; attempt < 256; attempt++)
             {
                 up = new Vector3((float)random.NextDouble() * 2f - 1f, (float)random.NextDouble() * 2f - 1f, (float)random.NextDouble() * 2f - 1f).normalized;
@@ -217,6 +272,16 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             up = Vector3.up;
             AdvancedMod.Log.Warning("dev: no dry land found on " + planet.name);
             return false;
+        }
+
+        // From the planet's center toward its star (zero when unknown)
+        private static Vector3 ToStar(Planet planet)
+        {
+            Stars.Star star = Galaxy.OrbitsErebos(planet.Id) ? Galaxy.Erebos : Galaxy.AllStars.FirstOrDefault(s => s != null && s != Galaxy.Erebos);
+            var transpose = ServiceLocator.GetService<WorldTracking.Interface.Services.IWorldTransposeServer>();
+            if (star == null || star.Space == null || transpose == null)
+                return Vector3.zero;
+            return transpose.Position((WorldTracking.Interface.Model.Spaces.Common.ISpace)star.Space, planet.SurfaceSpace, Vector3.zero).normalized;
         }
 
         // Rotations are given in the surface spot's local frame, y up: yaw turns the view
