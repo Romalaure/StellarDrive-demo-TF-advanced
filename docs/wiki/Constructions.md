@@ -29,3 +29,10 @@ Onglet **TF Blindage**, recherche *Blindage renforcé*. Les pièces de coque du 
 - avec le mod **Arsenal** : les armes n'y font qu'**un tiers des dégâts** et n'y percent **aucun trou** ;
 - **1,5 fois plus lourde** ;
 - coût : le double de fer (ou de verre), plus 1 titane (fer renforcé) ou 1 fer (verre renforcé).
+
+## Menu de construction
+
+Au-dessus du menu de construction, une barre :
+- **Rechercher une pièce** : tapez quelques lettres, toutes les pièces débloquées dont le nom les contient s'affichent (accents et majuscules ignorés) ; videz le champ pour revenir à l'onglet.
+- **Mod** : choisissez un mod (le jeu de base, TF Advanced, TFA Water, Submarine Add-ons…) pour n'afficher que ses pièces, page par page (◀ ▶) ; la recherche filtre encore dans ce mod. « Tous les mods » revient aux onglets.
+- **− / +** : rétrécit ou agrandit le menu (gardé d'une partie à l'autre, jamais plus grand que l'écran).

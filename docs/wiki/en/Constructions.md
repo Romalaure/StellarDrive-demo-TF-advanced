@@ -29,3 +29,10 @@ Wood and iron use the game's hull textures, glass uses its glass. The collision 
 - with the **Arsenal** mod: weapons do **a third of the damage** and punch **no holes**;
 - **1.5 times heavier**;
 - cost: twice the iron (or glass), plus 1 titanium (reinforced iron) or 1 iron (reinforced glass).
+
+## Build menu
+
+Over the build menu, a bar:
+- **Search a part**: type a few letters, every unlocked part whose name holds them shows (accents and case ignored); empty the field to go back to the tab.
+- **Mod**: pick a mod (the base game, TF Advanced, TFA Water, Submarine Add-ons…) to show only its parts, page by page (◀ ▶); the search narrows them further. "Every mod" goes back to the tabs.
+- **− / +**: makes the menu smaller or bigger (kept between sessions, never bigger than the screen).

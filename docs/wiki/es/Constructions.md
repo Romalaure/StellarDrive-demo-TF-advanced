@@ -29,3 +29,10 @@ Pestaña **TF Blindage**, investigación *Blindaje reforzado*. Las piezas de cas
 - con el mod **Arsenal**: las armas solo hacen **un tercio del daño** y **no abren agujeros**;
 - **1,5 veces más pesado**;
 - coste: el doble de hierro (o de cristal), más 1 titanio (hierro reforzado) o 1 hierro (cristal reforzado).
+
+## Menú de construcción
+
+Encima del menú de construcción, una barra:
+- **Buscar una pieza**: escribe unas letras y aparecen todas las piezas desbloqueadas cuyo nombre las contiene (sin tener en cuenta acentos ni mayúsculas); vacía el campo para volver a la pestaña.
+- **Mod**: elige un mod (el juego base, TF Advanced, TFA Water, Submarine Add-ons…) para ver solo sus piezas, página a página (◀ ▶); la búsqueda filtra aún más dentro de ese mod. «Todos los mods» vuelve a las pestañas.
+- **− / +**: reduce o agranda el menú (se guarda entre partidas, nunca más grande que la pantalla).

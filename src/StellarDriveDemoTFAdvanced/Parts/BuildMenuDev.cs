@@ -60,6 +60,24 @@ namespace StellarDriveDemoTFAdvanced.Parts
             yield return new WaitForSecondsRealtime(0.5f);
             BuildSearch.DevSearch(menu, "");
             yield return new WaitForSecondsRealtime(0.5f);
+            // The mod picker: the list of mods, then one mod's parts, a smaller and a bigger menu
+            var mods = BuildSearch.DevPick(menu, null, 1f);
+            AdvancedMod.Log.Msg("dev: build menu mods: " + (mods == null ? "none" : string.Join(", ", mods.Select(m => $"{m.Mod} {m.Count}"))));
+            if (mods != null && mods.Count > 0)
+            {
+                string many = mods.OrderByDescending(m => m.Count).First().Mod;
+                BuildSearch.DevPick(menu, many, 0.8f);
+                yield return new WaitForSecondsRealtime(1f);
+                DevHarness.Screenshot("buildmenu_mod_small");
+                yield return new WaitForSecondsRealtime(0.5f);
+                string water = mods.Select(m => m.Mod).FirstOrDefault(m => m.Contains("Water") && m.Contains("TFA")) ?? mods.Last().Mod;
+                BuildSearch.DevPick(menu, water, 1.3f);
+                yield return new WaitForSecondsRealtime(1f);
+                DevHarness.Screenshot("buildmenu_mod_big");
+                yield return new WaitForSecondsRealtime(0.5f);
+                BuildSearch.DevPick(menu, null, 1f);
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
             yield return new WaitForSecondsRealtime(0.5f);
             foreach (Transform row in container.parent)
                 dump.AppendLine($"ROW {row.name} scale {row.localScale} pos {((RectTransform)row).anchoredPosition} size {((RectTransform)row).rect.size}");

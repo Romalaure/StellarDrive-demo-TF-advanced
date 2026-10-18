@@ -32,9 +32,13 @@ namespace StellarDriveDemoTFAdvanced.Parts
         public static void Register(ushort id, string donor, int row, Action<PartSettings, GameObject> configure) =>
             Register(id, donor, AdvancedTab.Name, row, configure);
 
+        /// <summary>The assembly that made each part here (another mod can make its parts through this class).</summary>
+        public static readonly Dictionary<ushort, System.Reflection.Assembly> Makers = new Dictionary<ushort, System.Reflection.Assembly>();
+
         public static void Register(ushort id, string donor, string tab, int row, Action<PartSettings, GameObject> configure)
         {
             Ids.Add(id);
+            Makers[id] = configure?.Method?.DeclaringType?.Assembly;
             CustomParts.Register(new CustomPartDefinition
             {
                 Id = id,
