@@ -32,6 +32,7 @@
 - pueblos
 - ruinas
 - cuevas, cuevas de hielo
+- campamentos abandonados (cofre en la tienda), sotobosques, montones de rocas
 - restos, cargueros
 
 Ver también: [Recursos](Ressources.md), [Mesa de cartografía](Machines.md) (muestra esta ficha en el juego).

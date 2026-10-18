@@ -110,6 +110,12 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             new Site { Prefix = "TFA_FortDome", Kind = Kind.Fort, Spots = new[] { new Vector3(6f, 0.12f, -5f) } }
         };
 
+        // The mod's own nature camps (Kenney's Nature Kit scenes)
+        static LootCaches()
+        {
+            AddSite("TFA_Nature_" + NatureSites.Camp, NatureSites.CampChest, 412, NatureSites.CampLoot);
+        }
+
         private static readonly HashSet<string> Known = new HashSet<string>();
         private static readonly Queue<(string Key, ulong PlanetId, Vector3 Position, Quaternion Rotation, Site Site, int Spot)> Pending = new Queue<(string, ulong, Vector3, Quaternion, Site, int)>();
         private static string _loadedFor;

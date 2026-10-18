@@ -32,6 +32,7 @@
 - villages
 - ruines
 - grottes, grottes de glace
+- campements abandonnés (coffre dans la tente), sous-bois, amas de rochers
 - épaves, cargos
 
 Voir aussi : [Ressources](Ressources.md), [Table de cartographie](Machines.md#table-de-cartographie) (affiche cette fiche en jeu).

@@ -222,6 +222,28 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             });
         }
 
+        /// <summary>
+        /// A nature scene of <see cref="NatureSites"/> (camp, forest floor, boulders) above
+        /// <paramref name="minElevation"/>; <paramref name="inWoods"/>: it may stand among the trees.
+        /// </summary>
+        public static void Nature(PlanetShaper.Context planet, string scene, float frequency, float minElevation, bool inWoods)
+        {
+            GameObject site = NatureSites.Prefab(planet, scene);
+            AnimationCurve curve = TemplateCurve(planet);
+            if (site == null || curve == null)
+                return;
+            planet.AddHotspot(new PlanetHotspotsPlacementConfig
+            {
+                placementLevel = 4,
+                loadDistance = 1500f,
+                spawnProbability = Mathf.Clamp01(frequency * 0.4f),
+                avoidDenseEnvConstraint = !inWoods,
+                minElevationConstraint = true,
+                minElevation = minElevation,
+                distributionSteps = new[] { Step(site, curve, 1, 1, 0f, 1f, 20f) }
+            });
+        }
+
         /// <summary>A wrecked cargo ship with its debris thrown around.</summary>
         public static void CargoWrecks(PlanetShaper.Context planet, float frequency)
         {

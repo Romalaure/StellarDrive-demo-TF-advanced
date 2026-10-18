@@ -23,7 +23,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             var origin = new Vector3(0f, -40000f, 0f);
             var shown = new List<GameObject>();
             var prefabs = Trees.AllBuilt.Where(t => t.name.Contains("Kapok") || t.name.Contains("Palm") || t.name.Contains("Jungle") || t.name.EndsWith("_Oak") || t.name.EndsWith("_Birch") || t.name.EndsWith("_Acacia")).Concat(Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None)
-                .Where(t => t.parent != null && (t.parent.name == "TFA_CavePrefabs" || t.parent.name == "TFA_CityPrefabs" && (t.name.Contains("Dome") || t.name.EndsWith("Tower")) || t.parent.name == "TFA_OrePrefabs"
+                .Where(t => t.parent != null && (t.parent.name == "TFA_CavePrefabs" || t.parent.name == "TFA_NaturePrefabs" || t.parent.name == "TFA_CityPrefabs" && (t.name.Contains("Dome") || t.name.EndsWith("Tower")) || t.parent.name == "TFA_OrePrefabs"
                     || t.parent.name == "TFA_RuinPrefabs" && t.name.EndsWith("_Mossy") && (t.name.Contains("Hall") || t.name.Contains("House_") || t.name.Contains("Tower") || t.name.Contains("Temple"))))
                 .Select(t => t.gameObject)).ToList();
             prefabs.AddRange(Trees.AllPlants);

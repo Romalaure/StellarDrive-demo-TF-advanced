@@ -278,6 +278,15 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Modèles Blender, scènes de nature (v0.40)
+
+- Les modèles 3D sont maintenant faits dans **Blender** (scripts dans `tools/blender`, exportés et intégrés au mod) : arêtes biseautées, formes arrondies. Premier refait : le **terminal marchand**.
+- **Scènes de nature** faites avec le **Nature Kit de Kenney** (CC0, www.kenney.nl), recolorées aux tons du jeu :
+  - **campements abandonnés** : tentes, feu de camp, bûches, canoë, avec un **coffre** dans la tente ;
+  - **sous-bois** : troncs tombés, souches, ronds de champignons, fougères ;
+  - **amas de rochers** : grandes pierres dressées, herbe sur leurs sommets.
+- On les trouve sur Gaïa, Verdance, Sylvara (sous-bois) et Altis (rochers). Les plantes et champignons se traversent, les troncs, tentes et rochers bloquent.
+
 ## Missions, réputation, hangar automatique, aurores, vol rapide fluide (v0.39)
 
 - **Livraisons du jour** au terminal marchand : 3 commandes par jour (ex. 30 cryonite → 2 noyaux quantiques), une fois chacune pour tout le monde, renouvelées chaque jour.
@@ -636,3 +645,7 @@ Aucun fichier du jeu n'est modifié et aucun DLL du jeu n'est versionné.
 ## Feuille de route
 
 Voir [docs/AUDIT.md](docs/AUDIT.md) §7–8 : priorités du réseau, compléments de structure (poutres en L/T/X, plaques triangulaires), puis Docking, Landing Gear, Station.
+
+## Crédits
+
+- Scènes de nature : **Nature Kit** par Kenney (www.kenney.nl), licence CC0.

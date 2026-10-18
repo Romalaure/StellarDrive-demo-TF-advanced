@@ -125,6 +125,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                         (PlanetShaper.Tinted(p.TreePrefab("FirTreeTall1"), "darkpine", new Color(0.55f, 0.7f, 0.6f)), 60, 0.9f),
                         (birch, 80, 0.2f), (autumnBirch, 30, 0.15f), (p.TreePrefab("FirTreeDead1"), 4, 0.6f));
                     p.ForestDensity(1.4f);
+                    PointsOfInterest.Nature(p, NatureSites.Boulders, 0.9f, 75f, false);
                     PointsOfInterest.Ruins(p, RuinStyle.Granite, 0.5f);
                     PointsOfInterest.Village(p, RuinStyle.Granite, 0.35f);
                     PointsOfInterest.Deposits(p, OreKind.Titanium, 0.5f);
@@ -148,6 +149,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                         (oak, 100, 0.5f), (autumnOak, 45, 0.45f), (birch, 60, 0.15f), (autumnBirch, 25, 0.1f));
                     p.ForestDensity(0.9f);
                     p.Grass(PlanetShaper.Tinted(p.GrassPrefab, "lush", new Color(0.85f, 1.1f, 0.8f)));
+                    PointsOfInterest.Nature(p, NatureSites.Clearing, 0.8f, 75f, true);
+                    PointsOfInterest.Nature(p, NatureSites.Camp, 0.4f, 75f, false);
                     PointsOfInterest.Ruins(p, RuinStyle.Mossy, 0.6f);
                     PointsOfInterest.Village(p, RuinStyle.Mossy, 0.5f);
                     PointsOfInterest.CargoWrecks(p, 0.4f);
@@ -232,6 +235,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     p.Trees((kapok, 35, 0.95f), (jungle, 100, 0.7f), (palm, 60, 0.25f), (p.Tree(TreeKind.Oak), 20, 0.5f));
                     p.ForestDensity(1.5f);
                     p.Undergrowth(0.6f, (grass, 50), (fern, 30), (bush, 14), (red, 5), (yellow, 5), (violet, 4), (white, 4));
+                    PointsOfInterest.Nature(p, NatureSites.Clearing, 0.7f, 75f, true);
                     PointsOfInterest.Ruins(p, RuinStyle.Mossy, 0.7f);
                     PointsOfInterest.Village(p, RuinStyle.Mossy, 0.45f);
                     PointsOfInterest.Wrecks(p, 0.35f);
@@ -276,6 +280,10 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                         (p.Plant(PlantKind.YellowFlowers), 10), (p.Plant(PlantKind.RedFlowers), 6), (p.Plant(PlantKind.WhiteFlowers), 6), (p.Plant(PlantKind.Bush), 8));
                     p.FloraElevation(156f, 153f);
                     // Caves in the hills, ice caves in the snowy mountains
+                    // Kenney's Nature Kit scenes: camps in the open, forest floors in the woods, boulders up the hills
+                    PointsOfInterest.Nature(p, NatureSites.Camp, 0.5f, 165f, false);
+                    PointsOfInterest.Nature(p, NatureSites.Clearing, 0.9f, 165f, true);
+                    PointsOfInterest.Nature(p, NatureSites.Boulders, 0.6f, 320f, false);
                     PointsOfInterest.Caves(p, CaveStyle.Rock, 0.7f, 380f, OreKind.Quartz);
                     PointsOfInterest.Caves(p, CaveStyle.Ice, 0.6f, 1000f, OreKind.Cryonite);
                     PointsOfInterest.Village(p, RuinStyle.Mossy, 0.6f);

@@ -32,6 +32,7 @@
 - villages
 - ruins
 - caves, ice caves
+- abandoned camps (chest in the tent), forest floors, boulder heaps
 - wrecks, freighters
 
 See also: [Resources](Ressources.md), [Cartography table](Machines.md) (shows this page in game).

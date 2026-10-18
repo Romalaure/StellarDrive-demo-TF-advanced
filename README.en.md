@@ -46,6 +46,15 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Blender models, nature scenes (v0.40)
+
+- 3D models are now made in **Blender** (scripts in `tools/blender`, exported and built into the mod): bevelled edges, rounded shapes. First one remade: the **merchant terminal**.
+- **Nature scenes** made with **Kenney's Nature Kit** (CC0, www.kenney.nl), recolored to the game's tones:
+  - **abandoned camps**: tents, a campfire, logs, a canoe, with a **chest** in the tent;
+  - **forest floors**: fallen trunks, stumps, mushroom rings, ferns;
+  - **boulder heaps**: tall standing stones, grass on their tops.
+- They are on Gaia, Verdance, Sylvara (forest floors) and Altis (boulders). Plants and mushrooms can be walked through, trunks, tents and rocks block.
+
 ## Missions, reputation, automatic hangar, auroras, smooth fast flight (v0.39)
 
 - **Today's deliveries** at the merchant terminal: 3 orders a day (e.g. 30 cryonite → 2 quantum cores), once each for everyone, new ones every day.
@@ -266,3 +275,7 @@ dotnet build src/StellarDriveDemoTFAdvanced -c Release
 ```
 
 The build copies the DLL into the game's `Mods` folder. `tools/package.ps1` builds the release zip.
+
+## Credits
+
+- Nature scenes: **Nature Kit** by Kenney (www.kenney.nl), license CC0.

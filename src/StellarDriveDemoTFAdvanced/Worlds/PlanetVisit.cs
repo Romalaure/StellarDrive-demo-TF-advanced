@@ -151,7 +151,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 AdvancedMod.Log.Msg($"dev: {planet.name} has {objects.Length} point-of-interest objects loaded");
                 AdvancedMod.Log.Msg($"dev: {planet.name} points of interest loaded: " + string.Join(", ", objects
                     .GroupBy(o => o.name.Replace("(Clone)", "")).Select(g => g.Key + " x" + g.Count())));
-                foreach (string kind in new[] { "TFA_Cave", "TFA_RuinHall", "TFA_RuinHouse", "TFA_RuinTower", "TFA_RuinTemple", "TFA_Ore", "TFA_CityTowerTall", "TFA_CityDome", "TFA_FortTowerTall", "TFA_FortTower", "TFA_FortDome" })
+                foreach (string kind in new[] { "TFA_Nature_nature_camp", "TFA_Nature_nature_clearing", "TFA_Nature_nature_boulders", "TFA_Cave", "TFA_RuinHall", "TFA_RuinHouse", "TFA_RuinTower", "TFA_RuinTemple", "TFA_Ore", "TFA_CityTowerTall", "TFA_CityDome", "TFA_FortTowerTall", "TFA_FortTower", "TFA_FortDome" })
                 {
                     // Objects unload when the player moves: skip destroyed ones
                     PlanetObjectVisuals site = objects.Where(o => o != null && o.name.StartsWith(kind))
