@@ -51,7 +51,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
         /// <summary>Development: with a camera in DevShowcase, the tablet opened full screen and photographed.</summary>
         public static void Install()
         {
-            StellarDriveDemoTFAdvanced.Common.DevHarness.Steps.Add((70f, "camera tablet", () =>
+            StellarDriveDemoTFAdvanced.Common.DevHarness.Steps.Add((150f, "camera tablet", () =>
             {
                 if (!("," + StellarDriveDemoTFAdvanced.Common.Settings.DevShowcase.Value.Replace(" ", "") + ",").Contains("," + CameraParts.CameraId + ","))
                     return;
@@ -60,6 +60,22 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
         }
 
         private static bool _devMirror;
+
+        private static System.Collections.IEnumerator Measure(string label)
+        {
+            yield return new WaitForSecondsRealtime(2f);
+            float total = 0f, worst = 0f;
+            int frames = 0;
+            float until = Time.unscaledTime + 6f;
+            while (Time.unscaledTime < until)
+            {
+                total += Time.unscaledDeltaTime;
+                worst = Mathf.Max(worst, Time.unscaledDeltaTime);
+                frames++;
+                yield return null;
+            }
+            TFMod.Log.Msg($"dev: camera cost {label}: {frames / total:0.0} fps, avg {total / frames * 1000f:0.0} ms, worst {worst * 1000f:0} ms");
+        }
 
         private static System.Collections.IEnumerator DevShots()
         {
@@ -78,6 +94,19 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             yield return new WaitForSecondsRealtime(0.5f);
             _devMirror = false;
             TFMod.Log.Msg($"dev: camera tablet: {Cameras().Count} camera(s), sky {Settings.CameraSky.Value}");
+            // Frame cost: closed, then open (small) with each option
+            Settings.TabletSize.Value = 0;
+            Close();
+            yield return Measure("closed");
+            Open = true;
+            yield return Measure("open sky+post");
+            var post = _farFeed != null ? _farFeed.GetUniversalAdditionalCameraData() : null;
+            if (post != null)
+                post.renderPostProcessing = false;
+            yield return Measure("open sky, no post");
+            Settings.CameraSky.Value = false;
+            yield return Measure("open no sky, no post");
+            Settings.CameraSky.Value = true;
             Close();
         }
 
@@ -151,6 +180,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             CameraType type = Settings.CameraSky.Value ? CameraType.Game : CameraType.Reflection;
             if (_feed.cameraType != type)
                 _feed.cameraType = type;
+            if (_farFeed != null && _farFeed.cameraType != type)
+                _farFeed.cameraType = type;
         }
 
         private static void Close()
@@ -229,7 +260,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             int shown = Mathf.RoundToInt(_shownWidth * _guiScale);
             int width = Mathf.Clamp(Mathf.Min(Settings.CameraResolution.Value, shown), 160, 2560) / 16 * 16;
             int height = width * 9 / 16;
-            if (_texture == null || Mathf.Abs(_texture.width - width) > 32)
+            // The game's sky passes keep screen-sized buffers: a smaller image makes them rebuild them at every render
+            if (Settings.CameraSky.Value && !StellarDriveDemoTFAdvanced.Common.DevHarness.Off("camsmall"))
+            {
+                width = Screen.width;
+                height = Screen.height;
+            }
+            if (_texture == null || _texture.width != width || _texture.height != height)
             {
                 if (_texture != null)
                 {
@@ -283,7 +320,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
 
             _far = Camera.allCameras.FirstOrDefault(c => c != viewer && c.transform.root.name.Contains("Distant"));
             var farData = _far != null ? _far.GetComponent<UniversalAdditionalCameraData>() : null;
-            if (_far == null || farData == null || data == null)
+            if (_far == null || farData == null || data == null || StellarDriveDemoTFAdvanced.Common.DevHarness.Off("camfar"))
                 return;
             var farObject = new GameObject(FeedCameraName + "Far");
             UnityEngine.Object.DontDestroyOnLoad(farObject);
@@ -299,7 +336,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             if (AccessTools.Field(farData.GetType(), "m_RendererIndex")?.GetValue(farData) is int renderer)
                 farFeedData.SetRenderer(renderer);
             farFeedData.renderType = CameraRenderType.Base;
-            farFeedData.renderPostProcessing = true;
+            farFeedData.renderPostProcessing = false;
             farFeedData.renderShadows = false;
             data.renderType = CameraRenderType.Overlay;
             _feed.targetTexture = null;

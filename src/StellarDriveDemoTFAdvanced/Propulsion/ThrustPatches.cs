@@ -141,10 +141,53 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                     // The game already added level x 7 800 N along the same axis
                     __result += ThrustMath.Direction(part) * (ThrustMath.Thrust(spec, level) - level * EngineCatalog.BaseThrust);
                 }
+                // The compact wood thruster: the game added level x 3 000 N
+                foreach (StatefulPart part in stateRead.GetAllStatefulParts<WoodThrusterState>())
+                {
+                    if (part.Settings.id != EngineParts.WoodCompactId)
+                        continue;
+                    float level = ((WoodThrusterState)part.State).NormalizedThrustLevel;
+                    __result += -part.Placement.UpOrientation.GetVector3() * (level * 3000f * (EngineParts.WoodCompactThrust - 1f));
+                }
             }
             catch (System.Exception e)
             {
                 ErrorLog.Report("engine thrust", e);
+            }
+        }
+    }
+
+    /// <summary>The compact wood thruster burns in proportion to its thrust: the game took level x 0.05 wood/s, part of it goes back.</summary>
+    [HarmonyPatch(typeof(Ships.Parts.WoodThruster.WoodThrustersUpdater), nameof(Ships.Parts.WoodThruster.WoodThrustersUpdater.Update))]
+    internal static class CompactWoodBurnPatch
+    {
+        private static readonly HarmonyLib.AccessTools.FieldRef<Ships.Parts.WoodThruster.WoodThrustersUpdater, IShipStateWrite> Ship =
+            HarmonyLib.AccessTools.FieldRefAccess<Ships.Parts.WoodThruster.WoodThrustersUpdater, IShipStateWrite>("_ship");
+
+        private static void Postfix(Ships.Parts.WoodThruster.WoodThrustersUpdater __instance, float deltaTime)
+        {
+            try
+            {
+                IShipStateWrite ship = Ship(__instance);
+                foreach (StatefulPart part in ship.GetAllStatefulParts<WoodThrusterState>())
+                {
+                    if (part.Settings.id != EngineParts.WoodCompactId)
+                        continue;
+                    var state = (WoodThrusterState)part.State;
+                    if (state.NormalizedThrustLevel <= 0f)
+                        continue;
+                    float wood = state.GetWoodAvailable() + state.NormalizedThrustLevel * 0.05f * deltaTime * (1f - EngineParts.WoodCompactThrust);
+                    int whole = Mathf.FloorToInt(wood);
+                    ship.UpdatePartState(part.Id, state with
+                    {
+                        ItemSlot = whole > 0 ? new global::Items.Model.InventorySlot { HasItem = true, Quantity = (byte)whole, ItemId = global::Items.Model.ItemsConstants.WoodItemId } : new global::Items.Model.InventorySlot { HasItem = false },
+                        PartialItemConsumptionLevel = wood - whole
+                    });
+                }
+            }
+            catch (System.Exception e)
+            {
+                ErrorLog.Report("compact wood thruster", e);
             }
         }
     }

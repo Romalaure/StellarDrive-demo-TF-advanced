@@ -121,6 +121,7 @@ namespace StellarDriveDemoTFAdvanced
             Try("the nuclear machines", Power.NuclearParts.Register);
             Try("the pirate fairings", Combat.PirateDecor.Register);
             Try("the wrecks' dressing", Worlds.WreckDecor.Register);
+            Try("the loot chests", Worlds.LootChests.Register);
             Try("the structural parts", Construction.StructureParts.Register);
             Try("the wood, glass and iron parts", Construction.MaterialParts.Register);
             Try("the reinforced hull", Construction.ReinforcedHull.Register);

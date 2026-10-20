@@ -43,9 +43,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 description: "Refreshes per second of the camera image on the tablet. Cameras only render while the tablet is open.");
             CameraResolution = _category.CreateEntry("CameraResolution", 960,
                 description: "Largest width in pixels of the camera image. The image is never rendered wider than the tablet screen shows it.");
-            // New key: the old "CameraSky" (off) left the camera image's background black
-            CameraSky = _category.CreateEntry("CameraAtmosphere", true,
-                description: "Render the sky, atmosphere and clouds in the camera image. Off is cheaper but the background is black.");
+            // (third key: "CameraSky" off was black before the distant camera was copied, "CameraAtmosphere" on cost a lot of fps)
+            CameraSky = _category.CreateEntry("CameraPlanetSky", false,
+                description: "Render the planets' atmosphere and clouds in the camera image (space, stars and planets are always drawn). Costly: the image is then rendered at screen size.");
             TabletSize = _category.CreateEntry("TabletSize", 0,
                 description: "Camera tablet size: 0 small, 1 large, 2 full screen. Z in the tablet cycles it.");
             LampLightStrength = _category.CreateEntry("LampLightStrength", 1f,

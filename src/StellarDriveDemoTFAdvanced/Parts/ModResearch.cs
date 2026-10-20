@@ -43,7 +43,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
             new Tech { Id = 7504, Name = Loc.Pick("Ordinateur de bord", "Ship computer", "Ordenador de a bordo"), Requires = new ushort[] { 15 }, Position = new Vector2Int(4, 1),
                 Parts = Range(7301, 7306), Cost = new[] { (Copper, 10), (Glass, 5) } },
             new Tech { Id = 7505, Name = Loc.Pick("Propulsion avancée", "Advanced propulsion", "Propulsión avanzada"), Requires = new ushort[] { 20 }, Position = new Vector2Int(5, 4),
-                Parts = Range(7311, 7314).Concat(new ushort[] { 7347, 7467, 7468, 7469 }).ToArray(), Cost = new[] { (Iron, 25), (Copper, 10) } },
+                Parts = Range(7311, 7314).Concat(new ushort[] { 7347, 7468, 7469 }).ToArray(), Cost = new[] { (Iron, 25), (Copper, 10) } },
             new Tech { Id = 7506, Name = Loc.Pick("Réseau électrique avancé", "Advanced power grid", "Red eléctrica avanzada"), Requires = new ushort[] { 12 }, Position = new Vector2Int(3, 3),
                 Parts = new ushort[] { 7321, 7322 }, Cost = new[] { (Copper, 20), (Iron, 10) } },
             new Tech { Id = 7507, Name = Loc.Pick("Technologie des artefacts", "Artifact technology", "Tecnología de artefactos"), Requires = new ushort[] { 7506 }, Position = new Vector2Int(5, 1),

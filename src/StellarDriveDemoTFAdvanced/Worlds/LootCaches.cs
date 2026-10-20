@@ -44,29 +44,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         // The game's opened loot cases: 400 + 10 x color (gray, green, blue, purple, gold) + finish
         // (standard, metallic, timber, rusted, crystal, icy, alloy)
         private const int Gray = 0, Green = 1, Blue = 2, Purple = 3, Gold = 4;
-        private const int Standard = 0, Metallic = 1, Timber = 2, Rusted = 3, Crystal = 4, Icy = 5, Alloy = 6;
 
-        // The case's color tells its rarity (gray common .. gold legendary), its finish the place
-        private static int CasePart(Kind kind, string prefix, ulong planetId, int rarity)
-        {
-            int color = rarity, finish;
-            switch (kind)
-            {
-                case Kind.Temple: finish = Timber; break;
-                case Kind.CityCore:
-                case Kind.City: finish = Alloy; break;
-                case Kind.FortCore:
-                case Kind.Fort: finish = Rusted; break;
-                default:
-                    finish = prefix.Contains("Tower") ? Rusted : prefix.Contains("Hall") ? Metallic : Timber;
-                    break;
-            }
-            if (planetId == 105 && kind != Kind.City && kind != Kind.CityCore)
-                finish = Icy;
-            else if (planetId == 101 && finish == Timber)
-                finish = Crystal;
-            return 400 + color * 10 + finish;
-        }
+        // The mod's detailed chest in the rarity's color (gray common .. gold legendary)
+        private static int CasePart(int rarity) => LootChests.FirstId + rarity;
 
         private enum Kind { Village, Temple, City, CityCore, Fort, FortCore }
 
@@ -232,7 +212,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
             string json = site.Loot != null
                 ? ChestShipJson(site.CasePart ?? 400, site.Loot(planetId, random).Take(10).ToList())
-                : ChestShipJson(CasePart(site.Kind, site.Prefix, planetId, rarity = Rarity(site.Kind, site.Prefix, random)), LootFor(site.Kind, planetId, rarity, random));
+                : ChestShipJson(CasePart(rarity = Rarity(site.Kind, site.Prefix, random)), LootFor(site.Kind, planetId, rarity, random));
             var data = JsonUtility.FromJson<ShipImportExportUtils.ShipImportExportData>(json);
             SavedShipState state = new ShipsConverter().ConvertToState(data.ships).States.Cast<SavedShipState>().Single();
             state.Id = ids.CreateUniqueIdForObject();

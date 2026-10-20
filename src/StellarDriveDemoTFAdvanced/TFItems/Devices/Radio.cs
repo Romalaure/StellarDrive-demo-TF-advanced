@@ -49,9 +49,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             var materials = new Dictionary<string, DeviceMaterial>
             {
                 ["TF_Speaker_Case"] = new DeviceMaterial(new Color(0.86f, 0.88f, 0.9f), 0.3f, 0.45f),
-                ["TF_NoPaint_SpeakerTrim"] = new DeviceMaterial(new Color(0.09f, 0.1f, 0.12f), 0.4f, 0.4f),
+                ["TF_NoPaint_SpeakerTrim"] = new DeviceMaterial(new Color(0.13f, 0.14f, 0.16f), 0f, 0.15f),
                 ["TF_NoPaint_SpeakerMetal"] = new DeviceMaterial(new Color(0.55f, 0.6f, 0.66f), 1f, 0.5f),
-                ["TF_NoPaint_SpeakerCone"] = new DeviceMaterial(new Color(0.13f, 0.14f, 0.16f), 0.1f, 0.3f),
+                ["TF_NoPaint_SpeakerCone"] = new DeviceMaterial(new Color(0.2f, 0.21f, 0.23f), 0.1f, 0.45f),
                 ["TF_NoPaint_SpeakerGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.25f, 0.8f, 1f) * 1.6f)
             };
             Dictionary<string, Mesh> model = StellarDriveDemoTFAdvanced.Common.ObjModels.Load("speaker");
@@ -66,6 +66,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                     "Speaker: plays what the radios of the same ship or building play, wherever it stands. Look at it and press the use key (T) to open the radio.",
                     "Altavoz: reproduce la música de las radios de la misma nave o edificio, esté donde esté. Míralo y pulsa la tecla de uso (T) para abrir la radio."),
                 2f, new[] { (110u, 2), (112u, 2), (101u, 1) }, SpeakerCenter, SpeakerSize, model, materials);
+            SpeakerTextures.Dress(visuals);
             UsablePart.AddBox(visuals, SpeakerCenter, SpeakerSize + Vector3.one * 0.06f);
             visuals.gameObject.AddComponent<SpeakerVisuals>();
         }

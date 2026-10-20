@@ -765,7 +765,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                         }
                         _taken.Add(new Vector2Int(x, z));
                         // A loot case now and then instead of a plain chest (opened: no key needed)
-                        int container = _random.NextDouble() < 0.4 ? 400 + _random.Next(0, 5) * 10 + _random.Next(0, 7) : Chest;
+                        // (the mod's chests in the rarity's color; the finish roll is kept so the rest of the layout stays the same)
+                        int container = _random.NextDouble() < 0.4 ? LootChests.FirstId + _random.Next(0, 5) + 0 * _random.Next(0, 7) : Chest;
                         floating.Add(Floating(nextPart, container, new Vector3(x, m.y0 - 0.5f + 0.04f, z), 2, 4));
                         storages.Add($"{{\"partId\":{nextPart},\"slots\":[{Loot()}]}}");
                         nextPart++;

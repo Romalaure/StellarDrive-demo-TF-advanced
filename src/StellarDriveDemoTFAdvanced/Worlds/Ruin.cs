@@ -77,7 +77,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             GameObject copy = Object.Instantiate(rock, _holder.transform);
             copy.name = $"TFA_Ruin{name}_{style}";
 
-            var builder = new MeshBuilder();
+            // Stone in meters: the masonry texture tiles every 3 m on every face
+            var builder = new MeshBuilder { PlanarScale = NaturalTextures.StoneScale };
             var wood = new MeshBuilder { Panel = WoodArea() };
             build(builder, wood);
             Mesh mesh = builder.Build(copy.name);
@@ -152,6 +153,17 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             var material = new Material(rock) { name = rock.name + "_" + style };
             if (material.HasProperty(ColorId))
                 material.SetColor(ColorId, material.GetColor(ColorId) * tint);
+            // Dressed masonry instead of the rock's texture: blocks, joints, chips, cracks, moss or frost
+            NaturalTextures.Stone look = style == RuinStyle.Sandstone ? NaturalTextures.Stone.Sandstone
+                : style == RuinStyle.Mossy ? NaturalTextures.Stone.Mossy
+                : style == RuinStyle.Ice ? NaturalTextures.Stone.Icy : NaturalTextures.Stone.Plain;
+            if (material.HasProperty("_Albedo"))
+            {
+                material.SetTexture("_Albedo", NaturalTextures.StoneTexture(look));
+                material.SetTextureScale("_Albedo", Vector2.one);
+            }
+            if (material.HasProperty("_Normal"))
+                material.SetTexture("_Normal", NaturalTextures.StoneNormal);
             Stones[(rock, style)] = material;
             return material;
         }

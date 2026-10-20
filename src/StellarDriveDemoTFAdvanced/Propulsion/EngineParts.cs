@@ -16,6 +16,8 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
     internal static class EngineParts
     {
         private const string Donor = "Thruster";
+        public const ushort WoodCompactId = 7474;
+        public const float WoodCompactThrust = 0.4f;
         private static readonly int ColorId = Shader.PropertyToID("_Color");
         private static readonly Dictionary<string, Material> Tinted = new Dictionary<string, Material>();
 
@@ -26,7 +28,17 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                 EngineSpec spec = engine;
                 PartFactory.Register(spec.Id, Donor, spec.Tab, spec.Row, (settings, prefab) => Configure(spec, settings, prefab));
             }
-            AdvancedMod.Log.Msg($"registered {EngineCatalog.All.Length} engines");
+            // The game's wood-powered thruster, smaller: same signal control and wood feed
+            PartFactory.Register(WoodCompactId, "WoodThruster", AdvancedTab.Name, AdvancedTab.PropulsionRow, (settings, prefab) =>
+            {
+                PartFactory.Describe(settings, Common.Loc.Pick("Propulseur à bois compact", "Compact wood-powered thruster", "Propulsor de leña compacto"),
+                    Common.Loc.Pick($"Le propulseur à bois du jeu en plus petit : {WoodCompactThrust * 3000f:N0} N, brûle {WoodCompactThrust * 100f:0} % du bois. Même commande (signal) et même chargement.",
+                        $"The game's wood-powered thruster, smaller: {WoodCompactThrust * 3000f:N0} N, burns {WoodCompactThrust * 100f:0}% of the wood. Same control (signal) and loading.",
+                        $"El propulsor de leña del juego, más pequeño: {WoodCompactThrust * 3000f:N0} N, quema el {WoodCompactThrust * 100f:0} % de la leña. Mismo control (señal) y misma carga."),
+                    7f, new[] { (110u, 4), (101u, 2) });
+                Scale(prefab, 0.6f);
+            });
+            AdvancedMod.Log.Msg($"registered {EngineCatalog.All.Length + 1} engines");
         }
 
         private static void Configure(EngineSpec spec, PartSettings settings, GameObject prefab)
