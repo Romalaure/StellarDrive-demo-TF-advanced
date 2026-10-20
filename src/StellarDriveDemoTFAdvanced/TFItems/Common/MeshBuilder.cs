@@ -13,6 +13,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         private readonly List<Vector3> _normals = new List<Vector3>();
         private readonly List<int> _triangles = new List<int>();
 
+        public bool HasGeometry => _triangles.Count > 0;
+
         public Mesh Build(string name)
         {
             var mesh = new Mesh { name = name };

@@ -11,21 +11,22 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
     /// <summary>
     /// What a player wears, chosen in the cosmetic cabin: colors for the suit, helmet, backpack and
     /// visor (null: the game's), a hat, sunglasses and a jacket (with their colors). Travels as a
-    /// short text: "suit|helmet|pack|visor|hat|hatColor|glasses|lens|jacket|jacketColor", colors
+    /// short text: "suit|helmet|pack|visor|hat|hatColor|glasses|lens|jacket|jacketColor|back|backColor", colors
     /// as RRGGBB or "-".
     /// </summary>
     internal sealed class Outfit
     {
         public Color? Suit, Helmet, Pack, Visor;
-        public int Hat, Glasses, Jacket;
-        public Color HatColor = new Color(0.15f, 0.15f, 0.18f), Lens = new Color(0.05f, 0.05f, 0.08f), JacketColor = new Color(0.45f, 0.3f, 0.18f);
+        public int Hat, Glasses, Jacket, Back;
+        public Color HatColor = new Color(0.15f, 0.15f, 0.18f), Lens = new Color(0.05f, 0.05f, 0.08f), JacketColor = new Color(0.45f, 0.3f, 0.18f), BackColor = new Color(0.6f, 0.08f, 0.1f);
 
-        public const int Hats = 6, GlassesKinds = 4, Jackets = 4;
+        public const int Hats = 11, GlassesKinds = 6, Jackets = 4, Backs = 5;
 
         public Outfit Copy() => Parse(ToString());
 
         public override string ToString() => string.Join("|", Hex(Suit), Hex(Helmet), Hex(Pack), Hex(Visor),
-            Hat.ToString(CultureInfo.InvariantCulture), Hex(HatColor), Glasses.ToString(CultureInfo.InvariantCulture), Hex(Lens), Jacket.ToString(CultureInfo.InvariantCulture), Hex(JacketColor));
+            Hat.ToString(CultureInfo.InvariantCulture), Hex(HatColor), Glasses.ToString(CultureInfo.InvariantCulture), Hex(Lens), Jacket.ToString(CultureInfo.InvariantCulture), Hex(JacketColor),
+            Back.ToString(CultureInfo.InvariantCulture), Hex(BackColor));
 
         public static Outfit Parse(string text)
         {
@@ -45,11 +46,17 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             outfit.Lens = Color(f[7]) ?? outfit.Lens;
             outfit.Jacket = Mathf.Clamp(Int(f[8]), 0, Jackets - 1);
             outfit.JacketColor = Color(f[9]) ?? outfit.JacketColor;
+            // (older versions sent ten fields)
+            if (f.Length >= 12)
+            {
+                outfit.Back = Mathf.Clamp(Int(f[10]), 0, Backs - 1);
+                outfit.BackColor = Color(f[11]) ?? outfit.BackColor;
+            }
             return outfit;
         }
 
         /// <summary>Whether a text can be an outfit (the host only passes those on).</summary>
-        public static bool IsValid(string text) => text != null && text.Length <= 120 && text.Count(c => c == '|') == 9
+        public static bool IsValid(string text) => text != null && text.Length <= 160 && (text.Count(c => c == '|') == 9 || text.Count(c => c == '|') == 11)
             && text.All(c => c == '|' || c == '-' || char.IsDigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'));
 
         private static int Int(string s) => int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out int v) ? v : 0;

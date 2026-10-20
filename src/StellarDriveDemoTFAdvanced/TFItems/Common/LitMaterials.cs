@@ -45,6 +45,11 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 material.EnableKeyword("_EMISSION");
                 material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
                 material.SetColor("_EmissionColor", emission.Value);
+                // A lit piece does not mirror the sky (bright reflections inside dark ships)
+                material.SetFloat("_EnvironmentReflections", 0f);
+                material.SetFloat("_SpecularHighlights", 0f);
+                material.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
+                material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
             }
             Cache[name] = material;
             return material;

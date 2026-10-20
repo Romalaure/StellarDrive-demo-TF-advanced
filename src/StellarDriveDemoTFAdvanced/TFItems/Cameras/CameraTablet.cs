@@ -30,6 +30,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
 
         private static int _index;
         private static Camera _feed;
+        // The game draws space, stars and planets with a second, "distant" camera under the main
+        // one: the feed copies it too, as the base its own view is stacked on (else the sky is black)
+        private static Camera _farFeed;
+        private static Camera _far;
         private static RenderTexture _texture;
         private static float _lastRender = float.NegativeInfinity;
         private static string _message;
@@ -43,6 +47,39 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
 
         private static readonly AccessTools.FieldRef<ToolBelt, Core.Values.IntValue> SelectedTool =
             AccessTools.FieldRefAccess<ToolBelt, Core.Values.IntValue>("currentSelectedId");
+
+        /// <summary>Development: with a camera in DevShowcase, the tablet opened full screen and photographed.</summary>
+        public static void Install()
+        {
+            StellarDriveDemoTFAdvanced.Common.DevHarness.Steps.Add((70f, "camera tablet", () =>
+            {
+                if (!("," + StellarDriveDemoTFAdvanced.Common.Settings.DevShowcase.Value.Replace(" ", "") + ",").Contains("," + CameraParts.CameraId + ","))
+                    return;
+                MelonLoader.MelonCoroutines.Start(DevShots());
+            }));
+        }
+
+        private static bool _devMirror;
+
+        private static System.Collections.IEnumerator DevShots()
+        {
+            Open = true;
+            Settings.TabletSize.Value = 2;
+            for (int i = 0; i < Cameras().Count && i < 3; i++)
+            {
+                _index = i;
+                yield return new WaitForSecondsRealtime(2f);
+                ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(StellarDriveDemoTFAdvanced.Common.DevHarness.Folder, $"camera_tablet_{i}.png"));
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+            _devMirror = true;
+            yield return new WaitForSecondsRealtime(1.5f);
+            ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(StellarDriveDemoTFAdvanced.Common.DevHarness.Folder, "camera_tablet_mirror.png"));
+            yield return new WaitForSecondsRealtime(0.5f);
+            _devMirror = false;
+            TFMod.Log.Msg($"dev: camera tablet: {Cameras().Count} camera(s), sky {Settings.CameraSky.Value}");
+            Close();
+        }
 
         // ---- Input and feed ----
 
@@ -101,6 +138,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             // Enabled during LateUpdate, the camera renders this frame; otherwise the texture keeps its last image
             if (_feed != null && _feed.enabled != render)
                 _feed.enabled = render;
+            if (_farFeed != null && _farFeed.enabled != render)
+                _farFeed.enabled = render;
             if (_feed != null && render)
                 ApplyQuality();
         }
@@ -119,6 +158,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             Open = false;
             if (_feed != null)
                 _feed.enabled = false;
+            if (_farFeed != null)
+                _farFeed.enabled = false;
         }
 
         private static List<CameraPartVisuals> Cameras() =>
@@ -160,7 +201,14 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
 
         private static void PlaceFeed(CameraPartVisuals camera)
         {
-            _feed.transform.SetPositionAndRotation(camera.Eye.position, camera.Eye.rotation);
+            Camera main = MainCamera.Get();
+            // (development: the player's own view, to compare with the screen)
+            if (_devMirror && main != null)
+                _feed.transform.SetPositionAndRotation(main.transform.position, main.transform.rotation);
+            else
+                _feed.transform.SetPositionAndRotation(camera.Eye.position, camera.Eye.rotation);
+            if (_farFeed != null && _far != null && main != null)
+                _farFeed.transform.SetPositionAndRotation(_far.transform.position, _far.transform.rotation * Quaternion.Inverse(main.transform.rotation) * _feed.transform.rotation);
         }
 
         // Places the feed again right before it renders, once ships have their final pose this frame
@@ -192,7 +240,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
                 }
                 _texture = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32) { name = "TF_TabletTexture", useMipMap = false };
                 _texture.Create();
-                if (_feed != null)
+                if (_farFeed != null)
+                    _farFeed.targetTexture = _texture;
+                else if (_feed != null)
                     _feed.targetTexture = _texture;
             }
             if (_feed != null)
@@ -230,6 +280,37 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
                 data.requiresColorOption = CameraOverrideOption.Off;
             }
             RenderPipelineManager.beginCameraRendering += BeforeCameraRenders;
+
+            _far = Camera.allCameras.FirstOrDefault(c => c != viewer && c.transform.root.name.Contains("Distant"));
+            var farData = _far != null ? _far.GetComponent<UniversalAdditionalCameraData>() : null;
+            if (_far == null || farData == null || data == null)
+                return;
+            var farObject = new GameObject(FeedCameraName + "Far");
+            UnityEngine.Object.DontDestroyOnLoad(farObject);
+            _farFeed = farObject.AddComponent<Camera>();
+            _farFeed.CopyFrom(_far);
+            _farFeed.enabled = false;
+            _farFeed.depth = _feed.depth - 1f;
+            _farFeed.fieldOfView = _feed.fieldOfView;
+            _farFeed.allowMSAA = false;
+            _farFeed.allowHDR = false;
+            var farFeedData = _farFeed.GetUniversalAdditionalCameraData();
+            // The distant camera's own renderer: the default one leaves its layer out
+            if (AccessTools.Field(farData.GetType(), "m_RendererIndex")?.GetValue(farData) is int renderer)
+                farFeedData.SetRenderer(renderer);
+            farFeedData.renderType = CameraRenderType.Base;
+            farFeedData.renderPostProcessing = true;
+            farFeedData.renderShadows = false;
+            data.renderType = CameraRenderType.Overlay;
+            _feed.targetTexture = null;
+            farFeedData.cameraStack.Add(_feed);
+            _farFeed.targetTexture = _texture;
+            TFMod.Log.Msg($"camera tablet: sky from the distant camera {_far.name}");
+            if (StellarDriveDemoTFAdvanced.Common.DevHarness.Active)
+            {
+                var viewerData = viewer.GetUniversalAdditionalCameraData();
+                TFMod.Log.Msg($"dev: cameras: main {viewer.name} type {viewerData?.renderType} clear {viewer.clearFlags} depth {viewer.depth} target {viewer.targetTexture?.name} stack [{string.Join(",", viewerData?.cameraStack?.Select(c => c?.name) ?? new string[0])}]; far {_far.name} type {farData.renderType} clear {_far.clearFlags} depth {_far.depth} mask {_far.cullingMask} target {_far.targetTexture?.name} stack [{string.Join(",", farData.cameraStack?.Select(c => c?.name) ?? new string[0])}]; all: {string.Join("; ", Camera.allCameras.Select(c => c.name + " d" + c.depth + " " + c.GetUniversalAdditionalCameraData()?.renderType))}");
+            }
         }
 
         // ---- Drawing ----

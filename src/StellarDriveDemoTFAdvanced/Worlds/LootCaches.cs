@@ -46,19 +46,19 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         private const int Gray = 0, Green = 1, Blue = 2, Purple = 3, Gold = 4;
         private const int Standard = 0, Metallic = 1, Timber = 2, Rusted = 3, Crystal = 4, Icy = 5, Alloy = 6;
 
-        private static int CasePart(Kind kind, string prefix, ulong planetId)
+        // The case's color tells its rarity (gray common .. gold legendary), its finish the place
+        private static int CasePart(Kind kind, string prefix, ulong planetId, int rarity)
         {
-            int color, finish;
+            int color = rarity, finish;
             switch (kind)
             {
-                case Kind.Temple: color = Gold; finish = Timber; break;
-                case Kind.CityCore: color = Gold; finish = Alloy; break;
-                case Kind.City: color = Purple; finish = Alloy; break;
-                case Kind.FortCore: color = Gold; finish = Rusted; break;
-                case Kind.Fort: color = prefix.Contains("Dome") ? Purple : Gray; finish = Rusted; break;
+                case Kind.Temple: finish = Timber; break;
+                case Kind.CityCore:
+                case Kind.City: finish = Alloy; break;
+                case Kind.FortCore:
+                case Kind.Fort: finish = Rusted; break;
                 default:
-                    color = prefix.Contains("Hall") ? Blue : prefix.Contains("Tower") ? Gray : Green;
-                    finish = prefix.Contains("Tower") ? Rusted : Timber;
+                    finish = prefix.Contains("Tower") ? Rusted : prefix.Contains("Hall") ? Metallic : Timber;
                     break;
             }
             if (planetId == 105 && kind != Kind.City && kind != Kind.CityCore)
@@ -222,6 +222,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             if (ships == null || spaces == null || transpose == null || ids == null)
                 return;
             var random = new System.Random(key.GetHashCode());
+            int rarity = -1;
 
             // Surface spaces of one planet share the planet's axes: the building's rotation applies as is
             Vector3 up = rotation * Vector3.up;
@@ -231,7 +232,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 
             string json = site.Loot != null
                 ? ChestShipJson(site.CasePart ?? 400, site.Loot(planetId, random).Take(10).ToList())
-                : ChestShipJson(CasePart(site.Kind, site.Prefix, planetId), LootFor(site.Kind, planetId, random));
+                : ChestShipJson(CasePart(site.Kind, site.Prefix, planetId, rarity = Rarity(site.Kind, site.Prefix, random)), LootFor(site.Kind, planetId, rarity, random));
             var data = JsonUtility.FromJson<ShipImportExportUtils.ShipImportExportData>(json);
             SavedShipState state = new ShipsConverter().ConvertToState(data.ships).States.Cast<SavedShipState>().Single();
             state.Id = ids.CreateUniqueIdForObject();
@@ -242,7 +243,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             state.RelativeSpaceId = spaces.GetOrCreateShipRelativeSpace(state.Id);
             ships.LoadShip(state);
             Placed.Add(state.Id);
-            AdvancedMod.Log.Msg($"caches: chest {state.Id} placed in {site.Prefix.TrimEnd('_')} on planet {planetId}");
+            AdvancedMod.Log.Msg($"caches: chest {state.Id} placed in {site.Prefix.TrimEnd('_')} on planet {planetId}" + (rarity >= 0 ? $", rarity {rarity}" : ""));
         }
 
         // ---- Loot
@@ -304,17 +305,63 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             }
         }
 
-        private static List<(uint Item, int Quantity)> LootFor(Kind kind, ulong planetId, System.Random random)
+        // Chances of each rarity (common, uncommon, rare, epic, legendary) by place: the richer the place, the rarer its chests
+        private static readonly Dictionary<Kind, int[]> RarityWeights = new Dictionary<Kind, int[]>
         {
-            var loot = new List<(uint, int)>();
+            [Kind.Village] = new[] { 45, 32, 16, 6, 1 },
+            [Kind.Temple] = new[] { 0, 20, 40, 28, 12 },
+            [Kind.City] = new[] { 10, 30, 34, 20, 6 },
+            [Kind.CityCore] = new[] { 0, 8, 34, 36, 22 },
+            [Kind.Fort] = new[] { 18, 34, 28, 15, 5 },
+            [Kind.FortCore] = new[] { 0, 8, 30, 36, 26 }
+        };
+
+        private static int Rarity(Kind kind, string prefix, System.Random random)
+        {
+            int[] weights = RarityWeights[kind];
+            // Big halls and domes hold better chests than small houses
+            int shift = prefix.Contains("Hall") || prefix.Contains("Dome") ? 1 : 0;
+            int roll = random.Next(0, weights.Sum());
+            for (int i = 0; i < weights.Length; i++)
+            {
+                roll -= weights[i];
+                if (roll < 0)
+                    return Mathf.Min(Gold, i + (shift > 0 && random.NextDouble() < 0.3 ? shift : 0));
+            }
+            return Gray;
+        }
+
+        // The rare finds an epic or legendary chest always holds one (two) of
+        private static readonly (uint Item, int Min, int Max)[] Treasures =
+        {
+            (ModItems.Artifact, 1, 1), (ModItems.QuantumCore, 1, 1), (ModItems.ExoticMatter, 1, 2), (ModItems.GoldBar, 1, 3), (ModItems.Meteorite, 2, 4), (ModItems.NexoranAlloy, 3, 6)
+        };
+
+        private static List<(uint Item, int Quantity)> LootFor(Kind kind, ulong planetId, int rarity, System.Random random)
+        {
+            var loot = new List<(uint Item, int Quantity)>();
+            // Rarer chests: each drop more likely and more plentiful
+            float more = 1f + 0.4f * rarity;
             foreach (Drop drop in LootTable(kind, planetId))
             {
-                if (loot.Count < 10 && random.NextDouble() < drop.Chance)
-                    loot.Add((drop.Item, random.Next(drop.Min, drop.Max + 1)));
+                double chance = 1.0 - Math.Pow(1.0 - drop.Chance, 0.6 + 0.4 * rarity);
+                if (loot.Count < 10 && random.NextDouble() < chance)
+                    loot.Add((drop.Item, Mathf.Max(1, Mathf.RoundToInt(random.Next(drop.Min, drop.Max + 1) * more))));
+            }
+            for (int i = 0; i < rarity - 2 && loot.Count < 10; i++)
+            {
+                var treasure = Treasures[random.Next(0, Treasures.Length)];
+                int index = loot.FindIndex(l => l.Item == treasure.Item);
+                int count = random.Next(treasure.Min, treasure.Max + 1);
+                if (index >= 0)
+                    loot[index] = (treasure.Item, loot[index].Quantity + count);
+                else
+                    loot.Add((treasure.Item, count));
             }
             if (loot.Count == 0)
                 loot.Add((ModItems.Iron, random.Next(2, 6)));
-            return loot;
+            // Best finds first in the chest
+            return loot.OrderByDescending(l => Treasures.Any(t => t.Item == l.Item)).ToList();
         }
 
         // The game's ship save format: one chest, no hull

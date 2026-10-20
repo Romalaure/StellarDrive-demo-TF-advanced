@@ -63,6 +63,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.Outfits.Install();
             Devices.Teleporter.Install();
             Devices.Trader.Install();
+            Cameras.CameraTablet.Install();
             if (ToolsActive)
             {
                 Paint.PaintNet.InstallSerializers();

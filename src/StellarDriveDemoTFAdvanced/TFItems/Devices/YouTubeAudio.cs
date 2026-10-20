@@ -88,9 +88,24 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                     return;
                 }
 
+                var clock = Stopwatch.StartNew();
                 string ytDlp = EnsureYtDlp(job);
                 job.Step = job.Text("Téléchargement de la musique", "Downloading the music", "Descargando la música");
-                string downloaded = Download(ytDlp, job);
+                string downloaded;
+                try
+                {
+                    downloaded = Download(ytDlp, job);
+                }
+                catch (IOException e)
+                {
+                    // YouTube changes often and breaks old yt-dlp versions: update it and try once more
+                    TFMod.Log.Warning($"radio: yt-dlp failed ({e.Message}), updating it and retrying");
+                    job.Step = job.Text("Mise à jour de yt-dlp", "Updating yt-dlp", "Actualizando yt-dlp");
+                    Update(ytDlp);
+                    job.Step = job.Text("Téléchargement de la musique", "Downloading the music", "Descargando la música");
+                    downloaded = Download(ytDlp, job);
+                }
+                long downloadMs = clock.ElapsedMilliseconds;
                 job.Step = job.Text("Préparation du son", "Preparing the sound", "Preparando el sonido");
                 string partial = wav + ".tmp";
                 Mp4Fixup.StripEditLists(downloaded);
@@ -100,7 +115,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 File.Move(partial, wav);
                 TryDelete(downloaded);
                 Trim();
+                TFMod.Log.Msg($"radio: {job.VideoId} ready (download {downloadMs} ms, decode {clock.ElapsedMilliseconds - downloadMs} ms)");
                 Finish(job, wav);
+                UpdateIfOld(ytDlp);
             }
             catch (Exception e)
             {
@@ -138,6 +155,38 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                     File.Delete(path);
                 File.Move(partial, path);
                 return path;
+            }
+        }
+
+        // After a song is ready, so the next one does not wait: yt-dlp older than a week updates itself
+        private static void UpdateIfOld(string ytDlp)
+        {
+            try
+            {
+                if (DateTime.UtcNow - File.GetLastWriteTimeUtc(ytDlp) > TimeSpan.FromDays(7))
+                    Update(ytDlp);
+            }
+            catch (Exception e)
+            {
+                TFMod.Log.Warning("radio: yt-dlp update: " + e.Message);
+            }
+        }
+
+        private static void Update(string ytDlp)
+        {
+            lock (DownloadLock)
+            {
+                var start = new ProcessStartInfo(ytDlp, "-U") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+                using (Process process = Process.Start(start))
+                {
+                    var stdout = new Thread(() => process.StandardOutput.ReadToEnd()) { IsBackground = true };
+                    stdout.Start();
+                    process.StandardError.ReadToEnd();
+                    if (!process.WaitForExit(120_000))
+                        try { process.Kill(); } catch (Exception) { }
+                }
+                // Marks the check done even when already up to date
+                File.SetLastWriteTimeUtc(ytDlp, DateTime.UtcNow);
             }
         }
 

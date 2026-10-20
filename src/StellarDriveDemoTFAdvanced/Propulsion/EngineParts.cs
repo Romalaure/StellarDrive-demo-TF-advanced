@@ -61,7 +61,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             var model = new Power.MachineModels.Model();
             spec.Model(model, body);
             Power.MachineModels.Attach(visual, model, "Engine" + spec.Key, spec.ModelGlow, spec.ModelCore);
-            if (spec.Key == "DarkMatter")
+            if (spec.Key.EndsWith("DarkMatter"))
             {
                 DarkFlame(prefab);
             }

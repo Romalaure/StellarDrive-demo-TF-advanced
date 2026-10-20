@@ -35,7 +35,39 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         public static void Register()
         {
             Lights.LampParts.RegisterDonorPart(RadioId, TFTab.DevicesRow, Configure, TFTab.ObjectsName);
-            TFMod.Log.Msg("registered the radio");
+            Lights.LampParts.RegisterDonorPart(SpeakerId, TFTab.DevicesRow, ConfigureSpeaker, TFTab.ObjectsName);
+            TFMod.Log.Msg("registered the radio and its speaker");
+        }
+
+        public const ushort SpeakerId = 7162;
+        private static readonly Vector3 SpeakerCenter = new Vector3(0f, 0.27f, 0f);
+        private static readonly Vector3 SpeakerSize = new Vector3(0.36f, 0.54f, 0.3f);
+
+        // The speaker: plays what the radios of its ship play, wherever it is in the ship
+        private static void ConfigureSpeaker(PartSettings settings, GameObject prefab)
+        {
+            var materials = new Dictionary<string, DeviceMaterial>
+            {
+                ["TF_Speaker_Case"] = new DeviceMaterial(new Color(0.86f, 0.88f, 0.9f), 0.3f, 0.45f),
+                ["TF_NoPaint_SpeakerTrim"] = new DeviceMaterial(new Color(0.09f, 0.1f, 0.12f), 0.4f, 0.4f),
+                ["TF_NoPaint_SpeakerMetal"] = new DeviceMaterial(new Color(0.55f, 0.6f, 0.66f), 1f, 0.5f),
+                ["TF_NoPaint_SpeakerCone"] = new DeviceMaterial(new Color(0.13f, 0.14f, 0.16f), 0.1f, 0.3f),
+                ["TF_NoPaint_SpeakerGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.25f, 0.8f, 1f) * 1.6f)
+            };
+            Dictionary<string, Mesh> model = StellarDriveDemoTFAdvanced.Common.ObjModels.Load("speaker");
+            if (model == null)
+            {
+                var box = new MeshBuilder();
+                box.Box(SpeakerCenter, SpeakerSize);
+                model = new Dictionary<string, Mesh> { ["TF_Speaker_Case"] = box.Build("TF_Speaker_Simple") };
+            }
+            Transform visuals = DeviceModels.Build(settings, prefab, Loc.Pick("Enceinte radio", "Radio speaker", "Altavoz de radio"),
+                Loc.Pick("Enceinte : joue la musique des radios du même vaisseau ou bâtiment, où qu'elle soit posée. Regarde-la et appuie sur la touche d'utilisation (T) pour ouvrir la radio.",
+                    "Speaker: plays what the radios of the same ship or building play, wherever it stands. Look at it and press the use key (T) to open the radio.",
+                    "Altavoz: reproduce la música de las radios de la misma nave o edificio, esté donde esté. Míralo y pulsa la tecla de uso (T) para abrir la radio."),
+                2f, new[] { (110u, 2), (112u, 2), (101u, 1) }, SpeakerCenter, SpeakerSize, model, materials);
+            UsablePart.AddBox(visuals, SpeakerCenter, SpeakerSize + Vector3.one * 0.06f);
+            visuals.gameObject.AddComponent<SpeakerVisuals>();
         }
 
         /// <summary>Network handlers; installed whether or not the part could be registered.</summary>
@@ -43,6 +75,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         {
             TFNet.OnServer(TFMessageKind.Radio, OnServerRadio);
             TFNet.OnClient(TFMessageKind.Radio, (kind, ship, part, text) => ClientStates[new PartKey(ship, part)] = text);
+            TFNet.OnClient(TFMessageKind.RadioRefused, (kind, ship, part, text) => RadioMenu.Refused());
             TFNet.SyncRequested += connection =>
             {
                 foreach (KeyValuePair<PartKey, string> radio in ServerStates.ToList())
@@ -70,11 +103,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         {
             ["TF_Radio_Case"] = new DeviceMaterial(new Color(0.86f, 0.88f, 0.9f), 0.3f, 0.75f),
             ["TF_NoPaint_RadioTrim"] = new DeviceMaterial(new Color(0.09f, 0.1f, 0.12f), 0.5f, 0.7f),
-            ["TF_NoPaint_RadioMetal"] = new DeviceMaterial(new Color(0.55f, 0.6f, 0.66f), 1f, 0.85f),
-            ["TF_NoPaint_RadioGlass"] = new DeviceMaterial(new Color(0.02f, 0.05f, 0.09f), 0.2f, 0.95f),
+            // Low smoothness: mirror-like pieces reflected the bright sky inside dark ships
+            ["TF_NoPaint_RadioMetal"] = new DeviceMaterial(new Color(0.55f, 0.6f, 0.66f), 1f, 0.5f),
+            ["TF_NoPaint_RadioGlass"] = new DeviceMaterial(new Color(0.02f, 0.05f, 0.09f), 0.2f, 0.45f),
             ["TF_NoPaint_RadioGrille"] = new DeviceMaterial(new Color(0.16f, 0.18f, 0.21f), 0.4f, 0.4f),
-            ["TF_NoPaint_RadioGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.9f, new Color(0.25f, 0.8f, 1f) * 2.4f),
-            ["TF_NoPaint_RadioAccent"] = new DeviceMaterial(new Color(1f, 0.5f, 0.15f), 0f, 0.8f, new Color(1f, 0.45f, 0.1f) * 2f)
+            ["TF_NoPaint_RadioGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.25f, 0.8f, 1f) * 1.6f),
+            ["TF_NoPaint_RadioAccent"] = new DeviceMaterial(new Color(1f, 0.5f, 0.15f), 0f, 0.1f, new Color(1f, 0.45f, 0.1f) * 1.6f)
         };
 
         /// <summary>The equalizer's bars on the screen (separate objects, moved by <see cref="RadioVisuals"/>).</summary>
@@ -187,7 +221,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             var bar = new MeshBuilder();
             bar.Box(new Vector3(0f, 0.5f, 0f), Vector3.one);
             Mesh mesh = bar.Build("TF_RadioBar");
-            Material material = LitMaterials.Get("TF_RadioBarGlow", new Color(0.3f, 0.85f, 1f), 0f, 0.9f, new Color(0.3f, 0.9f, 1f) * 2.6f);
+            Material material = LitMaterials.Get("TF_RadioBarGlow", new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.3f, 0.9f, 1f) * 1.8f);
             float step = ScreenWidth / Bars;
             for (int i = 0; i < Bars; i++)
             {
@@ -217,6 +251,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             if (sender != null && !sender.IsLocalClient && player != null && IsLocked(player))
             {
                 TFMod.Log.Msg($"radio: {player} may not change the radios");
+                TFNet.SendTo(sender, TFMessageKind.RadioRefused, shipId, partId, "");
                 return;
             }
             var ships = ServiceLocator.GetService<IShipsServerProvider>();
@@ -383,6 +418,29 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         }
     }
 
+    /// <summary>A speaker: heard like its ship's radios; using it opens the radio that plays (or any radio of the ship).</summary>
+    internal sealed class SpeakerVisuals : UsablePart
+    {
+        public override string Label => Loc.Pick("Enceinte (radio)", "Speaker (radio)", "Altavoz (radio)");
+
+        public override void Use()
+        {
+            PartKey? radio = null;
+            foreach (UsablePart part in All)
+            {
+                if (!(part is RadioVisuals visuals) || !visuals.HasContext || visuals.Key.ShipId != Key.ShipId)
+                    continue;
+                radio = visuals.Key;
+                if (Radio.ClientStates.TryGetValue(visuals.Key, out string state) && !string.IsNullOrEmpty(state))
+                    break;
+            }
+            if (radio.HasValue)
+                RadioMenu.Show(radio.Value);
+            else
+                RadioMenu.Notice(Loc.Pick("Aucune radio dans ce vaisseau : pose une radio, l'enceinte jouera sa musique.", "No radio in this ship: place a radio and the speaker will play its music.", "No hay radio en esta nave: coloca una radio y el altavoz reproducirá su música."));
+        }
+    }
+
     /// <summary>The radio's window: game tracks, a YouTube link, stop and volume.</summary>
     internal static class RadioMenu
     {
@@ -418,8 +476,25 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             ModMenu.Open(() => _open = false);
         }
 
+        private static string _notice;
+        private static float _noticeUntil;
+
+        public static void Notice(string message)
+        {
+            _notice = message;
+            _noticeUntil = Time.unscaledTime + 5f;
+        }
+
+        /// <summary>The host refused our change (it blocked us from changing the radios).</summary>
+        public static void Refused() =>
+            Notice(_error = Loc.Pick("L'hôte ne te laisse pas changer la musique des radios (il peut t'autoriser dans la fenêtre de la radio).",
+                "The host does not let you change what the radios play (they can allow you in the radio's window).",
+                "El anfitrión no te deja cambiar la música de las radios (puede permitírtelo en la ventana de la radio)."));
+
         public static void Draw()
         {
+            if (_notice != null && Time.unscaledTime < _noticeUntil && !_open)
+                DeviceUi.Toast(Screen.width, Screen.height, _notice);
             if (!_open || !ModMenu.IsOpen)
                 return;
             float scale = Mathf.Clamp(Screen.height / 1080f, 0.7f, 2.5f);
@@ -485,10 +560,15 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 Settings.RadioVolume.Value = volume;
             GUILayout.Label(Mathf.RoundToInt(volume * 100f) + "%", DeviceUi.Muted, GUILayout.Width(44f));
             GUILayout.EndHorizontal();
+            // Two explicit choices: a single toggle showing its state was read as an action
             bool muted = Radio.IsMuted(_radio);
-            if (GUILayout.Button(muted ? Loc.Pick("Muet pour moi : oui (cliquer pour réécouter)", "Muted for me: yes (click to hear it again)", "Silenciada para mí: sí (clic para volver a oírla)") : Loc.Pick("Muet pour moi : non (les autres l'entendent toujours)", "Muted for me: no (the others still hear it)", "Silenciada para mí: no (los demás la siguen oyendo)"),
-                muted ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Height(32f)))
-                Radio.SetMuted(_radio, !muted);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(Loc.Pick("Pour moi :", "For me:", "Para mí:"), DeviceUi.Text, GUILayout.Width(90f));
+            if (GUILayout.Button(Loc.Pick("J'entends", "I hear it", "La oigo"), muted ? DeviceUi.Button : DeviceUi.Selected, GUILayout.Height(32f)))
+                Radio.SetMuted(_radio, false);
+            if (GUILayout.Button(Loc.Pick("Muet (les autres l'entendent)", "Muted (the others hear it)", "Silencio (los demás la oyen)"), muted ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Height(32f)))
+                Radio.SetMuted(_radio, true);
+            GUILayout.EndHorizontal();
             if (others.Count > 0)
             {
                 GUILayout.Space(6f);
@@ -499,8 +579,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                     bool locked = Radio.IsLocked(other);
                     GUILayout.BeginHorizontal();
                     GUILayout.Label(other, DeviceUi.Text, GUILayout.ExpandWidth(true));
-                    if (GUILayout.Button(locked ? Loc.Pick("Bloqué", "Blocked", "Bloqueado") : Loc.Pick("Autorisé", "Allowed", "Permitido"), locked ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Width(130f), GUILayout.Height(30f)))
-                        Radio.SetLocked(other, !locked);
+                    if (GUILayout.Button(Loc.Pick("Autorisé", "Allowed", "Permitido"), locked ? DeviceUi.Button : DeviceUi.Selected, GUILayout.Width(110f), GUILayout.Height(30f)))
+                        Radio.SetLocked(other, false);
+                    if (GUILayout.Button(Loc.Pick("Bloqué", "Blocked", "Bloqueado"), locked ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Width(110f), GUILayout.Height(30f)))
+                        Radio.SetLocked(other, true);
                     GUILayout.EndHorizontal();
                 }
                 GUILayout.EndScrollView();
@@ -591,12 +673,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             foreach (KeyValuePair<PartKey, Playing> entry in Radios)
             {
                 Playing playing = entry.Value;
-                RadioVisuals visuals = FindRadio(entry.Key);
+                UsablePart source = camera != null ? NearestSource(entry.Key, camera.transform.position) : null;
                 float volume = 0f;
                 float pan = 0f;
-                if (visuals != null && camera != null)
+                if (source != null)
                 {
-                    Vector3 offset = visuals.Center - camera.transform.position;
+                    Vector3 offset = source.Center - camera.transform.position;
                     float distance = offset.magnitude;
                     float fade = Mathf.Clamp01(1f - (distance - FullVolumeDistance) / (SilentDistance - FullVolumeDistance));
                     volume = Radio.IsMuted(entry.Key) ? 0f : fade * fade * Mathf.Clamp01(Settings.RadioVolume.Value);
@@ -705,14 +787,23 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             Radios.Clear();
         }
 
-        private static RadioVisuals FindRadio(PartKey key)
+        // The radio itself or the nearest speaker of its ship, whichever is closer to the listener
+        private static UsablePart NearestSource(PartKey key, Vector3 listener)
         {
+            UsablePart best = null;
+            float bestDistance = float.MaxValue;
             foreach (UsablePart part in UsablePart.All)
             {
-                if (part is RadioVisuals radio && radio.HasContext && radio.Key.Equals(key))
-                    return radio;
+                if (!part.HasContext || !(part is RadioVisuals && part.Key.Equals(key) || part is SpeakerVisuals && part.Key.ShipId == key.ShipId))
+                    continue;
+                float distance = (part.Center - listener).sqrMagnitude;
+                if (distance < bestDistance)
+                {
+                    best = part;
+                    bestDistance = distance;
+                }
             }
-            return null;
+            return best;
         }
     }
 }

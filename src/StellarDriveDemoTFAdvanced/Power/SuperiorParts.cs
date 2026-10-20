@@ -184,9 +184,6 @@ namespace StellarDriveDemoTFAdvanced.Power
                 float a = i * Mathf.PI * 2f / sides, b = (i + 1) * Mathf.PI * 2f / sides;
                 Vector3 pa = new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * radius, pb = new Vector3(Mathf.Cos(b), Mathf.Sin(b), 0f) * radius;
                 band.Box((pa + pb) * 0.5f, new Vector3((pb - pa).magnitude + 0.004f, 0.026f, 0.05f), Quaternion.Euler(0f, 0f, (a + b) * 0.5f * Mathf.Rad2Deg + 90f));
-                if (i % 2 == 0)
-                    foreach (float z in new[] { -0.027f, 0.027f })
-                        runes.Box((pa + pb) * 0.5f + Vector3.forward * z, new Vector3(i % 8 == 0 ? 0.035f : 0.016f, 0.01f, 0.003f), Quaternion.Euler(0f, 0f, (a + b) * 0.5f * Mathf.Rad2Deg + 90f));
             }
             // Axles out to the outer ring (at ±Y for the outer gimbal, ±X inside it)
             if (inner > 0f)
@@ -194,7 +191,18 @@ namespace StellarDriveDemoTFAdvanced.Power
                     band.Cylinder(new Vector3(s * inner, 0f, 0f), new Vector3(s * radius, 0f, 0f), 0.016f, 0.016f, 8);
             Transform holder = Piece(parent, name, at, layer);
             Piece(holder, "Band", Vector3.zero, layer, band.Build(name + "Band"), metal);
-            Piece(holder, "Glow", Vector3.zero, layer, runes.Build(name + "Glow"), glow);
+            // Glyph bands on both faces (Common/RuneTexture), tinted by the charge like the glow they replace
+            Material runeMaterial = TransparentMaterials.Additive("TFA_GimbalRunes", RuneTexture.Strip);
+            if (runeMaterial != null)
+            {
+                float repeats = Mathf.Max(1f, Mathf.Round(radius * 2f * Mathf.PI / 0.6f));
+                Piece(holder, "Glow", Vector3.zero, layer, RuneTexture.Ring(name + "Runes", radius - 0.022f, radius + 0.022f, -0.028f, 64, repeats), runeMaterial);
+                Piece(holder, "BackGlow", Vector3.forward * 0.056f, layer, RuneTexture.Ring(name + "RunesBack", radius - 0.022f, radius + 0.022f, -0.028f, 64, repeats), runeMaterial);
+            }
+            else
+            {
+                Piece(holder, "Glow", Vector3.zero, layer, runes.Build(name + "Glow"), glow);
+            }
             return holder;
         }
 

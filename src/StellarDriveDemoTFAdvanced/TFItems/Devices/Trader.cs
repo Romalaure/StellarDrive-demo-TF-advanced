@@ -53,6 +53,23 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             new Offer(ModItems.Key, 1, ModItems.Copper, 12)
         };
 
+        private static global::Items.Interface.Service.IItemThumbnailProvider _thumbnails;
+
+        /// <summary>The item's inventory picture (rendered and cached by the game), or null.</summary>
+        public static Texture ItemIcon(uint id)
+        {
+            try
+            {
+                if (_thumbnails == null)
+                    _thumbnails = Core.Services.ServiceLocator.GetService<global::Items.Interface.Service.IItemThumbnailProvider>();
+                return _thumbnails?.GetThumbnail(id);
+            }
+            catch (System.Exception)
+            {
+                return null;
+            }
+        }
+
         public static string ItemName(uint id)
         {
             var mod = ModItems.All.FirstOrDefault(i => i.Id == id);
@@ -400,7 +417,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 {
                     Trader.Offer offer = Trader.Offers[i];
                     GUILayout.BeginHorizontal();
-                    GUILayout.Label($"{Trader.Price(offer, _reputation)} × {Trader.ItemName(offer.Give)}   →   {offer.Gets} × {Trader.ItemName(offer.Get)}", DeviceUi.Text, GUILayout.Width(490f));
+                    Stack(offer.Give, Trader.Price(offer, _reputation));
+                    GUILayout.Label("→", DeviceUi.Text, GUILayout.Width(30f), GUILayout.Height(IconSize));
+                    Stack(offer.Get, offer.Gets);
+                    GUILayout.FlexibleSpace();
                     if (GUILayout.Button(Loc.Pick("Échanger", "Trade", "Cambiar"), DeviceUi.Button, GUILayout.Height(30f), GUILayout.Width(100f)))
                         Trader.Request(i, 1);
                     if (GUILayout.Button("× 5", DeviceUi.Button, GUILayout.Height(30f), GUILayout.Width(60f)))
@@ -419,7 +439,11 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 {
                     Trader.Mission mission = missions[i];
                     GUILayout.BeginHorizontal();
-                    GUILayout.Label($"{mission.Count} × {Trader.ItemName(mission.Item)}   →   {mission.Gets} × {Trader.ItemName(mission.Reward)}  (+{Trader.MissionReputation})", DeviceUi.Text, GUILayout.Width(530f));
+                    Stack(mission.Item, mission.Count);
+                    GUILayout.Label("→", DeviceUi.Text, GUILayout.Width(30f), GUILayout.Height(IconSize));
+                    Stack(mission.Reward, mission.Gets);
+                    GUILayout.Label($"+{Trader.MissionReputation}", DeviceUi.Muted, GUILayout.Width(50f), GUILayout.Height(IconSize));
+                    GUILayout.FlexibleSpace();
                     if (Done.Contains(i))
                         GUILayout.Label(Loc.Pick("Faite", "Done", "Hecha"), DeviceUi.Muted, GUILayout.Width(120f));
                     else if (GUILayout.Button(Loc.Pick("Livrer", "Deliver", "Entregar"), DeviceUi.Button, GUILayout.Height(30f), GUILayout.Width(120f)))
@@ -434,7 +458,29 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             if (GUILayout.Button(Loc.Pick("Fermer (Échap)", "Close (Esc)", "Cerrar (Esc)"), DeviceUi.Button, GUILayout.Height(36f)))
                 ModMenu.Close();
             GUILayout.EndArea();
+            // The item's name under the pointer
+            if (!string.IsNullOrEmpty(GUI.tooltip))
+            {
+                Vector2 mouse = Event.current.mousePosition;
+                var tip = new Rect(mouse.x + 16f, mouse.y + 10f, 260f, 30f);
+                DeviceUi.Panel(tip);
+                GUI.Label(new Rect(tip.x + 10f, tip.y, tip.width - 20f, tip.height), GUI.tooltip, DeviceUi.Text);
+            }
             GUI.matrix = previous;
+        }
+
+        private const float IconSize = 44f;
+
+        // An item's picture (the game's inventory thumbnail) and its count; its name shows on hover
+        private static void Stack(uint item, int count)
+        {
+            Texture icon = Trader.ItemIcon(item);
+            string name = Trader.ItemName(item);
+            if (icon != null)
+                GUILayout.Box(new GUIContent(icon, name), DeviceUi.Muted, GUILayout.Width(IconSize), GUILayout.Height(IconSize));
+            else
+                GUILayout.Label(new GUIContent(name, name), DeviceUi.Text, GUILayout.Height(IconSize));
+            GUILayout.Label(new GUIContent("× " + count, name), DeviceUi.Text, GUILayout.Width(60f), GUILayout.Height(IconSize));
         }
     }
 }

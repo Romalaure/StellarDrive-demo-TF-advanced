@@ -269,19 +269,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             _segmentGlow = glow.Build("TFA_PortalSegmentGlow");
             _segmentNode = node.Build("TFA_PortalSegmentNode");
 
-            var runes = new MeshBuilder { DoubleSided = true };
-            const int marks = 48;
-            for (int i = 0; i < marks; i++)
-            {
-                float a = i * 360f / marks;
-                Quaternion turn = Quaternion.Euler(0f, 0f, a);
-                Vector3 at = turn * new Vector3(0f, 0.93f, 0f);
-                float length = i % 4 == 0 ? 0.05f : 0.022f;
-                runes.Box(at, new Vector3(0.008f, length, 0.004f), turn);
-                if (i % 6 == 3)
-                    runes.Box(turn * new Vector3(0f, 0.905f, 0f), new Vector3(0.03f, 0.008f, 0.004f), turn);
-            }
-            _runeRing = runes.Build("TFA_PortalRunes");
+            // A band of glowing glyphs (Common/RuneTexture) inside the segments
+            _runeRing = RuneTexture.Ring("TFA_PortalRunes", 0.85f, 0.98f, 0f, 128, 3f);
 
             var disc = new MeshBuilder();
             disc.Cylinder(new Vector3(0f, 0f, -0.002f), new Vector3(0f, 0f, 0.002f), 1f, 1f, 64);
@@ -290,7 +279,11 @@ namespace StellarDriveDemoTFAdvanced.Power
             _frame = LitMaterials.Get("TFA_PortalFrame", new Color(0.24f, 0.2f, 0.3f), 0.6f, 0.6f);
             _frameGlow = LitMaterials.Get("TFA_PortalFrameGlow", MachineModels.Violet * 0.7f, 0f, 0.8f, MachineModels.Violet * 2.2f);
             _nodeGlow = LitMaterials.Get("TFA_PortalNodeGlow", new Color(0.9f, 0.75f, 1f), 0f, 0.9f, new Color(0.9f, 0.7f, 1f) * 3.5f);
-            _runes = LitMaterials.Get("TFA_PortalRunes", new Color(0.7f, 0.5f, 1f), 0f, 0.8f, new Color(0.75f, 0.55f, 1f) * 2.5f);
+            _runes = TransparentMaterials.Additive("TFA_PortalRunesTex", RuneTexture.Strip);
+            if (_runes != null)
+                _runes.SetColor("_BaseColor", new Color(0.75f, 0.5f, 1f) * 1.6f);
+            else
+                _runes = LitMaterials.Get("TFA_PortalRunes", new Color(0.7f, 0.5f, 1f), 0f, 0.8f, new Color(0.75f, 0.55f, 1f) * 2.5f);
             _swirlA = TransparentMaterials.Additive("TFA_PortalSwirl", Swirl(3, 14f, new Color(0.22f, 0.04f, 0.55f), new Color(0.7f, 0.45f, 1f)));
             _swirlB = TransparentMaterials.Additive("TFA_PortalSwirlB", Swirl(5, 22f, new Color(0.05f, 0.2f, 0.5f), new Color(0.85f, 0.6f, 1f)));
             _ripple = TransparentMaterials.Additive("TFA_PortalRipple", Ring());

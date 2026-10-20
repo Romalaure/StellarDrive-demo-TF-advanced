@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using MelonLoader;
 using UnityEngine;
 using StellarDriveDemoTFAdvanced.Common;
@@ -64,7 +65,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
         /// <summary>Signal socket of the nuclear and dark matter engines: when wired, it sets their thrust (0-1).</summary>
         public const byte CommandSocket = 4;
 
-        public static readonly EngineSpec[] All =
+        public static readonly EngineSpec[] All = WithCompacts(new[]
         {
             new EngineSpec
             {
@@ -130,7 +131,47 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                 Cost = new[] { (Items.ModItems.Meteorite, 30), (Items.ModItems.QuantumCore, 3), (Items.ModItems.ExoticMatter, 4), (Items.ModItems.NexoranAlloy, 15), (Items.ModItems.Titanium, 25) },
                 Row = Parts.AdvancedTab.SuperiorRow
             }
-        };
+        });
+
+        public const float CompactScale = 0.5f, CompactThrust = 0.35f;
+
+        // Compact versions (ids 7467-7473): about half the size, a third of the thrust and propellant
+        private static EngineSpec[] WithCompacts(EngineSpec[] engines)
+        {
+            // (a local: static fields declared below All would still be null when All is made)
+            var compacts = new (ushort Id, string Of, string Fr, string En, string Es)[]
+            {
+            (7467, "Chemical", "Propulseur chimique compact", "Compact chemical thruster", "Propulsor químico compacto"),
+            (7468, "Heavy", "Moteur lourd compact", "Compact heavy engine", "Motor pesado compacto"),
+            (7469, "Efficient", "Moteur économe compact", "Compact efficient engine", "Motor eficiente compacto"),
+            (7470, "Exotic", "Moteur exotique compact", "Compact exotic engine", "Motor exótico compacto"),
+            (7471, "NuclearCompact", "Mini-propulseur nucléaire", "Mini nuclear thruster", "Minipropulsor nuclear"),
+            (7472, "NuclearHeavy", "Moteur nucléaire compact", "Compact nuclear engine", "Motor nuclear compacto"),
+            (7473, "DarkMatter", "Moteur à matière noire compact", "Compact dark matter engine", "Motor de materia oscura compacto")
+            };
+            // The game's Chemical Thruster as a model for its compact version
+            var chemical = new EngineSpec { Key = "Chemical", DefaultThrust = 1f, DefaultFuel = 1f, Mass = 20f, Scale = 1f, Tint = new Color(0.9f, 0.92f, 0.95f), Cost = new[] { (101u, 4), (112u, 2) } };
+            var all = new List<EngineSpec>(engines);
+            foreach ((ushort id, string of, string fr, string en, string es) in compacts)
+            {
+                EngineSpec big = of == "Chemical" ? chemical : engines.First(e => e.Key == of);
+                float thrust = big.DefaultThrust * CompactThrust;
+                all.Add(new EngineSpec
+                {
+                    Id = id, Key = "Compact" + of, Label = Loc.Pick(fr, en, es),
+                    Description = Loc.Pick($"Version compacte, moitié moins grande : {thrust * BaseThrust:N0} N, un tiers de la poussée et des ergols de la version normale. ",
+                        $"Compact version, half the size: {thrust * BaseThrust:N0} N, a third of the normal version's thrust and propellant. ",
+                        $"Versión compacta, la mitad de grande: {thrust * BaseThrust:N0} N, un tercio del empuje y del propergol de la versión normal. ")
+                        + (big.Description ?? ""),
+                    DefaultThrust = thrust, DefaultFuel = big.DefaultFuel * CompactThrust, ReactionMass = big.ReactionMass * CompactThrust,
+                    Fuel = big.Fuel, Mass = big.Mass * CompactThrust, Scale = big.Scale * CompactScale, SpoolSeconds = big.SpoolSeconds * 0.6f,
+                    OffCenterThrust = big.OffCenterThrust, Tint = big.Tint, Glow = big.Glow, Model = big.Model, ModelGlow = big.ModelGlow, ModelCore = big.ModelCore, Flame = big.Flame,
+                    Cost = big.Cost.Select(c => (c.Item, Mathf.Max(1, (c.Count + 1) / 2))).ToArray(),
+                    Tab = big.Tab, Row = big.Row
+                });
+            }
+            return all.ToArray();
+        }
 
         private static readonly Dictionary<ushort, EngineSpec> ById = new Dictionary<ushort, EngineSpec>();
 

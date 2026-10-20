@@ -185,23 +185,23 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         }
     }
 
-    /// <summary>The outfit window, on the left so the cabin's mannequin stays in view.</summary>
+    /// <summary>
+    /// The outfit window, on the left so the cabin's mannequin stays in view: every accessory is a
+    /// tile with its picture; clicking a tile (or one of the suit's parts) opens a color wheel for it.
+    /// </summary>
     internal static class CabinMenu
     {
+        private enum Target { None, Suit, Helmet, Pack, Visor, Hat, Lens, Jacket, Back }
+
         private static bool _open;
         private static Vector2 _scroll;
-
-        private static readonly Color[] Palette =
-        {
-            new Color(0.95f, 0.95f, 0.95f), new Color(0.55f, 0.57f, 0.6f), new Color(0.12f, 0.12f, 0.14f), new Color(0.85f, 0.15f, 0.12f),
-            new Color(0.98f, 0.5f, 0.1f), new Color(0.98f, 0.82f, 0.15f), new Color(0.3f, 0.75f, 0.25f), new Color(0.1f, 0.45f, 0.25f),
-            new Color(0.25f, 0.8f, 0.95f), new Color(0.15f, 0.35f, 0.85f), new Color(0.1f, 0.15f, 0.4f), new Color(0.55f, 0.25f, 0.85f),
-            new Color(0.95f, 0.45f, 0.7f), new Color(0.5f, 0.32f, 0.18f), new Color(0.82f, 0.68f, 0.45f), new Color(0.9f, 0.75f, 0.3f)
-        };
+        private static Target _target;
+        private static Rect _windowRect;
 
         public static void Show()
         {
             _open = true;
+            _target = Target.None;
             ModMenu.Open(() => _open = false);
         }
 
@@ -213,107 +213,322 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             Matrix4x4 previous = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
             float screenWidth = Screen.width / scale, screenHeight = Screen.height / scale;
-            Rect area = DeviceUi.WindowAt(screenWidth, screenHeight, 40f, 660f, 820f, Loc.Pick("CABINE COSMÉTIQUE", "COSMETIC CABIN", "CABINA COSMÉTICA"));
+            Rect area = DeviceUi.WindowAt(screenWidth, screenHeight, 40f, 640f, 860f, Loc.Pick("CABINE COSMÉTIQUE", "COSMETIC CABIN", "CABINA COSMÉTICA"));
+            _windowRect = new Rect(area.x - 22f, area.y - 54f, area.width + 44f, area.height + 72f);
             GUILayout.BeginArea(area);
             Outfit outfit = Outfits.Mine;
             bool changed = false;
             _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.ExpandHeight(true));
-            changed |= ColorRow(Loc.Pick("Combinaison", "Suit", "Traje"), ref outfit.Suit);
-            changed |= ColorRow(Loc.Pick("Casque", "Helmet", "Casco"), ref outfit.Helmet);
-            changed |= ColorRow(Loc.Pick("Sac à dos", "Backpack", "Mochila"), ref outfit.Pack);
-            changed |= ColorRow(Loc.Pick("Visière", "Visor", "Visor"), ref outfit.Visor);
-            GUILayout.Space(6f);
-            changed |= Choice(Loc.Pick("Chapeau", "Hat", "Sombrero"), ref outfit.Hat, new[]
+
+            GUILayout.Label(Loc.Pick("COULEURS (clique pour changer)", "COLORS (click to change)", "COLORES (clic para cambiar)"), DeviceUi.Muted);
+            GUILayout.BeginHorizontal();
+            ColorTile(Loc.Pick("Combinaison", "Suit", "Traje"), outfit.Suit, Target.Suit);
+            ColorTile(Loc.Pick("Casque", "Helmet", "Casco"), outfit.Helmet, Target.Helmet);
+            ColorTile(Loc.Pick("Sac", "Pack", "Mochila"), outfit.Pack, Target.Pack);
+            ColorTile(Loc.Pick("Visière", "Visor", "Visor"), outfit.Visor, Target.Visor);
+            GUILayout.EndHorizontal();
+
+            changed |= Tiles(Loc.Pick("CHAPEAU", "HAT", "SOMBRERO"), ref outfit.Hat, Outfit.Hats, "hat", outfit.HatColor, Target.Hat, new[]
             {
-                Loc.Pick("Aucun", "None", "Ninguno"), Loc.Pick("Casquette", "Cap", "Gorra"), "Cowboy", Loc.Pick("Haut-de-forme", "Top hat", "Chistera"), Loc.Pick("Bonnet", "Beanie", "Gorro"), Loc.Pick("Couronne", "Crown", "Corona")
+                Loc.Pick("Aucun", "None", "Ninguno"), Loc.Pick("Casquette", "Cap", "Gorra"), "Cowboy", Loc.Pick("Haut-de-forme", "Top hat", "Chistera"), Loc.Pick("Bonnet", "Beanie", "Gorro"),
+                Loc.Pick("Couronne", "Crown", "Corona"), Loc.Pick("Béret", "Beret", "Boina"), Loc.Pick("Casque viking", "Viking helmet", "Casco vikingo"), Loc.Pick("Tricorne pirate", "Pirate tricorne", "Tricornio pirata"),
+                Loc.Pick("Casque audio", "Headphones", "Auriculares"), Loc.Pick("Auréole", "Halo", "Aureola")
             });
-            if (outfit.Hat > 0 && outfit.Hat < 5)
-                changed |= ColorRow(Loc.Pick("Couleur du chapeau", "Hat color", "Color del sombrero"), ref outfit.HatColor);
-            changed |= Choice(Loc.Pick("Lunettes", "Glasses", "Gafas"), ref outfit.Glasses, new[]
+            changed |= Tiles(Loc.Pick("LUNETTES", "GLASSES", "GAFAS"), ref outfit.Glasses, Outfit.GlassesKinds, "glasses", outfit.Lens, Target.Lens, new[]
             {
-                Loc.Pick("Aucunes", "None", "Ninguna"), Loc.Pick("Soleil", "Sunglasses", "De sol"), Loc.Pick("Aviateur", "Aviator", "Aviador"), Loc.Pick("Bandeau", "Visor band", "Banda")
+                Loc.Pick("Aucunes", "None", "Ninguna"), Loc.Pick("Soleil", "Sunglasses", "De sol"), Loc.Pick("Aviateur", "Aviator", "Aviador"), Loc.Pick("Bandeau", "Visor band", "Banda"),
+                Loc.Pick("Rondes", "Round", "Redondas"), Loc.Pick("Masque de ski", "Ski goggles", "Gafas de esquí")
             });
-            if (outfit.Glasses > 0)
-                changed |= ColorRow(Loc.Pick("Couleur des verres", "Lens color", "Color de los cristales"), ref outfit.Lens);
-            changed |= Choice(Loc.Pick("Veste", "Jacket", "Chaqueta"), ref outfit.Jacket, new[]
+            changed |= Tiles(Loc.Pick("VESTE", "JACKET", "CHAQUETA"), ref outfit.Jacket, Outfit.Jackets, "jacket", outfit.JacketColor, Target.Jacket, new[]
             {
                 Loc.Pick("Aucune", "None", "Ninguna"), Loc.Pick("Gilet", "Vest", "Chaleco"), Loc.Pick("Blouson", "Jacket", "Cazadora"), Loc.Pick("Manteau long", "Long coat", "Abrigo largo")
             });
-            if (outfit.Jacket > 0)
-                changed |= ColorRow(Loc.Pick("Couleur de la veste", "Jacket color", "Color de la chaqueta"), ref outfit.JacketColor);
+            changed |= Tiles(Loc.Pick("DOS", "BACK", "ESPALDA"), ref outfit.Back, Outfit.Backs, "back", outfit.BackColor, Target.Back, new[]
+            {
+                Loc.Pick("Rien", "Nothing", "Nada"), Loc.Pick("Cape", "Cape", "Capa"), "Jetpack", Loc.Pick("Ailes", "Wings", "Alas"), Loc.Pick("Antenne", "Antenna", "Antena")
+            });
             GUILayout.EndScrollView();
+
             GUILayout.Label(Loc.Pick("Le mannequin de la cabine porte ta tenue ; les autres joueurs te voient avec.", "The booth's mannequin wears your outfit; the other players see you in it.", "El maniquí de la cabina lleva tu ropa; los demás jugadores te ven con ella."), DeviceUi.Muted);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button(Loc.Pick("Tenue d'origine", "Original look", "Aspecto original"), DeviceUi.Button, GUILayout.Height(36f)))
             {
                 var fresh = new Outfit();
                 outfit.Suit = fresh.Suit; outfit.Helmet = fresh.Helmet; outfit.Pack = fresh.Pack; outfit.Visor = fresh.Visor;
-                outfit.Hat = 0; outfit.Glasses = 0; outfit.Jacket = 0;
+                outfit.Hat = 0; outfit.Glasses = 0; outfit.Jacket = 0; outfit.Back = 0;
+                _target = Target.None;
                 changed = true;
             }
             if (GUILayout.Button(Loc.Pick("Fermer (Échap)", "Close (Esc)", "Cerrar (Esc)"), DeviceUi.Button, GUILayout.Height(36f)))
                 ModMenu.Close();
             GUILayout.EndHorizontal();
             GUILayout.EndArea();
+
+            if (_target != Target.None)
+                changed |= ColorPanel(outfit);
             GUI.matrix = previous;
             if (changed)
                 Outfits.Changed();
         }
 
-        private static bool Choice(string label, ref int value, string[] names)
+        // ---- Tiles
+
+        private const float Tile = 92f;
+
+        private static void ColorTile(string label, Color? color, Target target)
+        {
+            Rect rect = GUILayoutUtility.GetRect(140f, 64f, GUILayout.Width(140f), GUILayout.Height(64f));
+            bool selected = _target == target;
+            DeviceUi.Fill(rect, selected ? Color.white : new Color(1f, 1f, 1f, 0.15f));
+            var inner = new Rect(rect.x + 3f, rect.y + 3f, rect.width - 6f, rect.height - 6f);
+            DeviceUi.Fill(inner, new Color(0.04f, 0.08f, 0.13f, 1f));
+            var swatch = new Rect(inner.x + 6f, inner.y + 14f, 28f, 28f);
+            if (color.HasValue)
+                DeviceUi.Fill(swatch, color.Value);
+            else
+                GUI.Label(swatch, Loc.Pick("Jeu", "Game", "Juego"), DeviceUi.Muted);
+            GUI.Label(new Rect(swatch.xMax + 6f, inner.y, inner.xMax - swatch.xMax - 8f, inner.height), label, DeviceUi.Muted);
+            if (GUI.Button(rect, GUIContent.none, GUIStyle.none))
+                _target = selected ? Target.None : target;
+            GUILayout.Space(6f);
+        }
+
+        // A row of tiles with pictures; choosing one also opens its color (when it has one)
+        private static bool Tiles(string label, ref int value, int count, string category, Color color, Target target, string[] names)
         {
             int before = value;
-            GUILayout.Label(label.ToUpperInvariant(), DeviceUi.Muted);
-            GUILayout.BeginHorizontal();
-            for (int i = 0; i < names.Length; i++)
+            GUILayout.Space(8f);
+            GUILayout.Label(label, DeviceUi.Muted);
+            int perRow = 6;
+            for (int row = 0; row * perRow < count; row++)
             {
-                if (GUILayout.Button(names[i], i == value ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Height(30f)))
-                    value = i;
+                GUILayout.BeginHorizontal();
+                for (int i = row * perRow; i < Mathf.Min(count, (row + 1) * perRow); i++)
+                {
+                    Rect rect = GUILayoutUtility.GetRect(Tile, Tile, GUILayout.Width(Tile), GUILayout.Height(Tile));
+                    bool selected = i == value;
+                    DeviceUi.Fill(rect, selected ? Color.white : new Color(1f, 1f, 1f, 0.15f));
+                    var inner = new Rect(rect.x + 3f, rect.y + 3f, rect.width - 6f, rect.height - 6f);
+                    DeviceUi.Fill(inner, new Color(0.04f, 0.08f, 0.13f, 1f));
+                    Texture picture = i == 0 ? null : CosmeticThumbs.Get(category, i, color);
+                    if (picture != null)
+                        GUI.DrawTexture(new Rect(inner.x + 4f, inner.y + 2f, inner.width - 8f, inner.height - 8f), picture, ScaleMode.ScaleToFit, true);
+                    else
+                        GUI.Label(new Rect(inner.x, inner.y, inner.width, inner.height - 16f), i == 0 ? "—" : names[i], DeviceUi.Text);
+                    GUI.Label(new Rect(inner.x + 2f, inner.yMax - 20f, inner.width - 4f, 20f), names[i], DeviceUi.Muted);
+                    if (GUI.Button(rect, new GUIContent("", names[i]), GUIStyle.none))
+                    {
+                        value = i;
+                        bool colored = i > 0 && !(category == "hat" && (i == 5 || i == 7 || i == 10));
+                        _target = colored ? target : Target.None;
+                    }
+                    GUILayout.Space(4f);
+                }
+                GUILayout.EndHorizontal();
+                GUILayout.Space(4f);
             }
-            GUILayout.EndHorizontal();
             return value != before;
         }
 
-        // A row of swatches; "game" (null) for the nullable colors
-        private static bool ColorRow(string label, ref Color? value)
+        // ---- The color wheel, beside the window
+
+        private static Texture2D _wheel;
+        private const int WheelSize = 200;
+
+        private static bool ColorPanel(Outfit outfit)
         {
-            Color? before = value;
-            GUILayout.Label(label.ToUpperInvariant(), DeviceUi.Muted);
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button(Loc.Pick("Jeu", "Game", "Juego"), !value.HasValue ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Width(62f), GUILayout.Height(28f)))
-                value = null;
-            foreach (Color color in Palette)
+            Color? current = Get(outfit, _target);
+            bool nullable = _target == Target.Suit || _target == Target.Helmet || _target == Target.Pack || _target == Target.Visor;
+            var panel = new Rect(_windowRect.xMax + 16f, _windowRect.y + 80f, 280f, nullable ? 420f : 380f);
+            DeviceUi.Panel(panel);
+            GUI.Label(new Rect(panel.x + 20f, panel.y + 12f, panel.width - 40f, 26f), TargetName(_target).ToUpperInvariant(), DeviceUi.Title);
+            var wheel = new Rect(panel.x + (panel.width - WheelSize) / 2f, panel.y + 48f, WheelSize, WheelSize);
+            GUI.DrawTexture(wheel, Wheel());
+            Color shown = current ?? Color.white;
+            Color.RGBToHSV(shown, out float h, out float s, out float v);
+            // Where the color is on the wheel
+            float angle = h * Mathf.PI * 2f;
+            var mark = new Vector2(wheel.center.x + Mathf.Cos(angle) * s * WheelSize * 0.5f, wheel.center.y - Mathf.Sin(angle) * s * WheelSize * 0.5f);
+            DeviceUi.Fill(new Rect(mark.x - 6f, mark.y - 6f, 12f, 12f), Color.black);
+            DeviceUi.Fill(new Rect(mark.x - 4f, mark.y - 4f, 8f, 8f), Color.white);
+
+            Color? picked = null;
+            Event e = Event.current;
+            if ((e.type == EventType.MouseDown || e.type == EventType.MouseDrag) && e.button == 0)
             {
-                if (Swatch(color, value.HasValue && Same(value.Value, color)))
-                    value = color;
+                Vector2 d = (e.mousePosition - wheel.center) / (WheelSize * 0.5f);
+                if (d.magnitude <= 1.05f)
+                {
+                    float hue = Mathf.Repeat(Mathf.Atan2(-d.y, d.x) / (Mathf.PI * 2f), 1f);
+                    picked = Color.HSVToRGB(hue, Mathf.Clamp01(d.magnitude), Mathf.Max(0.05f, v));
+                    e.Use();
+                }
             }
-            GUILayout.EndHorizontal();
-            return before.HasValue != value.HasValue || before.HasValue && !Same(before.Value, value.Value);
-        }
 
-        private static bool ColorRow(string label, ref Color value)
-        {
-            Color before = value;
-            GUILayout.Label(label.ToUpperInvariant(), DeviceUi.Muted);
-            GUILayout.BeginHorizontal();
-            foreach (Color color in Palette)
+            float y = wheel.yMax + 14f;
+            GUI.Label(new Rect(panel.x + 20f, y, 90f, 22f), Loc.Pick("Luminosité", "Brightness", "Brillo"), DeviceUi.Muted);
+            float brightness = GUI.HorizontalSlider(new Rect(panel.x + 115f, y + 6f, panel.width - 140f, 16f), v, 0.05f, 1f);
+            if (!Mathf.Approximately(brightness, v) && picked == null)
+                picked = Color.HSVToRGB(h, s, brightness);
+            y += 32f;
+            DeviceUi.Fill(new Rect(panel.x + 20f, y, 60f, 30f), shown);
+            GUI.Label(new Rect(panel.x + 90f, y, 100f, 30f), "#" + ColorUtility.ToHtmlStringRGB(shown), DeviceUi.Text);
+            if (GUI.Button(new Rect(panel.xMax - 80f, y, 60f, 30f), "OK", DeviceUi.Button))
+                _target = Target.None;
+            bool changed = false;
+            if (nullable)
             {
-                if (Swatch(color, Same(value, color)))
-                    value = color;
+                y += 40f;
+                if (GUI.Button(new Rect(panel.x + 20f, y, panel.width - 40f, 30f), Loc.Pick("Couleur du jeu", "Game's color", "Color del juego"), current.HasValue ? DeviceUi.Button : DeviceUi.Selected))
+                {
+                    Set(outfit, _target, null);
+                    changed = true;
+                }
             }
-            GUILayout.EndHorizontal();
-            return !Same(before, value);
+            if (picked.HasValue)
+            {
+                Set(outfit, _target, picked.Value);
+                changed = true;
+            }
+            return changed;
         }
 
-        private static bool Swatch(Color color, bool selected)
+        private static Texture2D Wheel()
         {
-            Rect rect = GUILayoutUtility.GetRect(26f, 28f, GUILayout.Width(26f), GUILayout.Height(28f));
-            if (selected)
-                DeviceUi.Fill(rect, Color.white);
-            DeviceUi.Fill(new Rect(rect.x + 2f, rect.y + 2f, rect.width - 4f, rect.height - 4f), color);
-            return GUI.Button(rect, GUIContent.none, GUIStyle.none);
+            if (_wheel != null)
+                return _wheel;
+            const int size = 256;
+            _wheel = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, name = "TF_ColorWheel" };
+            var pixels = new Color[size * size];
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = (x + 0.5f) / size * 2f - 1f, dy = (y + 0.5f) / size * 2f - 1f;
+                    float r = Mathf.Sqrt(dx * dx + dy * dy);
+                    // (texture rows go up, like the wheel's angle)
+                    Color c = Color.HSVToRGB(Mathf.Repeat(Mathf.Atan2(dy, dx) / (Mathf.PI * 2f), 1f), Mathf.Clamp01(r), 1f);
+                    c.a = Mathf.Clamp01((1f - r) * size * 0.5f);
+                    pixels[y * size + x] = c;
+                }
+            }
+            _wheel.SetPixels(pixels);
+            _wheel.Apply();
+            return _wheel;
         }
 
-        private static bool Same(Color a, Color b) => ColorUtility.ToHtmlStringRGB(a) == ColorUtility.ToHtmlStringRGB(b);
+        private static string TargetName(Target target)
+        {
+            switch (target)
+            {
+                case Target.Suit: return Loc.Pick("Combinaison", "Suit", "Traje");
+                case Target.Helmet: return Loc.Pick("Casque", "Helmet", "Casco");
+                case Target.Pack: return Loc.Pick("Sac à dos", "Backpack", "Mochila");
+                case Target.Visor: return Loc.Pick("Visière", "Visor", "Visor");
+                case Target.Hat: return Loc.Pick("Chapeau", "Hat", "Sombrero");
+                case Target.Lens: return Loc.Pick("Verres", "Lenses", "Cristales");
+                case Target.Jacket: return Loc.Pick("Veste", "Jacket", "Chaqueta");
+                default: return Loc.Pick("Dos", "Back", "Espalda");
+            }
+        }
+
+        private static Color? Get(Outfit o, Target t)
+        {
+            switch (t)
+            {
+                case Target.Suit: return o.Suit;
+                case Target.Helmet: return o.Helmet;
+                case Target.Pack: return o.Pack;
+                case Target.Visor: return o.Visor;
+                case Target.Hat: return o.HatColor;
+                case Target.Lens: return o.Lens;
+                case Target.Jacket: return o.JacketColor;
+                case Target.Back: return o.BackColor;
+                default: return null;
+            }
+        }
+
+        private static void Set(Outfit o, Target t, Color? c)
+        {
+            switch (t)
+            {
+                case Target.Suit: o.Suit = c; break;
+                case Target.Helmet: o.Helmet = c; break;
+                case Target.Pack: o.Pack = c; break;
+                case Target.Visor: o.Visor = c; break;
+                case Target.Hat: o.HatColor = c ?? o.HatColor; break;
+                case Target.Lens: o.Lens = c ?? o.Lens; break;
+                case Target.Jacket: o.JacketColor = c ?? o.JacketColor; break;
+                case Target.Back: o.BackColor = c ?? o.BackColor; break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Pictures of the accessories for the cabin's tiles, rendered by the game's own thumbnail
+    /// renderer (the one of the inventory icons) and kept per kind and color.
+    /// </summary>
+    internal static class CosmeticThumbs
+    {
+        private static readonly Dictionary<string, Texture2D> Cache = new Dictionary<string, Texture2D>();
+        private static Rendering.Services.ObjectThumbnailRenderer _renderer;
+        private static int _renderedThisFrame, _frame;
+
+        public static Texture Get(string category, int kind, Color color)
+        {
+            string key = category + kind + "_" + ColorUtility.ToHtmlStringRGB(color);
+            // (null: it could not be made, not tried again)
+            if (Cache.TryGetValue(key, out Texture2D cached))
+                return cached;
+            // A few per frame: dragging on the color wheel re-renders every tile of a row
+            if (_frame != Time.frameCount)
+            {
+                _frame = Time.frameCount;
+                _renderedThisFrame = 0;
+            }
+            if (_renderedThisFrame >= 3)
+                return null;
+            _renderedThisFrame++;
+            try
+            {
+                if (_renderer == null)
+                    _renderer = Core.Services.ServiceLocator.GetService<Rendering.Services.ObjectThumbnailRenderer>();
+                if (_renderer == null)
+                    return null;
+                List<OutfitModels.Piece> pieces = category == "hat" ? OutfitModels.HatPieces(kind, color)
+                    : category == "glasses" ? OutfitModels.GlassesPieces(kind, color)
+                    : category == "back" ? OutfitModels.BackPieces(kind, color)
+                    : OutfitModels.JacketIconPieces(kind, color);
+                var root = new GameObject("TFA_OutfitThumb");
+                root.transform.position = new Vector3(0f, -30000f, 0f);
+                foreach (OutfitModels.Piece piece in pieces)
+                {
+                    if (!piece.Mesh.HasGeometry)
+                        continue;
+                    var child = new GameObject("Piece");
+                    child.transform.SetParent(root.transform, false);
+                    child.AddComponent<MeshFilter>().sharedMesh = piece.Mesh.Build("TFA_OutfitThumb");
+                    child.AddComponent<MeshRenderer>().sharedMaterial = piece.Material();
+                }
+                var texture = new Texture2D(128, 128, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, name = "TFA_" + key };
+                // Seen from the front, a little from above and to the side (the camera looks along +z)
+                Quaternion turn = category == "back" ? Quaternion.Euler(10f, 25f, 0f) : Quaternion.Euler(18f, 205f, 0f);
+                _renderer.Render(root, turn, texture);
+                if (Cache.Count > 300)
+                {
+                    foreach (Texture2D old in Cache.Values)
+                        Object.Destroy(old);
+                    Cache.Clear();
+                }
+                Cache[key] = texture;
+                return texture;
+            }
+            catch (System.Exception e)
+            {
+                TFMod.Log.Warning("cabin: thumbnail " + key + ": " + e.Message);
+                Cache[key] = null;
+                return null;
+            }
+        }
     }
 }
