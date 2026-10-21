@@ -278,6 +278,18 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Enceinte, propulseurs compacts, coffres détaillés, cabine cosmétique (v0.41)
+
+- **Radio** : deux boutons clairs pour couper ou autoriser un joueur (les anciens interrupteurs étaient pris pour des actions), le joueur bloqué voit qu'il est refusé, yt-dlp se met à jour tout seul et réessaie.
+- **Enceinte** (7162, dans le menu de construction) : joue les radios de son vaisseau. Modèle Blender détaillé (suspension, vis, pavillon du tweeter, bouton de volume, borniers) et textures : tissu acoustique, alu brossé, membrane tissée.
+- **Propulseurs compacts** : une version compacte de chaque propulseur (7467-7474, bois compris) ; le compact chimique sans recherche.
+- **Coffres de butin** : chaque cache tire une rareté (commun à légendaire : couleur, plus de butin et plus rare). Nouveau coffre modélisé dans Blender : bois vieilli à nœuds, fer forgé rouillé, métal gravé de rinceaux à la couleur de la rareté, clous, rivets, pièces, gemmes, gobelet.
+- **Cabine cosmétique** : 5 chapeaux, 2 lunettes, accessoires de dos (cape, jetpack, ailes, antenne), images 3D dans les cases, roue des couleurs au clic.
+- **Marchand** : le comptoir montre l'image des objets ; le cargo marchand a son propre air.
+- **Runes** du portail et du cardan dessinées depuis une texture de glyphes ; **ruines** en pierre de taille.
+- **Tablette caméra** : plus de ciel noir, et plus de perte de fps (atmosphère des planètes coupée par défaut, réglage `CameraPlanetSky`).
+- **SDModKit** déclaré comme dépendance dans `mod.json` (`needs`) pour StellarModManager.
+
 ## Trou noir réaliste, mini cœur stellaire, lunettes, fps (v0.40)
 
 - **Trou noir refait** : le disque d'accrétion est dessiné là où sa lumière arrive après avoir été courbée par le trou noir (lentille gravitationnelle calculée) : la partie arrière du disque forme un arc au-dessus et en dessous de l'ombre, avec un anneau de photons et une seconde image fine. Le gaz tourne plus vite près du centre (spirales), bleu-blanc au centre et rouge au bord, plus lumineux du côté qui vient vers toi.

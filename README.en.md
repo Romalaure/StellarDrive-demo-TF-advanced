@@ -46,6 +46,18 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Speaker, compact thrusters, detailed chests, cosmetic cabin (v0.41)
+
+- **Radio**: two clear buttons to mute or allow a player (the old toggles were read as actions), blocked players see they are refused, yt-dlp updates itself and retries.
+- **Speaker** (7162, in the build menu): plays its ship's radios. Detailed Blender model (surround, screws, tweeter waveguide, volume knob, binding posts) and textures: acoustic cloth, brushed metal, woven cone.
+- **Compact thrusters**: a compact version of every thruster (7467-7474, wood included); the compact chemical one needs no research.
+- **Loot chests**: each cache rolls a rarity (common to legendary: color, more and rarer loot). New chest modelled in Blender: knotty weathered wood, rusty forged iron, engraved metal in the rarity's color, nails, rivets, coins, gems, a goblet.
+- **Cosmetic cabin**: 5 hats, 2 glasses, back accessories (cape, jetpack, wings, antenna), 3D pictures in the tiles, color wheel on click.
+- **Merchant**: the counter shows item pictures; the merchant freighter has its own air.
+- **Runes** of the portal and gimbal drawn from a glyph texture; **ruins** in dressed stone.
+- **Camera tablet**: no more black sky, and no more fps loss (planet atmosphere off by default, setting `CameraPlanetSky`).
+- **SDModKit** declared as a dependency in `mod.json` (`needs`) for StellarModManager.
+
 ## Realistic black hole, mini Stellar Core, sunglasses, fps (v0.40)
 
 - **Black hole remade**: the accretion disk is drawn where its light reaches you after being bent by the hole (computed gravitational lensing): the far side of the disk forms an arc over and under the shadow, with a photon ring and a thin second image. The gas turns faster near the center (spirals), blue-white inside and red at the edge, brighter on the side coming toward you.
