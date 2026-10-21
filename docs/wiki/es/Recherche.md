@@ -2,6 +2,8 @@
 
 Las piezas del mod se desbloquean en la **mesa de investigación**, en una rama del mod unida a las tecnologías del juego. Cada tecnología se paga en recursos.
 
+**Pestañas** en la parte superior de la mesa ordenan las tecnologías: **Juego base**, **TF Advanced** (las del mod por tema), **Otros mods** (si los hay) y **Todo**.
+
 | Tecnología | Requiere | Desbloquea | Coste |
 |---|---|---|---|
 | Construcción metálica | Iron Panels | estructura, hierro | 30 de hierro, 5 de cobre |

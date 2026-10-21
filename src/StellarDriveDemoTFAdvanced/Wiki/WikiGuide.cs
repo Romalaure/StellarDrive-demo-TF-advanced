@@ -114,10 +114,15 @@ namespace StellarDriveDemoTFAdvanced.Wiki
         }
     }
 
-    /// <summary>A wiki page in the guide: shows the current page and follows its links.</summary>
-    internal sealed class WikiPage : MonoBehaviour, IPointerClickHandler
+    /// <summary>
+    /// A wiki page in the guide: a bar of the main pages (buttons in the guide's own look), then
+    /// the page's text in blocks; a line naming a part or an item shows its icon beside it, and a
+    /// planet's page opens on pictures of its plants.
+    /// </summary>
+    internal sealed class WikiPage : MonoBehaviour
     {
         private static readonly List<string> Bar = new List<string> { "Home", "Systeme-Otrera", "Galaxie-Erebe", "Ressources", "Machines", "Constructions", "Stations-spatiales", "Recherche", "Itineraire" };
+        private const string Generated = "TFA_Wiki";
 
         /// <summary>Adds a page of another mod to the bar of main pages (see <see cref="WikiPages.AddSource"/>).</summary>
         public static void AddToBar(string page)
@@ -128,11 +133,11 @@ namespace StellarDriveDemoTFAdvanced.Wiki
         private static readonly Stack<string> History = new Stack<string>();
         public static string Current = "Home";
 
-        private TMP_Text _text;
+        private TMP_Text _style;
 
         private void Start()
         {
-            _text = GetComponent<TMP_Text>();
+            _style = GetComponent<TMP_Text>();
             Render();
         }
 
@@ -142,51 +147,225 @@ namespace StellarDriveDemoTFAdvanced.Wiki
                 return;
             History.Push(Current);
             Current = page;
+            RenderAll();
+        }
+
+        public static void Back()
+        {
+            if (History.Count == 0)
+                return;
+            Current = History.Pop();
+            RenderAll();
+        }
+
+        private static void RenderAll()
+        {
             foreach (WikiPage open in FindObjectsByType<WikiPage>(FindObjectsSortMode.None))
                 open.Render();
         }
 
         private void Render()
         {
-            if (_text == null)
+            if (_style == null)
                 return;
-            var text = new StringBuilder();
-            // The main pages, then back
-            text.Append("<size=80%>");
-            text.Append(string.Join("  ·  ", Bar.Where(WikiPages.Exists).Select(p => p == Current
-                ? "<b>" + WikiPages.Title(p) + "</b>"
-                : $"<link=\"{p}\"><color=#5fc8ff>{WikiPages.Title(p)}</color></link>")));
-            if (History.Count > 0)
-                text.Append("    <link=\"back\"><color=#ffb060>« " + Loc.Pick("Retour", "Back", "Atrás") + "</color></link>");
-            text.Append("</size>\n\n");
-            text.Append(WikiPages.Render(Current));
-            _text.text = text.ToString();
+            Transform page = transform.parent;
+            foreach (Transform child in page.Cast<Transform>().ToList())
+                if (child.name.StartsWith(Generated))
+                    Destroy(child.gameObject);
+            // This object only lends its font and colors
+            _style.text = "";
+            (GetComponent<LayoutElement>() ?? gameObject.AddComponent<LayoutElement>()).ignoreLayout = true;
+
+            AddBar(page);
+            foreach (WikiBlock block in WikiPages.Render(Current))
+            {
+                if (block.Gallery != null)
+                    AddGallery(page, block.Gallery);
+                else if (block.Icon != null)
+                    AddRow(page, block.Icon, block.Text);
+                else if (!string.IsNullOrWhiteSpace(block.Text))
+                    AddText(page, block.Text.TrimEnd('\n'), 1f);
+            }
             var scroll = GetComponentInParent<ScrollRect>();
             if (scroll != null)
                 scroll.verticalNormalizedPosition = 1f;
         }
 
+        private TMP_Text AddText(Transform parent, string text, float scale, string name = "Text")
+        {
+            var textObject = new GameObject(Generated + name, typeof(RectTransform));
+            textObject.transform.SetParent(parent, false);
+            var tmp = textObject.AddComponent<TextMeshProUGUI>();
+            tmp.font = _style.font;
+            tmp.fontSize = _style.fontSize * scale;
+            tmp.color = _style.color;
+            tmp.richText = true;
+            tmp.textWrappingMode = TextWrappingModes.Normal;
+            tmp.raycastTarget = true;
+            tmp.text = text;
+            textObject.AddComponent<WikiLinks>();
+            return tmp;
+        }
+
+        // The main pages and back, as buttons
+        private void AddBar(Transform page)
+        {
+            var bar = new GameObject(Generated + "Bar", typeof(RectTransform));
+            bar.transform.SetParent(page, false);
+            var grid = bar.AddComponent<GridLayoutGroup>();
+            grid.cellSize = new Vector2(_style.fontSize * 8.2f, _style.fontSize * 1.9f);
+            grid.spacing = new Vector2(8f, 8f);
+            grid.padding = new RectOffset(0, 0, 0, 10);
+            foreach (string target in Bar.Where(WikiPages.Exists))
+                AddButton(bar.transform, WikiPages.Title(target), target == Current, () => Show(target));
+            if (History.Count > 0)
+                AddButton(bar.transform, "« " + Loc.Pick("Retour", "Back", "Atrás"), false, Back, new Color(1f, 0.7f, 0.38f));
+        }
+
+        private void AddButton(Transform parent, string label, bool selected, UnityEngine.Events.UnityAction click, Color? tint = null)
+        {
+            var buttonObject = new GameObject(Generated + "Button", typeof(RectTransform));
+            buttonObject.transform.SetParent(parent, false);
+            // Flat panels like the guide's own list: blue when chosen, a thin light edge
+            var image = buttonObject.AddComponent<Image>();
+            image.color = selected ? new Color(0.17f, 0.45f, 0.7f, 1f) : new Color(0.06f, 0.13f, 0.2f, 0.95f);
+            var edge = buttonObject.AddComponent<UnityEngine.UI.Outline>();
+            edge.effectColor = new Color(0.45f, 0.6f, 0.72f, selected ? 0.9f : 0.45f);
+            edge.effectDistance = new Vector2(1.5f, -1.5f);
+            var button = buttonObject.AddComponent<Button>();
+            button.targetGraphic = image;
+            button.onClick.AddListener(click);
+            TMP_Text text = AddText(buttonObject.transform, label, 0.72f, "ButtonText");
+            Destroy(text.GetComponent<WikiLinks>());
+            text.raycastTarget = false;
+            text.alignment = TextAlignmentOptions.Center;
+            text.textWrappingMode = TextWrappingModes.NoWrap;
+            text.overflowMode = TextOverflowModes.Ellipsis;
+            text.fontStyle = selected ? FontStyles.Bold : FontStyles.Normal;
+            if (tint.HasValue)
+                text.color = tint.Value;
+            var rect = (RectTransform)text.transform;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = new Vector2(8f, 2f);
+            rect.offsetMax = new Vector2(-8f, -2f);
+        }
+
+        // A line with the icon of what it names on its left
+        private void AddRow(Transform page, WikiImages.Ref icon, string text)
+        {
+            var row = new GameObject(Generated + "Row", typeof(RectTransform));
+            row.transform.SetParent(page, false);
+            var layout = row.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = 14f;
+            layout.padding = new RectOffset(0, 0, 4, 4);
+            layout.childAlignment = TextAnchor.MiddleLeft;
+            layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = layout.childForceExpandHeight = false;
+            float size = _style.fontSize * 2.6f;
+            AddPicture(row.transform, icon, size);
+            TMP_Text line = AddText(row.transform, text.TrimEnd('\n'), 1f);
+            var element = line.gameObject.AddComponent<LayoutElement>();
+            element.flexibleWidth = 1f;
+        }
+
+        private void AddGallery(Transform page, List<WikiImages.Ref> pictures)
+        {
+            var gallery = new GameObject(Generated + "Gallery", typeof(RectTransform));
+            gallery.transform.SetParent(page, false);
+            var grid = gallery.AddComponent<GridLayoutGroup>();
+            float size = _style.fontSize * 5f;
+            grid.cellSize = new Vector2(size + 12f, size + _style.fontSize * 1.8f);
+            grid.spacing = new Vector2(10f, 10f);
+            grid.padding = new RectOffset(0, 0, 6, 10);
+            foreach (WikiImages.Ref picture in pictures)
+            {
+                var tile = new GameObject(Generated + "Tile", typeof(RectTransform));
+                tile.transform.SetParent(gallery.transform, false);
+                tile.AddComponent<Image>().color = new Color(0.04f, 0.09f, 0.14f, 0.75f);
+                var column = tile.AddComponent<VerticalLayoutGroup>();
+                column.padding = new RectOffset(6, 6, 6, 4);
+                column.childAlignment = TextAnchor.UpperCenter;
+                column.childControlWidth = column.childControlHeight = true;
+                column.childForceExpandWidth = column.childForceExpandHeight = false;
+                AddPicture(tile.transform, picture, size);
+                TMP_Text caption = AddText(tile.transform, picture.Caption, 0.62f, "Caption");
+                caption.alignment = TextAlignmentOptions.Center;
+            }
+        }
+
+        private static void AddPicture(Transform parent, WikiImages.Ref picture, float size)
+        {
+            var pictureObject = new GameObject(Generated + "Picture", typeof(RectTransform));
+            pictureObject.transform.SetParent(parent, false);
+            var raw = pictureObject.AddComponent<RawImage>();
+            raw.raycastTarget = false;
+            var element = pictureObject.AddComponent<LayoutElement>();
+            element.minWidth = element.preferredWidth = size;
+            element.minHeight = element.preferredHeight = size;
+            pictureObject.AddComponent<WikiPicture>().Picture = picture;
+        }
+    }
+
+    /// <summary>A picture of the wiki, filled in once the game has made it.</summary>
+    internal sealed class WikiPicture : MonoBehaviour
+    {
+        public WikiImages.Ref Picture;
+        private RawImage _raw;
+
+        private void Awake()
+        {
+            _raw = GetComponent<RawImage>();
+            _raw.color = Color.clear;
+        }
+
+        private void Update()
+        {
+            if (Picture == null || _raw.texture != null)
+            {
+                enabled = false;
+                return;
+            }
+            Texture texture = WikiImages.Get(Picture);
+            if (texture == null)
+            {
+                // A plant that cannot be pictured: its tile goes
+                if (WikiImages.Failed(Picture) && transform.parent.name.EndsWith("Tile"))
+                    transform.parent.gameObject.SetActive(false);
+                return;
+            }
+            _raw.texture = texture;
+            _raw.color = Color.white;
+        }
+    }
+
+    /// <summary>Follows the links of a block of wiki text.</summary>
+    internal sealed class WikiLinks : MonoBehaviour, IPointerClickHandler
+    {
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (_text == null)
+            var text = GetComponent<TMP_Text>();
+            if (text == null)
                 return;
             Canvas canvas = GetComponentInParent<Canvas>();
             Camera camera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
-            int index = TMP_TextUtilities.FindIntersectingLink(_text, eventData.position, camera);
+            int index = TMP_TextUtilities.FindIntersectingLink(text, eventData.position, camera);
             if (index < 0)
                 return;
-            string target = _text.textInfo.linkInfo[index].GetLinkID();
+            string target = text.textInfo.linkInfo[index].GetLinkID();
             if (target == "back")
-            {
-                if (History.Count == 0)
-                    return;
-                Current = History.Pop();
-                foreach (WikiPage open in FindObjectsByType<WikiPage>(FindObjectsSortMode.None))
-                    open.Render();
-                return;
-            }
-            Show(target);
+                WikiPage.Back();
+            else
+                WikiPage.Show(target);
         }
+    }
+
+    /// <summary>A piece of a wiki page: text, a line with an icon, or a row of pictures.</summary>
+    internal sealed class WikiBlock
+    {
+        public string Text = "";
+        public WikiImages.Ref Icon;
+        public List<WikiImages.Ref> Gallery;
     }
 
     /// <summary>The wiki's pages, built into the mod from docs/wiki, and their markdown turned into TextMeshPro text.</summary>
@@ -255,12 +434,35 @@ namespace StellarDriveDemoTFAdvanced.Wiki
         private static readonly Regex Italic = new Regex(@"(?<![*\w])\*([^*]+)\*(?![*\w])");
         private static readonly Regex Code = new Regex(@"`([^`]+)`");
 
-        public static string Render(string page)
+        private static readonly Regex Tags = new Regex("<[^>]+>");
+        private static readonly Regex LeadingBold = new Regex(@"^\*\*([^*]+)\*\*");
+
+        public static List<WikiBlock> Render(string page)
         {
+            var blocks = new List<WikiBlock>();
             if (!Pages.TryGetValue(page, out string md))
-                return "";
+                return blocks;
             var text = new StringBuilder();
+            void Flush()
+            {
+                if (text.Length > 0)
+                    blocks.Add(new WikiBlock { Text = text.ToString() });
+                text.Clear();
+            }
+            // A line naming a part or an item gets a block of its own, with the icon
+            void Line(string rendered, string name)
+            {
+                WikiImages.Ref icon = name != null ? WikiImages.Match(name) : null;
+                if (icon == null)
+                {
+                    text.Append(rendered).Append('\n');
+                    return;
+                }
+                Flush();
+                blocks.Add(new WikiBlock { Text = rendered.Trim('\n'), Icon = icon });
+            }
             string[] header = null;
+            bool galleryDone = false;
             foreach (string raw in md.Replace("\r", "").Split('\n'))
             {
                 string line = raw.TrimEnd();
@@ -275,39 +477,51 @@ namespace StellarDriveDemoTFAdvanced.Wiki
                         continue;
                     }
                     // A row: its first cell in bold, the others after their column's name
-                    text.Append("• <b>").Append(cells[0]).Append("</b>");
+                    var row = new StringBuilder();
+                    row.Append("• <b>").Append(cells[0]).Append("</b>");
                     for (int i = 1; i < cells.Length; i++)
                     {
                         if (string.IsNullOrEmpty(cells[i]))
                             continue;
                         string column = i < header.Length ? header[i] : "";
-                        text.Append(i == 1 ? " — " : " · ");
+                        row.Append(i == 1 ? " — " : " · ");
                         if (!string.IsNullOrEmpty(column) && header.Length > 2)
-                            text.Append("<color=#9ab0c0>").Append(column).Append(Loc.Pick(" :", ":", ":")).Append("</color> ");
-                        text.Append(cells[i]);
+                            row.Append("<color=#9ab0c0>").Append(column).Append(Loc.Pick(" :", ":", ":")).Append("</color> ");
+                        row.Append(cells[i]);
                     }
-                    text.Append('\n');
+                    Line(row.ToString(), Tags.Replace(cells[0], ""));
                     continue;
                 }
                 header = null;
                 if (line.StartsWith("# "))
+                {
                     text.Append("<size=150%><b>").Append(Inline(line.Substring(2))).Append("</b></size>\n");
+                    List<WikiImages.Ref> gallery = galleryDone ? null : WikiImages.PlanetGallery(line.Substring(2));
+                    galleryDone = true;
+                    if (gallery != null && gallery.Count > 0)
+                    {
+                        Flush();
+                        blocks.Add(new WikiBlock { Gallery = gallery });
+                    }
+                }
                 else if (line.StartsWith("## "))
-                    text.Append("\n<size=120%><b><color=#7fd8ff>").Append(Inline(line.Substring(3))).Append("</color></b></size>\n");
+                    Line("\n<size=120%><b><color=#7fd8ff>" + Inline(line.Substring(3)) + "</color></b></size>", line.Substring(3));
                 else if (line.StartsWith("### "))
-                    text.Append("\n<b>").Append(Inline(line.Substring(4))).Append("</b>\n");
+                    Line("\n<b>" + Inline(line.Substring(4)) + "</b>", line.Substring(4));
                 else if (line.StartsWith("- ") || line.StartsWith("* "))
-                    text.Append("• ").Append(Inline(line.Substring(2))).Append('\n');
+                {
+                    Match bold = LeadingBold.Match(line.Substring(2));
+                    Line("• " + Inline(line.Substring(2)), bold.Success ? bold.Groups[1].Value : null);
+                }
                 else if (line.StartsWith("  - "))
                     text.Append("    - ").Append(Inline(line.Substring(4))).Append('\n');
                 else if (line.StartsWith("> "))
                     text.Append("<color=#ffb080>").Append(Inline(line.Substring(2))).Append("</color>\n");
-                else if (Regex.IsMatch(line, @"^\d+\. "))
-                    text.Append(Inline(line)).Append('\n');
                 else
                     text.Append(Inline(line)).Append('\n');
             }
-            return text.ToString();
+            Flush();
+            return blocks;
         }
 
         private static string Inline(string s)

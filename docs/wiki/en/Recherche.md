@@ -2,6 +2,8 @@
 
 The mod's parts are unlocked at the **research table**, in a branch of the mod linked to the game's techs. Each tech is paid in resources.
 
+**Tabs** at the top of the table sort the techs: **Base game**, **TF Advanced** (the mod's techs by theme), **Other mods** (when there are any) and **All**.
+
 | Tech | Requires | Unlocks | Cost |
 |---|---|---|---|
 | Metal construction | Iron Panels | structure, iron | 30 iron, 5 copper |

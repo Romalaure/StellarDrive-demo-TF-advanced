@@ -52,7 +52,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 ["TF_NoPaint_SpeakerTrim"] = new DeviceMaterial(new Color(0.13f, 0.14f, 0.16f), 0f, 0.15f),
                 ["TF_NoPaint_SpeakerMetal"] = new DeviceMaterial(new Color(0.55f, 0.6f, 0.66f), 1f, 0.5f),
                 ["TF_NoPaint_SpeakerCone"] = new DeviceMaterial(new Color(0.2f, 0.21f, 0.23f), 0.1f, 0.45f),
-                ["TF_NoPaint_SpeakerGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.25f, 0.8f, 1f) * 1.6f)
+                ["TF_NoPaint_SpeakerGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.25f, 0.8f, 1f) * 1.1f)
             };
             Dictionary<string, Mesh> model = StellarDriveDemoTFAdvanced.Common.ObjModels.Load("speaker");
             if (model == null)
@@ -102,14 +102,14 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
         private static Dictionary<string, DeviceMaterial> Materials() => new Dictionary<string, DeviceMaterial>
         {
-            ["TF_Radio_Case"] = new DeviceMaterial(new Color(0.86f, 0.88f, 0.9f), 0.3f, 0.75f),
-            ["TF_NoPaint_RadioTrim"] = new DeviceMaterial(new Color(0.09f, 0.1f, 0.12f), 0.5f, 0.7f),
-            // Low smoothness: mirror-like pieces reflected the bright sky inside dark ships
-            ["TF_NoPaint_RadioMetal"] = new DeviceMaterial(new Color(0.55f, 0.6f, 0.66f), 1f, 0.5f),
-            ["TF_NoPaint_RadioGlass"] = new DeviceMaterial(new Color(0.02f, 0.05f, 0.09f), 0.2f, 0.45f),
+            ["TF_Radio_Case"] = new DeviceMaterial(new Color(0.86f, 0.88f, 0.9f), 0.1f, 0.35f),
+            ["TF_NoPaint_RadioTrim"] = new DeviceMaterial(new Color(0.09f, 0.1f, 0.12f), 0.3f, 0.35f),
+            // Low smoothness everywhere: glossy pieces mirrored the bright sky and the lamps (flashes)
+            ["TF_NoPaint_RadioMetal"] = new DeviceMaterial(new Color(0.55f, 0.6f, 0.66f), 0.8f, 0.35f),
+            ["TF_NoPaint_RadioGlass"] = new DeviceMaterial(new Color(0.02f, 0.05f, 0.09f), 0.1f, 0.3f),
             ["TF_NoPaint_RadioGrille"] = new DeviceMaterial(new Color(0.16f, 0.18f, 0.21f), 0.4f, 0.4f),
-            ["TF_NoPaint_RadioGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.25f, 0.8f, 1f) * 1.6f),
-            ["TF_NoPaint_RadioAccent"] = new DeviceMaterial(new Color(1f, 0.5f, 0.15f), 0f, 0.1f, new Color(1f, 0.45f, 0.1f) * 1.6f)
+            ["TF_NoPaint_RadioGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.25f, 0.8f, 1f) * 1.1f),
+            ["TF_NoPaint_RadioAccent"] = new DeviceMaterial(new Color(1f, 0.5f, 0.15f), 0f, 0.1f, new Color(1f, 0.45f, 0.1f) * 1.1f)
         };
 
         /// <summary>The equalizer's bars on the screen (separate objects, moved by <see cref="RadioVisuals"/>).</summary>
@@ -222,7 +222,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             var bar = new MeshBuilder();
             bar.Box(new Vector3(0f, 0.5f, 0f), Vector3.one);
             Mesh mesh = bar.Build("TF_RadioBar");
-            Material material = LitMaterials.Get("TF_RadioBarGlow", new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.3f, 0.9f, 1f) * 1.8f);
+            Material material = LitMaterials.Get("TF_RadioBarGlow", new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.3f, 0.9f, 1f) * 1.1f);
             float step = ScreenWidth / Bars;
             for (int i = 0; i < Bars; i++)
             {
@@ -407,9 +407,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             float t = Time.time;
             for (int i = 0; i < _bars.Count; i++)
             {
-                // A spectrum: lows taller, a beat every half second, noise on top
+                // A spectrum: lows taller, noise on top (no beat: all the bars rising at once flashed)
                 float target = playing
-                    ? Mathf.Clamp01(0.25f + 0.55f * Mathf.PerlinNoise(i * 0.7f, t * 3.1f) * (1.2f - i / (float)_bars.Count * 0.5f) + 0.25f * Mathf.Pow(Mathf.Max(0f, Mathf.Sin(t * 12.5f)), 6f))
+                    ? Mathf.Clamp01(0.25f + 0.6f * Mathf.PerlinNoise(i * 0.7f, t * 3.1f) * (1.2f - i / (float)_bars.Count * 0.5f))
                     : 0.08f + 0.04f * Mathf.Sin(t * 1.5f + i * 0.5f);
                 _heights[i] = Mathf.Lerp(_heights[i], target, playing ? 0.6f : 0.2f);
                 Vector3 scale = _bars[i].localScale;
@@ -622,8 +622,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
     /// </summary>
     internal static class RadioSound
     {
-        private const float FullVolumeDistance = 2.5f;
-        private const float SilentDistance = 28f;
+        private const float FullVolumeDistance = 2f;
+        private const float SilentDistance = 20f;
 
         private sealed class Playing
         {
@@ -673,21 +673,36 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
             foreach (KeyValuePair<PartKey, Playing> entry in Radios)
             {
-                Playing playing = entry.Value;
-                UsablePart source = camera != null ? NearestSource(entry.Key, camera.transform.position) : null;
-                float volume = 0f;
-                float pan = 0f;
-                if (source != null)
+                float volume = 0f, pan = 0f;
+                if (camera != null && !Radio.IsMuted(entry.Key))
                 {
-                    Vector3 offset = source.Center - camera.transform.position;
-                    float distance = offset.magnitude;
-                    float fade = Mathf.Clamp01(1f - (distance - FullVolumeDistance) / (SilentDistance - FullVolumeDistance));
-                    volume = Radio.IsMuted(entry.Key) ? 0f : fade * fade * Mathf.Clamp01(Settings.RadioVolume.Value);
-                    if (distance > 0.5f)
-                        pan = Mathf.Clamp(Vector3.Dot(offset / distance, camera.transform.right), -1f, 1f) * 0.6f;
+                    Mix(entry.Key, camera.transform.position, camera.transform.right, out volume, out pan);
+                    volume *= Mathf.Clamp01(Settings.RadioVolume.Value);
                 }
-                Drive(playing, volume, pan);
+                Drive(entry.Value, volume, pan);
             }
+        }
+
+        /// <summary>
+        /// What the listener hears of a radio: each of its sources (the radio and the speakers of
+        /// its ship) fades with its own distance; their powers add up, and the sound leans toward
+        /// the louder ones (left/right).
+        /// </summary>
+        public static void Mix(PartKey key, Vector3 listener, Vector3 right, out float volume, out float pan)
+        {
+            float power = 0f, lean = 0f;
+            foreach (UsablePart source in Sources(key))
+            {
+                Vector3 offset = source.Center - listener;
+                float distance = offset.magnitude;
+                float fade = Mathf.Clamp01(1f - (distance - FullVolumeDistance) / (SilentDistance - FullVolumeDistance));
+                float gain = fade * fade;
+                power += gain * gain;
+                if (distance > 0.5f)
+                    lean += gain * gain * Mathf.Clamp(Vector3.Dot(offset / distance, right), -1f, 1f) * 0.8f;
+            }
+            volume = Mathf.Min(1f, Mathf.Sqrt(power));
+            pan = power > 0f ? lean / power : 0f;
         }
 
         private static Playing Start(string state)
@@ -719,6 +734,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             if (playing.HasEvent)
             {
                 playing.Event.setVolume(volume);
+                // (its channel group exists once the event plays)
+                if (playing.Event.getChannelGroup(out FMOD.ChannelGroup group) == FMOD.RESULT.OK)
+                    group.setPan(pan);
                 // Music events end on their own; a radio keeps playing
                 if (playing.Event.getPlaybackState(out PLAYBACK_STATE state) == FMOD.RESULT.OK && state == PLAYBACK_STATE.STOPPED)
                     playing.Event.start();
@@ -788,23 +806,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             Radios.Clear();
         }
 
-        // The radio itself or the nearest speaker of its ship, whichever is closer to the listener
-        private static UsablePart NearestSource(PartKey key, Vector3 listener)
-        {
-            UsablePart best = null;
-            float bestDistance = float.MaxValue;
-            foreach (UsablePart part in UsablePart.All)
-            {
-                if (!part.HasContext || !(part is RadioVisuals && part.Key.Equals(key) || part is SpeakerVisuals && part.Key.ShipId == key.ShipId))
-                    continue;
-                float distance = (part.Center - listener).sqrMagnitude;
-                if (distance < bestDistance)
-                {
-                    best = part;
-                    bestDistance = distance;
-                }
-            }
-            return best;
-        }
+        // The radio itself and the speakers of its ship
+        public static IEnumerable<UsablePart> Sources(PartKey key) =>
+            UsablePart.All.Where(part => part != null && part.HasContext && (part is RadioVisuals && part.Key.Equals(key) || part is SpeakerVisuals && part.Key.ShipId == key.ShipId));
     }
 }

@@ -59,7 +59,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             }));
         }
 
-        private static bool _devMirror;
+        private static bool _devMirror, _devFacing;
 
         private static System.Collections.IEnumerator Measure(string label)
         {
@@ -93,6 +93,21 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(StellarDriveDemoTFAdvanced.Common.DevHarness.Folder, "camera_tablet_mirror.png"));
             yield return new WaitForSecondsRealtime(0.5f);
             _devMirror = false;
+            // The player seen from 1.6 m in front: with and without the sky passes
+            _devFacing = true;
+            foreach (bool sky in new[] { true, false })
+            {
+                Settings.CameraSky.Value = sky;
+                yield return new WaitForSecondsRealtime(1.5f);
+                ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(StellarDriveDemoTFAdvanced.Common.DevHarness.Folder, $"camera_tablet_player_{(sky ? "sky" : "nosky")}.png"));
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+            _devFacing = false;
+            var body = UnityEngine.Object.FindFirstObjectByType<Players.Visuals.FirstPersonPlayerAnimator>(FindObjectsInactive.Include);
+            Camera seen = MainCamera.Get();
+            if (body != null && seen != null)
+                TFMod.Log.Msg("dev: player body renderers: " + string.Join("; ", body.GetComponentsInChildren<Renderer>(true).Select(r =>
+                    $"{r.name} layer {LayerMask.LayerToName(r.gameObject.layer)} on {r.enabled && r.gameObject.activeInHierarchy} shadows {r.shadowCastingMode} main sees {(seen.cullingMask & (1 << r.gameObject.layer)) != 0} feed sees {(_feed != null && (_feed.cullingMask & (1 << r.gameObject.layer)) != 0)}")));
             TFMod.Log.Msg($"dev: camera tablet: {Cameras().Count} camera(s), sky {Settings.CameraSky.Value}");
             // Frame cost: closed, then open (small) with each option
             Settings.TabletSize.Value = 0;
@@ -167,22 +182,51 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             // Enabled during LateUpdate, the camera renders this frame; otherwise the texture keeps its last image
             if (_feed != null && _feed.enabled != render)
                 _feed.enabled = render;
-            if (_farFeed != null && _farFeed.enabled != render)
-                _farFeed.enabled = render;
             if (_feed != null && render)
                 ApplyQuality();
+            bool far = render && _stacked;
+            if (_farFeed != null && _farFeed.enabled != far)
+                _farFeed.enabled = far;
         }
 
-        // Without the sky passes the feed is a plain scene render: the game's atmosphere and cloud
-        // features only run for cameras of the Game type
+        // Without the sky the feed renders alone, as a plain scene render (the game's atmosphere and
+        // cloud passes only run for cameras of the Game type) over a dark sky; with it, stacked
+        // over the copy of the distant camera. (An overlay camera of another type than Game is
+        // skipped by the stack: the near scene, players included, was missing.)
         private static void ApplyQuality()
         {
-            CameraType type = Settings.CameraSky.Value ? CameraType.Game : CameraType.Reflection;
-            if (_feed.cameraType != type)
-                _feed.cameraType = type;
-            if (_farFeed != null && _farFeed.cameraType != type)
-                _farFeed.cameraType = type;
+            bool sky = Settings.CameraSky.Value && _farFeed != null;
+            var data = _feed.GetUniversalAdditionalCameraData();
+            var farData = _farFeed != null ? _farFeed.GetUniversalAdditionalCameraData() : null;
+            if (sky == _stacked && data != null)
+                return;
+            _stacked = sky;
+            if (sky)
+            {
+                _feed.cameraType = CameraType.Game;
+                _feed.targetTexture = null;
+                data.renderType = CameraRenderType.Overlay;
+                if (!farData.cameraStack.Contains(_feed))
+                    farData.cameraStack.Add(_feed);
+                _farFeed.targetTexture = _texture;
+            }
+            else
+            {
+                farData?.cameraStack.Remove(_feed);
+                if (_farFeed != null)
+                {
+                    _farFeed.targetTexture = null;
+                    _farFeed.enabled = false;
+                }
+                data.renderType = CameraRenderType.Base;
+                _feed.cameraType = CameraType.Reflection;
+                _feed.clearFlags = CameraClearFlags.SolidColor;
+                _feed.backgroundColor = new Color(0.12f, 0.16f, 0.22f);
+                _feed.targetTexture = _texture;
+            }
         }
+
+        private static bool _stacked = true;
 
         private static void Close()
         {
@@ -236,6 +280,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
             // (development: the player's own view, to compare with the screen)
             if (_devMirror && main != null)
                 _feed.transform.SetPositionAndRotation(main.transform.position, main.transform.rotation);
+            else if (_devFacing && main != null)
+                _feed.transform.SetPositionAndRotation(main.transform.position + main.transform.forward * 1.6f - Vector3.up * 0.2f, Quaternion.LookRotation(-main.transform.forward));
             else
                 _feed.transform.SetPositionAndRotation(camera.Eye.position, camera.Eye.rotation);
             if (_farFeed != null && _far != null && main != null)
@@ -277,7 +323,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
                 }
                 _texture = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32) { name = "TF_TabletTexture", useMipMap = false };
                 _texture.Create();
-                if (_farFeed != null)
+                if (_farFeed != null && _stacked)
                     _farFeed.targetTexture = _texture;
                 else if (_feed != null)
                     _feed.targetTexture = _texture;

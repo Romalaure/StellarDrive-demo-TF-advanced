@@ -46,7 +46,11 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             PlanetPhysicalProperties physics = planet.GetComponent<PlanetPhysicalProperties>();
             physics.gravityInG = spec.Gravity;
             physics.rotationPeriod = spec.RotationHours;
-            spec.Shape?.Invoke(new Context(planet));
+            var context = new Context(planet);
+            spec.Shape?.Invoke(context);
+            // The wiki shows each planet's plants
+            if (context.Flora != null && context.Flora.configs != null)
+                Wiki.WikiImages.NoteFlora(spec.Id, context.Flora.configs.SelectMany(c => c.objectsSpawn ?? new PlanetDensePlacementConfig.DenseObjectPlacementType[0]).Select(o => o.prefab));
             if (Common.DevHarness.Active && spec.Id == 108)
                 LogTerrainGraph(planet.GetComponent<PlanetTerrain>(), spec.Name);
         }

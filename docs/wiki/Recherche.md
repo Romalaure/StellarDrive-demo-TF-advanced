@@ -2,6 +2,8 @@
 
 Les pièces du mod se débloquent à la **table de recherche**, dans une branche du mod rattachée aux techs du jeu. Chaque tech se paie en ressources.
 
+Des **onglets** en haut de la table rangent les techs : **Jeu de base**, **TF Advanced** (les techs du mod, rangées par thème), **Autres mods** (s'il y en a) et **Tout**.
+
 | Tech | Requiert | Débloque | Coût |
 |---|---|---|---|
 | Construction métallique | Iron Panels | structure, fer | 30 fer, 5 cuivre |

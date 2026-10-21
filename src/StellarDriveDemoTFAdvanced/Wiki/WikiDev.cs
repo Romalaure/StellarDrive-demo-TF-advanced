@@ -42,16 +42,44 @@ namespace StellarDriveDemoTFAdvanced.Wiki
                 yield return new WaitForSecondsRealtime(1f);
                 DevHarness.Screenshot("wiki_1");
                 yield return new WaitForSecondsRealtime(0.5f);
-                WikiPage.Show("Pyros");
+                WikiPage.Show("TF-Gaia");
                 yield return new WaitForSecondsRealtime(1f);
                 DevHarness.Screenshot("wiki_2");
                 yield return new WaitForSecondsRealtime(0.5f);
-                WikiPage.Show("Machines");
+                WikiPage.Show("Ressources");
                 yield return new WaitForSecondsRealtime(1f);
                 DevHarness.Screenshot("wiki_3");
                 yield return new WaitForSecondsRealtime(0.5f);
             }
             activator.Close();
+            yield return new WaitForSecondsRealtime(1f);
+            yield return Research();
+        }
+
+        // The research window, opened without a table, photographed on each tab
+        private static IEnumerator Research()
+        {
+            var opener = Object.FindObjectsByType<UI.Research.GenericPartOpenableMenuActivator>(FindObjectsInactive.Include, FindObjectsSortMode.None).FirstOrDefault();
+            GameObject prefab = opener != null ? Traverse.Create(opener).Field<GameObject>("researchMenuPrefab").Value : null;
+            if (prefab == null)
+            {
+                AdvancedMod.Log.Warning("dev: research: no window");
+                yield break;
+            }
+            GameObject menu = Object.Instantiate(prefab, opener.transform);
+            yield return new WaitForSecondsRealtime(1.5f);
+            var canvas = menu.GetComponentInChildren<UI.Research.ResearchCanvas>(true);
+            foreach (var research in Resources.FindObjectsOfTypeAll<Research.Interface.Values.ResearchSettingsList>().SelectMany(l => l.list ?? new System.Collections.Generic.List<Research.Interface.Values.ResearchSettings>()).Where(r => r != null && !r.hideFromTechTree && r.availableInDemo).Distinct())
+                AdvancedMod.Log.Msg($"dev: research tech {research.id} {research.techName} owner {Parts.ResearchTabs.Owner(research)} at {research.positionInTechTree}");
+            foreach (Parts.ResearchTabs.Tab tab in new[] { Parts.ResearchTabs.Tab.Game, Parts.ResearchTabs.Tab.Mod, Parts.ResearchTabs.Tab.Others, Parts.ResearchTabs.Tab.All })
+            {
+                Parts.ResearchTabs.DevSelect(canvas, tab);
+                yield return new WaitForSecondsRealtime(1f);
+                DevHarness.Screenshot("research_" + tab);
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+            Parts.ResearchTabs.DevSelect(canvas, Parts.ResearchTabs.Tab.Game);
+            Object.Destroy(menu);
         }
     }
 }

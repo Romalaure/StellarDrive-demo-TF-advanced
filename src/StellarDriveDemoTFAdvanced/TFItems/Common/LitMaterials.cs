@@ -43,7 +43,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
             if (emission.HasValue)
             {
                 material.EnableKeyword("_EMISSION");
-                material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+                // (not a light source for the scene's lighting: moving lit pieces made it flicker)
+                material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
                 material.SetColor("_EmissionColor", emission.Value);
                 // A lit piece does not mirror the sky (bright reflections inside dark ships)
                 material.SetFloat("_EnvironmentReflections", 0f);

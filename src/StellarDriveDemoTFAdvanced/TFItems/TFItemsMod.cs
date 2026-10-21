@@ -58,6 +58,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Common.TFNet.InstallSerializers();
             Devices.TeleportCapsule.Install();
             Devices.Radio.Install();
+            Devices.RadioDev.Install();
             Devices.ToolRack.Install();
             Power.FieldDoor.Install();
             Devices.Outfits.Install();

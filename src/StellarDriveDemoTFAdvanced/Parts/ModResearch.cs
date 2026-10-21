@@ -26,6 +26,9 @@ namespace StellarDriveDemoTFAdvanced.Parts
             public string Name;
             public ushort[] Requires;
             public Vector2Int Position;
+            // Its cell in the research table's TF Advanced tab (by theme: electronics on top, the
+            // artifact line through the middle, propulsion, then construction)
+            public Vector2Int Tab;
             public ushort[] Parts;
             public (uint Item, int Count)[] Cost;
         }
@@ -34,37 +37,37 @@ namespace StellarDriveDemoTFAdvanced.Parts
 
         private static readonly Tech[] All =
         {
-            new Tech { Id = 7501, Name = Loc.Pick("Construction métallique", "Metal construction", "Construcción metálica"), Requires = new ushort[] { 18 }, Position = new Vector2Int(4, 6),
+            new Tech { Id = 7501, Tab = new Vector2Int(0, 4), Name = Loc.Pick("Construction métallique", "Metal construction", "Construcción metálica"), Requires = new ushort[] { 18 }, Position = new Vector2Int(4, 6),
                 Parts = Range(7331, 7338).Concat(Range(7361, 7367)).ToArray(), Cost = new[] { (Iron, 30), (Copper, 5) } },
-            new Tech { Id = 7502, Name = Loc.Pick("Charpenterie", "Carpentry", "Carpintería"), Requires = new ushort[] { 6 }, Position = new Vector2Int(5, 6),
+            new Tech { Id = 7502, Tab = new Vector2Int(0, 5), Name = Loc.Pick("Charpenterie", "Carpentry", "Carpintería"), Requires = new ushort[] { 6 }, Position = new Vector2Int(5, 6),
                 Parts = Range(7341, 7346), Cost = new[] { (Wood, 30) } },
-            new Tech { Id = 7503, Name = Loc.Pick("Verrerie architecturale", "Architectural glass", "Vidrio arquitectónico"), Requires = new ushort[] { 7 }, Position = new Vector2Int(5, 5),
+            new Tech { Id = 7503, Tab = new Vector2Int(0, 6), Name = Loc.Pick("Verrerie architecturale", "Architectural glass", "Vidrio arquitectónico"), Requires = new ushort[] { 7 }, Position = new Vector2Int(5, 5),
                 Parts = Range(7351, 7356), Cost = new[] { (Glass, 20), (Iron, 5) } },
-            new Tech { Id = 7504, Name = Loc.Pick("Ordinateur de bord", "Ship computer", "Ordenador de a bordo"), Requires = new ushort[] { 15 }, Position = new Vector2Int(4, 1),
+            new Tech { Id = 7504, Tab = new Vector2Int(0, 1), Name = Loc.Pick("Ordinateur de bord", "Ship computer", "Ordenador de a bordo"), Requires = new ushort[] { 15 }, Position = new Vector2Int(4, 1),
                 Parts = Range(7301, 7306), Cost = new[] { (Copper, 10), (Glass, 5) } },
-            new Tech { Id = 7505, Name = Loc.Pick("Propulsion avancée", "Advanced propulsion", "Propulsión avanzada"), Requires = new ushort[] { 20 }, Position = new Vector2Int(5, 4),
+            new Tech { Id = 7505, Tab = new Vector2Int(0, 3), Name = Loc.Pick("Propulsion avancée", "Advanced propulsion", "Propulsión avanzada"), Requires = new ushort[] { 20 }, Position = new Vector2Int(5, 4),
                 Parts = Range(7311, 7314).Concat(new ushort[] { 7347, 7468, 7469 }).ToArray(), Cost = new[] { (Iron, 25), (Copper, 10) } },
-            new Tech { Id = 7506, Name = Loc.Pick("Réseau électrique avancé", "Advanced power grid", "Red eléctrica avanzada"), Requires = new ushort[] { 12 }, Position = new Vector2Int(3, 3),
+            new Tech { Id = 7506, Tab = new Vector2Int(0, 2), Name = Loc.Pick("Réseau électrique avancé", "Advanced power grid", "Red eléctrica avanzada"), Requires = new ushort[] { 12 }, Position = new Vector2Int(3, 3),
                 Parts = new ushort[] { 7321, 7322 }, Cost = new[] { (Copper, 20), (Iron, 10) } },
-            new Tech { Id = 7507, Name = Loc.Pick("Technologie des artefacts", "Artifact technology", "Tecnología de artefactos"), Requires = new ushort[] { 7506 }, Position = new Vector2Int(5, 1),
+            new Tech { Id = 7507, Tab = new Vector2Int(1, 2), Name = Loc.Pick("Technologie des artefacts", "Artifact technology", "Tecnología de artefactos"), Requires = new ushort[] { 7506 }, Position = new Vector2Int(5, 1),
                 Parts = new ushort[] { 7323, 7324, 7325, 7328, 7330, 7319, 7326, 7327, 7315, 7470, 7339, 7340 }, Cost = new[] { (ModItems.Titanium, 10), (ModItems.Cryonite, 5), (ModItems.Artifact, 1) } },
-            new Tech { Id = 7508, Name = Loc.Pick("Cartographie", "Cartography", "Cartografía"), Requires = new ushort[] { 14 }, Position = new Vector2Int(3, 0),
+            new Tech { Id = 7508, Tab = new Vector2Int(0, 0), Name = Loc.Pick("Cartographie", "Cartography", "Cartografía"), Requires = new ushort[] { 14 }, Position = new Vector2Int(3, 0),
                 Parts = new ushort[] { 7381 }, Cost = new[] { (Copper, 10), (Glass, 10), (ModItems.Meteorite, 2) } },
-            new Tech { Id = 7509, Name = Loc.Pick("Modules de station", "Station modules", "Módulos de estación"), Requires = new ushort[] { 7501 }, Position = new Vector2Int(6, 6),
+            new Tech { Id = 7509, Tab = new Vector2Int(1, 4), Name = Loc.Pick("Modules de station", "Station modules", "Módulos de estación"), Requires = new ushort[] { 7501 }, Position = new Vector2Int(6, 6),
                 Parts = Range(7371, 7380).Concat(Range(7382, 7390)).ToArray(), Cost = new[] { (Iron, 40), (Glass, 15), (ModItems.Titanium, 10) } },
-            new Tech { Id = 7512, Name = Loc.Pick("Énergie nucléaire", "Nuclear power", "Energía nuclear"), Requires = new ushort[] { 7507 }, Position = new Vector2Int(6, 2),
+            new Tech { Id = 7512, Tab = new Vector2Int(2, 2), Name = Loc.Pick("Énergie nucléaire", "Nuclear power", "Energía nuclear"), Requires = new ushort[] { 7507 }, Position = new Vector2Int(6, 2),
                 Parts = new ushort[] { 7396, 7397, 7398, 7316, 7317, 7471, 7472, 7320 }, Cost = new[] { (ModItems.Uranium, 10), (ModItems.Titanium, 15), (Copper, 20) } },
-            new Tech { Id = 7510, Name = Loc.Pick("Matière noire", "Dark matter", "Materia oscura"), Requires = new ushort[] { 7512 }, Position = new Vector2Int(7, 2),
+            new Tech { Id = 7510, Tab = new Vector2Int(3, 2), Name = Loc.Pick("Matière noire", "Dark matter", "Materia oscura"), Requires = new ushort[] { 7512 }, Position = new Vector2Int(7, 2),
                 Parts = new ushort[] { 7391, 7392, 7393, 7394, 7329, 7318, 7473 }, Cost = new[] { (ModItems.Meteorite, 10), (ModItems.QuantumCore, 1), (ModItems.NexoranAlloy, 5) } },
-            new Tech { Id = 7511, Name = Loc.Pick("Portail dimensionnel", "Dimensional portal", "Portal dimensional"), Requires = new ushort[] { 7510 }, Position = new Vector2Int(8, 2),
+            new Tech { Id = 7511, Tab = new Vector2Int(4, 2), Name = Loc.Pick("Portail dimensionnel", "Dimensional portal", "Portal dimensional"), Requires = new ushort[] { 7510 }, Position = new Vector2Int(8, 2),
                 Parts = new ushort[] { 7395 }, Cost = new[] { (ModItems.Meteorite, 20), (ModItems.QuantumCore, 2), (ModItems.ExoticMatter, 3), (ModItems.Artifact, 2) } },
-            new Tech { Id = 7513, Name = Loc.Pick("Guerre électronique", "Electronic warfare", "Guerra electrónica"), Requires = new ushort[] { 7508 }, Position = new Vector2Int(4, 0),
+            new Tech { Id = 7513, Tab = new Vector2Int(1, 0), Name = Loc.Pick("Guerre électronique", "Electronic warfare", "Guerra electrónica"), Requires = new ushort[] { 7508 }, Position = new Vector2Int(4, 0),
                 Parts = new ushort[] { 7307, 7308, 7309, 7310 }, Cost = new[] { (Copper, 25), (Glass, 10), (ModItems.Titanium, 10), (ModItems.Quartz, 5) } },
-            new Tech { Id = 7514, Name = Loc.Pick("Blindage renforcé", "Reinforced plating", "Blindaje reforzado"), Requires = new ushort[] { 7501 }, Position = new Vector2Int(7, 5),
+            new Tech { Id = 7514, Tab = new Vector2Int(1, 5), Name = Loc.Pick("Blindage renforcé", "Reinforced plating", "Blindaje reforzado"), Requires = new ushort[] { 7501 }, Position = new Vector2Int(7, 5),
                 Parts = Range(7421, 7429).Concat(Range(7431, 7439)).ToArray(), Cost = new[] { (Iron, 40), (Glass, 20), (ModItems.Titanium, 10) } },
-            new Tech { Id = 7515, Name = Loc.Pick("Minage embarqué", "Ship mining", "Minería embarcada"), Requires = new ushort[] { 7506 }, Position = new Vector2Int(7, 4),
+            new Tech { Id = 7515, Tab = new Vector2Int(1, 1), Name = Loc.Pick("Minage embarqué", "Ship mining", "Minería embarcada"), Requires = new ushort[] { 7506 }, Position = new Vector2Int(7, 4),
                 Parts = new ushort[] { 7399 }, Cost = new[] { (Iron, 25), (Copper, 15) } },
-            new Tech { Id = 7516, Name = Loc.Pick("Saut stellaire compact", "Compact stellar jump", "Salto estelar compacto"), Requires = new ushort[] { 20 }, Position = new Vector2Int(6, 4),
+            new Tech { Id = 7516, Tab = new Vector2Int(1, 3), Name = Loc.Pick("Saut stellaire compact", "Compact stellar jump", "Salto estelar compacto"), Requires = new ushort[] { 20 }, Position = new Vector2Int(6, 4),
                 Parts = new ushort[] { Propulsion.MiniWarpCore.Id }, Cost = new[] { (Iron, 20), (Copper, 10), (Glass, 5) } },
         };
 
@@ -73,6 +76,15 @@ namespace StellarDriveDemoTFAdvanced.Parts
         private static int _placedCount;
         private static float _nextCheck;
         private static readonly List<ResearchSettings> Added = new List<ResearchSettings>();
+
+        public static bool IsModTech(ushort id) => All.Any(t => t.Id == id);
+
+        /// <summary>The tech's wished cell in the TF Advanced tab, or null when it is not the mod's.</summary>
+        public static Vector2Int? TabCell(ushort id) => All.FirstOrDefault(t => t.Id == id)?.Tab;
+
+        /// <summary>Whether the line from one tech's cell to another's runs through a third cell's box.</summary>
+        public static bool LineCrosses(Vector2Int from, Vector2Int to, Vector2Int box) =>
+            box != from && box != to && Crosses(Out(from), In(to), Box(box));
 
         /// <summary>Whether the part waits for one of the mod's techs (otherwise it is always available).</summary>
         public static bool IsResearchPart(ushort partId) => Settings.ResearchUnlocks.Value && Locked.Contains(partId);
