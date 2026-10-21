@@ -46,6 +46,17 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Photo mode, photo frame, trading post robots, solid stations (v0.43)
+
+- **Photo mode** (**F8** key): the camera flies freely (mouse, WASD, Space/Ctrl, Shift/Alt, wheel to zoom, R/T to tilt), the interface goes, **F** changes the filter (black and white, sepia, vivid, cinema, night vision), **P**, Enter or a click takes the photo into `UserData/TFAdvanced/photos`.
+- **Photo frame** (TF Equipment tab, 3 wood + 1 glass): press T to hang one of your photos; it is sent to the host, kept with the world and seen by every player.
+- **Inhabitants of the Hermes trading post**, service robots: Kade the engineer fills the tanks (10 iron) and charges the batteries (6 copper), Doctor Lyra heals and fills the oxygen (3 copper). They can be neither picked up nor recycled: sign their **hiring contract** (20 stellar shards) to take them to your ship.
+- **Solid stations**: a ship or a player coming from orbit went through the stations (the game kept it in another physics scene); it now joins the station's space within 1.5 km.
+- **Loot chests**: they go again once emptied, and take no cable any more.
+- **Stations rebuilt** at the next load (build 6): the new chests everywhere and the trading post's inhabitants in older worlds.
+- **Language**: changing the game's language also translates the mod's names and descriptions (they stayed in the language the game started in).
+- The mining drone bay (never released) is removed.
+
 ## Illustrated wiki, research tabs, speaker sound (v0.42)
 
 - **Wiki** (guide, G key): every line naming a part or an item shows its icon; planet pages open on pictures of their trees and plants; the main pages are buttons.

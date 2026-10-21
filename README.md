@@ -278,6 +278,17 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Mode photo, cadre photo, robots du comptoir, stations solides (v0.43)
+
+- **Mode photo** (touche **F8**) : la caméra vole librement (souris, ZQSD, Espace/Ctrl, Maj/Alt, molette pour zoomer, R/T pour pencher), l'interface disparaît, **F** change de filtre (noir et blanc, sépia, vif, cinéma, vision nocturne), **P**, Entrée ou clic prend la photo dans `UserData/TFAdvanced/photos`.
+- **Cadre photo** (onglet TF Équipement, 3 bois + 1 verre) : touche T pour accrocher une de tes photos ; elle est envoyée à l'hôte, gardée avec le monde et vue par tous les joueurs.
+- **Habitants du Comptoir Hermès**, des robots de service : Kade l'ingénieur remplit les réservoirs (10 fer) et recharge les batteries (6 cuivre), la Docteure Lyra soigne et remplit l'oxygène (3 cuivre). Ils ne peuvent être ni pris ni recyclés : signe leur **contrat d'embauche** (20 éclats stellaires) pour les emmener dans ton vaisseau.
+- **Stations solides** : un vaisseau ou un joueur arrivant de l'orbite passait à travers les stations (le jeu le gardait dans une autre physique) ; il entre maintenant dans l'espace de la station à moins de 1,5 km.
+- **Coffres de butin** : ils disparaissent de nouveau une fois vidés, et ne prennent plus de câble.
+- **Stations reconstruites** au prochain chargement (version 6) : nouveaux coffres partout et habitants du comptoir dans les anciens mondes.
+- **Langue** : changer la langue du jeu traduit aussi les noms et descriptions du mod (ils restaient dans la langue du lancement).
+- La baie de drone de minage (jamais publiée) est retirée.
+
 ## Wiki illustré, recherche par onglets, son des enceintes (v0.42)
 
 - **Wiki** (guide, touche G) : chaque ligne qui nomme une pièce ou un objet montre son icône ; les pages des planètes s'ouvrent sur les images de leurs arbres et plantes ; les pages principales sont des boutons.
