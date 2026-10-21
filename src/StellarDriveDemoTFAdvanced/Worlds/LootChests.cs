@@ -1,5 +1,15 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using HarmonyLib;
+using Ships;
+using Ships.Interface.Model.Parts;
+using Ships.Interface.Model.Parts.Common;
+using Ships.Interface.Model.Parts.State;
+using Ships.Interface.Model.Parts.StateTypes;
 using Ships.Interface.Settings;
+using Ships.Services;
 using StellarDriveDemoTFAdvanced.Common;
 using StellarDriveDemoTFAdvanced.Parts;
 using UnityEngine;
@@ -12,6 +22,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
     /// (its storage and saving) wearing a detailed chest modelled in Blender
     /// (tools/blender/chest.py): textured planks, hammered iron bands and rivets, a lock and a
     /// glow in the rarity's color. Not in the build menu: the ruins and stations place them.
+    /// Like the game's loot cases they go once emptied (the host removes them when the last item
+    /// is taken and nobody has them open), and take no cable (no item ports from Item Lines).
     /// </summary>
     internal static class LootChests
     {
@@ -25,6 +37,47 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             new Color(0.62f, 0.63f, 0.66f), new Color(0.3f, 0.78f, 0.35f), new Color(0.25f, 0.52f, 1f), new Color(0.65f, 0.3f, 0.95f), new Color(1f, 0.76f, 0.22f)
         };
+
+        public static bool IsLootChest(ushort id) => id >= FirstId && id < FirstId + Rarities;
+
+        // Host: emptied chests, removed once nobody has them open
+        private static readonly HashSet<(uint Ship, ushort Part)> Emptied = new HashSet<(uint, ushort)>();
+
+        /// <summary>Host: a slot of a chest changed; an emptied loot chest goes.</summary>
+        internal static void SlotChanged(TrackedShipServer ship, ushort partId)
+        {
+            if (ship.TryGetStatefulPart(partId, out StatefulPart part) && part.Settings != null && IsLootChest(part.Settings.id)
+                && part.State is IStoragePart storage && Enumerable.Range(0, storage.SlotCount).All(i => !storage.GetSlot((byte)i).HasItem))
+                Emptied.Add((ship.Id, partId));
+        }
+
+        /// <summary>Host, every frame in game.</summary>
+        public static void Update()
+        {
+            if (Emptied.Count == 0)
+                return;
+            ShipsServerTracker ships = GameServices.ShipsServer;
+            foreach ((uint shipId, ushort partId) in Emptied.ToList())
+            {
+                TrackedShipServer ship = ships?.GetShip(shipId);
+                if (ship == null || !ship.TryGetStatefulPart(partId, out StatefulPart part) || !(part.State is IStoragePart storage)
+                    || Enumerable.Range(0, storage.SlotCount).Any(i => storage.GetSlot((byte)i).HasItem))
+                {
+                    Emptied.Remove((shipId, partId));
+                    continue;
+                }
+                // Still open in someone's chest window: wait
+                if (part.State is IInteractivePart interactive && interactive.IsInUse)
+                    continue;
+                Emptied.Remove((shipId, partId));
+                // A chest lying on its own is a one-part ship (the ruins' caches): the ship goes
+                if (ship.StatefulParts.Count() <= 1 && ship.HullPartsAndPlayersMass < 1f)
+                    ships.RemoveShip(ship.State);
+                else
+                    ship.RemoveStatefulPart(partId);
+                AdvancedMod.Log.Msg($"loot chests: emptied chest {partId} of ship {shipId} gone");
+            }
+        }
 
         public static void Register()
         {
@@ -120,6 +173,43 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 }
             }
             return any;
+        }
+    }
+
+    [HarmonyPatch(typeof(TrackedShipServer), nameof(TrackedShipServer.SetChestSlot))]
+    internal static class LootChestEmptiedPatch
+    {
+        private static void Postfix(TrackedShipServer __instance, ushort partId)
+        {
+            try
+            {
+                LootChests.SlotChanged(__instance, partId);
+            }
+            catch (Exception e)
+            {
+                ErrorLog.Report("loot chest emptied", e);
+            }
+        }
+    }
+
+    /// <summary>
+    /// SDModKit's "attach" rules (Item Lines' item ports) graft two sockets on every part with an
+    /// inventory: the loot chests are left out (their own names in the rule's exclusions).
+    /// </summary>
+    [HarmonyPatch]
+    internal static class LootChestNoPortsPatch
+    {
+        private static MethodBase TargetMethod() => AccessTools.GetDeclaredMethods(typeof(SDModKit.Content.ContentAttach))
+            .FirstOrDefault(m => m.IsStatic && m.ReturnType == typeof(void) && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(SDModKit.Content.ContentAttachDef));
+
+        private static void Prefix(SDModKit.Content.ContentAttachDef __0)
+        {
+            for (int rarity = 0; rarity < LootChests.Rarities; rarity++)
+            {
+                string name = "TFA_" + (LootChests.FirstId + rarity);
+                if (!__0.Exclude.Contains(name))
+                    __0.Exclude.Add(name);
+            }
         }
     }
 }

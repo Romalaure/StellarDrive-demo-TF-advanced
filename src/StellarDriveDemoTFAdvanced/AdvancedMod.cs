@@ -189,6 +189,8 @@ namespace StellarDriveDemoTFAdvanced
                 Worlds.BlackHole.ServerUpdate();
             if (_inGame)
                 Worlds.AbandonedStations.Update();
+            if (_inGame && GameServices.IsServer)
+                Worlds.LootChests.Update();
             if (_inGame)
                 Worlds.LootCaches.Update();
             if (_inGame && GameServices.IsServer)

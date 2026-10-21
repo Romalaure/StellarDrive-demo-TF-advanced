@@ -107,6 +107,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 }
                 AdvancedMod.Log.Msg($"dev: visited {spec.Name} (ship {station.Id}, {station.PartCount} parts)");
                 yield return Wait(0.5f);
+                yield return EmptyALootChest(station);
                 yield return FlyIn(station, ships);
             }
         }
@@ -160,6 +161,22 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             NotifyAtShip.Invoke(respawn, new object[] { connection, player.PhysicsState, look, FishNet.Transporting.Channel.Reliable });
             yield return Wait(3f);
             AdvancedMod.Log.Msg($"dev: fly-out: player in space {player.SpaceId} ({spaces.GetSpace(player.SpaceId)?.GetType().Name}), station's {station.SpaceId}, {transpose.Position(player.SpaceId, station.SpaceId, player.Position).magnitude - station.Position.magnitude:0} m");
+        }
+
+        // A loot chest of the station emptied slot by slot (as a player taking the loot does): it should go
+        private static IEnumerator EmptyALootChest(TrackedShipServer station)
+        {
+            Ships.Interface.Model.Parts.StatefulPart chest = station.StatefulParts.FirstOrDefault(p => p.Settings != null && LootChests.IsLootChest(p.Settings.id));
+            if (chest == null || !(chest.State is Ships.Interface.Model.Parts.StateTypes.IStoragePart storage))
+            {
+                AdvancedMod.Log.Msg("dev: no loot chest in " + station.Id);
+                yield break;
+            }
+            int filled = Enumerable.Range(0, storage.SlotCount).Count(i => storage.GetSlot((byte)i).HasItem);
+            for (byte i = 0; i < storage.SlotCount; i++)
+                station.SetChestSlot(chest.Id, i, default(global::Items.Model.InventorySlot));
+            yield return Wait(1f);
+            AdvancedMod.Log.Msg($"dev: loot chest {chest.Id} ({chest.Settings.id}, {filled} slots filled) emptied: still there {station.TryGetStatefulPart(chest.Id, out _)}");
         }
 
         internal static IEnumerator Wait(float seconds)
