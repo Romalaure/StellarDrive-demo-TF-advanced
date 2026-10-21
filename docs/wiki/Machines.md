@@ -25,14 +25,6 @@ Le laser de minage du joueur, en grand, sur une tourelle à fixer sur la coque (
 
 Prise d'**état** : 2 mine, 1 tire sans rien à miner, 0 éteint, -1 sans courant, -2 sans coffre, -3 coffre plein (il attend qu'on le vide). Le minage se fait chez l'hôte, près d'un joueur (les rochers n'existent que là où il y a quelqu'un). Recherche *Minage embarqué*.
 
-## Baie de drone de minage
-
-Une baie à poser sur le vaisseau (recherche **Minage embarqué**). Son drone part seul miner le rocher, le cristal, le minerai ou l'arbre le plus proche (jusqu'à 40 m), revient et vide sa récolte dans le coffre relié à sa **prise d'objets** (jaune) par une ligne d'objets.
-
-- 500 W ; prise de commande comme le laser (sans câble il travaille toujours).
-- Prise d'état : 3 part, 2 mine, 4 revient, 1 posé (rien à portée), 0 éteint, -1 sans courant, -2 sans coffre, -3 coffre plein.
-- Les rochers n'existent qu'autour des joueurs : le drone travaille quand quelqu'un est près du vaisseau.
-
 ## Champ de force
 
 Enveloppe tout le vaisseau (et ce qui y est amarré) d'une bulle cyan qui encaisse les chocs et les forces de marée des trous noirs : **150 points** (un choc compte sa variation de vitesse en m/s). Consomme 2 000 W et 0,02 oxygène/s, se recharge de 0,5 point/s. À zéro il casse et redémarre **5 minutes** plus tard. La bulle est une coque d'énergie : presque invisible de face, lumineuse sur les bords, couverte d'une grille hexagonale, traversée par une bande de balayage qui monte ; chaque impact lance une onde qui s'étend sur la bulle. Elle rougit quand la charge baisse et vacille quand elle est presque vide.

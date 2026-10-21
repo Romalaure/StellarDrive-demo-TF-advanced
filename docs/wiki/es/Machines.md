@@ -25,14 +25,6 @@ El láser de minería del jugador, en grande, sobre una torreta que se fija al c
 
 Toma de **estado**: 2 mina, 1 dispara sin nada que minar, 0 apagado, -1 sin energía, -2 sin cofre, -3 cofre lleno (espera a que se vacíe). La minería se hace en el anfitrión, cerca de un jugador (las rocas solo existen donde hay alguien). Investigación *Minería embarcada*.
 
-## Bahía de dron minero
-
-Una bahía para colocar en la nave (investigación **Minería embarcada**). Su dron sale solo a minar la roca, el cristal, el mineral o el árbol más cercano (hasta 40 m), vuelve y vacía lo que obtuvo en el cofre unido a su **toma de objetos** (amarilla) por una línea de objetos.
-
-- 500 W; toma de mando como la del láser (sin cable trabaja siempre).
-- Toma de estado: 3 sale, 2 mina, 4 vuelve, 1 posado (nada al alcance), 0 apagado, -1 sin energía, -2 sin cofre, -3 cofre lleno.
-- Las rocas solo existen cerca de los jugadores: el dron trabaja cuando alguien está cerca de la nave.
-
 ## Campo de fuerza
 
 Envuelve toda la nave (y lo que está acoplado a ella) en una burbuja cian que recibe los impactos y las fuerzas de marea de los agujeros negros: **150 puntos** (un impacto cuenta su cambio de velocidad en m/s). Consume 2.000 W y 0,02 de oxígeno/s, se recarga 0,5 puntos/s. A cero se rompe y se reinicia **5 minutos** después. La burbuja es una capa de energía: casi invisible de frente, brillante en los bordes, cubierta por una malla hexagonal, recorrida por una banda de escaneo ascendente; cada impacto lanza una onda sobre la burbuja. Se vuelve roja a medida que baja la carga y parpadea cuando está casi vacía.

@@ -58,10 +58,6 @@ namespace StellarDriveDemoTFAdvanced.Power
             public PowerGroupServerState Group;
             public double Written = double.NaN;
             public float LastWrite = -10f;
-            // The drone bay's drone: where it is going and how long it still flies
-            public double Phase = DroneBay.Docked;
-            public Component Rock;
-            public float Flight;
         }
 
         private struct Entry
@@ -93,7 +89,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             {
                 foreach (StatefulPart part in ship.GetAllStatefulParts<ConstantState>())
                 {
-                    if (part.Settings.id != Id && part.Settings.id != DroneBay.Id)
+                    if (part.Settings.id != Id)
                         continue;
                     if (!Runtimes.TryGetValue((ship.Id, part.Id), out Runtime rt))
                         Runtimes[(ship.Id, part.Id)] = rt = new Runtime();
@@ -107,7 +103,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                     if (!power.TryGetGroupFromSocket(new EntityPartSocket(ship.Id, part.Id, PowerCatalog.MachinePowerA), out PowerGroupServerState group)
                         && !power.TryGetGroupFromSocket(new EntityPartSocket(ship.Id, part.Id, PowerCatalog.MachinePowerB), out group))
                         continue;
-                    group.TotalPowerNeeded += (part.Settings.id == DroneBay.Id ? DroneBay.Watts : Mathf.Max(0f, PowerCatalog.MiningLaserWatts.Value)) * deltaTime;
+                    group.TotalPowerNeeded += Mathf.Max(0f, PowerCatalog.MiningLaserWatts.Value) * deltaTime;
                     rt.Group = group;
                 }
             }
@@ -149,8 +145,6 @@ namespace StellarDriveDemoTFAdvanced.Power
             List<(TrackedShipServer Ship, ushort Part)> chests = Chests(entry.Ship.Id, entry.Part.Id);
             if (chests.Count == 0)
                 return NoChest;
-            if (entry.Part.Settings.id == DroneBay.Id)
-                return Drone(entry, rt, supply, chests, deltaTime);
             IMinableObject target = Target(entry.Ship.Id, entry.Part);
             if (target == null)
                 return Firing;
@@ -162,90 +156,6 @@ namespace StellarDriveDemoTFAdvanced.Power
                 return Mining;
             }
             return Harvest((Component)target, chests) ? Mining : ChestFull;
-        }
-
-        // The drone: out to the nearest rock, mines it at half the laser's pace, back with the drop
-        private static double Drone(Entry entry, Runtime rt, float supply, List<(TrackedShipServer Ship, ushort Part)> chests, float deltaTime)
-        {
-            bool gone = rt.Rock == null || !(rt.Rock is IMinableObject);
-            switch (rt.Phase)
-            {
-                case DroneBay.Out:
-                    rt.Flight -= deltaTime;
-                    if (gone)
-                        return Return(entry, rt);
-                    if (rt.Flight <= 0f)
-                        rt.Phase = DroneBay.Mining;
-                    return rt.Phase;
-                case DroneBay.Mining:
-                    if (gone)
-                        return Return(entry, rt);
-                    var rock = (IMinableObject)rt.Rock;
-                    float damage = Mathf.Max(0f, PowerCatalog.MiningLaserDamagePerSecond.Value) * 0.5f * supply * deltaTime;
-                    if (rock.CurrentHealth - damage > 0.01f)
-                    {
-                        rock.ReduceHealth(damage);
-                        return DroneBay.Mining;
-                    }
-                    if (!Harvest(rt.Rock, chests))
-                        return ChestFull;
-                    return Return(entry, rt);
-                case DroneBay.Back:
-                    rt.Flight -= deltaTime;
-                    if (rt.Flight <= 0f)
-                        rt.Phase = DroneBay.Docked;
-                    return DroneBay.Back;
-                default:
-                    if (!DroneTarget(entry.Ship.Id, entry.Part, out Component target, out Vector3 point) || target == null)
-                        return DroneBay.Docked;
-                    rt.Rock = target;
-                    rt.Phase = DroneBay.Out;
-                    rt.Flight = Vector3.Distance(point, DronePad(entry.Ship.Id, entry.Part)) / DroneBay.Speed + 0.5f;
-                    return DroneBay.Out;
-            }
-        }
-
-        private static double Return(Entry entry, Runtime rt)
-        {
-            Vector3 from = rt.Rock != null ? rt.Rock.transform.position : DronePad(entry.Ship.Id, entry.Part);
-            rt.Rock = null;
-            rt.Phase = DroneBay.Back;
-            rt.Flight = Vector3.Distance(from, DronePad(entry.Ship.Id, entry.Part)) / DroneBay.Speed + 0.5f;
-            return DroneBay.Back;
-        }
-
-        private static Vector3 DronePad(uint shipId, StatefulPart part) =>
-            Ray(shipId, part, out Ray ray, out Transform _) ? ray.origin : Vector3.zero;
-
-        private static readonly Collider[] Near = new Collider[64];
-
-        /// <summary>The nearest thing a drone can mine around its bay (client physics scene), its own ship left out.</summary>
-        public static bool DroneTarget(uint shipId, StatefulPart part, out Component target, out Vector3 point)
-        {
-            target = null;
-            point = Vector3.zero;
-            if (!Ray(shipId, part, out Ray ray, out Transform shipBody))
-                return false;
-            int count = ClientScene.PhysicsScene.OverlapSphere(ray.origin, DroneBay.Range, Near, Mask, QueryTriggerInteraction.UseGlobal);
-            float best = float.MaxValue;
-            for (int i = 0; i < count; i++)
-            {
-                Collider collider = Near[i];
-                if (collider == null || (shipBody != null && collider.transform.IsChildOf(shipBody)))
-                    continue;
-                var minable = collider.GetComponentInParent<IMinableObject>() as Component;
-                if (minable == null)
-                    continue;
-                Vector3 at = collider.ClosestPoint(ray.origin);
-                float distance = (at - ray.origin).sqrMagnitude;
-                if (distance < best)
-                {
-                    best = distance;
-                    target = minable;
-                    point = at;
-                }
-            }
-            return true;
         }
 
         /// <summary>

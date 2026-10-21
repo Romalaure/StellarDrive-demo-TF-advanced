@@ -61,7 +61,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             /// <summary>A pirate base (with the Arsenal mod): armed, hostile, see <see cref="Combat.Pirates"/>.</summary>
             public bool Pirate;
             /// <summary>The stations' build this one last changed in: worlds saved before it get it rebuilt.</summary>
-            public int Version = 4;
+            public int Version = 6;
             /// <summary>The part dressing its hull (prow, engines, plating, torn edges...), 0 for none; see <see cref="WreckDecor"/>.</summary>
             public ushort Decor;
             /// <summary>A trading ship: merchant terminals in its first module (the trading hall) and in its cargo hold.</summary>
@@ -321,10 +321,11 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         /// loaded (version 2: docking door entrance, furnishing, outside equipment; version 3: the
         /// Vagabond, the Leviathan and the Hades probe, rebuilt big; version 4: furniture kept out of
         /// the passages between modules and off the shafts, wreck dressings solid; version 5: the
-        /// Comptoir Hermès a merchant freighter, without its hangar), only those whose
+        /// Comptoir Hermès a merchant freighter, without its hangar; version 6: the mod's detailed chests
+        /// in every station instead of the game's loot cases, the Hermès inhabitants), only those whose
         /// <see cref="StationSpec.Version"/> is newer than the world's; destroyed pirate bases stay wrecks.
         /// </summary>
-        public const int StationVersion = 5;
+        public const int StationVersion = 6;
         private const string VersionFile = "tfa_stations.txt";
         private static bool _loadingWorld;
         private static int _savedVersion = -1;

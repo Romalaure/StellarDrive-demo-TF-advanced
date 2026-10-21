@@ -126,7 +126,6 @@ namespace StellarDriveDemoTFAdvanced
             Try("the wood, glass and iron parts", Construction.MaterialParts.Register);
             Try("the reinforced hull", Construction.ReinforcedHull.Register);
             Try("the ship mining laser", Power.MiningLaserParts.Register);
-            Try("the mining drone bay", Power.DroneBay.Register);
             Try("the station modules", Construction.StationModules.Register);
             Try("the cartography table", Construction.ScannerTable.Register);
             Try("the radars", Combat.Radar.Register);
