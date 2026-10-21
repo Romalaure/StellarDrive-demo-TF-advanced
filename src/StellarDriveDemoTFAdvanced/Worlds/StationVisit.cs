@@ -107,7 +107,59 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 }
                 AdvancedMod.Log.Msg($"dev: visited {spec.Name} (ship {station.Id}, {station.PartCount} parts)");
                 yield return Wait(0.5f);
+                yield return FlyIn(station, ships);
             }
+        }
+
+        // The host, in a suit, coming from a free trajectory 250 m out at 20 m/s straight at the station:
+        // it should join the station's space and be stopped by its hull (DevDisable stationspaces: goes through)
+        private static IEnumerator FlyIn(TrackedShipServer station, ShipsServerTracker ships)
+        {
+            var spaces = ServiceLocator.GetService<WorldTracking.Spaces.SpacesServer>();
+            var time = ServiceLocator.GetService<IWorldTimeProviderServer>();
+            var transpose = ServiceLocator.GetService<IWorldTransposeServer>();
+            PlayersServerTracker players = ServiceLocator.GetService<PlayersServerTracker>();
+            PlayerRespawnService respawn = Object.FindFirstObjectByType<PlayerRespawnService>();
+            var connection = InstanceFinder.ClientManager.Connection;
+            TrackedPlayerServer player = players?.GetTrackedPlayerFromConnectionId(connection.ClientId);
+            if (spaces == null || time == null || player == null || respawn == null || !(spaces.GetSpaceServerState(station.SpaceId) is WorldTracking.Spaces.Model.FixedSpaceServerState home))
+            {
+                AdvancedMod.Log.Warning("dev: fly-in: no player or no station space");
+                yield break;
+            }
+            var start = home.GetObjectWorldPos(station);
+            start.positionWithinSystemCell += new Vector3(0f, 0f, -250f);
+            start.UpdateCells();
+            var free = spaces.CreateSpace(new WorldTracking.Interface.Model.Spaces.TrajectorySpace { InitialPosition = start, Velocity = Core.Values.Vector3Double.Zero, WorldTime = time.CurrentWorldTime });
+            Quaternion look = Quaternion.LookRotation(Vector3.forward, Vector3.up);
+            spaces.SetWorldObjectPhysics(player, free.Id, new LocalPhysicsState { Position = Vector3.zero, Rotation = look, Velocity = new Vector3(0f, 0f, 20f) });
+            NotifyAtShip.Invoke(respawn, new object[] { connection, player.PhysicsState, look, FishNet.Transporting.Channel.Reliable });
+            AdvancedMod.Log.Msg($"dev: fly-in: player in space {free.Id}, 250 m from station {station.Id} (space {station.SpaceId})");
+            float until = Time.unscaledTime + 10f, nextLog = Time.unscaledTime + 1f;
+            uint told = player.SpaceId;
+            while (Time.unscaledTime < until)
+            {
+                // Pushed like a jetpack, the client told when the space changes
+                spaces.SetWorldObjectPhysics(player, player.SpaceId, new LocalPhysicsState { Position = player.Position, Rotation = look, Velocity = new Vector3(0f, 0f, 8f) });
+                if (player.SpaceId != told)
+                {
+                    told = player.SpaceId;
+                    NotifyAtShip.Invoke(respawn, new object[] { connection, player.PhysicsState, look, FishNet.Transporting.Channel.Reliable });
+                }
+                if (Time.unscaledTime >= nextLog)
+                {
+                    nextLog += 1f;
+                    Vector3 at = transpose.Position(player.SpaceId, station.SpaceId, player.Position) - station.Position;
+                    AdvancedMod.Log.Msg($"dev: fly-in t={10f - (until - Time.unscaledTime):0} s: space {player.SpaceId}{(player.SpaceId == station.SpaceId ? " (station's)" : "")}, {at.z:0.0} m along, {at.magnitude:0.0} m from the station center, player scene '{player.ServerRigidbody.gameObject.scene.name}', station scene '{(station.IsRigidbodyLoaded ? station.RigidbodyObject.scene.name : "not loaded")}'");
+                }
+                yield return null;
+            }
+            DevHarness.Screenshot("station_flyin");
+            // Far from it again: the player flies on in a space of its own
+            spaces.SetWorldObjectPhysics(player, station.SpaceId, new LocalPhysicsState { Position = station.Position + new Vector3(0f, 0f, -4500f), Rotation = look, Velocity = Vector3.zero });
+            NotifyAtShip.Invoke(respawn, new object[] { connection, player.PhysicsState, look, FishNet.Transporting.Channel.Reliable });
+            yield return Wait(3f);
+            AdvancedMod.Log.Msg($"dev: fly-out: player in space {player.SpaceId} ({spaces.GetSpace(player.SpaceId)?.GetType().Name}), station's {station.SpaceId}, {transpose.Position(player.SpaceId, station.SpaceId, player.Position).magnitude - station.Position.magnitude:0} m");
         }
 
         internal static IEnumerator Wait(float seconds)
