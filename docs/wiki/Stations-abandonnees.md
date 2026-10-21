@@ -26,3 +26,5 @@ Le cargo marchand est habité. Regarde un habitant et appuie sur **T** :
 - **Docteure Lyra, la médecin** (dans le module suivant) : **soins complets**, toute ta santé et l'oxygène de ta combinaison, pour 3 cuivre.
 
 C'est l'hôte qui fait le travail et prend le paiement dans ton inventaire.
+
+Ce sont des robots de service (corps en métal, visière et lumières à la couleur de leur métier). Ils travaillent au comptoir : impossible de les prendre ou de les recycler. Pour en emmener un, signe son **contrat d'embauche** (20 éclats stellaires) dans sa fenêtre : tu peux alors le prendre comme une pièce et l'installer dans ton vaisseau, où il rend les mêmes services. On ne peut pas en construire.

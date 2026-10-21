@@ -103,6 +103,95 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 TFMod.Log.Msg($"dev: outfit on {avatar.name}: suit {(suit != null ? suit.name + " readable " + suit.sharedMesh?.isReadable : "none")}, helmet {(shell != null ? Measure(shell, avatar, head, out Shape h) ? $"top {h.Top:0.000} radius {h.Radius:0.000}, head bone at {Quaternion.Inverse(avatar.rotation) * (head.position - avatar.position)}" : "not measured" : "none")}");
         }
 
+        /// <summary>
+        /// A service robot over a dressed avatar (the station's inhabitants): a glowing visor band and
+        /// an antenna on the helmet, round audio pods at its sides, a lit core on the chest, armored
+        /// shoulder plates and light strips down the forearms, in <paramref name="glow"/>.
+        /// </summary>
+        public static void Robot(Transform avatar, Color glow)
+        {
+            SkinnedMeshRenderer suit = null, shell = null, visor = null;
+            foreach (SkinnedMeshRenderer renderer in avatar.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                if (renderer.name.StartsWith("PlayerModel") && suit == null)
+                    suit = renderer;
+                else if (renderer.name.StartsWith("Helmet2_Shell"))
+                    shell = renderer;
+                else if (renderer.name.StartsWith("Helmet2_Visor"))
+                    visor = renderer;
+            }
+            Piece Metal() => new Piece(new Color(0.6f, 0.63f, 0.68f), 0.9f, 0.7f, lit: true);
+            Piece Dark() => new Piece(new Color(0.1f, 0.11f, 0.13f), 0.7f, 0.55f, lit: true);
+            Piece Light() => new Piece(glow, 0f, 0.1f, glow: glow * 2.2f);
+            void Put(Transform bone, string name, Vector3 at, float scale, params Piece[] pieces)
+            {
+                foreach (Piece piece in pieces)
+                    Fix(bone, avatar, name, piece, at, scale);
+            }
+            Vector3 Local(Transform t) => Quaternion.Inverse(avatar.rotation) * (t.position - avatar.position);
+
+            Transform head = Bone(avatar, "mixamorig:Head");
+            if (head != null && shell != null && Measure(shell, avatar, head, out Shape helmet))
+            {
+                // On the crown, toward the right: a thin mast and its lit tip (sizes in helmet radii)
+                Piece mast = Dark(), tip = Light();
+                mast.Mesh.Cylinder(new Vector3(0.45f, -0.1f, -0.15f), new Vector3(0.5f, 0.75f, -0.2f), 0.05f, 0.03f, 8);
+                tip.Mesh.Cylinder(new Vector3(0.5f, 0.75f, -0.2f), new Vector3(0.5f, 0.9f, -0.2f), 0.08f, 0.08f, 10);
+                Put(head, "RobotMast", helmet.Center(helmet.Top), helmet.Radius, mast, tip);
+                if (Measure(shell, avatar, head, out Shape ears, helmet.Top - (helmet.Top - helmet.Bottom) * 0.55f))
+                {
+                    // Audio pods on both sides, a lit ring on each
+                    Piece pod = Metal(), ring = Light();
+                    foreach (float side in new[] { -1f, 1f })
+                    {
+                        pod.Mesh.Cylinder(new Vector3(side * 0.92f, 0f, 0f), new Vector3(side * 1.12f, 0f, 0f), 0.36f, 0.3f, 18);
+                        ring.Mesh.Cylinder(new Vector3(side * 1.12f, 0f, 0f), new Vector3(side * 1.15f, 0f, 0f), 0.2f, 0.2f, 18);
+                    }
+                    Put(head, "RobotPods", ears.Center(ears.EyeHeight), ears.Width, pod, ring);
+                }
+            }
+            if (head != null && visor != null && Measure(visor, avatar, head, out Shape glass))
+            {
+                // A lit band across the visor, at eye height, just in front of it
+                Piece band = Light();
+                band.Mesh.Box(Vector3.zero, new Vector3(1.5f, 0.16f, 0.06f));
+                Put(head, "RobotVisor", glass.Center(glass.EyeHeight) + Vector3.forward * (glass.Front - glass.Middle.z + 0.012f), glass.Width, band);
+            }
+            Transform chest = Bone(avatar, "mixamorig:Spine2");
+            if (chest != null && suit != null && Measure(suit, avatar, chest, out Shape torso, Local(chest).y))
+            {
+                // A round core on the chest: a dark socket, its lit lens
+                Piece socket = Dark(), core = Light(), plate = Metal();
+                socket.Mesh.Cylinder(new Vector3(0f, 0f, -0.3f), new Vector3(0f, 0f, 0.25f), 1.45f, 1.35f, 20);
+                core.Mesh.Cylinder(new Vector3(0f, 0f, 0.25f), new Vector3(0f, 0f, 0.4f), 1f, 0.9f, 20);
+                plate.Mesh.Box(new Vector3(0f, 0f, -0.45f), new Vector3(5.5f, 3.6f, 0.4f));
+                Put(chest, "RobotCore", new Vector3(torso.Middle.x, Local(chest).y + 0.02f, torso.Front), 0.05f, plate, socket, core);
+            }
+            foreach (string side in new[] { "Left", "Right" })
+            {
+                Transform arm = Bone(avatar, "mixamorig:" + side + "Arm"), fore = Bone(avatar, "mixamorig:" + side + "ForeArm"), hand = Bone(avatar, "mixamorig:" + side + "Hand");
+                if (arm != null)
+                {
+                    // A curved plate over the shoulder, its edge lit
+                    Piece pad = Metal(), edge = Light();
+                    pad.Mesh.Cylinder(new Vector3(-0.5f, 0f, 0f), new Vector3(0.5f, 0f, 0f), 0.62f, 0.62f, 14);
+                    edge.Mesh.Box(new Vector3(0f, -0.1f, 0.6f), new Vector3(0.9f, 0.12f, 0.08f));
+                    Vector3 at = Local(arm) + Vector3.up * 0.05f;
+                    Put(arm, "RobotShoulder" + side, at, 0.11f, pad, edge);
+                }
+                if (fore != null && hand != null)
+                {
+                    // A light strip along the outside of the forearm
+                    Vector3 a = Local(fore), b = Local(hand);
+                    Piece strip = Light();
+                    Vector3 along = b - a;
+                    Vector3 outward = new Vector3(side == "Left" ? -1f : 1f, 0f, 0f);
+                    strip.Mesh.Box(Vector3.zero, new Vector3(0.06f, 0.06f, 1f), Quaternion.LookRotation(along.normalized, Vector3.up));
+                    Put(fore, "RobotStrip" + side, (a + b) * 0.5f + outward * 0.045f, along.magnitude * 0.8f, strip);
+                }
+            }
+        }
+
         private static Transform Bone(Transform avatar, string name) => avatar.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == name);
 
         // ---- Measures, in the avatar's frame (x right, y up, z forward, from its origin, in meters)

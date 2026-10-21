@@ -26,3 +26,5 @@ El carguero mercante está habitado. Mira a un habitante y pulsa **T**:
 - **La doctora Lyra, la médica** (en el módulo siguiente): **cuidados completos**, toda tu salud y el oxígeno de tu traje, por 3 cobre.
 
 El anfitrión hace el trabajo y cobra el pago de tu inventario.
+
+Son robots de servicio (cuerpo de metal, visor y luces del color de su oficio). Trabajan en el puesto: no se pueden coger ni reciclar. Para llevarte uno, firma su **contrato de contratación** (20 fragmentos estelares) en su ventana: luego puedes cogerlo como una pieza e instalarlo en tu nave, donde ofrece los mismos servicios. No se pueden construir.

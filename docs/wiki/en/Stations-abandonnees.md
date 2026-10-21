@@ -26,3 +26,5 @@ The merchant freighter is inhabited. Look at an inhabitant and press **T**:
 - **Doctor Lyra, the medic** (in the next module): **full care**, all your health and your suit's oxygen, for 3 copper.
 
 The host does the work and takes the payment from your inventory.
+
+They are service robots (metal bodies, visor and lights in their trade's color). They work at the post: they cannot be picked up nor recycled. To take one along, sign their **hiring contract** (20 stellar shards) in their window: you can then pick them up like a part and set them up in your ship, where they offer the same services. They cannot be built.
