@@ -39,11 +39,11 @@ namespace StellarDriveDemoTFAdvanced.Wiki
             Flora[planet] = prefabs.Where(p => p != null).Distinct().ToList();
 
         /// <summary>Lowercase, without accents, parentheses or punctuation.</summary>
-        public static string Normalize(string text)
+        public static string Normalize(string text, bool cutParentheses = true)
         {
             if (string.IsNullOrEmpty(text))
                 return "";
-            int paren = text.IndexOf('(');
+            int paren = cutParentheses ? text.IndexOf('(') : -1;
             if (paren > 0)
                 text = text.Substring(0, paren);
             var result = new StringBuilder();

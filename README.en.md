@@ -46,6 +46,16 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Illustrated wiki, research tabs, speaker sound (v0.42)
+
+- **Wiki** (guide, G key): every line naming a part or an item shows its icon; planet pages open on pictures of their trees and plants; the main pages are buttons.
+- **A page for each part**: click a part's name to see its picture, description, mass, cost (with icons), its **sockets** (signal, power, fluid, in order) and the tech that unlocks it.
+- **Wiki search**: a field at the top searches the parts and the pages (Enter or "Search").
+- **Tidier research table**: tabs **Base game**, **TF Advanced** (the mod's techs by theme), **Other mods** and **All**.
+- **Speakers**: each speaker fades with its own distance (silent at about 20 m), their sounds add up and come from the right side. No more sound "everywhere" with several speakers.
+- **Cameras**: without the sky (the default), the near view was no longer drawn: players and ships show again, with no fps loss.
+- **Radio**: matte surfaces, softer lights, no more pulsing bars (light flashes).
+
 ## Speaker, compact thrusters, detailed chests, cosmetic cabin (v0.41)
 
 - **Radio**: two clear buttons to mute or allow a player (the old toggles were read as actions), blocked players see they are refused, yt-dlp updates itself and retries.

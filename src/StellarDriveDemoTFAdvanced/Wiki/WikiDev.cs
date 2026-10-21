@@ -50,6 +50,14 @@ namespace StellarDriveDemoTFAdvanced.Wiki
                 yield return new WaitForSecondsRealtime(1f);
                 DevHarness.Screenshot("wiki_3");
                 yield return new WaitForSecondsRealtime(0.5f);
+                WikiPage.Show(WikiParts.PartPrefix + "7161");
+                yield return new WaitForSecondsRealtime(1f);
+                DevHarness.Screenshot("wiki_4");
+                yield return new WaitForSecondsRealtime(0.5f);
+                WikiPage.ShowSearch("batterie");
+                yield return new WaitForSecondsRealtime(1f);
+                DevHarness.Screenshot("wiki_5");
+                yield return new WaitForSecondsRealtime(0.5f);
             }
             activator.Close();
             yield return new WaitForSecondsRealtime(1f);

@@ -278,6 +278,16 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Wiki illustré, recherche par onglets, son des enceintes (v0.42)
+
+- **Wiki** (guide, touche G) : chaque ligne qui nomme une pièce ou un objet montre son icône ; les pages des planètes s'ouvrent sur les images de leurs arbres et plantes ; les pages principales sont des boutons.
+- **Fiche de chaque pièce** : clique sur le nom d'une pièce pour voir son image, sa description, sa masse, son coût (avec les icônes), ses **prises** (signal, puissance, fluide, dans l'ordre) et la tech qui la débloque.
+- **Recherche dans le wiki** : un champ en haut cherche les pièces et les pages (Entrée ou « Chercher »).
+- **Table de recherche rangée** : onglets **Jeu de base**, **TF Advanced** (les techs du mod par thème), **Autres mods** et **Tout**.
+- **Enceintes** : le son de chaque enceinte baisse avec sa propre distance (silence vers 20 m), les sons s'additionnent et viennent du bon côté. Plus de son « partout » avec plusieurs enceintes.
+- **Caméras** : sans le ciel (réglage par défaut), la vue proche n'était plus dessinée : on voit de nouveau les joueurs et les vaisseaux, sans perte de fps.
+- **Radio** : surfaces mates, lumières plus douces, plus de pulsation des barres (flashs lumineux).
+
 ## Enceinte, propulseurs compacts, coffres détaillés, cabine cosmétique (v0.41)
 
 - **Radio** : deux boutons clairs pour couper ou autoriser un joueur (les anciens interrupteurs étaient pris pour des actions), le joueur bloqué voit qu'il est refusé, yt-dlp se met à jour tout seul et réessaie.

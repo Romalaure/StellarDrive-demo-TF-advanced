@@ -182,7 +182,7 @@ namespace StellarDriveDemoTFAdvanced.Wiki
                 if (block.Gallery != null)
                     AddGallery(page, block.Gallery);
                 else if (block.Icon != null)
-                    AddRow(page, block.Icon, block.Text);
+                    AddRow(page, block.Icon, block.Text, block.Large);
                 else if (!string.IsNullOrWhiteSpace(block.Text))
                     AddText(page, block.Text.TrimEnd('\n'), 1f);
             }
@@ -220,7 +220,98 @@ namespace StellarDriveDemoTFAdvanced.Wiki
                 AddButton(bar.transform, WikiPages.Title(target), target == Current, () => Show(target));
             if (History.Count > 0)
                 AddButton(bar.transform, "« " + Loc.Pick("Retour", "Back", "Atrás"), false, Back, new Color(1f, 0.7f, 0.38f));
+            AddSearch(page);
         }
+
+        /// <summary>Whether the player is typing in the search field (the game's keys wait).</summary>
+        public static bool Typing { get; private set; }
+
+        private static void SetTyping(bool typing)
+        {
+            if (typing == Typing)
+                return;
+            Typing = typing;
+            StellarDriveDemoTFAdvanced.TFItems.Common.ModMenu.RefreshControls();
+        }
+
+        private void OnDisable() => SetTyping(false);
+
+        public static void ShowSearch(string query)
+        {
+            WikiParts.Query = query ?? "";
+            if (Current != WikiParts.SearchPage)
+                History.Push(Current);
+            Current = WikiParts.SearchPage;
+            RenderAll();
+        }
+
+        // The search field (Enter searches the parts and the pages) and its button
+        private void AddSearch(Transform page)
+        {
+            float height = _style.fontSize * 1.9f;
+            var row = new GameObject(Generated + "SearchRow", typeof(RectTransform));
+            row.transform.SetParent(page, false);
+            var layout = row.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = 8f;
+            layout.padding = new RectOffset(0, 0, 0, 12);
+            layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = true;
+
+            var fieldObject = new GameObject(Generated + "SearchField", typeof(RectTransform));
+            fieldObject.transform.SetParent(row.transform, false);
+            fieldObject.AddComponent<Image>().color = new Color(0.03f, 0.08f, 0.13f, 0.95f);
+            fieldObject.AddComponent<UnityEngine.UI.Outline>().effectColor = new Color(0.45f, 0.6f, 0.72f, 0.6f);
+            var element = fieldObject.AddComponent<LayoutElement>();
+            element.flexibleWidth = 1f;
+            element.preferredHeight = element.minHeight = height;
+            var area = new GameObject("Text Area", typeof(RectTransform), typeof(RectMask2D));
+            area.transform.SetParent(fieldObject.transform, false);
+            var areaRect = (RectTransform)area.transform;
+            areaRect.anchorMin = Vector2.zero;
+            areaRect.anchorMax = Vector2.one;
+            areaRect.offsetMin = new Vector2(10f, 2f);
+            areaRect.offsetMax = new Vector2(-10f, -2f);
+            TMP_Text Inner(string name, string value, Color color)
+            {
+                TMP_Text inner = AddText(area.transform, value, 0.8f, name);
+                Destroy(inner.GetComponent<WikiLinks>());
+                inner.textWrappingMode = TextWrappingModes.NoWrap;
+                inner.alignment = TextAlignmentOptions.MidlineLeft;
+                inner.color = color;
+                var rect = (RectTransform)inner.transform;
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = rect.offsetMax = Vector2.zero;
+                return inner;
+            }
+            TMP_Text placeholder = Inner("Placeholder", Loc.Pick("Chercher une pièce, un objet, une planète…", "Search a part, an item, a planet…", "Buscar una pieza, un objeto, un planeta…"), new Color(0.6f, 0.66f, 0.72f, 0.8f));
+            placeholder.fontStyle = FontStyles.Italic;
+            TMP_Text text = Inner("Text", "", _style.color);
+            var field = fieldObject.AddComponent<TMP_InputField>();
+            field.textViewport = areaRect;
+            field.textComponent = text;
+            field.placeholder = placeholder;
+            field.fontAsset = _style.font;
+            field.pointSize = _style.fontSize * 0.8f;
+            field.characterLimit = 40;
+            field.lineType = TMP_InputField.LineType.SingleLine;
+            field.text = WikiParts.Query;
+            field.onSelect.AddListener(_ => SetTyping(true));
+            field.onDeselect.AddListener(_ => SetTyping(false));
+            field.onSubmit.AddListener(value => { SetTyping(false); ShowSearch(value); });
+
+            var go = new GameObject(Generated + "SearchGo", typeof(RectTransform));
+            go.transform.SetParent(row.transform, false);
+            var goElement = go.AddComponent<LayoutElement>();
+            goElement.preferredWidth = goElement.minWidth = _style.fontSize * 6f;
+            AddButton(go.transform, Loc.Pick("Chercher", "Search", "Buscar"), Current == WikiParts.SearchPage, () => ShowSearch(field.text));
+            var button = (RectTransform)go.transform.GetChild(0);
+            button.anchorMin = Vector2.zero;
+            button.anchorMax = Vector2.one;
+            button.offsetMin = button.offsetMax = Vector2.zero;
+        }
+
 
         private void AddButton(Transform parent, string label, bool selected, UnityEngine.Events.UnityAction click, Color? tint = null)
         {
@@ -252,7 +343,7 @@ namespace StellarDriveDemoTFAdvanced.Wiki
         }
 
         // A line with the icon of what it names on its left
-        private void AddRow(Transform page, WikiImages.Ref icon, string text)
+        private void AddRow(Transform page, WikiImages.Ref icon, string text, bool large = false)
         {
             var row = new GameObject(Generated + "Row", typeof(RectTransform));
             row.transform.SetParent(page, false);
@@ -262,7 +353,7 @@ namespace StellarDriveDemoTFAdvanced.Wiki
             layout.childAlignment = TextAnchor.MiddleLeft;
             layout.childControlWidth = layout.childControlHeight = true;
             layout.childForceExpandWidth = layout.childForceExpandHeight = false;
-            float size = _style.fontSize * 2.6f;
+            float size = _style.fontSize * (large ? 6f : 2.6f);
             AddPicture(row.transform, icon, size);
             TMP_Text line = AddText(row.transform, text.TrimEnd('\n'), 1f);
             var element = line.gameObject.AddComponent<LayoutElement>();
@@ -365,6 +456,8 @@ namespace StellarDriveDemoTFAdvanced.Wiki
     {
         public string Text = "";
         public WikiImages.Ref Icon;
+        /// <summary>The icon shown big (a part's own page).</summary>
+        public bool Large;
         public List<WikiImages.Ref> Gallery;
     }
 
@@ -418,13 +511,18 @@ namespace StellarDriveDemoTFAdvanced.Wiki
 
         public static IEnumerable<string> Names => Pages.Keys;
 
-        public static bool Exists(string page) => page != null && Pages.ContainsKey(page);
+        public static bool Exists(string page) => page != null && (Pages.ContainsKey(page) || WikiParts.Exists(page));
+
+        /// <summary>A page's markdown ("" for the pages the wiki makes itself).</summary>
+        public static string Text(string page) => Pages.TryGetValue(page, out string md) ? md : "";
 
         /// <summary>The page's first heading.</summary>
         public static string Title(string page)
         {
             if (page == "Home")
                 return Loc.Pick("Accueil", "Home", "Inicio");
+            if (!Pages.ContainsKey(page) && WikiParts.Exists(page))
+                return WikiParts.Title(page);
             string first = Pages.TryGetValue(page, out string md) ? md.Split('\n').FirstOrDefault(l => l.StartsWith("# ")) : null;
             return first != null ? first.Substring(2).Trim() : page;
         }
@@ -439,6 +537,8 @@ namespace StellarDriveDemoTFAdvanced.Wiki
 
         public static List<WikiBlock> Render(string page)
         {
+            if (!Pages.ContainsKey(page) && WikiParts.Exists(page))
+                return WikiParts.Render(page);
             var blocks = new List<WikiBlock>();
             if (!Pages.TryGetValue(page, out string md))
                 return blocks;
@@ -459,6 +559,14 @@ namespace StellarDriveDemoTFAdvanced.Wiki
                     return;
                 }
                 Flush();
+                // A part's name opens its own page
+                int bold = rendered.IndexOf("<b>", System.StringComparison.Ordinal);
+                if (icon.Kind == WikiImages.Kind.Part && bold >= 0 && !rendered.Contains("<link="))
+                {
+                    int end = rendered.IndexOf("</b>", bold, System.StringComparison.Ordinal);
+                    if (end > bold)
+                        rendered = rendered.Substring(0, bold) + $"<link=\"{WikiParts.PartPrefix}{icon.Id}\"><color=#5fc8ff>" + rendered.Substring(bold, end + 4 - bold) + "</color></link>" + rendered.Substring(end + 4);
+                }
                 blocks.Add(new WikiBlock { Text = rendered.Trim('\n'), Icon = icon });
             }
             string[] header = null;

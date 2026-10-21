@@ -119,7 +119,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
     {
         private static void Postfix(MonoBehaviour script, ref bool __result)
         {
-            if (__result && (ModMenu.IsOpen || Parts.BuildSearch.Typing) && !(script is PlayerEscapeControl))
+            if (__result && (ModMenu.IsOpen || Parts.BuildSearch.Typing || Wiki.WikiPage.Typing) && !(script is PlayerEscapeControl))
                 __result = false;
         }
     }
