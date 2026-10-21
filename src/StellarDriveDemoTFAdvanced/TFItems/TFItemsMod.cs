@@ -59,11 +59,14 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.TeleportCapsule.Install();
             Devices.Radio.Install();
             Devices.RadioDev.Install();
+            Devices.PhotoFrame.Install();
+            Common.TFNet.Disconnected += Devices.PhotoMode.Reset;
             Devices.ToolRack.Install();
             Power.FieldDoor.Install();
             Devices.Outfits.Install();
             Devices.Teleporter.Install();
             Devices.Trader.Install();
+            Devices.Npc.Install();
             Cameras.CameraTablet.Install();
             if (ToolsActive)
             {
@@ -83,8 +86,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             attempt("the infinite parts", Infinite.InfiniteParts.Register);
             attempt("the teleport capsule", Devices.TeleportCapsule.Register);
             attempt("the radio", Devices.Radio.Register);
+            attempt("the photo frame", Devices.PhotoFrame.Register);
             attempt("the cosmetic cabin", Devices.CosmeticCabin.Register);
             attempt("the merchant terminal", Devices.Trader.Register);
+            attempt("the station's inhabitants", Devices.Npc.Register);
             attempt("the tool rack", Devices.ToolRack.Register);
         }
 
@@ -106,6 +111,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.Outfits.Update();
             Devices.Teleporter.Update();
             Devices.RadioSound.Update();
+            Devices.PhotoMode.Update();
             if (ToolsActive)
             {
                 Paint.PaintNet.Update();
@@ -136,7 +142,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.CabinMenu.Draw();
             Devices.TeleporterMenu.Draw();
             Devices.TraderMenu.Draw();
+            Devices.NpcMenu.Draw();
             Devices.Teleporter.DrawHint();
+            Devices.PhotoFrameMenu.Draw();
+            Devices.PhotoMode.Draw();
             if (ToolsActive)
             {
                 Paint.PaintHud.Draw();

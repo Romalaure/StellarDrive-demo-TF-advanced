@@ -17,3 +17,12 @@ Las estaciones de una versión anterior del mod se reconstruyen (con su puerta) 
 | Épave du Vagabond (restos del Vagabundo) | órbita de Thalassa (Érebo) | carguero pesado de 60 m: bodega con mamparos, contenedores, grúa, puente, sección de motores arrancada; 12 de materia oscura, meteorito |
 | Épave du Léviathan (restos del Leviatán) | órbita de Cristallis (Érebo) | nave capital de 90 m: proa en daga, hojas blindadas, torretas muertas, hangar, bahía hundida, puente, seis toberas; 20 de materia oscura, materia exótica, artefactos |
 | Épave de l'Icare (restos del Ícaro) | órbita de Pyros (Érebo) | 30 de materia oscura, materia exótica |
+
+## Habitantes del puesto Hermès
+
+El carguero mercante está habitado. Mira a un habitante y pulsa **T**:
+
+- **Kade, el ingeniero** (en la sala de comercio, frente al terminal): **llena los depósitos** de tu nave más cercana (a menos de 300 m) con el fluido que ya contienen, por 10 hierro; **carga las baterías** del mod, por 6 cobre.
+- **La doctora Lyra, la médica** (en el módulo siguiente): **cuidados completos**, toda tu salud y el oxígeno de tu traje, por 3 cobre.
+
+El anfitrión hace el trabajo y cobra el pago de tu inventario.

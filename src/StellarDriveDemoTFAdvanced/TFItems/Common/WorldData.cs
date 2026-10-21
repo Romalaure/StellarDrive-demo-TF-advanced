@@ -13,7 +13,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
 {
     /// <summary>
     /// TF data saved with a world, in tf-data.json next to its world.json (like tf-paint.json):
-    /// capsule names. The game's own save is untouched.
+    /// capsule names and the photos hung in the frames. The game's own save is untouched.
     /// </summary>
     internal static class WorldData
     {
@@ -23,6 +23,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         {
             public int version = 1;
             public List<SavedName> capsules = new List<SavedName>();
+            /// <summary>Photo frames: the photo's hash as the name (the photo is in UserData/TFAdvanced/photocache).</summary>
+            public List<SavedName> photos = new List<SavedName>();
         }
 
         private sealed class SavedName
@@ -40,10 +42,14 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 capsules = TeleportCapsule.ServerNames
                     .Where(e => ships == null || ships.TryGetStatefulPart(new PartContext(e.Key.ShipId, e.Key.PartId), out _))
                     .Select(e => new SavedName { ship = e.Key.ShipId, part = e.Key.PartId, name = e.Value })
+                    .ToList(),
+                photos = PhotoFrame.ServerFrames
+                    .Where(e => ships == null || ships.TryGetStatefulPart(new PartContext(e.Key.ShipId, e.Key.PartId), out _))
+                    .Select(e => new SavedName { ship = e.Key.ShipId, part = e.Key.PartId, name = e.Value })
                     .ToList()
             };
             string path = Path.Combine(worldDirectory, FileName);
-            if (file.capsules.Count == 0)
+            if (file.capsules.Count == 0 && file.photos.Count == 0)
             {
                 if (File.Exists(path))
                     File.Delete(path);
@@ -60,6 +66,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         public static void Load(string worldDirectory)
         {
             TeleportCapsule.ServerNames.Clear();
+            PhotoFrame.ServerFrames.Clear();
             string path = Path.Combine(worldDirectory, FileName);
             if (!File.Exists(path))
                 return;
@@ -69,6 +76,11 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 string name = TeleportCapsule.CleanName(saved?.name);
                 if (name.Length > 0)
                     TeleportCapsule.ServerNames[new PartKey(saved.ship, saved.part)] = name;
+            }
+            foreach (SavedName saved in file?.photos ?? new List<SavedName>())
+            {
+                if (saved?.name != null && saved.name.Length == 40)
+                    PhotoFrame.ServerFrames[new PartKey(saved.ship, saved.part)] = saved.name;
             }
         }
     }

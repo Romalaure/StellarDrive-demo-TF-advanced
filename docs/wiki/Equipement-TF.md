@@ -30,3 +30,9 @@ Sans le mod TF, TF Advanced fournit aussi (mêmes objets, mêmes fichiers : rien
 Si le mod TF est installé, c'est lui qui les fournit, sans doublon.
 
 Réglages : section `[TFAdvancedObjects]` (touche de la tablette `TabletKey`, touche d'utilisation `UseKey`, images par seconde de la caméra, force de l'éclairage des lampes `LampLightStrength`, volume de la radio).
+
+## Mode photo et cadre photo
+
+- **Mode photo** (touche **F8**, réglage `PhotoKey`) : la vue quitte le joueur et vole librement (souris pour regarder, ZQSD pour bouger, Espace/Ctrl pour monter et descendre, Maj plus vite, Alt plus lent, molette pour zoomer, R pour pencher et T pour redresser). L'interface du jeu disparaît. **F** change de filtre (noir et blanc, sépia, couleurs vives, cinéma, vision nocturne), **H** cache l'aide, **P**, Entrée ou clic prend la photo, Échap ou F8 revient.
+- Les photos vont dans `UserData/TFAdvanced/photos` (toute image PNG ou JPG mise là marche aussi).
+- **Cadre photo** (onglet TF Équipement, 3 bois + 1 verre) : regarde-le et appuie sur **T** pour choisir une photo. Elle est envoyée à l'hôte, gardée avec le monde et montrée à tous les joueurs. L'image regarde vers l'extérieur de la surface où le cadre est posé : idéal sur un mur.

@@ -18,6 +18,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         public static MelonPreferences_Entry<float> LampLightStrength { get; private set; }
         public static MelonPreferences_Entry<string> UseKey { get; private set; }
         public static MelonPreferences_Entry<string> ThirdPersonKey { get; private set; }
+        public static MelonPreferences_Entry<string> PhotoKey { get; private set; }
         public static MelonPreferences_Entry<float> ThirdPersonDistance { get; private set; }
         public static MelonPreferences_Entry<float> RadioVolume { get; private set; }
         public static MelonPreferences_Entry<string> RadioMuted { get; private set; }
@@ -54,6 +55,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 description: "Key (UnityEngine.InputSystem.Key name) to use the TF part you look at: radio, wardrobe, teleport capsule.");
             ThirdPersonKey = _category.CreateEntry("ThirdPersonKey", "V",
                 description: "Key (UnityEngine.InputSystem.Key name) that switches between first and third person while flying from the pilot seat.");
+            PhotoKey = _category.CreateEntry("PhotoKey", "F8",
+                description: "Key (UnityEngine.InputSystem.Key name) that enters and leaves photo mode (free camera, filters, photos into UserData/TFAdvanced/photos). Empty disables it.");
             ThirdPersonDistance = _category.CreateEntry("ThirdPersonDistance", 1f,
                 description: "Third person camera distance, as a multiple of the ship size. The mouse wheel changes it in flight.");
             RadioVolume = _category.CreateEntry("RadioVolume", 0.7f,

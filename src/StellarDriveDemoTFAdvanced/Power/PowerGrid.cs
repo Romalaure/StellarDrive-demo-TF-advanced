@@ -322,6 +322,19 @@ namespace StellarDriveDemoTFAdvanced.Power
             rt.PendingDischarge = output;
         }
 
+        /// <summary>Host: fills a battery (the station's engineer); false when it was full already.</summary>
+        public static bool Charge(TrackedShipServer ship, StatefulPart part)
+        {
+            float capacity = PowerCatalog.CapacityJoules(part.Settings.id);
+            if (!Runtimes.TryGetValue((ship.Id, part.Id), out Runtime rt))
+                Runtimes[(ship.Id, part.Id)] = rt = new Runtime { Initialized = true };
+            if (rt.Initialized && rt.Stored >= capacity * 0.999f)
+                return false;
+            rt.Initialized = true;
+            rt.Stored = capacity;
+            return true;
+        }
+
         private static void PrepareBattery(PowerServerTracker power, Entry entry, float deltaTime)
         {
             Runtime rt = entry.Runtime;

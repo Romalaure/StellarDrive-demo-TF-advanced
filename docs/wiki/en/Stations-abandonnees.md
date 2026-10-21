@@ -17,3 +17,12 @@ Stations from an older version of the mod are rebuilt (with their door) when the
 | Épave du Vagabond (Wanderer wreck) | Thalassa orbit (Erebus) | 60 m heavy freighter: bulkheaded hold, containers, crane, bridge, torn-off engine section; 12 dark matter, meteorite |
 | Épave du Léviathan (Leviathan wreck) | Cristallis orbit (Erebus) | 90 m capital ship: dagger bow, armoured blades, dead turrets, hangar, collapsed bay, bridge, six nozzles; 20 dark matter, exotic matter, artifacts |
 | Épave de l'Icare (Icarus wreck) | Pyros orbit (Erebus) | 30 dark matter, exotic matter |
+
+## Inhabitants of the Hermes trading post
+
+The merchant freighter is inhabited. Look at an inhabitant and press **T**:
+
+- **Kade, the engineer** (in the trading hall, facing the terminal): **fills the tanks** of your nearest ship (within 300 m) with the fluid they already hold, for 10 iron; **charges the mod's batteries**, for 6 copper.
+- **Doctor Lyra, the medic** (in the next module): **full care**, all your health and your suit's oxygen, for 3 copper.
+
+The host does the work and takes the payment from your inventory.

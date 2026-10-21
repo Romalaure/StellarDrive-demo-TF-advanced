@@ -25,6 +25,14 @@ The player's mining laser, scaled up, on a turret that bolts to the hull (floor,
 
 **Status** socket: 2 mining, 1 firing with nothing to mine, 0 off, -1 no power, -2 no chest, -3 chest full (it waits until emptied). Mining runs on the host, near a player (rocks only exist where someone is). Research *Ship mining*.
 
+## Mining drone bay
+
+A bay to place on the ship (research **Ship mining**). Its drone flies off on its own to mine the nearest rock, crystal, ore or tree (up to 40 m), comes back and empties what it got into the chest linked to its **item socket** (yellow) by an item line.
+
+- 500 W; command socket like the laser's (with no cable it always works).
+- Status socket: 3 flying out, 2 mining, 4 coming back, 1 docked (nothing in range), 0 off, -1 no power, -2 no chest, -3 chest full.
+- Rocks only exist around players: the drone works while someone is near the ship.
+
 ## Force field
 
 Wraps the whole ship (and what is docked to it) in a cyan bubble that takes impacts and black hole tidal forces: **150 points** (an impact counts its change of speed in m/s). Draws 2,000 W and 0.02 oxygen/s, recharges 0.5 point/s. At zero it breaks and restarts **5 minutes** later. The bubble is an energy shell: almost invisible face-on, glowing at the edges, covered with a hexagonal grid, crossed by a rising scan band; each impact sends a ripple across the bubble. It turns red as the charge drops and flickers when almost empty.

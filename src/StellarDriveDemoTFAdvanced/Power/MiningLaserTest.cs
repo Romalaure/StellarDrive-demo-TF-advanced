@@ -128,7 +128,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 cables.AddCable(c);
             }
             AdvancedMod.Log.Msg($"dev: mining laser test ship {state.Id} landed, {state.StatefulParts.Length} parts, terminal part {(CustomParts.Get(Terminal) != null ? "found" : "missing")}");
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < 25; i++)
             {
                 float until = Time.unscaledTime + 2f;
                 while (Time.unscaledTime < until)
@@ -145,10 +145,15 @@ namespace StellarDriveDemoTFAdvanced.Power
                     .FirstOrDefault() ?? "no terminal";
                 bool alive = rock != null && rock.gameObject.activeInHierarchy;
                 AdvancedMod.Log.Msg($"dev: mining laser test t={2 * (i + 1)} s: status {status}, rock {(alive ? minable.CurrentHealth.ToString("0.0") : "mined")}, terminal [{contents}], ship parts {ship.PartCount}");
-                if (i == 2)
-                    yield return Parts.Showcase.Photograph(state.Id, "mininglaser");
+                if (i == 2 || DevHarness.Off("drone") && status == "2" && !_photographed)
+                {
+                    _photographed = status == "2";
+                    yield return Parts.Showcase.Photograph(state.Id, DevHarness.Off("drone") ? "drone" + i : "mininglaser");
+                }
             }
         }
+
+        private static bool _photographed;
 
         private static float Height(Vector3 v, Vector3 up) => Vector3.Dot(v, up);
 
@@ -187,7 +192,9 @@ namespace StellarDriveDemoTFAdvanced.Power
             string Part(int id, int settings, float x, float y, float z, int forward, int upward) => string.Format(CultureInfo.InvariantCulture,
                 "{{\"id\":{0},\"settingsId\":{1},\"coord\":{{\"x\":{2},\"y\":{3},\"z\":{4}}},\"forwardOrientationId\":{5},\"upOrientationId\":{6}}}", id, settings, x, y, z, forward, upward);
             // The laser stands on the front edge, +Y along the ship's +Z (Forward 0), its own +Z up (Up 4)
-            string parts = string.Join(",", Part(1, PowerCatalog.ReactorId, -1.5f, -0.46f, -1f, 2, 4), Part(2, ShipMiningLaser.Id, 0f, -0.2f, 2.6f, 4, 0),
+            // DevDisable drone: the mining drone bay instead, on the floor
+            string machine = DevHarness.Off("drone") ? Part(2, DroneBay.Id, 0f, -0.46f, 1.2f, 2, 4) : Part(2, ShipMiningLaser.Id, 0f, -0.2f, 2.6f, 4, 0);
+            string parts = string.Join(",", Part(1, PowerCatalog.ReactorId, -1.5f, -0.46f, -1f, 2, 4), machine,
                 Part(3, Terminal, 1.5f, -0.46f, -1f, 2, 4));
             string constants = "{\"partId\":2,\"constantValue\":0.0}";
             string tanks = "{\"partId\":1,\"fluidItemId\":0,\"fluidQuantity\":0.0}";

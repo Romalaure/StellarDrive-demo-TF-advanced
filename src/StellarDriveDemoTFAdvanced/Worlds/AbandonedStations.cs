@@ -97,7 +97,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Name = "Comptoir Hermès (marchand)", AnchorPlanet = 107, Offset = new Vector3(-9e6f, 2e6f, -1.1e7f), Seed = 131, Breaches = 0f, Merchant = true,
                 Band = new Color32(230, 180, 40, 255), Outside = new Color32(70, 80, 100, 255), Inside = new Color32(190, 180, 160, 255),
                 Rare = new[] { (Items.ModItems.GoldBar, 1, 2, 0.3), (Items.ModItems.Titanium, 3, 8, 0.4) },
-                Decor = WreckDecor.HermesId, Version = 5,
+                Decor = WreckDecor.HermesId, Version = 6,
                 Build = b =>
                 {
                     // Bow to stern: the trading hall first (its counters), the glazed bridge and its
@@ -894,6 +894,11 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                     floating.Add(Floating(nextPart++, TFItems.Devices.Trader.TerminalId, new Vector3(counter.x, hall.y0 - 0.5f + 0.04f, counter.y), 3, 4));
                 if (_modules.Count > 4 && Take(_modules[4], _modules[4].x0, (_modules[4].z0 + _modules[4].z1) / 2) is Vector2Int hold)
                     floating.Add(Floating(nextPart++, TFItems.Devices.Trader.TerminalId, new Vector3(hold.x, _modules[4].y0 - 0.5f + 0.04f, hold.y), 3, 4));
+                // Its inhabitants: the engineer across the trading hall, the doctor in the next module
+                if (Take(hall, hall.x1, (hall.z0 + hall.z1) / 2) is Vector2Int engineer)
+                    floating.Add(Floating(nextPart++, TFItems.Devices.Npc.EngineerId, new Vector3(engineer.x, hall.y0 - 0.5f + 0.04f, engineer.y), 1, 4));
+                if (_modules.Count > 1 && Take(_modules[1], _modules[1].x0, (_modules[1].z0 + _modules[1].z1) / 2) is Vector2Int doctor)
+                    floating.Add(Floating(nextPart++, TFItems.Devices.Npc.DoctorId, new Vector3(doctor.x, _modules[1].y0 - 0.5f + 0.04f, doctor.y), 3, 4));
             }
 
             // A free floor cell of a module, or null

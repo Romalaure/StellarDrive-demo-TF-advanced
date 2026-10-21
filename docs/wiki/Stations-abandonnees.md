@@ -17,3 +17,12 @@ Les stations d'une version plus ancienne du mod sont reconstruites (avec leur po
 | Épave du Vagabond | orbite de Thalassa (Érèbe) | cargo lourd de 60 m : soute à cloisons, conteneurs, grue, passerelle, section moteur arrachée ; 12 matière noire, météorite |
 | Épave du Léviathan | orbite de Cristallis (Érèbe) | vaisseau capital de 90 m : proue en dague, lames blindées, tourelles mortes, hangar, baie effondrée, passerelle, six tuyères ; 20 matière noire, matière exotique, artefacts |
 | Épave de l'Icare | orbite de Pyros (Érèbe) | 30 matière noire, matière exotique |
+
+## Habitants du Comptoir Hermès
+
+Le cargo marchand est habité. Regarde un habitant et appuie sur **T** :
+
+- **Kade, l'ingénieur** (dans le hall de commerce, face au terminal) : **plein des réservoirs** de ton vaisseau le plus proche (à moins de 300 m) avec le fluide qu'ils contiennent déjà, pour 10 fer ; **recharge des batteries** du mod, pour 6 cuivre.
+- **Docteure Lyra, la médecin** (dans le module suivant) : **soins complets**, toute ta santé et l'oxygène de ta combinaison, pour 3 cuivre.
+
+C'est l'hôte qui fait le travail et prend le paiement dans ton inventaire.

@@ -51,6 +51,19 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         /// <summary>Client to server: deliver the day's mission A.</summary>
         TraderMission = 54,
 
+        /// <summary>Either way: piece B of a photo, Text is "count|hash|data" (a JPEG in base64).</summary>
+        PhotoChunk = 60,
+        /// <summary>Client to server: photo frame A/B shows the photo Text (its hash, sent before).</summary>
+        PhotoFrameSet = 61,
+        /// <summary>Server to everyone: photo frame A/B shows the photo Text ("" for none).</summary>
+        PhotoFrame = 62,
+        /// <summary>Client to server: send me the photo Text.</summary>
+        PhotoRequest = 63,
+        /// <summary>Client to server: an NPC service A at the station (B = the NPC), paid from the player's inventory.</summary>
+        NpcService = 70,
+        /// <summary>Server to one client: how the service went, Text is for the player.</summary>
+        NpcServiceResult = 71,
+
         /// <summary>Client to server: copy the ship A (and what is attached to it) as schematic Text.</summary>
         SchematicCopy = 30,
         /// <summary>Either way: piece B of schematic file transfer A, Text is "count|data".</summary>

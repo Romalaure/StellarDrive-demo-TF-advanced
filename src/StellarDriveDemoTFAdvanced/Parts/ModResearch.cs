@@ -66,7 +66,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
             new Tech { Id = 7514, Tab = new Vector2Int(1, 5), Name = Loc.Pick("Blindage renforcé", "Reinforced plating", "Blindaje reforzado"), Requires = new ushort[] { 7501 }, Position = new Vector2Int(7, 5),
                 Parts = Range(7421, 7429).Concat(Range(7431, 7439)).ToArray(), Cost = new[] { (Iron, 40), (Glass, 20), (ModItems.Titanium, 10) } },
             new Tech { Id = 7515, Tab = new Vector2Int(1, 1), Name = Loc.Pick("Minage embarqué", "Ship mining", "Minería embarcada"), Requires = new ushort[] { 7506 }, Position = new Vector2Int(7, 4),
-                Parts = new ushort[] { 7399 }, Cost = new[] { (Iron, 25), (Copper, 15) } },
+                Parts = new ushort[] { 7399, Power.DroneBay.Id }, Cost = new[] { (Iron, 25), (Copper, 15) } },
             new Tech { Id = 7516, Tab = new Vector2Int(1, 3), Name = Loc.Pick("Saut stellaire compact", "Compact stellar jump", "Salto estelar compacto"), Requires = new ushort[] { 20 }, Position = new Vector2Int(6, 4),
                 Parts = new ushort[] { Propulsion.MiniWarpCore.Id }, Cost = new[] { (Iron, 20), (Copper, 10), (Glass, 5) } },
         };

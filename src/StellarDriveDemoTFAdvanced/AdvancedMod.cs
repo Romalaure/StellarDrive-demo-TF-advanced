@@ -126,6 +126,7 @@ namespace StellarDriveDemoTFAdvanced
             Try("the wood, glass and iron parts", Construction.MaterialParts.Register);
             Try("the reinforced hull", Construction.ReinforcedHull.Register);
             Try("the ship mining laser", Power.MiningLaserParts.Register);
+            Try("the mining drone bay", Power.DroneBay.Register);
             Try("the station modules", Construction.StationModules.Register);
             Try("the cartography table", Construction.ScannerTable.Register);
             Try("the radars", Combat.Radar.Register);
@@ -224,6 +225,12 @@ namespace StellarDriveDemoTFAdvanced
 
         public override void OnGUI()
         {
+            // Photo mode: nothing of the mod on screen but its own help
+            if (_partsRegistered && TFItems.TFItemsMod.Active && (TFItems.Devices.PhotoMode.Active || TFItems.Devices.PhotoMode.Capturing))
+            {
+                TFItems.Devices.PhotoMode.Draw();
+                return;
+            }
             if (_inGame)
                 Combat.Radar.OnGUI();
             if (_inGame)
