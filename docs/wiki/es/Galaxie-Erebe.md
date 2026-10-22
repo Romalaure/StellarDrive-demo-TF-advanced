@@ -2,7 +2,7 @@
 
 Un segundo sistema, alrededor de la estrella **Érebo** (Érèbe), una gigante naranja a unos **0,18 años luz** de Otrera. Se ve como una estrella brillante en el cielo de Otrera. El salto es demasiado lento para esa distancia: se llega por el **[portal](Machines.md#generador-de-portal)**, con un planeta de Érebo como objetivo.
 
-Una vez allí, la luz, el día y la noche y el mapa estelar siguen a Érebo. El mapa estelar solo muestra los planetas del sistema en el que estás.
+Una vez allí, la luz, el día y la noche y el mapa estelar siguen a Érebo. El mapa estelar muestra los planetas del sistema en el que estás; míralo y pulsa **T** para ver la otra galaxia (donde está la nave, luego 442 Otrera, luego Érebo).
 
 | Planeta | Bioma | Gravedad | Aire | Qué buscar |
 |---|---|---|---|---|

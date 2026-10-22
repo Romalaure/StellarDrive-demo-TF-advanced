@@ -218,8 +218,51 @@ namespace StellarDriveDemoTFAdvanced.Worlds
     /// </summary>
     internal sealed class MapSystemFilter : MonoBehaviour
     {
-        /// <summary>The galaxy chosen in the menu: null follows the ship, true Erebos, false Otrera.</summary>
+        /// <summary>The galaxy chosen (targeting computer menu, or the use key on the star map): null follows the ship, true Erebos, false Otrera.</summary>
         public static bool? View;
+
+        /// <summary>The drawn star maps, for looking at one and switching its galaxy.</summary>
+        public static readonly List<MapSystemFilter> Shown = new List<MapSystemFilter>();
+
+        /// <summary>Follow the ship, then Otrera, then Erebos.</summary>
+        public static void Cycle() => View = View == null ? false : View == false ? true : (bool?)null;
+
+        public static string ViewName => (ShowsErebos ? PlanetWiki.SystemName(PlanetWiki.Erebos) : "442 Otrera")
+            + (View == null ? Loc.Pick(" (où est le vaisseau)", " (where the ship is)", " (donde está la nave)") : "");
+
+        private void OnEnable() => Shown.Add(this);
+
+        private void OnDisable() => Shown.Remove(this);
+
+        /// <summary>Whether a ray meets this map's hologram (its planets' box), and how far.</summary>
+        public bool Hit(Ray ray, out float distance)
+        {
+            distance = 0f;
+            if (Time.unscaledTime >= _nextBounds)
+            {
+                _nextBounds = Time.unscaledTime + 1f;
+                _hasBounds = false;
+                foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
+                {
+                    if (!_hasBounds)
+                    {
+                        _bounds = renderer.bounds;
+                        _hasBounds = true;
+                    }
+                    else
+                    {
+                        _bounds.Encapsulate(renderer.bounds);
+                    }
+                }
+                if (_hasBounds)
+                    _bounds.Expand(0.2f);
+            }
+            return _hasBounds && _bounds.IntersectRay(ray, out distance);
+        }
+
+        private float _nextBounds;
+        private bool _hasBounds;
+        private Bounds _bounds;
 
         public static bool ShowsErebos => View ?? (Galaxy.Erebos != null && Galaxy.Nearest() == Galaxy.Erebos);
 

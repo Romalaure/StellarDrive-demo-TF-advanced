@@ -2,7 +2,7 @@
 
 Un second système, autour de l'étoile **Érèbe**, une géante orange, à environ **0,18 année-lumière** d'Otrera. Elle apparaît comme une étoile brillante dans le ciel d'Otrera. La distorsion est bien trop lente pour une telle distance : on y va par le **[portail](Machines.md#générateur-de-portail)**, en choisissant une planète d'Érèbe comme cible.
 
-Sur place, la lumière, le jour et la nuit et la carte stellaire suivent Érèbe. La carte stellaire n'affiche que les planètes du système où vous êtes.
+Sur place, la lumière, le jour et la nuit et la carte stellaire suivent Érèbe. La carte stellaire affiche les planètes du système où vous êtes ; regardez-la et appuyez sur **T** pour voir l'autre galaxie (où est le vaisseau, puis 442 Otrera, puis Érèbe).
 
 | Planète | Biome | Gravité | Air | À y chercher |
 |---|---|---|---|---|

@@ -108,6 +108,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 AdvancedMod.Log.Msg($"dev: visited {spec.Name} (ship {station.Id}, {station.PartCount} parts)");
                 yield return Wait(0.5f);
                 yield return EmptyALootChest(station);
+                yield return GalaxyOnMap();
                 yield return FlyIn(station, ships);
             }
         }
@@ -161,6 +162,28 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             NotifyAtShip.Invoke(respawn, new object[] { connection, player.PhysicsState, look, FishNet.Transporting.Channel.Reliable });
             yield return Wait(3f);
             AdvancedMod.Log.Msg($"dev: fly-out: player in space {player.SpaceId} ({spaces.GetSpace(player.SpaceId)?.GetType().Name}), station's {station.SpaceId}, {transpose.Position(player.SpaceId, station.SpaceId, player.Position).magnitude - station.Position.magnitude:0} m");
+        }
+
+        // The star maps shown: a look at one's middle hits it, and the galaxy cycles
+        private static IEnumerator GalaxyOnMap()
+        {
+            yield return Wait(1f);
+            Camera camera = MainCamera.Get();
+            AdvancedMod.Log.Msg($"dev: star maps shown: {MapSystemFilter.Shown.Count}");
+            foreach (MapSystemFilter map in MapSystemFilter.Shown.ToList())
+            {
+                Renderer any = map.GetComponentInChildren<Renderer>();
+                if (any == null || camera == null)
+                    continue;
+                Vector3 target = any.bounds.center;
+                var ray = new Ray(target - camera.transform.forward * 2f, camera.transform.forward);
+                bool hit = map.Hit(ray, out float distance);
+                string before = MapSystemFilter.ViewName;
+                MapSystemFilter.Cycle();
+                AdvancedMod.Log.Msg($"dev: star map hit {hit} at {distance:0.0} m: {before} -> {MapSystemFilter.ViewName}");
+                MapSystemFilter.Cycle();
+                MapSystemFilter.Cycle();
+            }
         }
 
         // A loot chest of the station emptied slot by slot (as a player taking the loot does): it should go

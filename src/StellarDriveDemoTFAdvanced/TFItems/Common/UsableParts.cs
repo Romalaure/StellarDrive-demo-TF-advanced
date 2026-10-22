@@ -5,6 +5,7 @@ using Ships.Parts.Common;
 using Ships.Parts.Common.Model;
 using Ships.Parts.Common.Utils;
 using UnityEngine;
+using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
 
 namespace StellarDriveDemoTFAdvanced.TFItems.Common
 {
@@ -19,6 +20,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
 
         private static readonly KeySetting UseKey = new KeySetting(() => Settings.UseKey);
         private static UsablePart _target;
+        private static Worlds.MapSystemFilter _map;
         private static GUIStyle _prompt;
 
         public static void Update()
@@ -45,6 +47,23 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                     _target = part;
                 }
             }
+            // A ship's star map: the use key switches the galaxy it shows
+            _map = null;
+            foreach (Worlds.MapSystemFilter map in Worlds.MapSystemFilter.Shown)
+            {
+                if (map != null && map.Hit(ray, out float distance) && distance < best)
+                {
+                    best = distance;
+                    _map = map;
+                    _target = null;
+                }
+            }
+            if (_map != null && UseKey.WasPressed)
+            {
+                Worlds.MapSystemFilter.Cycle();
+                Devices.NpcMenu.Result(Loc.Pick("Carte : ", "Map: ", "Mapa: ") + Worlds.MapSystemFilter.ViewName);
+                return;
+            }
             if (_target != null && UseKey.WasPressed)
             {
                 try
@@ -60,7 +79,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
 
         public static void Draw()
         {
-            if (_target == null || ModMenu.IsOpen)
+            if (_target == null && _map == null || ModMenu.IsOpen)
                 return;
             if (_prompt == null)
             {
@@ -73,7 +92,11 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
             var rect = new Rect(width / 2f - 180f, height / 2f + 46f, 360f, 38f);
             // (the game's panel, its textures made once)
             Devices.DeviceUi.Panel(rect);
-            GUI.Label(rect, $"[{UseKey.Label}]  {_target.Label}", _prompt);
+            string label = _target != null ? _target.Label
+                : Loc.Pick("Changer de galaxie (", "Change galaxy (", "Cambiar de galaxia (") + Worlds.MapSystemFilter.ViewName + ")";
+            if (_map != null)
+                rect = new Rect(width / 2f - 260f, rect.y, 520f, rect.height);
+            GUI.Label(rect, $"[{UseKey.Label}]  {label}", _prompt);
             GUI.matrix = previous;
         }
     }

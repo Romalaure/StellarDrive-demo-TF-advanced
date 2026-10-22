@@ -2,7 +2,7 @@
 
 A second system, around the star **Erebus** (Érèbe), an orange giant about **0.18 light-years** from Otrera. It shows as a bright star in Otrera's sky. Warp is far too slow for such a distance: you get there through the **[portal](Machines.md#portal-generator)**, with an Erebus planet as the target.
 
-Once there, light, day and night and the star map follow Erebus. The star map only shows the planets of the system you are in.
+Once there, light, day and night and the star map follow Erebus. The star map shows the planets of the system you are in; look at it and press **T** to see the other galaxy (where the ship is, then 442 Otrera, then Erebus).
 
 | Planet | Biome | Gravity | Air | Look for |
 |---|---|---|---|---|
