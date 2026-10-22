@@ -122,6 +122,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             ModMenu.Close();
         }
 
+        /// <summary>Starts the photo mode (the camera item's click), when in game with no window open.</summary>
+        public static void Start()
+        {
+            if (!Active && !ModMenu.IsOpen && GameServices.ShipsClient != null && !Cameras.CameraTablet.Open)
+                Enter();
+        }
+
         private static void Enter()
         {
             Camera camera = MainCamera.Get();

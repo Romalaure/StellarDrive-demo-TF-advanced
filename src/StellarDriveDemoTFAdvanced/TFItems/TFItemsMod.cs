@@ -113,6 +113,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.Teleporter.Update();
             Devices.RadioSound.Update();
             Devices.PhotoMode.Update();
+            Devices.PhotoCamera.Update();
             if (ToolsActive)
             {
                 Paint.PaintNet.Update();
@@ -147,6 +148,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.Teleporter.DrawHint();
             Devices.PhotoFrameMenu.Draw();
             Devices.PhotoMode.Draw();
+            Devices.PhotoCamera.Draw();
             if (ToolsActive)
             {
                 Paint.PaintHud.Draw();

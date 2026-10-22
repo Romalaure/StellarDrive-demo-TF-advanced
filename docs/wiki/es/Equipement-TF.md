@@ -33,6 +33,6 @@ Ajustes: sección `[TFAdvancedObjects]` (tecla de la tableta `TabletKey`, tecla 
 
 ## Modo foto y marco de fotos
 
-- **Modo foto** (tecla **F8**, ajuste `PhotoKey`): la vista deja al jugador y vuela libre (ratón para mirar, WASD para moverse, Espacio/Ctrl para subir y bajar, Mayús más rápido, Alt más lento, rueda para el zoom, R para inclinar y T para nivelar). La interfaz del juego desaparece. **F** cambia el filtro (blanco y negro, sepia, vivos, cine, visión nocturna), **H** oculta la ayuda, **P**, Intro o un clic hace la foto, Esc o F8 vuelve.
+- **Modo foto** (tecla **F8**, ajuste `PhotoKey`, o clic izquierdo con la **cámara** en la mano, tomada del soporte de herramientas): la vista deja al jugador y vuela libre (ratón para mirar, WASD para moverse, Espacio/Ctrl para subir y bajar, Mayús más rápido, Alt más lento, rueda para el zoom, R para inclinar y T para nivelar). La interfaz del juego desaparece. **F** cambia el filtro (blanco y negro, sepia, vivos, cine, visión nocturna), **H** oculta la ayuda, **P**, Intro o un clic hace la foto, Esc o F8 vuelve.
 - Las fotos van a `UserData/TFAdvanced/photos` (cualquier imagen PNG o JPG puesta allí también sirve).
 - **Marco de fotos** (pestaña TF Equipamiento, 3 madera + 1 vidrio): míralo y pulsa **T** para elegir una foto. Se envía al anfitrión, se guarda con el mundo y todos los jugadores la ven. La imagen mira hacia fuera de la superficie donde está el marco: ideal en una pared.

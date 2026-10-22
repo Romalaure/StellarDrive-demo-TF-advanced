@@ -17,9 +17,9 @@ using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
 namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 {
     /// <summary>
-    /// The tool rack: a wall panel holding a paint gun and a schematic tablet. Look at it and press
-    /// the use key to take one of them, or one of the game's base tools if it was lost, as an item
-    /// in your inventory (one of each per player).
+    /// The tool rack: a wall panel holding a paint gun, a schematic tablet and a camera. Look at it
+    /// and press the use key to take one of them, or one of the game's base tools if it was lost,
+    /// as an item in your inventory (one of each per player).
     /// </summary>
     internal static class ToolRack
     {
@@ -47,7 +47,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         private static void Configure(PartSettings settings, GameObject prefab)
         {
             Transform visuals = DeviceModels.Build(settings, prefab, Loc.Pick("Râtelier à outils", "Tool rack", "Soporte de herramientas"),
-                Loc.Pick("Panneau à fixer au mur : regarde-le et appuie sur la touche d'utilisation (T) pour prendre un pistolet à peinture, une tablette schématique ou reprendre un outil de base perdu.", "Wall panel: look at it and press the use key (T) to take a paint gun, a schematic tablet or take back a lost base tool.", "Panel de pared: míralo y pulsa la tecla de uso (T) para coger una pistola de pintura, una tableta esquemática o recuperar una herramienta básica perdida."),
+                Loc.Pick("Panneau à fixer au mur : regarde-le et appuie sur la touche d'utilisation (T) pour prendre un pistolet à peinture, une tablette schématique, un appareil photo ou reprendre un outil de base perdu.", "Wall panel: look at it and press the use key (T) to take a paint gun, a schematic tablet, a camera or take back a lost base tool.", "Panel de pared: míralo y pulsa la tecla de uso (T) para coger una pistola de pintura, una tableta esquemática, una cámara o recuperar una herramienta básica perdida."),
                 4f, new[] { (101u, 2), (110u, 2) }, BoundsCenter, BoundsSize, Shapes(), Materials());
             UsablePart.AddBox(visuals, BoundsCenter, BoundsSize + new Vector3(0f, 0.2f, 0f));
             visuals.gameObject.AddComponent<ToolRackVisuals>();
@@ -73,7 +73,11 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             ["TF_NoPaint_RackBlueprint"] = new DeviceMaterial(new Color(0.6f, 0.9f, 1f), 0f, 0.2f, new Color(0.5f, 0.85f, 1f) * 0.8f),
             ["TF_NoPaint_RackCanRed"] = new DeviceMaterial(new Color(0.85f, 0.12f, 0.1f), 0.3f, 0.4f),
             ["TF_NoPaint_RackCanYellow"] = new DeviceMaterial(new Color(0.95f, 0.78f, 0.1f), 0.3f, 0.4f),
-            ["TF_NoPaint_RackCanGreen"] = new DeviceMaterial(new Color(0.15f, 0.7f, 0.3f), 0.3f, 0.4f)
+            ["TF_NoPaint_RackCanGreen"] = new DeviceMaterial(new Color(0.15f, 0.7f, 0.3f), 0.3f, 0.4f),
+            ["TF_NoPaint_RackCameraBody"] = new DeviceMaterial(new Color(0.72f, 0.74f, 0.78f), 0.5f, 0.4f),
+            ["TF_NoPaint_RackCameraDark"] = new DeviceMaterial(new Color(0.08f, 0.085f, 0.095f), 0.2f, 0.35f),
+            ["TF_NoPaint_RackCameraGlass"] = new DeviceMaterial(new Color(0.1f, 0.16f, 0.24f), 0.3f, 0.45f),
+            ["TF_NoPaint_RackCameraLight"] = new DeviceMaterial(new Color(1f, 0.3f, 0.2f), 0f, 0.1f, new Color(1f, 0.3f, 0.2f) * 0.8f)
         };
 
         // Lies on its mounting surface (+y out of it); seen on a wall, x is across and z is up.
@@ -169,6 +173,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             metal.Box(new Vector3(tx + 0.08f, 0.04f, tz - 0.178f), new Vector3(0.03f, 0.04f, 0.012f));
             metal.Box(new Vector3(tx, 0.04f, tz + 0.178f), new Vector3(0.05f, 0.04f, 0.012f));
 
+            // The camera hung on a peg between the gun and the tablet, its lens out of the wall
+            // (camera x -> board x, camera y -> along the board toward its top, camera z -> out of the wall)
+            var cameraMatrix = Matrix4x4.TRS(new Vector3(-0.06f, 0.025f, -0.02f), Quaternion.LookRotation(Vector3.up, Vector3.forward), Vector3.one * 1.1f);
+            foreach (KeyValuePair<string, MeshBuilder> part in PhotoCamera.Shapes())
+                Of("TF_NoPaint_RackCamera" + part.Key).Append(part.Value, cameraMatrix);
+            metal.Cylinder(new Vector3(-0.06f, 0.02f, 0.12f), new Vector3(-0.06f, 0.08f, 0.12f), 0.006f, 0.006f, 8);
+
             // Shelf along the bottom with three paint cans
             metal.Box(new Vector3(0f, 0.055f, -0.262f), new Vector3(0.84f, 0.09f, 0.008f));
             metal.Box(new Vector3(0f, 0.1f, -0.25f), new Vector3(0.84f, 0.006f, 0.03f));
@@ -187,7 +198,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         // Host: a base tool (build tool, recycler, mining laser) for the player who asked, if they lack it
         private static void ServerGive(NetworkConnection sender, TFMessageKind kind, uint itemId, ushort b, string text)
         {
-            if (sender == null || (System.Array.IndexOf(BaseTools, itemId) < 0 && !(TFItemsMod.ToolsActive && (itemId == SchematicTablet.ItemId || itemId == Paint.PaintToolGiver.FindPaintToolItem()?.id))))
+            if (sender == null || (System.Array.IndexOf(BaseTools, itemId) < 0 && itemId != PhotoCamera.ItemId && !(TFItemsMod.ToolsActive && (itemId == SchematicTablet.ItemId || itemId == Paint.PaintToolGiver.FindPaintToolItem()?.id))))
                 return;
             TrackedPlayerServer player = GameServices.PlayersServer?.GetTrackedPlayerFromConnectionId(sender.ClientId);
             if (player == null)
@@ -268,7 +279,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         /// <summary>The host's answer: the tool is in the inventory now, or was already.</summary>
         public static void Notify(uint itemId, bool given)
         {
-            string name = itemId == SchematicTablet.ItemId ? Loc.Pick("Tablette schématique", "Schematic tablet", "Tableta esquemática") : ToolName(itemId);
+            string name = itemId == SchematicTablet.ItemId ? Loc.Pick("Tablette schématique", "Schematic tablet", "Tableta esquemática") : itemId == PhotoCamera.ItemId ? PhotoCamera.Name : ToolName(itemId);
             _notice = given
                 ? Loc.Pick($"{name} : ajouté à ton inventaire.", $"{name}: added to your inventory.", $"{name}: añadido a tu inventario.")
                 : Loc.Pick($"{name} : tu en as déjà un (inventaire ou barre d'outils).", $"{name}: you already have one (inventory or toolbar).", $"{name}: ya tienes uno (inventario o barra de herramientas).");
@@ -284,7 +295,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             float scale = Mathf.Clamp(Screen.height / 1080f, 0.7f, 2.5f);
             Matrix4x4 previous = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
-            Rect area = DeviceUi.Window(Screen.width / scale, Screen.height / scale, 480f, 520f, Loc.Pick("RÂTELIER À OUTILS", "TOOL RACK", "SOPORTE DE HERRAMIENTAS"));
+            Rect area = DeviceUi.Window(Screen.width / scale, Screen.height / scale, 480f, 580f, Loc.Pick("RÂTELIER À OUTILS", "TOOL RACK", "SOPORTE DE HERRAMIENTAS"));
             GUILayout.BeginArea(area);
             GUILayout.Label(Loc.Pick("Prends un outil : il va dans ton inventaire (un de chaque par joueur).", "Take a tool: it goes to your inventory (one of each per player).", "Coge una herramienta: va a tu inventario (una de cada por jugador)."), DeviceUi.Text);
             GUILayout.Space(10f);
@@ -318,6 +329,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 }
                 GUILayout.Space(12f);
             }
+            if (GUILayout.Button(PhotoCamera.Name + Loc.Pick("  (mode photo)", "  (photo mode)", "  (modo foto)"), DeviceUi.Button, GUILayout.Height(44f)))
+            {
+                ToolRack.RequestTool(PhotoCamera.ItemId);
+                ModMenu.Close();
+            }
+            GUILayout.Space(12f);
             GUILayout.Label(Loc.Pick("Outils de base (si tu les as perdus) :", "Base tools (if you lost them):", "Herramientas básicas (si las perdiste):"), DeviceUi.Text);
             GUILayout.Space(4f);
             foreach (uint tool in ToolRack.BaseTools)
