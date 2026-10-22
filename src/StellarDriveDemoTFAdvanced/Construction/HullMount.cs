@@ -24,8 +24,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
         /// <summary>Parts made to stand: upright against walls.</summary>
         internal static readonly HashSet<ushort> Standing = new HashSet<ushort> { TFItems.Devices.Radio.SpeakerId, TFItems.Devices.Radio.RadioId };
 
-        /// <summary>Standing parts whose front is their -z (the radio's screen): turned around to face out.</summary>
-        internal static bool FrontIsBack(ushort id) => id == TFItems.Devices.Radio.RadioId;
+        /// <summary>Standing parts whose front is their -z (the radio's screen, the speaker's cones: the Blender models' front): turned around to face out.</summary>
+        internal static bool FrontIsBack(ushort id) => id == TFItems.Devices.Radio.RadioId || id == TFItems.Devices.Radio.SpeakerId;
 
         private static void Postfix(HitSnapDetectionProperties props, IShipPartPlacements shipGrid, ref IPartPlacement __result)
         {

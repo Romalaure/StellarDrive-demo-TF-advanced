@@ -52,6 +52,8 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                 Power.PowerParts.GraftSeated(prefab, prefab.GetComponent<ShipPartBounds>(), EngineCatalog.CommandSocket, CableType.Signal,
                     new Vector3(0f, 0.07f * spec.Scale, -0.47f * spec.Scale), Vector3.back);
             }
+            if (spec.Scale > 4f)
+                SeatGiantSockets(prefab);
             if (spec.Model != null)
             {
                 Detailed(prefab, spec);
@@ -260,6 +262,37 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
         // Everything scales around the part origin. The game instantiates the model container and the
         // interactions container on their own and puts the sockets' plugs and click zones inside them at
         // the sockets' part-space positions: those two containers keep scale 1, their content scales
+        /// <summary>
+        /// A giant engine's plugs: scaled with it they were huge and hung in the air, away from its
+        /// base (SDModKit's pads are skipped there): a sensible size, set on the nearest face of its box.
+        /// </summary>
+        private static void SeatGiantSockets(GameObject prefab)
+        {
+            var bounds = prefab.GetComponent<ShipPartBounds>();
+            if (bounds == null)
+                return;
+            Vector3 half = bounds.bounds * 0.5f;
+            foreach (SocketObject socket in prefab.GetComponentsInChildren<SocketObject>(true))
+            {
+                Transform t = socket.transform;
+                t.localScale = Vector3.one * 3f;
+                Vector3 p = t.localPosition - bounds.center;
+                // Onto the face it stands out of (the axis it is furthest along, relative to the box)
+                if (Mathf.Abs(p.x) / half.x >= Mathf.Abs(p.z) / half.z)
+                {
+                    p.x = Mathf.Sign(p.x) * half.x;
+                    p.z = Mathf.Clamp(p.z, -half.z * 0.8f, half.z * 0.8f);
+                }
+                else
+                {
+                    p.z = Mathf.Sign(p.z) * half.z;
+                    p.x = Mathf.Clamp(p.x, -half.x * 0.8f, half.x * 0.8f);
+                }
+                p.y = Mathf.Clamp(p.y, -half.y + 0.5f, half.y - 0.5f);
+                t.localPosition = bounds.center + p;
+            }
+        }
+
         private static void Scale(GameObject prefab, float scale)
         {
             if (Mathf.Approximately(scale, 1f))
