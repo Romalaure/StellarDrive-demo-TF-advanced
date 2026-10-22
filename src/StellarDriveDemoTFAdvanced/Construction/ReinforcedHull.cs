@@ -124,6 +124,11 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     clone.name = "TFA_" + spec.Id;
                     clone.hideFlags = HideFlags.DontUnloadUnusedAsset;
                     clone.id = spec.Id;
+                    // A piece with its own model (the pivoted plates): its own copy of the model, so
+                    // nothing keyed on the model mixes it up with the game's piece of another color
+                    // (its look flickered between the two)
+                    if (clone.hasItsOwnMesh && clone.part != null)
+                        clone.part = SDModKit.Game.CustomParts.CloneIntoHolder(clone.part, "TFA_" + spec.Id) ?? clone.part;
                     Configure(spec, clone);
                     Built[spec.Id] = clone;
                 }
