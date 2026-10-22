@@ -169,6 +169,15 @@ namespace StellarDriveDemoTFAdvanced.Construction
             settings.snappingStyle = spec.Set == 3 ? Ships.Interface.Model.SnappingStyle.PreciseOnFloor : Ships.Interface.Model.SnappingStyle.PreciseOnAny;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, spec.Size.y * 0.5f, 0f), spec.Size);
             int layer = visuals.gameObject.layer;
+            // The seats: look at the piece and press the use key to sit
+            if (TFItems.Devices.Seats.IsSeat(spec.Id))
+            {
+                TFItems.Common.UsablePart.AddBox(visuals, new Vector3(0f, spec.Size.y * 0.5f, 0f), spec.Size + new Vector3(0.1f, 0.1f, 0.1f));
+                var plain = visuals.GetComponent<Ships.Parts.Common.DefaultShipPartVisuals>();
+                if (plain != null)
+                    Object.DestroyImmediate(plain);
+                visuals.gameObject.AddComponent<TFItems.Devices.SeatVisuals>();
+            }
             if (BlenderModel(spec, visuals, layer))
                 return;
             var model = new Model();

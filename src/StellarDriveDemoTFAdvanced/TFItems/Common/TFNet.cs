@@ -67,6 +67,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         RadioAudioRequest = 72,
         /// <summary>Server to one client: piece B of a video's audio, Text is "count|video id|data" (count 0: data is why it failed).</summary>
         RadioAudioChunk = 73,
+        /// <summary>Client to server: sit on piece A/B (Text "sit"), or get up (Text "stand").</summary>
+        SitRequest = 74,
+        /// <summary>Server to everyone: player A sits on the seat Text ("ship|part|seat"), or "" when up.</summary>
+        SitState = 75,
+        /// <summary>Server to the player who sat: their seat Text ("" when up).</summary>
+        SitSelf = 76,
 
         /// <summary>Client to server: copy the ship A (and what is attached to it) as schematic Text.</summary>
         SchematicCopy = 30,

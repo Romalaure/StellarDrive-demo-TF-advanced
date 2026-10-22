@@ -38,7 +38,7 @@ Cuarta fila de la pestaña, investigación **Carpintería**; se colocan en el su
 | Librería | 1 × 2 m de alto | 6 madera |
 | Planta en maceta | 1,2 m de alto | 2 madera, 1 cristal |
 
-La tela del sofá y del sillón y la alfombra toman el color de la pistola de pintura. Los muebles son decorativos (no se puede sentar en ellos ni guardar nada).
+La tela del sofá y del sillón y la alfombra toman el color de la pistola de pintura. **Puedes sentarte** en el sofá (3 plazas), el sillón, la silla, el taburete, la mesa y la mesa baja: míralos y pulsa **T** (el sitio libre más cercano); **T** o una tecla de movimiento para levantarte. Los demás jugadores te ven sentado. El escritorio, la alfombra, la librería y la planta son decorativos.
 
 ## Casco reforzado
 

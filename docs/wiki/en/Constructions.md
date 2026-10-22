@@ -38,7 +38,7 @@ The tab's fourth row, research **Carpentry**; placed on floors (or beside a plac
 | Bookcase | 1 × 2 m high | 6 wood |
 | Potted plant | 1.2 m high | 2 wood, 1 glass |
 
-The sofa's and armchair's fabric and the rug take the paint gun's color. The furniture is decorative (you cannot sit on it or store anything in it).
+The sofa's and armchair's fabric and the rug take the paint gun's color. **You can sit** on the sofa (3 seats), the armchair, the chair, the stool, the table and the coffee table: look at one and press **T** (the nearest free seat); **T** or a move key to get up. The other players see you seated. The desk, rug, bookcase and plant are decorative.
 
 ## Reinforced hull
 

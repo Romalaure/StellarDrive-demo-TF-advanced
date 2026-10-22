@@ -58,6 +58,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Common.TFNet.InstallSerializers();
             Devices.TeleportCapsule.Install();
             Devices.Radio.Install();
+            Devices.Seats.Install();
             Devices.RadioShare.Install();
             Devices.RadioDev.Install();
             Devices.PhotoFrame.Install();
@@ -114,6 +115,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.RadioSound.Update();
             Devices.PhotoMode.Update();
             Devices.PhotoCamera.Update();
+            Devices.Seats.Update();
             if (ToolsActive)
             {
                 Paint.PaintNet.Update();

@@ -38,7 +38,7 @@ Quatrième rangée de l'onglet, tech **Charpenterie** ; ils se posent au sol (ou
 | Bibliothèque | 1 × 2 m de haut | 6 bois |
 | Plante en pot | 1,2 m de haut | 2 bois, 1 verre |
 
-Le tissu du canapé, du fauteuil et le tapis prennent la couleur du pistolet à peinture. Les meubles sont décoratifs (on ne s'y assoit pas, rien ne s'y range).
+Le tissu du canapé, du fauteuil et le tapis prennent la couleur du pistolet à peinture. **On s'assoit** sur le canapé (3 places), le fauteuil, la chaise, le tabouret, la table et la table basse : regarde-les et appuie sur **T** (place libre la plus proche) ; **T** ou une touche de déplacement pour se relever. Les autres joueurs te voient assis. Le bureau, le tapis, la bibliothèque et la plante sont décoratifs.
 
 ## Coque renforcée
 
