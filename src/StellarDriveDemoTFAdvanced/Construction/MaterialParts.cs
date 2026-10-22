@@ -10,13 +10,14 @@ using Object = UnityEngine.Object;
 namespace StellarDriveDemoTFAdvanced.Construction
 {
     /// <summary>
-    /// Construction sets in the game's three building materials: wood, glass and iron. The game's
-    /// hull already has floors, walls and slopes in each; these add the shapes it lacks (posts,
-    /// plank floors and partitions, railings, lattices, framed windows, glass floors and
-    /// balustrades, gratings, trusses, columns, gussets). Wood and iron wear the hull's own
-    /// textures (its texture array, chosen per vertex like the hull does), glass the hull's glass.
-    /// Stateless placed parts with the game's box collision; +Y points out of the surface.
-    /// Only call when SDModKit is loaded.
+    /// Construction sets in the game's three building materials: wood, glass and iron, and
+    /// furniture. The game's hull already has floors, walls and slopes in each; these add the shapes
+    /// it lacks (posts, plank floors and partitions, railings, lattices, framed windows, glass
+    /// floors and balustrades, gratings, trusses, columns, gussets) and furnish rooms (sofa,
+    /// armchair, chair, stool, tables, desk, rug, bookcase, plant). Their models are made in Blender
+    /// (tools/blender/construction.py: real wood grain, satin steel, the hull's glass, fabrics); the
+    /// shapes built here are the fallback. Stateless placed parts with the game's box collision;
+    /// +Y points out of the surface. Only call when SDModKit is loaded.
     /// </summary>
     internal static class MaterialParts
     {
@@ -39,7 +40,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             public (uint Item, int Count)[] Cost;
             public Vector3 Size;
             public Action<Model> Build;
-            /// <summary>The set: 0 wood, 1 glass, 2 iron (build menu order and research).</summary>
+            /// <summary>The set: 0 wood, 1 glass, 2 iron, 3 furniture (build menu order and research).</summary>
             public int Set;
         }
 
@@ -107,7 +108,38 @@ namespace StellarDriveDemoTFAdvanced.Construction
             new Spec { Id = 7367, Set = 2, Label = Loc.Pick("Tôle perforée 1 × 1", "Perforated sheet 1 × 1", "Chapa perforada 1 × 1"), Mass = 7f, Cost = new[] { (Iron, 2) }, Size = new Vector3(1f, 0.03f, 1f),
                 Description = Loc.Pick("Tôle percée de trous ronds, cadre plié : bardage, cloisons techniques.", "Steel sheet punched with round holes, folded frame: cladding, service partitions.", "Chapa de acero perforada con agujeros redondos, marco plegado: revestimientos, tabiques técnicos."),
                 Build = m => Perforated(m, 1f) },
+            // Furniture (on floors, or beside other placed parts)
+            new Spec { Id = 7440, Set = 3, Label = Loc.Pick("Canapé", "Sofa", "Sofá"), Mass = 40f, Cost = new[] { (Wood, 6), (Iron, 2) }, Size = new Vector3(2f, 0.85f, 0.9f),
+                Description = Loc.Pick("Canapé trois places à coussins. Peins-le pour changer la couleur du tissu.", "Three-seat sofa with cushions. Paint it to change the fabric's color.", "Sofá de tres plazas con cojines. Píntalo para cambiar el color de la tela."), Build = m => Furniture(m, 2f, 0.85f, 0.9f) },
+            new Spec { Id = 7441, Set = 3, Label = Loc.Pick("Fauteuil", "Armchair", "Sillón"), Mass = 18f, Cost = new[] { (Wood, 3), (Iron, 1) }, Size = new Vector3(0.9f, 0.85f, 0.9f),
+                Description = Loc.Pick("Fauteuil assorti au canapé.", "An armchair matching the sofa.", "Un sillón a juego con el sofá."), Build = m => Furniture(m, 0.9f, 0.85f, 0.9f) },
+            new Spec { Id = 7442, Set = 3, Label = Loc.Pick("Chaise", "Chair", "Silla"), Mass = 5f, Cost = new[] { (Wood, 2) }, Size = new Vector3(0.45f, 0.9f, 0.5f),
+                Description = Loc.Pick("Chaise en bois à dossier à lattes et assise rembourrée.", "Wooden chair with a slatted back and a padded seat.", "Silla de madera con respaldo de listones y asiento acolchado."), Build = m => Furniture(m, 0.45f, 0.9f, 0.5f) },
+            new Spec { Id = 7443, Set = 3, Label = Loc.Pick("Tabouret", "Stool", "Taburete"), Mass = 3f, Cost = new[] { (Wood, 1), (Iron, 1) }, Size = new Vector3(0.4f, 0.7f, 0.4f),
+                Description = Loc.Pick("Tabouret de bar à trois pieds d'acier et assise ronde en bois.", "Bar stool on three steel legs with a round wooden seat.", "Taburete de bar de tres patas de acero con asiento redondo de madera."), Build = m => Furniture(m, 0.4f, 0.7f, 0.4f) },
+            new Spec { Id = 7444, Set = 3, Label = Loc.Pick("Table", "Table", "Mesa"), Mass = 25f, Cost = new[] { (Wood, 4), (Iron, 2) }, Size = new Vector3(1.6f, 0.76f, 0.9f),
+                Description = Loc.Pick("Table de 1,6 m, plateau en bois sur pieds d'acier.", "1.6 m table, a wooden top on steel legs.", "Mesa de 1,6 m, tablero de madera sobre patas de acero."), Build = m => Furniture(m, 1.6f, 0.76f, 0.9f) },
+            new Spec { Id = 7445, Set = 3, Label = Loc.Pick("Table basse", "Coffee table", "Mesa baja"), Mass = 15f, Cost = new[] { (Glass, 2), (Iron, 2), (Wood, 1) }, Size = new Vector3(1.1f, 0.42f, 0.6f),
+                Description = Loc.Pick("Table basse : plateau de verre sur cadre d'acier, tablette en bois dessous.", "Coffee table: a glass top on a steel frame, a wooden shelf under it.", "Mesa baja: tablero de cristal sobre un marco de acero, una balda de madera debajo."), Build = m => Furniture(m, 1.1f, 0.42f, 0.6f) },
+            new Spec { Id = 7446, Set = 3, Label = Loc.Pick("Bureau", "Desk", "Escritorio"), Mass = 30f, Cost = new[] { (Wood, 5), (Iron, 2) }, Size = new Vector3(1.4f, 0.76f, 0.7f),
+                Description = Loc.Pick("Bureau de 1,4 m avec caisson à trois tiroirs (décoratifs).", "1.4 m desk with a three-drawer unit (decorative).", "Escritorio de 1,4 m con cajonera de tres cajones (decorativos)."), Build = m => Furniture(m, 1.4f, 0.76f, 0.7f) },
+            new Spec { Id = 7447, Set = 3, Label = Loc.Pick("Tapis", "Rug", "Alfombra"), Mass = 6f, Cost = new[] { (Wood, 2) }, Size = new Vector3(2f, 0.012f, 3f),
+                Description = Loc.Pick("Tapis tissé de 2 × 3 m à bordure et franges. Peins-le pour changer sa couleur.", "A 2 × 3 m woven rug with a border and fringes. Paint it to change its color.", "Una alfombra tejida de 2 × 3 m con cenefa y flecos. Píntala para cambiar su color."), Build = m => Furniture(m, 2f, 0.012f, 3f) },
+            new Spec { Id = 7448, Set = 3, Label = Loc.Pick("Bibliothèque", "Bookcase", "Librería"), Mass = 35f, Cost = new[] { (Wood, 6) }, Size = new Vector3(1f, 2f, 0.35f),
+                Description = Loc.Pick("Bibliothèque de 2 m, cinq étagères pleines de livres (décoratifs).", "A 2 m bookcase, five shelves full of books (decorative).", "Una librería de 2 m, cinco baldas llenas de libros (decorativos)."), Build = m => Furniture(m, 1f, 2f, 0.35f) },
+            new Spec { Id = 7449, Set = 3, Label = Loc.Pick("Plante en pot", "Potted plant", "Planta en maceta"), Mass = 12f, Cost = new[] { (Wood, 2), (Glass, 1) }, Size = new Vector3(0.5f, 1.2f, 0.5f),
+                Description = Loc.Pick("Une plante verte à larges feuilles dans un pot en céramique.", "A green plant with broad leaves in a ceramic pot.", "Una planta verde de hojas anchas en una maceta de cerámica."), Build = m => Furniture(m, 0.5f, 1.2f, 0.5f) },
         };
+
+        public static bool IsFurniture(ushort id) => id >= 7440 && id <= 7449;
+
+        private static readonly System.Collections.Generic.HashSet<ushort> Ids = new System.Collections.Generic.HashSet<ushort>(All.Select(s => s.Id));
+
+        public static bool IsConstruction(ushort id) => Ids.Contains(id);
+
+        // The fallback of a piece of furniture (its Blender model missing): a plain block
+        private static void Furniture(Model m, float width, float height, float depth) =>
+            m.Wood.Box(new Vector3(0f, height * 0.5f, 0f), new Vector3(width, height, depth));
 
         private static Material _hull;
         private static Material _glass;
@@ -117,7 +149,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             foreach (Spec part in All)
             {
                 Spec spec = part;
-                int row = spec.Set == 0 ? AdvancedTab.WoodRow : spec.Set == 1 ? AdvancedTab.GlassRow : AdvancedTab.IronRow;
+                int row = spec.Set == 0 ? AdvancedTab.WoodRow : spec.Set == 1 ? AdvancedTab.GlassRow : spec.Set == 2 ? AdvancedTab.IronRow : AdvancedTab.FurnitureRow;
                 PartFactory.Register(spec.Id, Donor, AdvancedTab.ConstructionName, row, (settings, prefab) => Configure(spec, settings, prefab));
             }
             AdvancedMod.Log.Msg($"registered {All.Length} wood, glass and iron construction parts");
@@ -133,17 +165,89 @@ namespace StellarDriveDemoTFAdvanced.Construction
         {
             PartFactory.Describe(settings, spec.Label, spec.Description, spec.Mass, spec.Cost);
             settings.internalStateClass = null;
-            // On any face of the hull, and on other placed parts (see FloatingSnap)
-            settings.snappingStyle = Ships.Interface.Model.SnappingStyle.PreciseOnAny;
+            // On any face of the hull, and on other placed parts (see FloatingSnap); furniture on floors
+            settings.snappingStyle = spec.Set == 3 ? Ships.Interface.Model.SnappingStyle.PreciseOnFloor : Ships.Interface.Model.SnappingStyle.PreciseOnAny;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, spec.Size.y * 0.5f, 0f), spec.Size);
+            int layer = visuals.gameObject.layer;
+            if (BlenderModel(spec, visuals, layer))
+                return;
             var model = new Model();
             spec.Build(model);
-            int layer = visuals.gameObject.layer;
             Material hull = HullMaterial();
             Add(visuals, layer, "TFA_Build" + spec.Id + "Wood", model.Wood, hull ?? LitMaterials.Get("TFA_BuildWood", new Color(0.55f, 0.38f, 0.22f), 0f, 0.25f));
             Add(visuals, layer, "TFA_Build" + spec.Id + "Iron", model.Iron, hull ?? LitMaterials.Get("TFA_BuildIron", new Color(0.6f, 0.62f, 0.65f), 0.7f, 0.4f));
             Add(visuals, layer, "TFA_Build" + spec.Id + "DarkIron", model.DarkIron, hull ?? LitMaterials.Get("TFA_BuildDarkIron", new Color(0.25f, 0.26f, 0.28f), 0.7f, 0.4f));
             Add(visuals, layer, "TF_NoPaint_Build" + spec.Id + "Glass", model.Glass, GlassMaterial(), ShadowCastingMode.Off);
+        }
+
+        // The part's Blender model: its pieces C<id>_<look>, each look its material
+        private static bool BlenderModel(Spec spec, Transform visuals, int layer)
+        {
+            System.Collections.Generic.Dictionary<string, Mesh> models = ObjModels.Load("construction");
+            if (models == null)
+                return false;
+            string prefix = "C" + spec.Id + "_";
+            bool any = false;
+            foreach (System.Collections.Generic.KeyValuePair<string, Mesh> piece in models)
+            {
+                if (!piece.Key.StartsWith(prefix))
+                    continue;
+                string look = piece.Key.Substring(prefix.Length);
+                Material material = Look(look);
+                if (material == null)
+                    continue;
+                bool glass = look == "Glass";
+                // The hull's glass reads its highlight from UV1 (the shapes made here set "none" too)
+                if (glass && piece.Value.uv2.Length == 0)
+                    piece.Value.SetUVs(1, Enumerable.Repeat(new Vector2(0.125f, 0.5f), piece.Value.vertexCount).ToList());
+                // Glass keeps its look when painted; the rest takes the paint
+                var child = new GameObject((glass ? "TF_NoPaint_Build" : "TFA_Build") + spec.Id + look) { layer = layer };
+                child.transform.SetParent(visuals, false);
+                child.AddComponent<MeshFilter>().sharedMesh = piece.Value;
+                var renderer = child.AddComponent<MeshRenderer>();
+                renderer.sharedMaterial = material;
+                renderer.shadowCastingMode = glass || look == "Rug" || look == "RugTrim" ? ShadowCastingMode.Off : ShadowCastingMode.On;
+                any = true;
+            }
+            return any;
+        }
+
+        private static readonly System.Collections.Generic.Dictionary<string, Material> Looks = new System.Collections.Generic.Dictionary<string, Material>();
+
+        private static Material Look(string look)
+        {
+            if (Looks.TryGetValue(look, out Material material) && material != null)
+                return material;
+            switch (look)
+            {
+                case "Wood": material = NaturalTextures.Lit("TFA_CWood", NaturalTextures.Wood, NaturalTextures.WoodNormal, new Color(1f, 0.9f, 0.76f), 0f, 0.25f, 1.5f); break;
+                case "WoodDark": material = NaturalTextures.Lit("TFA_CWoodDark", NaturalTextures.Wood, NaturalTextures.WoodNormal, new Color(0.5f, 0.38f, 0.3f), 0f, 0.25f, 1.5f); break;
+                case "Steel": material = LitMaterials.Get("TFA_CSteel", new Color(0.66f, 0.68f, 0.72f), 0.45f, 0.4f); break;
+                case "SteelDark": material = LitMaterials.Get("TFA_CSteelDark", new Color(0.26f, 0.27f, 0.3f), 0.4f, 0.35f); break;
+                case "Chrome": material = LitMaterials.Get("TFA_CChrome", new Color(0.82f, 0.83f, 0.86f), 0.7f, 0.5f); break;
+                case "Glass": material = GlassMaterial(); break;
+                case "Fabric": material = LitMaterials.Get("TFA_CFabric", new Color(0.36f, 0.45f, 0.58f), 0f, 0.12f); break;
+                case "FabricDark": material = LitMaterials.Get("TFA_CFabricDark", new Color(0.22f, 0.27f, 0.36f), 0f, 0.12f); break;
+                case "Leaf": material = LitMaterials.Get("TFA_CLeaf", new Color(0.22f, 0.5f, 0.2f), 0f, 0.3f); break;
+                case "Pot": material = LitMaterials.Get("TFA_CPot", new Color(0.86f, 0.83f, 0.78f), 0f, 0.45f); break;
+                case "Soil": material = LitMaterials.Get("TFA_CSoil", new Color(0.2f, 0.14f, 0.09f), 0f, 0.05f); break;
+                case "Rug": material = LitMaterials.Get("TFA_CRug", new Color(0.55f, 0.2f, 0.17f), 0f, 0.05f); break;
+                case "RugTrim": material = LitMaterials.Get("TFA_CRugTrim", new Color(0.86f, 0.74f, 0.52f), 0f, 0.05f); break;
+                case "BookA": material = LitMaterials.Get("TFA_CBookA", new Color(0.55f, 0.16f, 0.12f), 0f, 0.3f); break;
+                case "BookB": material = LitMaterials.Get("TFA_CBookB", new Color(0.16f, 0.3f, 0.5f), 0f, 0.3f); break;
+                case "BookC": material = LitMaterials.Get("TFA_CBookC", new Color(0.78f, 0.64f, 0.32f), 0f, 0.3f); break;
+            }
+            // Plain surfaces: without the panel texture LitMaterials lays on (its seams drew dark
+            // crosses over fabrics and plates)
+            if (material != null && look != "Wood" && look != "WoodDark" && look != "Glass")
+            {
+                foreach (string map in new[] { "_BaseMap", "_MainTex", "_BumpMap" })
+                    if (material.HasProperty(map))
+                        material.SetTexture(map, null);
+                material.DisableKeyword("_NORMALMAP");
+            }
+            Looks[look] = material;
+            return material;
         }
 
         private static void Add(Transform parent, int layer, string name, MeshBuilder builder, Material material, ShadowCastingMode shadows = ShadowCastingMode.On)

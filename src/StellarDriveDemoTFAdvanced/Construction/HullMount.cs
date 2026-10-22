@@ -39,6 +39,11 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     __result = under;
                 return;
             }
+            if (MaterialParts.IsConstruction(id))
+            {
+                Aligned(props, shipGrid, ref __result, placed);
+                return;
+            }
             Vector3 n = placed.UpOrientation.GetVector3();
             if (!Standing.Contains(id) || Mathf.Abs(n.y) > 0.1f || Mathf.Abs(n.x) > 0.1f && Mathf.Abs(n.z) > 0.1f)
                 return;
@@ -51,6 +56,36 @@ namespace StellarDriveDemoTFAdvanced.Construction
             var upright = new FloatingPartPlacement(coord, placed.UpOrientation, PartOrientation.Up);
             if (shipGrid.IsFloatingPlacementFree(upright, bounds))
                 __result = upright;
+        }
+
+        /// <summary>
+        /// Construction parts and furniture on the hull line up with its cells (centered on whole
+        /// meters): across the face, a part 1 or 3 m long is centered on a cell, 2 m on a cell's edge,
+        /// anything else on a 25 cm grid, so floor plates, partitions and windows sit edge to edge
+        /// with the hull and with each other.
+        /// </summary>
+        private static void Aligned(HitSnapDetectionProperties props, IShipPartPlacements shipGrid, ref IPartPlacement result, FloatingPartPlacement placed)
+        {
+            Vector3 n = placed.UpOrientation.GetVector3();
+            Quaternion rotation = Quaternion.LookRotation(placed.ForwardOrientation.GetVector3(), n);
+            Bounds bounds = props.Bounds;
+            Vector3 coord = placed.Coord;
+            Vector3 center = coord + rotation * bounds.center;
+            foreach (Vector3 axis in new[] { Vector3.right, Vector3.up, Vector3.forward })
+            {
+                if (Mathf.Abs(Vector3.Dot(axis, n)) > 0.5f)
+                    continue;
+                float size = 2f * FloatingSnap.Extent(bounds, rotation, axis);
+                float at = Vector3.Dot(center, axis);
+                int meters = Mathf.RoundToInt(size);
+                float target = meters >= 1 && Mathf.Abs(size - meters) < 0.03f
+                    ? meters % 2 == 1 ? Mathf.Round(at) : Mathf.Floor(at) + 0.5f
+                    : Mathf.Round(at * 4f) / 4f;
+                coord += axis * (target - at);
+            }
+            var aligned = new FloatingPartPlacement(coord, placed.ForwardOrientation, placed.UpOrientation);
+            if (shipGrid.IsFloatingPlacementFree(aligned, bounds))
+                result = aligned;
         }
     }
 }

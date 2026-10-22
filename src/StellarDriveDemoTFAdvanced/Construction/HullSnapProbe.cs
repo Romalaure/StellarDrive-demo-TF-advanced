@@ -69,7 +69,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 ("wall +x low", middle + Vector3.up * 0.6f, Vector3.right),
                 ("wall -x low", middle + Vector3.up * 0.6f, Vector3.left),
             };
-            ushort[] parts = { 7347, 7162 };
+            ushort[] parts = { 7347, 7162, 7342, 7343, 7352, 7444 };
             PartSettings[] all = Resources.FindObjectsOfTypeAll<PartSettings>();
             foreach (var ray in rays)
             {

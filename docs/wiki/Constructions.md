@@ -6,7 +6,7 @@ Onglet **TF Construction**. Le jeu a déjà des sols, murs et pentes de coque en
 - Sur sa **face du dessus** (ou du dessous), la nouvelle pièce s'y pose (ou s'y accroche par en dessous).
 - Sur un **côté**, elle se place contre lui en restant droite, sa base au niveau de celle de la pièce visée : planches côte à côte, cloisons en enfilade, vitre contre un poteau.
 
-Les positions suivent une grille de 25 cm comptée depuis la pièce visée.
+Les positions suivent une grille de 25 cm comptée depuis la pièce visée. **Sur la coque**, les pièces s'alignent sur ses cases : une pièce de 1 m se centre sur une case, une de 2 m sur un bord de case (les dalles et cloisons se posent bord à bord avec la coque).
 
 | Bois | Verre | Fer |
 |---|---|---|
@@ -19,7 +19,26 @@ Les positions suivent une grille de 25 cm comptée depuis la pièce visée.
 
 S'y ajoutent les **pièces de structure** : poutres 1, 2 et 4 m, poutre renforcée, plaques 1 × 1 et 2 × 1, cadre, jonction.
 
-Le bois et le fer portent les textures de la coque du jeu, le verre son verre. La collision est la boîte de la pièce (le vide d'un treillis est visuel).
+Modèles retravaillés : vrai grain de bois, acier satiné, verre de la coque. La collision est la boîte de la pièce (le vide d'un treillis est visuel).
+
+## Meubles
+
+Quatrième rangée de l'onglet, tech **Charpenterie** ; ils se posent au sol (ou à côté d'une pièce posée) :
+
+| Meuble | Taille | Coût |
+|---|---|---|
+| Canapé (3 places) | 2 × 0,9 m | 6 bois, 2 fer |
+| Fauteuil | 0,9 × 0,9 m | 3 bois, 1 fer |
+| Chaise | 0,45 × 0,5 m | 2 bois |
+| Tabouret | 0,4 m | 1 bois, 1 fer |
+| Table | 1,6 × 0,9 m | 4 bois, 2 fer |
+| Table basse (plateau en verre) | 1,1 × 0,6 m | 2 verre, 2 fer, 1 bois |
+| Bureau (caisson à tiroirs) | 1,4 × 0,7 m | 5 bois, 2 fer |
+| Tapis | 2 × 3 m | 2 bois |
+| Bibliothèque | 1 × 2 m de haut | 6 bois |
+| Plante en pot | 1,2 m de haut | 2 bois, 1 verre |
+
+Le tissu du canapé, du fauteuil et le tapis prennent la couleur du pistolet à peinture. Les meubles sont décoratifs (on ne s'y assoit pas, rien ne s'y range).
 
 ## Coque renforcée
 

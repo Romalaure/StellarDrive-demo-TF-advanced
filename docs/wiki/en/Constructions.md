@@ -19,7 +19,26 @@ Positions follow a 25 cm grid counted from the aimed part.
 
 On top of these come the **structural parts**: beams 1, 2 and 4 m, reinforced beam, plates 1 × 1 and 2 × 1, frame, junction.
 
-Wood and iron use the game's hull textures, glass uses its glass. The collision is the part's box (the gaps of a lattice are only visual).
+Reworked models: real wood grain, satin steel, the hull's glass. On the hull, parts line up with its cells: a 1 m part is centered on a cell, a 2 m part on a cell's edge (plates and partitions sit edge to edge with the hull). The collision is the part's box (the gaps of a lattice are only visual).
+
+## Furniture
+
+The tab's fourth row, research **Carpentry**; placed on floors (or beside a placed part):
+
+| Furniture | Size | Cost |
+|---|---|---|
+| Sofa (3 seats) | 2 × 0.9 m | 6 wood, 2 iron |
+| Armchair | 0.9 × 0.9 m | 3 wood, 1 iron |
+| Chair | 0.45 × 0.5 m | 2 wood |
+| Stool | 0.4 m | 1 wood, 1 iron |
+| Table | 1.6 × 0.9 m | 4 wood, 2 iron |
+| Coffee table (glass top) | 1.1 × 0.6 m | 2 glass, 2 iron, 1 wood |
+| Desk (drawer unit) | 1.4 × 0.7 m | 5 wood, 2 iron |
+| Rug | 2 × 3 m | 2 wood |
+| Bookcase | 1 × 2 m high | 6 wood |
+| Potted plant | 1.2 m high | 2 wood, 1 glass |
+
+The sofa's and armchair's fabric and the rug take the paint gun's color. The furniture is decorative (you cannot sit on it or store anything in it).
 
 ## Reinforced hull
 

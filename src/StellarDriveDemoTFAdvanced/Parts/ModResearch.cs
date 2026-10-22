@@ -40,7 +40,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
             new Tech { Id = 7501, Tab = new Vector2Int(0, 4), Name = Loc.Pick("Construction métallique", "Metal construction", "Construcción metálica"), Requires = new ushort[] { 18 }, Position = new Vector2Int(4, 6),
                 Parts = Range(7331, 7338).Concat(Range(7361, 7367)).ToArray(), Cost = new[] { (Iron, 30), (Copper, 5) } },
             new Tech { Id = 7502, Tab = new Vector2Int(0, 5), Name = Loc.Pick("Charpenterie", "Carpentry", "Carpintería"), Requires = new ushort[] { 6 }, Position = new Vector2Int(5, 6),
-                Parts = Range(7341, 7346), Cost = new[] { (Wood, 30) } },
+                Parts = Range(7341, 7346).Concat(Range(7440, 7449)).ToArray(), Cost = new[] { (Wood, 30) } },
             new Tech { Id = 7503, Tab = new Vector2Int(0, 6), Name = Loc.Pick("Verrerie architecturale", "Architectural glass", "Vidrio arquitectónico"), Requires = new ushort[] { 7 }, Position = new Vector2Int(5, 5),
                 Parts = Range(7351, 7356), Cost = new[] { (Glass, 20), (Iron, 5) } },
             new Tech { Id = 7504, Tab = new Vector2Int(0, 1), Name = Loc.Pick("Ordinateur de bord", "Ship computer", "Ordenador de a bordo"), Requires = new ushort[] { 15 }, Position = new Vector2Int(4, 1),

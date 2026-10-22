@@ -19,7 +19,26 @@ Las posiciones siguen una cuadrícula de 25 cm contada desde la pieza apuntada.
 
 A esto se suman las **piezas de estructura**: vigas de 1, 2 y 4 m, viga reforzada, placas 1 × 1 y 2 × 1, marco, unión.
 
-La madera y el hierro usan las texturas de casco del juego, el cristal usa su cristal. La colisión es la caja de la pieza (los huecos de una celosía son solo visuales).
+Modelos rehechos: veta de madera real, acero satinado, el cristal del casco. Sobre el casco, las piezas se alinean con sus casillas: una pieza de 1 m se centra en una casilla, una de 2 m en un borde de casilla (placas y tabiques quedan borde con borde con el casco). La colisión es la caja de la pieza (los huecos de una celosía son solo visuales).
+
+## Muebles
+
+Cuarta fila de la pestaña, investigación **Carpintería**; se colocan en el suelo (o junto a una pieza colocada):
+
+| Mueble | Tamaño | Coste |
+|---|---|---|
+| Sofá (3 plazas) | 2 × 0,9 m | 6 madera, 2 hierro |
+| Sillón | 0,9 × 0,9 m | 3 madera, 1 hierro |
+| Silla | 0,45 × 0,5 m | 2 madera |
+| Taburete | 0,4 m | 1 madera, 1 hierro |
+| Mesa | 1,6 × 0,9 m | 4 madera, 2 hierro |
+| Mesa baja (tablero de cristal) | 1,1 × 0,6 m | 2 cristal, 2 hierro, 1 madera |
+| Escritorio (cajonera) | 1,4 × 0,7 m | 5 madera, 2 hierro |
+| Alfombra | 2 × 3 m | 2 madera |
+| Librería | 1 × 2 m de alto | 6 madera |
+| Planta en maceta | 1,2 m de alto | 2 madera, 1 cristal |
+
+La tela del sofá y del sillón y la alfombra toman el color de la pistola de pintura. Los muebles son decorativos (no se puede sentar en ellos ni guardar nada).
 
 ## Casco reforzado
 
