@@ -44,6 +44,7 @@ namespace StellarDriveDemoTFAdvanced
             Parts.Showcase.Install();
             Parts.BuildMenuDev.Install();
             Construction.SnapTest.Install();
+            Construction.HullSnapProbe.Install();
             Wiki.WikiDev.Install();
             Parts.PrefabDump.Install();
             Power.PortalTest.Install();

@@ -52,7 +52,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 ["TF_NoPaint_SpeakerTrim"] = new DeviceMaterial(new Color(0.13f, 0.14f, 0.16f), 0f, 0.15f),
                 ["TF_NoPaint_SpeakerMetal"] = new DeviceMaterial(new Color(0.55f, 0.6f, 0.66f), 1f, 0.5f),
                 ["TF_NoPaint_SpeakerCone"] = new DeviceMaterial(new Color(0.2f, 0.21f, 0.23f), 0.1f, 0.45f),
-                ["TF_NoPaint_SpeakerGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.25f, 0.8f, 1f) * 1.1f)
+                ["TF_NoPaint_SpeakerGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.25f, 0.8f, 1f) * 0.75f)
             };
             Dictionary<string, Mesh> model = StellarDriveDemoTFAdvanced.Common.ObjModels.Load("speaker");
             if (model == null)
@@ -108,8 +108,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             ["TF_NoPaint_RadioMetal"] = new DeviceMaterial(new Color(0.55f, 0.6f, 0.66f), 0.8f, 0.35f),
             ["TF_NoPaint_RadioGlass"] = new DeviceMaterial(new Color(0.02f, 0.05f, 0.09f), 0.1f, 0.3f),
             ["TF_NoPaint_RadioGrille"] = new DeviceMaterial(new Color(0.16f, 0.18f, 0.21f), 0.4f, 0.4f),
-            ["TF_NoPaint_RadioGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.25f, 0.8f, 1f) * 1.1f),
-            ["TF_NoPaint_RadioAccent"] = new DeviceMaterial(new Color(1f, 0.5f, 0.15f), 0f, 0.1f, new Color(1f, 0.45f, 0.1f) * 1.1f)
+            ["TF_NoPaint_RadioGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.25f, 0.8f, 1f) * 0.75f),
+            ["TF_NoPaint_RadioAccent"] = new DeviceMaterial(new Color(1f, 0.5f, 0.15f), 0f, 0.1f, new Color(1f, 0.45f, 0.1f) * 0.75f)
         };
 
         /// <summary>The equalizer's bars on the screen (separate objects, moved by <see cref="RadioVisuals"/>).</summary>
@@ -222,7 +222,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             var bar = new MeshBuilder();
             bar.Box(new Vector3(0f, 0.5f, 0f), Vector3.one);
             Mesh mesh = bar.Build("TF_RadioBar");
-            Material material = LitMaterials.Get("TF_RadioBarGlow", new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.3f, 0.9f, 1f) * 1.1f);
+            Material material = LitMaterials.Get("TF_RadioBarGlow", new Color(0.3f, 0.85f, 1f), 0f, 0.1f, new Color(0.3f, 0.9f, 1f) * 0.75f);
             float step = ScreenWidth / Bars;
             for (int i = 0; i < Bars; i++)
             {
@@ -743,6 +743,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             }
             if (!playing.HasChannel && playing.Job != null && playing.Job.Status == YouTubeAudio.State.Ready && playing.Job.WavPath != null)
                 OpenStream(playing);
+            // Not downloaded here: the host sends it
+            if (playing.Job != null && playing.Job.Status == YouTubeAudio.State.Failed && !playing.Job.FromHost && !StellarDriveDemoTFAdvanced.Common.GameServices.IsServer)
+                RadioShare.AskHost(playing.Job);
             if (playing.HasChannel)
             {
                 playing.Channel.setVolume(volume);

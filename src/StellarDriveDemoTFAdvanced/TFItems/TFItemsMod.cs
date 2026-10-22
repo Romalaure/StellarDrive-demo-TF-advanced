@@ -58,6 +58,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Common.TFNet.InstallSerializers();
             Devices.TeleportCapsule.Install();
             Devices.Radio.Install();
+            Devices.RadioShare.Install();
             Devices.RadioDev.Install();
             Devices.PhotoFrame.Install();
             Common.TFNet.Disconnected += Devices.PhotoMode.Reset;

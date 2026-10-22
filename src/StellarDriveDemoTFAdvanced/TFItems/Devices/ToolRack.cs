@@ -55,23 +55,25 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
         private static readonly Color Orange = new Color(0.95f, 0.45f, 0.1f);
 
+        // Low smoothness and soft glows: thin chrome pegs and lit lines a few millimeters wide
+        // sparkled (flashes) as the view moved
         private static Dictionary<string, DeviceMaterial> Materials() => new Dictionary<string, DeviceMaterial>
         {
-            ["TF_Rack_Board"] = new DeviceMaterial(new Color(0.24f, 0.27f, 0.3f), 0.2f, 0.35f),
+            ["TF_Rack_Board"] = new DeviceMaterial(new Color(0.24f, 0.27f, 0.3f), 0.2f, 0.3f),
             ["TF_NoPaint_RackHoles"] = new DeviceMaterial(new Color(0.05f, 0.055f, 0.06f), 0f, 0.1f),
-            ["TF_NoPaint_RackMetal"] = new DeviceMaterial(new Color(0.75f, 0.77f, 0.8f), 1f, 0.8f),
-            ["TF_NoPaint_RackAccent"] = new DeviceMaterial(Orange, 0.2f, 0.55f),
-            ["TF_NoPaint_RackLetters"] = new DeviceMaterial(new Color(1f, 0.97f, 0.9f), 0f, 0.6f, new Color(1f, 0.9f, 0.75f) * 1.5f),
-            ["TF_NoPaint_RackGunBody"] = new DeviceMaterial(new Color(0.72f, 0.75f, 0.79f), 0.55f, 0.55f),
+            ["TF_NoPaint_RackMetal"] = new DeviceMaterial(new Color(0.7f, 0.72f, 0.75f), 0.7f, 0.35f),
+            ["TF_NoPaint_RackAccent"] = new DeviceMaterial(Orange, 0.2f, 0.35f),
+            ["TF_NoPaint_RackLetters"] = new DeviceMaterial(new Color(1f, 0.97f, 0.9f), 0f, 0.3f, new Color(1f, 0.9f, 0.75f) * 0.7f),
+            ["TF_NoPaint_RackGunBody"] = new DeviceMaterial(new Color(0.72f, 0.75f, 0.79f), 0.5f, 0.4f),
             ["TF_NoPaint_RackGunDark"] = new DeviceMaterial(new Color(0.11f, 0.115f, 0.125f), 0.1f, 0.3f),
-            ["TF_NoPaint_RackGunPaint"] = new DeviceMaterial(new Color(0.2f, 0.75f, 0.95f), 0.1f, 0.85f),
-            ["TF_NoPaint_RackGunGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.9f, new Color(0.3f, 0.85f, 1f) * 2f),
-            ["TF_NoPaint_RackTablet"] = new DeviceMaterial(new Color(0.08f, 0.09f, 0.11f), 0.1f, 0.8f),
-            ["TF_NoPaint_RackScreen"] = new DeviceMaterial(new Color(0.05f, 0.2f, 0.4f), 0f, 0.9f, new Color(0.08f, 0.3f, 0.6f)),
-            ["TF_NoPaint_RackBlueprint"] = new DeviceMaterial(new Color(0.6f, 0.9f, 1f), 0f, 0.9f, new Color(0.5f, 0.85f, 1f) * 2.2f),
-            ["TF_NoPaint_RackCanRed"] = new DeviceMaterial(new Color(0.85f, 0.12f, 0.1f), 0.3f, 0.7f),
-            ["TF_NoPaint_RackCanYellow"] = new DeviceMaterial(new Color(0.95f, 0.78f, 0.1f), 0.3f, 0.7f),
-            ["TF_NoPaint_RackCanGreen"] = new DeviceMaterial(new Color(0.15f, 0.7f, 0.3f), 0.3f, 0.7f)
+            ["TF_NoPaint_RackGunPaint"] = new DeviceMaterial(new Color(0.2f, 0.75f, 0.95f), 0.1f, 0.4f),
+            ["TF_NoPaint_RackGunGlow"] = new DeviceMaterial(new Color(0.3f, 0.85f, 1f), 0f, 0.2f, new Color(0.3f, 0.85f, 1f) * 0.8f),
+            ["TF_NoPaint_RackTablet"] = new DeviceMaterial(new Color(0.08f, 0.09f, 0.11f), 0.1f, 0.4f),
+            ["TF_NoPaint_RackScreen"] = new DeviceMaterial(new Color(0.05f, 0.2f, 0.4f), 0f, 0.3f, new Color(0.08f, 0.3f, 0.6f) * 0.8f),
+            ["TF_NoPaint_RackBlueprint"] = new DeviceMaterial(new Color(0.6f, 0.9f, 1f), 0f, 0.2f, new Color(0.5f, 0.85f, 1f) * 0.8f),
+            ["TF_NoPaint_RackCanRed"] = new DeviceMaterial(new Color(0.85f, 0.12f, 0.1f), 0.3f, 0.4f),
+            ["TF_NoPaint_RackCanYellow"] = new DeviceMaterial(new Color(0.95f, 0.78f, 0.1f), 0.3f, 0.4f),
+            ["TF_NoPaint_RackCanGreen"] = new DeviceMaterial(new Color(0.15f, 0.7f, 0.3f), 0.3f, 0.4f)
         };
 
         // Lies on its mounting surface (+y out of it); seen on a wall, x is across and z is up.

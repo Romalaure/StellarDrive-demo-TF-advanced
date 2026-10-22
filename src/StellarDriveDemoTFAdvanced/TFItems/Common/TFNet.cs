@@ -63,6 +63,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         NpcService = 70,
         /// <summary>Server to one client: how the service went, Text is for the player.</summary>
         NpcServiceResult = 71,
+        /// <summary>Client to server: send me the audio of the YouTube video Text (my download failed).</summary>
+        RadioAudioRequest = 72,
+        /// <summary>Server to one client: piece B of a video's audio, Text is "count|video id|data" (count 0: data is why it failed).</summary>
+        RadioAudioChunk = 73,
 
         /// <summary>Client to server: copy the ship A (and what is attached to it) as schematic Text.</summary>
         SchematicCopy = 30,

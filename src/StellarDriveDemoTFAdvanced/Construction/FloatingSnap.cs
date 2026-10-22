@@ -60,7 +60,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         private static readonly PartOrientation[] Axes = { PartOrientation.Forward, PartOrientation.Right, PartOrientation.Back, PartOrientation.Left, PartOrientation.Up, PartOrientation.Down };
 
-        private static PartOrientation Nearest(Vector3 direction, Vector3? across = null)
+        internal static PartOrientation Nearest(Vector3 direction, Vector3? across = null)
         {
             PartOrientation best = PartOrientation.Up;
             float bestDot = float.NegativeInfinity;
@@ -124,7 +124,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             StationModules.ById.TryGetValue(id, out StationModules.Spec spec) ? spec.Offset : Vector3.zero;
 
         // Half the size of rotated bounds along an axis
-        private static float Extent(Bounds bounds, Quaternion rotation, Vector3 axis)
+        internal static float Extent(Bounds bounds, Quaternion rotation, Vector3 axis)
         {
             Vector3 e = bounds.extents;
             return Mathf.Abs(Vector3.Dot(rotation * Vector3.right, axis)) * e.x
@@ -174,6 +174,12 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 {
                     up = side ? upright : face;
                     forward = Nearest(props.PartForward, up.GetVector3());
+                }
+                else if (HullMount.Standing.Contains(placingId))
+                {
+                    // Standing parts stand against the side, their front out of it
+                    up = upright;
+                    forward = face;
                 }
                 else if (style == SnappingStyle.PreciseOnWall)
                 {

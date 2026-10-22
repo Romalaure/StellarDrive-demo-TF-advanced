@@ -33,7 +33,7 @@ namespace StellarDriveDemoTFAdvanced.Power
     internal static class FieldDoor
     {
         public const ushort Id = 7339;
-        public const int MaxSize = 30;
+        public const int MaxSize = 50;
         public const int DefaultWidth = 2, DefaultHeight = 3;
         // Its only sockets (the game indexes a part's sockets by id: they must be 0 and up)
         public const byte PowerA = 0, PowerB = 1;

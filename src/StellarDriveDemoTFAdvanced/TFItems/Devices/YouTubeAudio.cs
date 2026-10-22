@@ -34,6 +34,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 Language == Loc.Language.French ? french : Language == Loc.Language.Spanish ? spanish : english;
             public string WavPath;
             public string Error;
+            /// <summary>Client: the sound comes from the host (this player's own download failed).</summary>
+            public bool FromHost;
+            /// <summary>Host: the downloaded track must be there too, for the players who cannot download it.</summary>
+            public bool NeedSource;
         }
 
         private const string YtDlpUrl = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe";
@@ -60,6 +64,50 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             return match.Success ? match.Groups[1].Value : null;
         }
 
+        public static bool IsVideoId(string id) => id != null && id.Length == 11 && id.All(c => char.IsLetterOrDigit(c) && c < 128 || c == '_' || c == '-');
+
+        /// <summary>The audio track yt-dlp downloaded for this video (kept for the players who cannot download it), or null.</summary>
+        public static string SourceOf(string videoId)
+        {
+            string path = Path.Combine(CacheDir, videoId + ".src");
+            return IsVideoId(videoId) && File.Exists(path) ? path : null;
+        }
+
+        /// <summary>Client: decodes an audio track the host sent, like a download of its own.</summary>
+        public static void FromBytes(Job job, byte[] bytes)
+        {
+            job.Step = job.Text("Préparation du son", "Preparing the sound", "Preparando el sonido");
+            new Thread(() =>
+            {
+                try
+                {
+                    Directory.CreateDirectory(CacheDir);
+                    string source = Path.Combine(CacheDir, job.VideoId + ".src"), wav = Path.Combine(CacheDir, job.VideoId + ".wav");
+                    File.WriteAllBytes(source, bytes);
+                    Decode(source, wav);
+                    Trim();
+                    TFMod.Log.Msg($"radio: {job.VideoId} ready (from the host, {bytes.Length / 1024} KB)");
+                    Finish(job, wav);
+                }
+                catch (Exception e)
+                {
+                    job.Error = e.Message;
+                    job.Status = State.Failed;
+                    TFMod.Log.Warning($"radio: could not decode {job.VideoId} sent by the host: {e.Message}");
+                }
+            }) { IsBackground = true, Name = "TF radio " + job.VideoId }.Start();
+        }
+
+        private static void Decode(string source, string wav)
+        {
+            string partial = wav + ".tmp";
+            Mp4Fixup.StripEditLists(source);
+            MediaFoundationDecoder.ToWav(source, partial, MaxSeconds);
+            if (File.Exists(wav))
+                File.Delete(wav);
+            File.Move(partial, wav);
+        }
+
         /// <summary>Starts (or finds) the job for this video. Poll its status.</summary>
         public static Job Request(string videoId)
         {
@@ -67,7 +115,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             {
                 if (Jobs.TryGetValue(videoId, out Job existing) && existing.Status != State.Failed)
                     return existing;
-                var job = new Job { VideoId = videoId };
+                var job = new Job { VideoId = videoId, NeedSource = StellarDriveDemoTFAdvanced.Common.GameServices.IsServer };
                 Jobs[videoId] = job;
                 var thread = new Thread(() => Run(job)) { IsBackground = true, Name = "TF radio " + videoId };
                 thread.Start();
@@ -81,7 +129,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             {
                 Directory.CreateDirectory(CacheDir);
                 string wav = Path.Combine(CacheDir, job.VideoId + ".wav");
-                if (File.Exists(wav) && new FileInfo(wav).Length > 44)
+                if (File.Exists(wav) && new FileInfo(wav).Length > 44 && (!job.NeedSource || SourceOf(job.VideoId) != null))
                 {
                     File.SetLastWriteTimeUtc(wav, DateTime.UtcNow);
                     Finish(job, wav);
@@ -107,13 +155,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 }
                 long downloadMs = clock.ElapsedMilliseconds;
                 job.Step = job.Text("Préparation du son", "Preparing the sound", "Preparando el sonido");
-                string partial = wav + ".tmp";
-                Mp4Fixup.StripEditLists(downloaded);
-                MediaFoundationDecoder.ToWav(downloaded, partial, MaxSeconds);
-                if (File.Exists(wav))
-                    File.Delete(wav);
-                File.Move(partial, wav);
-                TryDelete(downloaded);
+                // The downloaded track is kept for the players who cannot download it (sent by the host)
+                string source = Path.Combine(CacheDir, job.VideoId + ".src");
+                if (File.Exists(source))
+                    File.Delete(source);
+                File.Move(downloaded, source);
+                Decode(source, wav);
                 Trim();
                 TFMod.Log.Msg($"radio: {job.VideoId} ready (download {downloadMs} ms, decode {clock.ElapsedMilliseconds - downloadMs} ms)");
                 Finish(job, wav);
@@ -193,7 +240,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         private static string Download(string ytDlp, Job job)
         {
             string videoId = job.VideoId;
-            foreach (string old in Directory.GetFiles(CacheDir, videoId + ".*").Where(f => !f.EndsWith(".wav")))
+            foreach (string old in Directory.GetFiles(CacheDir, videoId + ".*").Where(f => !f.EndsWith(".wav") && !f.EndsWith(".src")))
                 TryDelete(old);
             string output = Path.Combine(CacheDir, videoId + ".%(ext)s");
             string arguments = string.Join(" ", new[]
@@ -231,7 +278,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 }
             }
             string file = Directory.GetFiles(CacheDir, videoId + ".*")
-                .FirstOrDefault(f => !f.EndsWith(".wav") && !f.EndsWith(".tmp"));
+                .FirstOrDefault(f => !f.EndsWith(".wav") && !f.EndsWith(".tmp") && !f.EndsWith(".src"));
             if (file == null)
                 throw new FileNotFoundException(job.Text("yt-dlp n'a rien téléchargé", "yt-dlp downloaded nothing", "yt-dlp no descargó nada"));
             return file;
@@ -240,9 +287,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         // Keeps the most recent decoded files only
         private static void Trim()
         {
-            foreach (FileInfo old in new DirectoryInfo(CacheDir).GetFiles("*.wav")
-                         .OrderByDescending(f => f.LastWriteTimeUtc).Skip(KeptFiles))
-                TryDelete(old.FullName);
+            foreach (string pattern in new[] { "*.wav", "*.src" })
+                foreach (FileInfo old in new DirectoryInfo(CacheDir).GetFiles(pattern)
+                             .OrderByDescending(f => f.LastWriteTimeUtc).Skip(KeptFiles))
+                    TryDelete(old.FullName);
         }
 
         private static void TryDelete(string path)

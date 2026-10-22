@@ -54,7 +54,7 @@ The power grid must be able to give it **all** of its power (together with the g
 
 ## Force field door
 
-An emitter you set **on the floor, in the middle of an opening in the hull**, facing the opening. Look at it and press the use key (**T**): a window lets you choose the **field's width and height** (1 to 30 m each, for example 2 × 2 or 10 × 20; an orange outline shows the size while you set it) and switch it on or off.
+An emitter you set **on the floor, in the middle of an opening in the hull**, facing the opening. Look at it and press the use key (**T**): a window lets you choose the **field's width and height** (1 to 50 m each, for example 2 × 2 or 10 × 20; an orange outline shows the size while you set it) and switch it on or off.
 
 - On, the field **holds the oxygen like a closed door**, but **you walk through it** (a ripple runs from where you cross it).
 - It draws **25 W per m²** (setting `FieldDoorWattsPerSquareMeter`) on its two power sockets; the grid must be able to supply all of it. Without power it goes out and the air escapes.

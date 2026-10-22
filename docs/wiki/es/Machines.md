@@ -54,7 +54,7 @@ La red eléctrica debe poder darle **toda** su energía (junto con las demás m�
 
 ## Puerta de campo de fuerza
 
-Un emisor que se coloca **en el suelo, en medio de una abertura del casco**, de cara a la abertura. Míralo y pulsa la tecla de uso (**T**): una ventana permite elegir el **ancho y el alto del campo** (de 1 a 30 m cada uno, por ejemplo 2 × 2 o 10 × 20; un contorno naranja muestra el tamaño mientras lo ajustas) y encenderlo o apagarlo.
+Un emisor que se coloca **en el suelo, en medio de una abertura del casco**, de cara a la abertura. Míralo y pulsa la tecla de uso (**T**): una ventana permite elegir el **ancho y el alto del campo** (de 1 a 50 m cada uno, por ejemplo 2 × 2 o 10 × 20; un contorno naranja muestra el tamaño mientras lo ajustas) y encenderlo o apagarlo.
 
 - Encendido, el campo **retiene el oxígeno como una puerta cerrada**, pero **se puede atravesar** (una onda sale del punto por donde lo cruzas).
 - Consume **25 W por m²** (ajuste `FieldDoorWattsPerSquareMeter`) en sus dos tomas de energía; la red debe poder suministrarlos todos. Sin energía se apaga y el aire se escapa.
