@@ -19,9 +19,9 @@ namespace StellarDriveDemoTFAdvanced.Worlds
 {
     /// <summary>
     /// The mod's loot chests (ids 7475-7479, common to legendary): the game's storage chest
-    /// (its storage and saving) wearing a detailed chest modelled in Blender
-    /// (tools/blender/chest.py): textured planks, hammered iron bands and rivets, a lock and a
-    /// glow in the rarity's color. Not in the build menu: the ruins and stations place them.
+    /// (its storage and saving) wearing a sci-fi cargo case modelled in Blender
+    /// (tools/blender/chest.py): a metal shell, dark panels, bumpers and lid edge in the rarity's
+    /// metal, a thin light band and small lit crystals inside. Not in the build menu: the ruins and stations place them.
     /// Like the game's loot cases they go once emptied (the host removes them when the last item
     /// is taken and nobody has them open), and take no cable (no item ports from Item Lines).
     /// </summary>
@@ -110,11 +110,13 @@ namespace StellarDriveDemoTFAdvanced.Worlds
             Color color = RarityColors[rarity];
             var looks = new Dictionary<string, Material>
             {
-                ["TF_ChestWood"] = NaturalTextures.Lit("TFA_ChestWood", NaturalTextures.Wood, NaturalTextures.WoodNormal, Color.white, 0f, 0.2f, 1f),
-                ["TF_ChestIron"] = NaturalTextures.Lit("TFA_ChestIron", NaturalTextures.Iron, NaturalTextures.IronNormal, new Color(0.5f, 0.5f, 0.53f), 0.8f, 0.4f, 2f),
-                ["TF_ChestTrim"] = NaturalTextures.Lit("TFA_ChestTrim" + rarity, NaturalTextures.Engraved, NaturalTextures.EngravedNormal, color, 0.9f, 0.7f, 2f),
-                ["TF_ChestGlow"] = LitMaterials.Get("TFA_ChestGlow" + rarity, color, 0f, 0.1f, color * (1.2f + 0.4f * rarity)),
-                ["TF_ChestInside"] = LitMaterials.Get("TFA_ChestInside", new Color(0.05f, 0.04f, 0.035f), 0f, 0.1f)
+                // Brushed light metal, a dark gunmetal frame, the rarity's metal; soft lights only
+                // (the old glowing heap and bright trims were blinding)
+                ["TF_ChestShell"] = LitMaterials.Get("TFA_ChestShell", new Color(0.72f, 0.75f, 0.8f), 0.6f, 0.4f),
+                ["TF_ChestIron"] = LitMaterials.Get("TFA_ChestFrame", new Color(0.12f, 0.13f, 0.15f), 0.5f, 0.35f),
+                ["TF_ChestTrim"] = LitMaterials.Get("TFA_ChestTrim" + rarity, color, 0.7f, 0.4f),
+                ["TF_ChestGlow"] = LitMaterials.Get("TFA_ChestGlow" + rarity, color, 0f, 0.1f, color * 0.75f),
+                ["TF_ChestInside"] = LitMaterials.Get("TFA_ChestInside", new Color(0.05f, 0.05f, 0.06f), 0f, 0.1f)
             };
             var holder = new GameObject("TF_ChestModel") { layer = visual.gameObject.layer };
             holder.transform.SetParent(visual, false);
@@ -129,7 +131,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 child.AddComponent<MeshFilter>().sharedMesh = group.Value;
                 var renderer = child.AddComponent<MeshRenderer>();
                 renderer.sharedMaterial = look;
-                renderer.shadowCastingMode = group.Key == "TF_ChestWood" || group.Key == "TF_ChestIron" ? ShadowCastingMode.On : ShadowCastingMode.Off;
+                renderer.shadowCastingMode = group.Key == "TF_ChestShell" || group.Key == "TF_ChestIron" ? ShadowCastingMode.On : ShadowCastingMode.Off;
             }
             // The legendary and epic ones light what is near them
             if (rarity >= 3)
@@ -140,8 +142,8 @@ namespace StellarDriveDemoTFAdvanced.Worlds
                 Light glow = light.AddComponent<Light>();
                 glow.type = LightType.Point;
                 glow.color = color;
-                glow.range = 2.5f;
-                glow.intensity = 0.8f;
+                glow.range = 1.6f;
+                glow.intensity = 0.3f;
                 glow.shadows = LightShadows.None;
             }
         }
