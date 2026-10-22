@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using Ships.Interface.Model.Parts;
 using Ships.Interface.Model.Parts.Common;
@@ -318,5 +319,18 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             Tinted[name] = copy;
             return copy;
         }
+    }
+
+    /// <summary>
+    /// SDModKit seats each socket on a pad reaching back to the part's box, measured in the
+    /// prefab's own units: on a scaled-up engine the pad is scaled once more and became a bar
+    /// tens of meters long. The giant engines' sockets get no pad.
+    /// </summary>
+    [HarmonyLib.HarmonyPatch(typeof(SDModKit.Content.PartFinish), nameof(SDModKit.Content.PartFinish.Seat))]
+    internal static class GiantEngineNoPadPatch
+    {
+        private static bool Prefix(GameObject prefab) =>
+            prefab == null || !prefab.name.StartsWith("TFA_") || !ushort.TryParse(prefab.name.Substring(4).Split('_')[0], out ushort id)
+            || !EngineCatalog.TryGet(id, out EngineSpec spec) || spec.Scale <= 4f;
     }
 }

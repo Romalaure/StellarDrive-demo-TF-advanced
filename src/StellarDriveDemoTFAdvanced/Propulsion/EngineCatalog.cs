@@ -50,7 +50,7 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
         public MelonPreferences_Entry<float> ThrustSetting;
         public MelonPreferences_Entry<float> FuelSetting;
 
-        public float ThrustMultiplier => ThrustSetting != null ? Mathf.Clamp(ThrustSetting.Value, 0f, 200f) : DefaultThrust;
+        public float ThrustMultiplier => ThrustSetting != null ? Mathf.Clamp(ThrustSetting.Value, 0f, 2000f) : DefaultThrust;
         public float FuelMultiplier => FuelSetting != null ? Mathf.Clamp(FuelSetting.Value, 0.001f, 10f) : DefaultFuel;
 
         /// <summary>Flow on a propellant line, as a multiple of the Chemical Thruster's: the special propellant or the oxygen beside it.</summary>
@@ -129,6 +129,17 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
                 DefaultThrust = 80f, DefaultFuel = 0.04f, ReactionMass = 0.6f, Fuel = Items.ModItems.DarkMatter, Mass = 260f, Scale = 2f, SpoolSeconds = 3f,
                 Tint = Color.white, Model = EngineModels.DarkMatter, ModelGlow = Power.MachineModels.Violet, ModelCore = new Color(1f, 0.65f, 1f), Flame = new Color(0.8f, 0.55f, 1f),
                 Cost = new[] { (Items.ModItems.Meteorite, 30), (Items.ModItems.QuantumCore, 3), (Items.ModItems.ExoticMatter, 4), (Items.ModItems.NexoranAlloy, 15), (Items.ModItems.Titanium, 25) },
+                Row = Parts.AdvancedTab.SuperiorRow
+            },
+            new EngineSpec
+            {
+                Id = 7484, Key = "DarkMatterTitan", Label = Loc.Pick("Moteur titan à matière noire", "Titan dark matter engine", "Motor titán de materia oscura"),
+                Description = Loc.Pick("Le moteur à matière noire en version géante : 20 × 20 m, pour les stations mobiles et les vaisseaux géants. 6 240 000 N (huit cents propulseurs chimiques) pour 0,02 unité/s de matière noire et 0,3 d'oxygène. Une prise de propergol reçoit la matière noire, l'autre l'oxygène. Commande : un signal sur sa prise de commande (0-1), sinon une vanne sur sa conduite, sinon le siège de pilotage. Montée en régime : 8 s.",
+                    "The dark matter engine, giant: 20 × 20 m, for moving stations and giant ships. 6,240,000 N (eight hundred Chemical Thrusters) for 0.02 unit/s of dark matter and 0.3 of oxygen. One propellant socket takes dark matter, the other oxygen. Control: a signal on its command socket (0-1), else a valve on its line, else the pilot seat. Spool-up: 8 s.",
+                    "El motor de materia oscura en versión gigante: 20 × 20 m, para estaciones móviles y naves gigantes. 6.240.000 N (ochocientos Propulsores químicos) por 0,02 unidad/s de materia oscura y 0,3 de oxígeno. Una toma de propergol recibe materia oscura, la otra oxígeno. Control: una señal en su toma de mando (0-1), si no una válvula en su línea, si no el asiento del piloto. Arranque: 8 s."),
+                DefaultThrust = 800f, DefaultFuel = 0.4f, ReactionMass = 6f, Fuel = Items.ModItems.DarkMatter, Mass = 9000f, Scale = 25f, SpoolSeconds = 8f,
+                Tint = Color.white, Model = EngineModels.DarkMatter, ModelGlow = Power.MachineModels.Violet, ModelCore = new Color(1f, 0.65f, 1f), Flame = new Color(0.8f, 0.55f, 1f),
+                Cost = new[] { (Items.ModItems.Meteorite, 150), (Items.ModItems.QuantumCore, 12), (Items.ModItems.ExoticMatter, 25), (Items.ModItems.NexoranAlloy, 80), (Items.ModItems.Titanium, 120), (112u, 60) },
                 Row = Parts.AdvancedTab.SuperiorRow
             }
         });

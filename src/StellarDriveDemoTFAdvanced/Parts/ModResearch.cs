@@ -58,7 +58,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
             new Tech { Id = 7512, Tab = new Vector2Int(2, 2), Name = Loc.Pick("Énergie nucléaire", "Nuclear power", "Energía nuclear"), Requires = new ushort[] { 7507 }, Position = new Vector2Int(6, 2),
                 Parts = new ushort[] { 7396, 7397, 7398, 7316, 7317, 7471, 7472, 7320 }, Cost = new[] { (ModItems.Uranium, 10), (ModItems.Titanium, 15), (Copper, 20) } },
             new Tech { Id = 7510, Tab = new Vector2Int(3, 2), Name = Loc.Pick("Matière noire", "Dark matter", "Materia oscura"), Requires = new ushort[] { 7512 }, Position = new Vector2Int(7, 2),
-                Parts = new ushort[] { 7391, 7392, 7393, 7394, 7329, 7318, 7473 }, Cost = new[] { (ModItems.Meteorite, 10), (ModItems.QuantumCore, 1), (ModItems.NexoranAlloy, 5) } },
+                Parts = new ushort[] { 7391, 7392, 7393, 7394, 7329, 7318, 7473, 7484 }, Cost = new[] { (ModItems.Meteorite, 10), (ModItems.QuantumCore, 1), (ModItems.NexoranAlloy, 5) } },
             new Tech { Id = 7511, Tab = new Vector2Int(4, 2), Name = Loc.Pick("Portail dimensionnel", "Dimensional portal", "Portal dimensional"), Requires = new ushort[] { 7510 }, Position = new Vector2Int(8, 2),
                 Parts = new ushort[] { 7395 }, Cost = new[] { (ModItems.Meteorite, 20), (ModItems.QuantumCore, 2), (ModItems.ExoticMatter, 3), (ModItems.Artifact, 2) } },
             new Tech { Id = 7513, Tab = new Vector2Int(1, 0), Name = Loc.Pick("Guerre électronique", "Electronic warfare", "Guerra electrónica"), Requires = new ushort[] { 7508 }, Position = new Vector2Int(4, 0),

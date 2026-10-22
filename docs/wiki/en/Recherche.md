@@ -16,7 +16,7 @@ The mod's parts are unlocked at the **research table**, in a branch of the mod l
 | Cartography | Beacons | cartography table | 10 copper, 10 glass, 2 meteorite |
 | Station modules | Metal construction | modules, solar panels | 40 iron, 15 glass, 10 titanium |
 | Nuclear power | Artifact technology | enrichment centrifuge, nuclear tank and reactor, nuclear thruster, heavy nuclear engine, nuclear field | 10 uranium, 15 titanium, 20 copper |
-| Dark matter | Nuclear power | collector, tank, dark matter reactor, dark matter field generator, dark matter engine | 10 meteorite, 1 quantum core, 5 alloys |
+| Dark matter | Nuclear power | collector, tank, dark matter reactor, dark matter field generator, dark matter engine, titan dark matter engine (20 × 20 m) | 10 meteorite, 1 quantum core, 5 alloys |
 | Dimensional portal | Dark matter | portal generator | 20 meteorite, 2 quantum cores, 3 exotic matter, 2 artifacts |
 | Electronic warfare | Cartography | radars (short range, long range, deep space), stealth generator | 25 copper, 10 glass, 10 titanium, 5 quartz |
 | Reinforced plating | Metal construction | reinforced iron and glass hull | 40 iron, 20 glass, 10 titanium |

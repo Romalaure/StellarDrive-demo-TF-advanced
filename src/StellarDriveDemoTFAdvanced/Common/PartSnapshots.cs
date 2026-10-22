@@ -68,6 +68,7 @@ namespace StellarDriveDemoTFAdvanced.Common
                     foreach (Renderer renderer in instance.GetComponentsInChildren<Renderer>())
                         bounds.Encapsulate(renderer.bounds);
                     float distance = bounds.extents.magnitude / Mathf.Tan(camera.fieldOfView * 0.5f * Mathf.Deg2Rad) * 1.1f;
+                    camera.farClipPlane = Mathf.Max(100f, distance * 2f);
                     Vector3[] views = { new Vector3(0.6f, 0.55f, -0.8f), new Vector3(-0.7f, -0.35f, 0.6f) };
                     for (int v = 0; v < views.Length; v++)
                     {
@@ -86,6 +87,11 @@ namespace StellarDriveDemoTFAdvanced.Common
                         sockets.Append($" {socket.Id}:{socket.Type}@{socket.transform.position - origin:F2}");
                     var partBounds = instance.GetComponent<Ships.Interface.Model.Parts.ShipPartBounds>();
                     AdvancedMod.Log.Msg($"snapshot {id} {settings.name}: renderers {bounds.center - origin:F2}±{bounds.extents:F2}, part box {partBounds?.center:F2}/{partBounds?.bounds:F2}, sockets{sockets}");
+                    // Pieces reaching well out of the part's box (a model scaled twice...)
+                    if (partBounds != null)
+                        foreach (Renderer renderer in instance.GetComponentsInChildren<Renderer>())
+                            if (renderer.bounds.extents.magnitude > partBounds.bounds.magnitude || (renderer.bounds.max - origin).magnitude > partBounds.bounds.magnitude)
+                                AdvancedMod.Log.Msg($"snapshot {id}:   oversized {renderer.name} ({renderer.GetType().Name}) ±{renderer.bounds.extents:F2} under {renderer.transform.parent?.name}");
                     Object.DestroyImmediate(instance);
                     done++;
                 }
