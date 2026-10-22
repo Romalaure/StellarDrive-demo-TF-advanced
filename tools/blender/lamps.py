@@ -302,4 +302,15 @@ for x, tilt in ((-0.28, -0.25), (0.0, 0.0), (0.28, 0.25)):
     cyl(L, "Trim", end, along(end, d, 0.008), 0.038, sides=32)
     cyl(L, "Diffuser", along(end, d, 0.002), along(end, d, 0.01), 0.03, sides=32)
 
+# ---- 7127 Light tile 1 x 1 (0.04): a satin frame, the lit panel and a thin grid of chrome
+L = 7127
+box(L, "Frame", (0, 0.01, 0), (1.0, 0.02, 1.0), bevel=0.004)
+for s in (-1, 1):
+    box(L, "Trim", (s * 0.485, 0.03, 0), (0.03, 0.02, 1.0), bevel=0.003)
+    box(L, "Trim", (0, 0.03, s * 0.485), (0.94, 0.02, 0.03), bevel=0.003)
+box(L, "Diffuser", (0, 0.03, 0), (0.94, 0.012, 0.94))
+for k in (-1, 1):
+    box(L, "Trim", (k * 0.157, 0.0385, 0), (0.008, 0.004, 0.94))
+    box(L, "Trim", (0, 0.0385, k * 0.157), (0.94, 0.004, 0.008))
+
 export("lamps.obj")

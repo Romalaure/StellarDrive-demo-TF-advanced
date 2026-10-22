@@ -32,7 +32,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
         /// <summary>The last place tried, for the development check.</summary>
         internal static string LastTried;
 
-        private const float Gap = 0.02f, ModuleGap = 0.04f, Step = 0.25f;
+        // Construction parts touch (a row of planks, walls in a line); lamps on a fine grid, so they reach a part's edge
+        private const float Gap = 0.02f, BuildGap = 0.002f, ModuleGap = 0.04f, Step = 0.25f, LampStep = 0.05f;
         private static readonly Detector Instance = new Detector();
 
         public static bool IsPrecise(SnappingStyle style) =>
@@ -132,7 +133,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 + Mathf.Abs(Vector3.Dot(rotation * Vector3.forward, axis)) * e.z;
         }
 
-        private static float Snap(float value, float origin) => origin + Mathf.Round((value - origin) / Step) * Step;
+        private static float Snap(float value, float origin, float step = Step) => origin + Mathf.Round((value - origin) / step) * step;
 
         private sealed class Detector : ISnapDetector
         {
@@ -179,7 +180,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 {
                     // Standing parts stand against the side, their front out of it
                     up = upright;
-                    forward = face;
+                    forward = HullMount.FrontIsBack(placingId) ? face.GetInverse() : face;
                 }
                 else if (style == SnappingStyle.PreciseOnWall)
                 {
@@ -197,6 +198,15 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 }
                 Vector3 upVector = up.GetVector3();
                 Quaternion rotation = Quaternion.LookRotation(forward.GetVector3(), upVector);
+                // A construction part turned further with the tilt key
+                if (MaterialParts.IsConstruction(placingId) && !modules)
+                {
+                    Quaternion tilted = rotation * BuildTilt.For(placingId);
+                    up = Nearest(tilted * Vector3.up);
+                    upVector = up.GetVector3();
+                    forward = Nearest(tilted * Vector3.forward, upVector);
+                    rotation = Quaternion.LookRotation(forward.GetVector3(), upVector);
+                }
                 Bounds bounds = props.Bounds;
                 Vector3 frame = hasTarget ? targetPos + targetRot * ModuleOffset(targetId) : Vector3.zero;
 
@@ -216,7 +226,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 }
 
                 Vector3 center = rotation * bounds.center;
-                float along = plane + (modules ? ModuleGap : Gap) - (Vector3.Dot(center, n) - Extent(bounds, rotation, n));
+                float along = plane + (modules ? ModuleGap : Builds(placingId) ? BuildGap : Gap) - (Vector3.Dot(center, n) - Extent(bounds, rotation, n));
+                float step = TFItems.Lights.LampCatalog.IsLamp(placingId) ? LampStep : Step;
 
                 // Across: around where the player aims, on a grid from the part aimed at
                 Vector3 coord = Vector3.zero;
@@ -233,7 +244,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     else if (modules)
                         value = origin;  // module centered on the one it joins
                     else
-                        value = Snap(Vector3.Dot(props.Hit.Pos, axis) - Vector3.Dot(center, axis), origin);
+                        value = Snap(Vector3.Dot(props.Hit.Pos, axis) - Vector3.Dot(center, axis), origin, step);
                     coord += axis * value;
                 }
                 coord += n * along;

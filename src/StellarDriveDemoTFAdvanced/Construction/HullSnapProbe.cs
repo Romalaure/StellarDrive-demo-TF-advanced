@@ -69,7 +69,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 ("wall +x low", middle + Vector3.up * 0.6f, Vector3.right),
                 ("wall -x low", middle + Vector3.up * 0.6f, Vector3.left),
             };
-            ushort[] parts = { 7347, 7162, 7342, 7343, 7352, 7444 };
+            ushort[] parts = { 7347, 7162, 7161, 7343, 7127 };
             PartSettings[] all = Resources.FindObjectsOfTypeAll<PartSettings>();
             foreach (var ray in rays)
             {
@@ -81,6 +81,19 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     continue;
                 }
                 PartHit local = proxy.ConvertHitToLocalHit(hit);
+                for (int tilt = 1; tilt < 4; tilt++)
+                {
+                    PartSettings wall = all.FirstOrDefault(x => x != null && x.id == 7343);
+                    if (wall == null)
+                        break;
+                    BuildTilt.Force(7343, tilt);
+                    FloatingSnap.HitCollider = hit.collider;
+                    FloatingSnap.Placing = wall;
+                    var tiltProps = new HitSnapDetectionProperties(local, Quaternion.identity, wall.size, wall.Bounds);
+                    IPartPlacement tilted = new SnapDetectionStrategyProvider().GetSnapDetector(wall.snappingStyle, hit.collider.tag).DetectSnapPlacement(tiltProps, proxy);
+                    AdvancedMod.Log.Msg($"dev: hull snap: {ray.Name}: 7343 tilt {tilt} -> " + (tilted is FloatingPartPlacement tf ? $"at {tf.Coord:F2} forward {tf.ForwardOrientation} up {tf.UpOrientation}" : "nothing"));
+                }
+                BuildTilt.Force(7343, 0);
                 foreach (ushort id in parts)
                 {
                     PartSettings settings = all.FirstOrDefault(s => s != null && s.id == id);

@@ -16,7 +16,7 @@ Des **onglets** en haut de la table rangent les techs : **Jeu de base**, **TF Ad
 | Cartographie | Beacons | table de cartographie | 10 cuivre, 10 verre, 2 météorite |
 | Modules de station | Construction métallique | modules, panneaux solaires | 40 fer, 15 verre, 10 titane |
 | Énergie nucléaire | Technologie des artefacts | centrifugeuse d'enrichissement, réservoir et réacteur nucléaires, propulseur nucléaire, moteur nucléaire lourd, champ nucléaire | 10 uranium, 15 titane, 20 cuivre |
-| Matière noire | Énergie nucléaire | collecteur, réservoir, réacteur à matière noire, générateur de champ à matière noire, moteur à matière noire, moteur titan à matière noire (20 × 20 m) | 10 météorite, 1 noyau quantique, 5 alliages |
+| Matière noire | Énergie nucléaire | collecteur, réservoir, réacteur à matière noire, générateur de champ à matière noire, moteur à matière noire, moteur titan à matière noire (10 × 10 m, blanc) | 10 météorite, 1 noyau quantique, 5 alliages |
 | Portail dimensionnel | Matière noire | générateur de portail | 20 météorite, 2 noyaux quantiques, 3 matière exotique, 2 artefacts |
 | Guerre électronique | Cartographie | radars (courte portée, longue portée, espace profond), générateur d'invisibilité | 25 cuivre, 10 verre, 10 titane, 5 quartz |
 | Blindage renforcé | Construction métallique | coque renforcée en fer et en verre | 40 fer, 20 verre, 10 titane |

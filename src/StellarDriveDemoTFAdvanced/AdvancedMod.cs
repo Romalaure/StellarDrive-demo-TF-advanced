@@ -192,6 +192,8 @@ namespace StellarDriveDemoTFAdvanced
                 Worlds.AbandonedStations.Update();
             if (_inGame && GameServices.IsServer)
                 Worlds.LootChests.Update();
+            if (_inGame && TFItems.TFItemsMod.Active)
+                Construction.BuildTilt.Update();
             if (_inGame)
                 Worlds.LootCaches.Update();
             if (_inGame && GameServices.IsServer)
@@ -235,6 +237,8 @@ namespace StellarDriveDemoTFAdvanced
             }
             if (_inGame)
                 Combat.Radar.OnGUI();
+            if (_inGame && TFItems.TFItemsMod.Active)
+                Construction.BuildTilt.Draw();
             if (_inGame)
                 Combat.LootPing.OnGUI();
             if (_inGame)

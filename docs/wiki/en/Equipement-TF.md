@@ -4,7 +4,7 @@ The objects of the **StellarDrive Demo TF** mod joined TF Advanced (v0.18), in t
 
 | Object | Use |
 |---|---|
-| **20 lamps** (ceiling light, wall light, spotlight, light strip, recessed spot, industrial lamp, flashing beacon, rotating beacon, floor lamp, desk lamp, bulkhead light, ring chandelier, up and down wall light, track spots...): placed on any surface (hull, slope, ceiling, placed parts) | light the walls, floors and parts around them, stronger at night and indoors; take the color painted with the TF mod's paint gun |
+| **21 lamps** (light tile 1 × 1 lined up with the hull's cells, ceiling light, wall light, spotlight, light strip, recessed spot, industrial lamp, flashing beacon, rotating beacon, floor lamp, desk lamp, bulkhead light, ring chandelier, up and down wall light, track spots...): placed on any surface (hull, slope, ceiling, placed parts, up to a part's edge: 5 cm grid) | light the walls, floors and parts around them, stronger at night and indoors; take the color painted with the TF mod's paint gun |
 | **Surveillance camera** | fix it anywhere; the **tablet** (**F9**) shows its picture, arrows switch cameras, Z changes the size |
 | **Teleport capsule** | look at it and press **T**: pick another (named) capsule and you are teleported there. A pad with a turning emitter, pillars, a lit back wall and a console; its energy rings sweep up and down, faster with you inside, and flare when you leave |
 | **Radio** | **T**: plays music (file or YouTube link) heard by every player around |

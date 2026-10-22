@@ -40,6 +40,8 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
         /// <summary>The engine's own detailed model, built in the thruster's frame (null: the game's thruster with a collar).</summary>
         public System.Action<Power.MachineModels.Model, Bounds> Model;
         public Color ModelGlow = Power.MachineModels.Red;
+        /// <summary>The model's dark pieces (rings, chamber) in white ceramic instead.</summary>
+        public bool White;
         public Color ModelCore = Color.white;
         /// <summary>Flame color (white: the game's).</summary>
         public Color Flame = Color.white;
@@ -134,10 +136,10 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             new EngineSpec
             {
                 Id = 7484, Key = "DarkMatterTitan", Label = Loc.Pick("Moteur titan à matière noire", "Titan dark matter engine", "Motor titán de materia oscura"),
-                Description = Loc.Pick("Le moteur à matière noire en version géante : 20 × 20 m, pour les stations mobiles et les vaisseaux géants. 6 240 000 N (huit cents propulseurs chimiques) pour 0,02 unité/s de matière noire et 0,3 d'oxygène. Une prise de propergol reçoit la matière noire, l'autre l'oxygène. Commande : un signal sur sa prise de commande (0-1), sinon une vanne sur sa conduite, sinon le siège de pilotage. Montée en régime : 8 s.",
-                    "The dark matter engine, giant: 20 × 20 m, for moving stations and giant ships. 6,240,000 N (eight hundred Chemical Thrusters) for 0.02 unit/s of dark matter and 0.3 of oxygen. One propellant socket takes dark matter, the other oxygen. Control: a signal on its command socket (0-1), else a valve on its line, else the pilot seat. Spool-up: 8 s.",
-                    "El motor de materia oscura en versión gigante: 20 × 20 m, para estaciones móviles y naves gigantes. 6.240.000 N (ochocientos Propulsores químicos) por 0,02 unidad/s de materia oscura y 0,3 de oxígeno. Una toma de propergol recibe materia oscura, la otra oxígeno. Control: una señal en su toma de mando (0-1), si no una válvula en su línea, si no el asiento del piloto. Arranque: 8 s."),
-                DefaultThrust = 800f, DefaultFuel = 0.4f, ReactionMass = 6f, Fuel = Items.ModItems.DarkMatter, Mass = 9000f, Scale = 25f, SpoolSeconds = 8f,
+                Description = Loc.Pick("Le moteur à matière noire en version géante, blanche : 10 × 10 m, pour les stations mobiles et les vaisseaux géants. 6 240 000 N (huit cents propulseurs chimiques) pour 0,02 unité/s de matière noire et 0,3 d'oxygène. Une prise de propergol reçoit la matière noire, l'autre l'oxygène. Commande : un signal sur sa prise de commande (0-1), sinon une vanne sur sa conduite, sinon le siège de pilotage. Montée en régime : 8 s.",
+                    "The dark matter engine, giant and white: 10 × 10 m, for moving stations and giant ships. 6,240,000 N (eight hundred Chemical Thrusters) for 0.02 unit/s of dark matter and 0.3 of oxygen. One propellant socket takes dark matter, the other oxygen. Control: a signal on its command socket (0-1), else a valve on its line, else the pilot seat. Spool-up: 8 s.",
+                    "El motor de materia oscura en versión gigante y blanca: 10 × 10 m, para estaciones móviles y naves gigantes. 6.240.000 N (ochocientos Propulsores químicos) por 0,02 unidad/s de materia oscura y 0,3 de oxígeno. Una toma de propergol recibe materia oscura, la otra oxígeno. Control: una señal en su toma de mando (0-1), si no una válvula en su línea, si no el asiento del piloto. Arranque: 8 s."),
+                DefaultThrust = 800f, DefaultFuel = 0.4f, ReactionMass = 6f, Fuel = Items.ModItems.DarkMatter, Mass = 9000f, Scale = 12.5f, SpoolSeconds = 8f, White = true,
                 Tint = Color.white, Model = EngineModels.DarkMatter, ModelGlow = Power.MachineModels.Violet, ModelCore = new Color(1f, 0.65f, 1f), Flame = new Color(0.8f, 0.55f, 1f),
                 Cost = new[] { (Items.ModItems.Meteorite, 150), (Items.ModItems.QuantumCore, 12), (Items.ModItems.ExoticMatter, 25), (Items.ModItems.NexoranAlloy, 80), (Items.ModItems.Titanium, 120), (112u, 60) },
                 Row = Parts.AdvancedTab.SuperiorRow

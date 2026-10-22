@@ -54,6 +54,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
 
         public static readonly Color DefaultLight = new Color(1f, 0.9f, 0.75f);
 
+        /// <summary>The floor-sized light panel: lined up with the hull's cells like a floor plate.</summary>
+        public const ushort FloorPanelId = 7127;
+
         /// <summary>
         /// Direction the sloped face of a corner wedge looks: away from the surface and from the wall.
         /// Declared before All, which uses it while initializing.
@@ -477,6 +480,25 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
                 {
                     b[LampGroup.Frame].Box(new Vector3(0f, 0.008f, 0f), new Vector3(0.07f, 0.016f, 0.12f));
                     b[LampGroup.Trim].Cylinder(new Vector3(0f, 0.065f, -0.12f), new Vector3(0f, 0.065f, 0.12f), 0.042f, 0.042f, 24);
+                }
+            },
+            new LampSpec
+            {
+                Id = FloorPanelId,
+                Label = Loc.Pick("Dalle lumineuse 1 × 1", "Light tile 1 × 1", "Losa luminosa 1 × 1"),
+                Description = Loc.Pick("Un panneau lumineux de la taille d'un sol (1 × 1 m), mince, à poser au sol, au mur ou au plafond : il s'aligne sur les cases de la coque. Peins-le pour changer la couleur de la lumière.", "A thin light panel the size of a floor tile (1 × 1 m), for floors, walls or ceilings: it lines up with the hull's cells. Paint it to change the light's color.", "Un panel luminoso fino del tamaño de una baldosa (1 × 1 m), para suelos, paredes o techos: se alinea con las casillas del casco. Píntalo para cambiar el color de la luz."),
+                Mass = 4f,
+                Cost = new[] { (Iron, 2), (Glass, 3), (Copper, 2) },
+                BoundsCenter = new Vector3(0f, 0.02f, 0f),
+                BoundsSize = new Vector3(1f, 0.04f, 1f),
+                LightType = LightType.Point,
+                LightPosition = new Vector3(0f, 0.45f, 0f),
+                Range = 11f,
+                Intensity = 2.6f,
+                Shape = b =>
+                {
+                    b[LampGroup.Frame].Box(new Vector3(0f, 0.01f, 0f), new Vector3(1f, 0.02f, 1f));
+                    b[LampGroup.Diffuser].Box(new Vector3(0f, 0.03f, 0f), new Vector3(0.94f, 0.012f, 0.94f));
                 }
             },
             new LampSpec

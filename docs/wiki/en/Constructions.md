@@ -19,7 +19,7 @@ Positions follow a 25 cm grid counted from the aimed part.
 
 On top of these come the **structural parts**: beams 1, 2 and 4 m, reinforced beam, plates 1 × 1 and 2 × 1, frame, junction.
 
-Reworked models: real wood grain, satin steel, the hull's glass. On the hull, parts line up with its cells: a 1 m part is centered on a cell, a 2 m part on a cell's edge (plates and partitions sit edge to edge with the hull). The collision is the part's box (the gaps of a lattice are only visual).
+Placed parts touch (planks and partitions in a continuous run). **Orientation**: while placing, the **V** key (setting `BuildTiltKey`) turns the part from upright to tipped forward, on its side and upside down: a partition standing against a hull wall, a post lying on the floor, a 2 m long, 1 m high partition. Reworked models: real wood grain, satin steel, the hull's glass. On the hull, parts line up with its cells: a 1 m part is centered on a cell, a 2 m part on a cell's edge (plates and partitions sit edge to edge with the hull). The collision is the part's box (the gaps of a lattice are only visual).
 
 ## Furniture
 

@@ -74,6 +74,18 @@ namespace StellarDriveDemoTFAdvanced.Propulsion
             var model = new Power.MachineModels.Model();
             spec.Model(model, body);
             Power.MachineModels.Attach(visual, model, "Engine" + spec.Key, spec.ModelGlow, spec.ModelCore);
+            if (spec.White)
+            {
+                Material white = StellarDriveDemoTFAdvanced.Common.LitMaterials.Get("TFA_EngineWhite", new Color(0.86f, 0.88f, 0.91f), 0.2f, 0.5f);
+                Material shell = StellarDriveDemoTFAdvanced.Common.LitMaterials.Get("TFA_EngineWhiteShell", new Color(0.94f, 0.95f, 0.97f), 0.25f, 0.55f);
+                foreach (MeshRenderer renderer in visual.GetComponentsInChildren<MeshRenderer>(true))
+                {
+                    if (renderer.name.EndsWith("Dark"))
+                        renderer.sharedMaterial = white;
+                    else if (renderer.name.EndsWith("Armor"))
+                        renderer.sharedMaterial = shell;
+                }
+            }
             if (spec.Key.EndsWith("DarkMatter"))
             {
                 DarkFlame(prefab);
