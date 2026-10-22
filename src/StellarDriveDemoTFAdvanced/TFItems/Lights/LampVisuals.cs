@@ -173,8 +173,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             {
                 renderer.GetPropertyBlock(_block);
                 _block.SetColor(BaseColorId, Color.Lerp(new Color(0.35f, 0.36f, 0.38f), color, level));
-                // The diffuser glows harder in daylight so the lamp still reads as lit
-                _block.SetColor(EmissionColorId, color * (3f * level * Mathf.Lerp(1.6f, 1f, Mathf.InverseLerp(DaylightDim, DarkBoost, _environment))));
+                // The diffuser glows harder in daylight so the lamp still reads as lit (soft: a bright
+                // glow bloomed and flashed)
+                _block.SetColor(EmissionColorId, color * (1.6f * level * Mathf.Lerp(1.3f, 1f, Mathf.InverseLerp(DaylightDim, DarkBoost, _environment))));
                 renderer.SetPropertyBlock(_block);
             }
         }

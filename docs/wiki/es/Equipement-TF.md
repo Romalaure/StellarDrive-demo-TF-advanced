@@ -4,7 +4,7 @@ Los objetos del mod **StellarDrive Demo TF** se unieron a TF Advanced (v0.18), e
 
 | Objeto | Uso |
 |---|---|
-| **15 lámparas** (plafón, aplique, foco, regleta, foco empotrado, farol industrial, baliza intermitente, girofaro...) | iluminan las paredes, suelos y piezas a su alrededor, más fuerte de noche y en interiores; toman el color pintado con la pistola de pintura del mod TF |
+| **20 lámparas** (plafón, aplique, foco, regleta, foco empotrado, farol industrial, baliza intermitente, girofaro, lámpara de pie, lámpara de escritorio, ojo de buey luminoso, lámpara de anillo, aplique de doble haz, riel de focos...): se colocan en cualquier superficie (casco, pendiente, techo, piezas colocadas) | iluminan las paredes, suelos y piezas a su alrededor, más fuerte de noche y en interiores; toman el color pintado con la pistola de pintura del mod TF |
 | **Cámara de vigilancia** | se fija en cualquier sitio; la **tableta** (**F9**) muestra su imagen, las flechas cambian de cámara, Z cambia el tamaño |
 | **Cápsula de teletransporte** | mírala y pulsa **T**: elige otra cápsula (con nombre) y te teletransportas allí. Base con emisor giratorio, pilares, pared trasera iluminada y consola; sus anillos de energía suben y bajan, más rápido contigo dentro, y se aceleran al partir |
 | **Radio** | **T**: reproduce música (del juego o enlace de YouTube) que oyen todos los jugadores cercanos |

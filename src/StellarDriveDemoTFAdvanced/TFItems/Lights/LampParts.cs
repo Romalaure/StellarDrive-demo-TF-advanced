@@ -115,16 +115,29 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
         {
             EnsureMaterials();
             int layer = visuals.gameObject.layer;
-            foreach (KeyValuePair<LampGroup, MeshBuilder> entry in spec.BuildShapes())
+            // The Blender model (tools/blender/lamps.py: L<id>_Frame, _Trim, _Diffuser), else the shapes made here
+            Dictionary<string, Mesh> models = StellarDriveDemoTFAdvanced.Common.ObjModels.Load("lamps");
+            Dictionary<LampGroup, MeshBuilder> shapes = null;
+            foreach (LampGroup group in new[] { LampGroup.Frame, LampGroup.Trim, LampGroup.Diffuser })
             {
+                Mesh mesh = null;
+                if (models != null && models.TryGetValue("L" + spec.Id + "_" + group, out Mesh model))
+                    mesh = model;
+                else if (models == null || !models.Keys.Any(k => k.StartsWith("L" + spec.Id + "_")))
+                {
+                    shapes = shapes ?? spec.BuildShapes();
+                    mesh = shapes[group].HasGeometry ? shapes[group].Build("TF_Lamp" + spec.Id + "_" + group) : null;
+                }
+                if (mesh == null)
+                    continue;
                 // Lamp bodies keep their look; painting a lamp colors its light instead
-                string name = entry.Key == LampGroup.Diffuser ? LampVisuals.DiffuserName : "TF_NoPaint_" + entry.Key;
+                string name = group == LampGroup.Diffuser ? LampVisuals.DiffuserName : "TF_NoPaint_" + group;
                 var child = new GameObject(name) { layer = layer };
                 child.transform.SetParent(visuals, false);
-                child.AddComponent<MeshFilter>().sharedMesh = entry.Value.Build("TF_Lamp" + spec.Id + "_" + entry.Key);
+                child.AddComponent<MeshFilter>().sharedMesh = mesh;
                 var renderer = child.AddComponent<MeshRenderer>();
-                renderer.sharedMaterial = Materials[entry.Key];
-                renderer.shadowCastingMode = entry.Key == LampGroup.Diffuser ? ShadowCastingMode.Off : ShadowCastingMode.On;
+                renderer.sharedMaterial = Materials[group];
+                renderer.shadowCastingMode = group == LampGroup.Diffuser ? ShadowCastingMode.Off : ShadowCastingMode.On;
             }
 
             var lightObject = new GameObject(LampVisuals.LightName) { layer = layer };
@@ -154,9 +167,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
             if (Materials.Count > 0 && Materials.Values.All(m => m != null))
                 return;
             Materials[LampGroup.Frame] = LitMaterials.Get("TF_LampFrame", new Color(0.2f, 0.21f, 0.23f), 0.6f, 0.45f);
-            Materials[LampGroup.Trim] = LitMaterials.Get("TF_LampTrim", new Color(0.82f, 0.83f, 0.86f), 1f, 0.8f);
+            // Satin chrome: mirror-bright thin pieces sparkled as the view moved
+            Materials[LampGroup.Trim] = LitMaterials.Get("TF_LampTrim", new Color(0.8f, 0.81f, 0.84f), 0.8f, 0.45f);
             // "glass" in the name keeps the paint tool from tinting it
-            Materials[LampGroup.Diffuser] = LitMaterials.Get("TF_LampGlass", new Color(0.95f, 0.93f, 0.88f), 0f, 0.9f, LampCatalog.DefaultLight * 3f);
+            Materials[LampGroup.Diffuser] = LitMaterials.Get("TF_LampGlass", new Color(0.95f, 0.93f, 0.88f), 0f, 0.5f, LampCatalog.DefaultLight * 1.6f);
         }
 
         private static readonly AccessTools.FieldRef<PartSettings, List<ItemInstance>> BuildingCost =

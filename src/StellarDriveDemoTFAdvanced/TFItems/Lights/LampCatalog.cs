@@ -397,6 +397,108 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
                     b[LampGroup.Diffuser].Cylinder(new Vector3(0f, 1.44f, 0f), new Vector3(0f, 1.455f, 0f), 0.165f, 0.165f, 28);
                     b[LampGroup.Frame].Cylinder(new Vector3(0f, 1.455f, 0f), new Vector3(0f, 1.7f, 0f), 0.17f, 0.12f, 28);
                 }
+            },
+            // New lamps (their models are in tools/blender/lamps.py; the shapes here are the fallback)
+            new LampSpec
+            {
+                Id = 7118,
+                Label = Loc.Pick("Lampe de bureau", "Desk lamp", "Lámpara de escritorio"),
+                Description = Loc.Pick("Lampe articulée à poser sur un bureau, une table ou le sol : sa tête éclaire vers le bas et devant elle. Peins-la pour changer la couleur de la lumière.", "Jointed lamp for a desk, a table or the floor: its head lights down and in front of it. Paint it to change the light's color.", "Lámpara articulada para un escritorio, una mesa o el suelo: su cabeza ilumina hacia abajo y delante. Píntala para cambiar el color de la luz."),
+                Mass = 1.5f,
+                Cost = new[] { (Iron, 2), (Glass, 1), (Copper, 1) },
+                BoundsCenter = new Vector3(0f, 0.24f, 0.05f),
+                BoundsSize = new Vector3(0.22f, 0.48f, 0.34f),
+                LightType = LightType.Spot,
+                LightPosition = new Vector3(0f, 0.35f, 0.2f),
+                LightDirection = new Vector3(0f, -0.75f, 0.66f),
+                Range = 6f,
+                Intensity = 2.5f,
+                SpotAngle = 75f,
+                Shape = b =>
+                {
+                    b[LampGroup.Frame].Cylinder(Vector3.zero, new Vector3(0f, 0.025f, 0f), 0.1f, 0.095f, 24);
+                    b[LampGroup.Trim].Cylinder(new Vector3(0f, 0.025f, 0.04f), new Vector3(0f, 0.3f, -0.05f), 0.008f, 0.008f, 10);
+                    b[LampGroup.Trim].Cylinder(new Vector3(0f, 0.3f, -0.05f), new Vector3(0f, 0.42f, 0.13f), 0.008f, 0.008f, 10);
+                    b[LampGroup.Frame].Cylinder(new Vector3(0f, 0.42f, 0.13f), new Vector3(0f, 0.345f, 0.196f), 0.026f, 0.065f, 20);
+                }
+            },
+            new LampSpec
+            {
+                Id = 7119,
+                Label = Loc.Pick("Hublot lumineux", "Bulkhead light", "Ojo de buey luminoso"),
+                Description = Loc.Pick("Lampe ovale étanche derrière une grille, pour les soutes, les coursives et la coque extérieure. Peins-la pour changer la couleur de la lumière.", "Sealed oval lamp behind a guard, for holds, gangways and the outer hull. Paint it to change the light's color.", "Lámpara ovalada estanca tras una rejilla, para bodegas, pasarelas y el casco exterior. Píntala para cambiar el color de la luz."),
+                Mass = 1.5f,
+                Cost = new[] { (Iron, 2), (Glass, 1), (Copper, 1) },
+                BoundsCenter = new Vector3(0f, 0.03f, 0f),
+                BoundsSize = new Vector3(0.26f, 0.06f, 0.18f),
+                LightType = LightType.Point,
+                LightPosition = new Vector3(0f, 0.25f, 0f),
+                Range = 7f,
+                Intensity = 2f,
+                Shape = b =>
+                {
+                    b[LampGroup.Frame].Box(new Vector3(0f, 0.015f, 0f), new Vector3(0.26f, 0.03f, 0.18f));
+                    b[LampGroup.Diffuser].Box(new Vector3(0f, 0.04f, 0f), new Vector3(0.2f, 0.022f, 0.13f));
+                }
+            },
+            new LampSpec
+            {
+                Id = 7120,
+                Label = Loc.Pick("Lustre annulaire", "Ring chandelier", "Lámpara de anillo"),
+                Description = Loc.Pick("Un anneau lumineux de 60 cm suspendu au plafond par trois câbles, pour les grandes salles. Peins-le pour changer la couleur de la lumière.", "A 60 cm ring of light hung from the ceiling on three cables, for big rooms. Paint it to change the light's color.", "Un anillo de luz de 60 cm colgado del techo con tres cables, para salas grandes. Píntalo para cambiar el color de la luz."),
+                Mass = 4f,
+                Cost = new[] { (Iron, 3), (Glass, 3), (Copper, 2) },
+                BoundsCenter = new Vector3(0f, 0.27f, 0f),
+                BoundsSize = new Vector3(0.64f, 0.54f, 0.64f),
+                LightType = LightType.Point,
+                LightPosition = new Vector3(0f, 0.6f, 0f),
+                Range = 11f,
+                Intensity = 2.8f,
+                Shape = b =>
+                {
+                    b[LampGroup.Frame].Cylinder(Vector3.zero, new Vector3(0f, 0.025f, 0f), 0.08f, 0.07f, 24);
+                    b[LampGroup.Diffuser].Cylinder(new Vector3(0f, 0.5f, 0f), new Vector3(0f, 0.54f, 0f), 0.32f, 0.32f, 40, false, false);
+                }
+            },
+            new LampSpec
+            {
+                Id = 7125,
+                Label = Loc.Pick("Applique double faisceau", "Up and down wall light", "Aplique de doble haz"),
+                Description = Loc.Pick("Cylindre chromé à fixer au mur, qui éclaire vers le haut et vers le bas. Peins-le pour changer la couleur de la lumière.", "A chrome cylinder for walls, lighting up and down. Paint it to change the light's color.", "Un cilindro cromado para paredes, que ilumina hacia arriba y hacia abajo. Píntalo para cambiar el color de la luz."),
+                Mass = 1f,
+                Cost = new[] { (Iron, 1), (Glass, 1), (Copper, 1) },
+                BoundsCenter = new Vector3(0f, 0.055f, 0f),
+                BoundsSize = new Vector3(0.1f, 0.11f, 0.26f),
+                LightType = LightType.Point,
+                LightPosition = new Vector3(0f, 0.2f, 0f),
+                Range = 6f,
+                Intensity = 1.8f,
+                Shape = b =>
+                {
+                    b[LampGroup.Frame].Box(new Vector3(0f, 0.008f, 0f), new Vector3(0.07f, 0.016f, 0.12f));
+                    b[LampGroup.Trim].Cylinder(new Vector3(0f, 0.065f, -0.12f), new Vector3(0f, 0.065f, 0.12f), 0.042f, 0.042f, 24);
+                }
+            },
+            new LampSpec
+            {
+                Id = 7126,
+                Label = Loc.Pick("Rail à spots", "Track spots", "Riel de focos"),
+                Description = Loc.Pick("Un rail de 80 cm portant trois spots orientés, pour éclairer un comptoir, un établi ou un couloir. Peins-le pour changer la couleur de la lumière.", "An 80 cm rail carrying three aimed spots, to light a counter, a workbench or a corridor. Paint it to change the light's color.", "Un riel de 80 cm con tres focos orientados, para iluminar un mostrador, un banco de trabajo o un pasillo. Píntalo para cambiar el color de la luz."),
+                Mass = 2.5f,
+                Cost = new[] { (Iron, 3), (Glass, 2), (Copper, 2) },
+                BoundsCenter = new Vector3(0f, 0.07f, 0f),
+                BoundsSize = new Vector3(0.8f, 0.14f, 0.08f),
+                LightType = LightType.Spot,
+                LightPosition = new Vector3(0f, 0.2f, 0f),
+                Range = 12f,
+                Intensity = 4f,
+                SpotAngle = 90f,
+                Shape = b =>
+                {
+                    b[LampGroup.Frame].Box(new Vector3(0f, 0.015f, 0f), new Vector3(0.8f, 0.03f, 0.04f));
+                    foreach (float x in new[] { -0.28f, 0f, 0.28f })
+                        b[LampGroup.Frame].Cylinder(new Vector3(x, 0.065f, 0f), new Vector3(x, 0.155f, 0f), 0.03f, 0.036f, 16);
+                }
             }
         };
 

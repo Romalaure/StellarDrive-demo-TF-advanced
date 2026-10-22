@@ -4,7 +4,7 @@ Les objets du mod **StellarDrive Demo TF** ont rejoint TF Advanced (v0.18), dans
 
 | Objet | Rôle |
 |---|---|
-| **15 luminaires** (plafonnier, applique, projecteur, réglette, spot encastré, lampe industrielle, balise clignotante, gyrophare...) | éclairent les murs, sols et pièces autour d'eux, plus fort la nuit et à l'intérieur ; prennent la couleur peinte avec le pistolet du mod TF |
+| **20 luminaires** (plafonnier, applique, projecteur, réglette, spot encastré, lampe industrielle, balise clignotante, gyrophare, lampadaire, lampe de bureau, hublot lumineux, lustre annulaire, applique double faisceau, rail à spots...) : se posent sur toute surface (coque, pente, plafond, pièces posées) | éclairent les murs, sols et pièces autour d'eux, plus fort la nuit et à l'intérieur ; prennent la couleur peinte avec le pistolet du mod TF |
 | **Caméra de surveillance** | à fixer n'importe où ; la **tablette** (touche **F9**) montre son image, flèches pour changer de caméra, Z pour la taille |
 | **Capsule de téléportation** | regarde-la et appuie sur **T** : choisis une autre capsule (nommée) et tu y es téléporté. Socle à émetteur tournant, piliers, paroi arrière lumineuse, console ; ses anneaux d'énergie montent et descendent, plus vite quand tu es dedans, et s'emballent au départ |
 | **Radio** | touche **T** : joue une musique (fichier ou lien YouTube) entendue par tous les joueurs autour |
