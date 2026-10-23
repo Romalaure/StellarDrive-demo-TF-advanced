@@ -43,7 +43,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
         }
     }
 
-    /// <summary>Lamps are in no research node, so the build menu would keep them locked forever.</summary>
+    /// <summary>Lamps (and the TF devices: camera, capsule, radio, speaker, rack, cabin, photo frame) are in no research node, so the build menu would keep them locked forever.</summary>
     [HarmonyPatch(typeof(ResearchClientProxy), nameof(ResearchClientProxy.IsPartUnlocked))]
     internal static class LampUnlockPatch
     {
@@ -51,7 +51,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Lights
         {
             if (!__result && part != null && (LampCatalog.IsLamp(part.id) || part.id == Cameras.CameraParts.CameraId
                 || part.id == Devices.TeleportCapsule.CapsuleId || part.id == Devices.Radio.RadioId || part.id == Devices.Radio.SpeakerId
-                || part.id == Devices.ToolRack.RackId || part.id == Devices.CosmeticCabin.CabinId))
+                || part.id == Devices.ToolRack.RackId || part.id == Devices.CosmeticCabin.CabinId || part.id == Devices.PhotoFrame.Id))
                 __result = true;
         }
     }
