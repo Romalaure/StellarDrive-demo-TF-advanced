@@ -55,7 +55,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
         /// <summary>
         /// Construction parts and furniture on the hull line up with its cells (centered on whole
         /// meters): across the face, a part 1 or 3 m long is centered on a cell, 2 m on a cell's edge,
-        /// anything else on a 25 cm grid, so floor plates, partitions and windows sit edge to edge
+        /// a thin side (railings, partitions) on a cell's edge, anything else on a 25 cm grid, so floor plates, partitions and windows sit edge to edge
         /// with the hull and with each other.
         /// </summary>
         private static void Aligned(HitSnapDetectionProperties props, IShipPartPlacements shipGrid, ref IPartPlacement result, FloatingPartPlacement placed, Quaternion tilt)
@@ -80,8 +80,11 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 float size = 2f * FloatingSnap.Extent(bounds, rotation, axis);
                 float at = Vector3.Dot(center, axis);
                 int meters = Mathf.RoundToInt(size);
+                // A thin part (railing, partition, window) stands on a cell's edge like the hull's walls,
+                // so two of them at a right angle meet at the cell's corner
                 float target = meters >= 1 && Mathf.Abs(size - meters) < 0.03f
                     ? meters % 2 == 1 ? Mathf.Round(at) : Mathf.Floor(at) + 0.5f
+                    : size < 0.15f ? Mathf.Round(at - 0.5f) + 0.5f
                     : Mathf.Round(at * 4f) / 4f;
                 // Up the ship: the hull's floors stand 4 cm over the cells' edges, the part on top of them
                 if (axis == Vector3.up && meters >= 1 && Mathf.Abs(size - meters) < 0.03f)

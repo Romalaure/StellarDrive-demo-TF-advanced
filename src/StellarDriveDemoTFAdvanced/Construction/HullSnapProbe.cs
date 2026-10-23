@@ -69,7 +69,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 ("wall +x low", middle + Vector3.up * 0.6f, Vector3.right),
                 ("wall -x low", middle + Vector3.up * 0.6f, Vector3.left),
             };
-            ushort[] parts = { 7347, 7162, 7161, 7343, 7127 };
+            ushort[] parts = { 7362 };
             PartSettings[] all = Resources.FindObjectsOfTypeAll<PartSettings>();
             foreach (var ray in rays)
             {
@@ -101,10 +101,13 @@ namespace StellarDriveDemoTFAdvanced.Construction
                         continue;
                     FloatingSnap.HitCollider = hit.collider;
                     FloatingSnap.Placing = settings;
-                    var props = new HitSnapDetectionProperties(local, Quaternion.identity, settings.size, settings.Bounds);
-                    IPartPlacement placement = new SnapDetectionStrategyProvider().GetSnapDetector(settings.snappingStyle, hit.collider.tag).DetectSnapPlacement(props, proxy);
-                    string where = placement is FloatingPartPlacement f ? $"at {f.Coord:F2} forward {f.ForwardOrientation} up {f.UpOrientation}" : "nothing";
-                    AdvancedMod.Log.Msg($"dev: hull snap: {ray.Name}: hit {hit.collider.name} tag {hit.collider.tag} normal {local.Normal:F2}: {id} -> {where}");
+                    foreach (float turn in new[] { 0f, 90f })
+                    {
+                        var props = new HitSnapDetectionProperties(local, Quaternion.Euler(0f, turn, 0f), settings.size, settings.Bounds);
+                        IPartPlacement placement = new SnapDetectionStrategyProvider().GetSnapDetector(settings.snappingStyle, hit.collider.tag).DetectSnapPlacement(props, proxy);
+                        string where = placement is FloatingPartPlacement f ? $"at {f.Coord:F2} forward {f.ForwardOrientation} up {f.UpOrientation}" : "nothing";
+                        AdvancedMod.Log.Msg($"dev: hull snap: {ray.Name}: hit {hit.collider.name} tag {hit.collider.tag} normal {local.Normal:F2}: {id} turned {turn} -> {where}");
+                    }
                 }
             }
         }

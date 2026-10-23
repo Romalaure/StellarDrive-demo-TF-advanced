@@ -391,9 +391,18 @@ for k in range(5):
 
 # 7449 Potted plant (0.5 x 1.2 x 0.5): a tapered pot, soil, stems and broad leaves
 P = 7449
-cyl(P, "Pot", (0, 0.0, 0), (0, 0.42, 0), 0.17, 0.22, sides=32, bevel=0.006)
-cyl(P, "Pot", (0, 0.42, 0), (0, 0.45, 0), 0.23, 0.23, sides=32)
-cyl(P, "Soil", (0, 0.4, 0), (0, 0.43, 0), 0.205, sides=32)
+cyl(P, "Pot", (0, 0.0, 0), (0, 0.4, 0), 0.17, 0.215, sides=32, bevel=0.006)
+# The rim is a ring (a solid lip hid the soil), the soil heaped a little inside it, a few pebbles
+bpy.ops.mesh.primitive_torus_add(major_radius=0.212, minor_radius=0.022, major_segments=40, minor_segments=10, location=B((0, 0.42, 0)))
+rim = bpy.context.active_object
+rim.name = "C7449_Pot_rim"
+_finish(rim, "C7449_Pot")
+cyl(P, "Soil", (0, 0.39, 0), (0, 0.425, 0), 0.205, 0.2, sides=32)
+cyl(P, "Soil", (0, 0.425, 0), (0, 0.44, 0), 0.2, 0.12, sides=32)
+for i in range(7):
+    a = math.radians(i * 51 + 20)
+    r = 0.08 + (i % 3) * 0.035
+    cyl(P, "SteelDark", (r * math.cos(a), 0.43, r * math.sin(a)), (r * math.cos(a), 0.445, r * math.sin(a)), 0.014, 0.008, sides=6)
 for i in range(9):
     a = math.radians(i * 40 + random.uniform(-10, 10))
     lean = random.uniform(0.12, 0.22)
