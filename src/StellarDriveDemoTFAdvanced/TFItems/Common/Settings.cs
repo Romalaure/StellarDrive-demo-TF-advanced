@@ -56,7 +56,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 description: "Key (UnityEngine.InputSystem.Key name) to use the TF part you look at: radio, wardrobe, teleport capsule.");
             ThirdPersonKey = _category.CreateEntry("ThirdPersonKey", "V",
                 description: "Key (UnityEngine.InputSystem.Key name) that switches between first and third person while flying from the pilot seat.");
-            BuildTiltKey = _category.CreateEntry("BuildTiltKey", "V",
+            BuildTiltKey = _category.CreateEntry("BuildTiltKey", "B",
                 description: "Key (UnityEngine.InputSystem.Key name) that turns the TF Construction part being placed: upright, tipped forward, on its side, upside down. Empty disables it.");
             PhotoKey = _category.CreateEntry("PhotoKey", "F8",
                 description: "Key (UnityEngine.InputSystem.Key name) that enters and leaves photo mode (free camera, filters, photos into UserData/TFAdvanced/photos). Empty disables it.");

@@ -6,7 +6,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
 {
     /// <summary>
     /// How a construction part being placed is turned beyond what the game allows (its up out of
-    /// the face aimed at, turned about it): the tilt key (V) cycles upright, tipped forward, on its
+    /// the face aimed at, turned about it): the tilt key (B) cycles upright, tipped forward, on its
     /// side and upside down, so a plank wall can stand on a hull wall, a post lie along a floor, a
     /// window close a sloped opening. Reset when another part is chosen.
     /// </summary>

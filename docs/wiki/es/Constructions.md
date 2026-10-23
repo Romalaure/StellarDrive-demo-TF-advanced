@@ -19,7 +19,7 @@ Las posiciones siguen una cuadrícula de 25 cm contada desde la pieza apuntada.
 
 A esto se suman las **piezas de estructura**: vigas de 1, 2 y 4 m, viga reforzada, placas 1 × 1 y 2 × 1, marco, unión.
 
-Las piezas colocadas se tocan (tablas y tabiques en continuo). **Orientación**: al colocar, la tecla **V** (ajuste `BuildTiltKey`) pasa la pieza de derecha a inclinada, de lado y luego invertida: un tabique de pie contra una pared del casco, un poste tumbado en el suelo, un tabique de 2 m de largo y 1 m de alto. Modelos rehechos: veta de madera real, acero satinado, el cristal del casco. Sobre el casco, las piezas se alinean con sus casillas: una pieza de 1 m se centra en una casilla, una de 2 m en un borde de casilla (placas y tabiques quedan borde con borde con el casco). La colisión es la caja de la pieza (los huecos de una celosía son solo visuales).
+Las piezas colocadas se tocan (tablas y tabiques en continuo). **Orientación**: al colocar, la tecla **B** (ajuste `BuildTiltKey`) pasa la pieza de derecha a inclinada, de lado y luego invertida: un tabique de pie contra una pared del casco, un poste tumbado en el suelo, un tabique de 2 m de largo y 1 m de alto. Modelos rehechos: veta de madera real, acero satinado, el cristal del casco. Sobre el casco, las piezas se alinean con sus casillas: una pieza de 1 m se centra en una casilla, una de 2 m en un borde de casilla (placas y tabiques quedan borde con borde con el casco). La colisión es la caja de la pieza (los huecos de una celosía son solo visuales).
 
 ## Muebles
 

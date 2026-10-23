@@ -6,7 +6,7 @@ Onglet **TF Construction**. Le jeu a déjà des sols, murs et pentes de coque en
 - Sur sa **face du dessus** (ou du dessous), la nouvelle pièce s'y pose (ou s'y accroche par en dessous).
 - Sur un **côté**, elle se place contre lui en restant droite, sa base au niveau de celle de la pièce visée : planches côte à côte, cloisons en enfilade, vitre contre un poteau.
 
-Les positions suivent une grille de 25 cm comptée depuis la pièce visée, et les pièces se touchent (planches et cloisons en continu). **Orientation** : pendant la pose, la touche **V** (réglage `BuildTiltKey`) fait passer la pièce de droite à basculée, sur le côté puis retournée : une cloison debout contre un mur de coque, un poteau couché au sol, une cloison de 2 m de long sur 1 m de haut. **Sur la coque**, les pièces s'alignent sur ses cases : une pièce de 1 m se centre sur une case, une de 2 m sur un bord de case (les dalles et cloisons se posent bord à bord avec la coque).
+Les positions suivent une grille de 25 cm comptée depuis la pièce visée, et les pièces se touchent (planches et cloisons en continu). **Orientation** : pendant la pose, la touche **B** (réglage `BuildTiltKey`) fait passer la pièce de droite à basculée, sur le côté puis retournée : une cloison debout contre un mur de coque, un poteau couché au sol, une cloison de 2 m de long sur 1 m de haut. **Sur la coque**, les pièces s'alignent sur ses cases : une pièce de 1 m se centre sur une case, une de 2 m sur un bord de case (les dalles et cloisons se posent bord à bord avec la coque).
 
 | Bois | Verre | Fer |
 |---|---|---|
