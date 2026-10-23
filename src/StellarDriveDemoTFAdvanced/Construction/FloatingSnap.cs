@@ -228,6 +228,10 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 Vector3 center = rotation * bounds.center;
                 float along = plane + (modules ? ModuleGap : Builds(placingId) ? BuildGap : Gap) - (Vector3.Dot(center, n) - Extent(bounds, rotation, n));
                 float step = TFItems.Lights.LampCatalog.IsLamp(placingId) ? LampStep : Step;
+                // Thin pieces in a line (railings, partitions): their boxes stop short of their ends, the
+                // gap between the boxes is what brings the models end to end (they share their end post)
+                if (side && Mathf.Abs(Vector3.Dot(rotation * Vector3.right, n)) > 0.9f && MaterialParts.IsThin(placingId) && MaterialParts.IsThin(targetId))
+                    along += MaterialParts.EndInset(placingId) + MaterialParts.EndInset(targetId) - BuildGap;
 
                 // Across: around where the player aims, on a grid from the part aimed at
                 Vector3 coord = Vector3.zero;

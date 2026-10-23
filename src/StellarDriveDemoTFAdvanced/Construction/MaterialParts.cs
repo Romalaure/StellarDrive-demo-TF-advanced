@@ -137,6 +137,20 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         public static bool IsConstruction(ushort id) => Ids.Contains(id);
 
+        /// <summary>
+        /// Thin upright pieces (railings, partitions, windows): their box stops half their thickness
+        /// short of each end, so two meeting at a corner do not overlap (the game refused the second);
+        /// their models still reach the ends, where two pieces share a post.
+        /// </summary>
+        public static bool IsThin(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && IsThin(spec);
+
+        private static bool IsThin(Spec spec) => spec.Set != 3 && spec.Size.z < 0.1f && spec.Size.x >= 1f && spec.Size.y >= 0.5f;
+
+        /// <summary>How far a thin piece's box stops short of each of its ends.</summary>
+        public static float EndInset(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && IsThin(spec) ? (spec.Size.z + 0.01f) * 0.5f : 0f;
+
+        private static Vector3 BoxSize(Spec spec) => IsThin(spec) ? new Vector3(spec.Size.x - 2f * EndInset(spec.Id), spec.Size.y, spec.Size.z) : spec.Size;
+
         // The fallback of a piece of furniture (its Blender model missing): a plain block
         private static void Furniture(Model m, float width, float height, float depth) =>
             m.Wood.Box(new Vector3(0f, height * 0.5f, 0f), new Vector3(width, height, depth));
@@ -167,7 +181,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             settings.internalStateClass = null;
             // On any face of the hull, and on other placed parts (see FloatingSnap); furniture on floors
             settings.snappingStyle = spec.Set == 3 ? Ships.Interface.Model.SnappingStyle.PreciseOnFloor : Ships.Interface.Model.SnappingStyle.PreciseOnAny;
-            Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, spec.Size.y * 0.5f, 0f), spec.Size);
+            Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, spec.Size.y * 0.5f, 0f), BoxSize(spec));
             int layer = visuals.gameObject.layer;
             // The seats: look at the piece and press the use key to sit
             if (TFItems.Devices.Seats.IsSeat(spec.Id))

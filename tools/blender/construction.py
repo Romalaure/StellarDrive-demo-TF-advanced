@@ -97,14 +97,15 @@ for i in range(6):
     for y in (0.27, 0.33, 1.67, 1.73):
         cyl(P, "SteelDark", (x, y, -0.028), (x, y, -0.03), 0.006, sides=6)
 
-# 7344 Wooden railing 1 m (1 x 1 x 0.08): two posts, a rounded handrail, two rails
+# 7344 Wooden railing 1 m (1 x 1 x 0.08): two posts, a rounded handrail, two rails. The posts stand
+# on the ends (half past them): two railings in a line or at a corner share one post
 P = 7344
-for x in (-0.45, 0.45):
+for x in (-0.5, 0.5):
     box(P, "Wood", (x, 0.47, 0), (0.08, 0.94, 0.08), bevel=0.008)
     box(P, "SteelDark", (x, 0.015, 0), (0.1, 0.03, 0.1), bevel=0.003)
-box(P, "WoodDark", (0, 0.965, 0), (1.0, 0.07, 0.08), bevel=0.025, segments=2)
+box(P, "WoodDark", (0, 0.965, 0), (1.04, 0.07, 0.08), bevel=0.025, segments=2)
 for y in (0.35, 0.65):
-    box(P, "Wood", (0, y, 0), (0.82, 0.06, 0.04), bevel=0.006)
+    box(P, "Wood", (0, y, 0), (0.92, 0.06, 0.04), bevel=0.006)
 
 # 7345 Wooden lattice 1 x 1 (0.05): a frame, slats crossed both ways at two heights
 P = 7345
@@ -179,7 +180,7 @@ for x in (-0.38, 0.38):
     for y in (0.14, 0.86):
         box(P, "Chrome", (x, y, 0), (0.05, 0.06, 0.034), bevel=0.006)
 cyl(P, "Chrome", (-0.5, 0.96, 0), (0.5, 0.96, 0), 0.025, sides=20)
-for x in (-0.47, 0.47):
+for x in (-0.5, 0.5):
     cyl(P, "Chrome", (x, 0.0, 0), (x, 0.95, 0), 0.016, sides=14)
     cyl(P, "SteelDark", (x, 0.0, 0), (x, 0.02, 0), 0.03, sides=16)
 
@@ -215,11 +216,11 @@ for j in range(8):
 def steel_railing(P, w):
     n = max(2, int(round(w)) + 1)
     for i in range(n):
-        x = -w / 2 + 0.03 + (w - 0.06) * i / (n - 1)
+        x = -w / 2 + w * i / (n - 1)
         box(P, "SteelDark", (x, 0.47, 0), (0.04, 0.94, 0.04), bevel=0.004)
         box(P, "SteelDark", (x, 0.01, 0), (0.08, 0.02, 0.06), bevel=0.003)
     cyl(P, "Steel", (-w / 2, 0.96, 0), (w / 2, 0.96, 0), 0.022, sides=16)
-    cyl(P, "Steel", (-w / 2 + 0.03, 0.52, 0), (w / 2 - 0.03, 0.52, 0), 0.014, sides=12)
+    cyl(P, "Steel", (-w / 2, 0.52, 0), (w / 2, 0.52, 0), 0.014, sides=12)
     box(P, "SteelDark", (0, 0.07, 0), (w - 0.06, 0.1, 0.008), bevel=0.002)
 
 
