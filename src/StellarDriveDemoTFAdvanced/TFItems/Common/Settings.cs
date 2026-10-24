@@ -19,6 +19,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         public static MelonPreferences_Entry<string> UseKey { get; private set; }
         public static MelonPreferences_Entry<string> ThirdPersonKey { get; private set; }
         public static MelonPreferences_Entry<string> PhotoKey { get; private set; }
+        public static MelonPreferences_Entry<string> TractorKey { get; private set; }
         public static MelonPreferences_Entry<string> BuildTiltKey { get; private set; }
         public static MelonPreferences_Entry<float> ThirdPersonDistance { get; private set; }
         public static MelonPreferences_Entry<float> RadioVolume { get; private set; }
@@ -45,9 +46,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 description: "Refreshes per second of the camera image on the tablet. Cameras only render while the tablet is open.");
             CameraResolution = _category.CreateEntry("CameraResolution", 960,
                 description: "Largest width in pixels of the camera image. The image is never rendered wider than the tablet screen shows it.");
-            // (third key: "CameraSky" off was black before the distant camera was copied, "CameraAtmosphere" on cost a lot of fps)
-            CameraSky = _category.CreateEntry("CameraPlanetSky", false,
-                description: "Render the planets' atmosphere and clouds in the camera image (space, stars and planets are always drawn). Costly: the image is then rendered at screen size.");
+            // (fourth key: "CameraSky" off was black before the distant camera was copied, "CameraAtmosphere" on cost a lot of fps,
+            // "CameraPlanetSky" was off: without the atmosphere a camera on a planet showed a black sky; now on for everyone)
+            CameraSky = _category.CreateEntry("CameraPlanetSkyOn", true,
+                description: "Render the planets' atmosphere and clouds (the sky) in the camera image; off, a camera on a planet sees a dark sky (space, stars and planets are always drawn). Costs fps: the image is then rendered at screen size.");
             TabletSize = _category.CreateEntry("TabletSize", 0,
                 description: "Camera tablet size: 0 small, 1 large, 2 full screen. Z in the tablet cycles it.");
             LampLightStrength = _category.CreateEntry("LampLightStrength", 1f,
@@ -60,6 +62,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 description: "Key (UnityEngine.InputSystem.Key name) that turns the TF Construction part being placed: upright, tipped forward, on its side, upside down. Empty disables it.");
             PhotoKey = _category.CreateEntry("PhotoKey", "F8",
                 description: "Key (UnityEngine.InputSystem.Key name) that enters and leaves photo mode (free camera, filters, photos into UserData/TFAdvanced/photos). Empty disables it.");
+            TractorKey = _category.CreateEntry("TractorKey", "Y",
+                description: "Key (UnityEngine.InputSystem.Key name) that switches the tractor beams of the ship flown on or off, from the pilot seat. Empty disables it.");
             ThirdPersonDistance = _category.CreateEntry("ThirdPersonDistance", 1f,
                 description: "Third person camera distance, as a multiple of the ship size. The mouse wheel changes it in flight.");
             RadioVolume = _category.CreateEntry("RadioVolume", 0.7f,

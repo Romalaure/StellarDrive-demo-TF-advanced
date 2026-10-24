@@ -104,7 +104,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             var gases = new ShipRoomsGases();
             var updater = new ShipRoomsVoxelUpdater(tree, gases, env, ship);
             Box(updater);
-            FieldDoorRooms.Voxels(new Vector3(1.5f, -0.5f, 3.5f), Quaternion.identity, 2, 2, 0f, false, out Vector3Int[] walls, out Vector3Int[] scan);
+            FieldDoorRooms.Voxels(new Vector3(1.5f, -0.5f, 3.5f), Quaternion.identity, 2, 2, 0f, false, 0.2f, out Vector3Int[] walls, out Vector3Int[] scan);
             updater.AddHullVoxel(walls, scan);
             updater.UpdateRooms();
             bool up = tree.SampleRoomAtPosition(new Vector3(1.5f, 1f, 1.5f)).RoomId != 0;
@@ -120,7 +120,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             var gases = new ShipRoomsGases();
             var updater = new ShipRoomsVoxelUpdater(tree, gases, env, ship);
             Box(updater);
-            FieldDoorRooms.Voxels(new Vector3(1.5f, 1.5f, 3.5f), Quaternion.identity, 2, 2, 0f, true, out Vector3Int[] walls, out Vector3Int[] scan);
+            FieldDoorRooms.Voxels(new Vector3(1.5f, 1.5f, 3.5f), Quaternion.identity, 2, 2, 0f, true, 0.2f, out Vector3Int[] walls, out Vector3Int[] scan);
             updater.AddHullVoxel(walls, scan);
             updater.UpdateRooms();
             AdvancedMod.Log.Msg($"dev: force field door test: field going down from the lintel: room inside {(tree.SampleRoomAtPosition(new Vector3(1.5f, 1f, 1.5f)).RoomId != 0 ? "yes" : "no")}");
@@ -135,7 +135,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             int fieldVoxels = 0;
             if (field.HasValue)
             {
-                FieldDoorRooms.Voxels(field.Value.At, field.Value.Rotation, field.Value.W, field.Value.H, field.Value.Shift, false, out Vector3Int[] walls, out Vector3Int[] scan);
+                FieldDoorRooms.Voxels(field.Value.At, field.Value.Rotation, field.Value.W, field.Value.H, field.Value.Shift, false, 0.2f, out Vector3Int[] walls, out Vector3Int[] scan);
                 updater.AddHullVoxel(walls, scan);
                 fieldVoxels = walls.Length;
             }

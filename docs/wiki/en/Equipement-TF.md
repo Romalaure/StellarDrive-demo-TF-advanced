@@ -36,3 +36,11 @@ Settings: section `[TFAdvancedObjects]` (tablet key `TabletKey`, use key `UseKey
 - **Photo mode** (**F8** key, setting `PhotoKey`, or a left click with the **camera** in hand, taken from the tool rack): the view leaves the player and flies freely (mouse to look, WASD to move, Space/Ctrl up and down, Shift faster, Alt slower, wheel to zoom, R to tilt and T to level). The game's interface goes. **F** changes the filter (black and white, sepia, vivid, cinema, night vision), **H** hides the help, **P**, Enter or a click takes the photo, Esc or F8 comes back.
 - Photos go to `UserData/TFAdvanced/photos` (any PNG or JPG put there works too).
 - **Photo frame** (TF Equipment tab, 3 wood + 1 glass): look at it and press **T** to choose a photo. It is sent to the host, kept with the world and shown to every player. The picture faces out of the surface the frame is on: best on a wall.
+
+## Area paint (BuildZoop)
+
+Paint gun in hand, **hold the zoop key** (the BuildZoop mod's, **Shift** by default, or Shift without that mod): a corner is fixed where you aim, an orange box goes from it to where you aim now, with the number of parts in it. **Click**: everything in the box is painted at once (walls, floors, slopes and placed parts), with the gun's color, finish and camouflage, on the side aimed at first (both with "both sides").
+
+## Cameras and photo mode: sky and player
+
+The surveillance cameras' image now shows the **planets' sky** (atmosphere, clouds) by default (setting `CameraPlanetSkyOn`, turn it off if the frame rate drops). In a camera's image and in photo mode, **your own character** is seen whole (head included), in your outfit.

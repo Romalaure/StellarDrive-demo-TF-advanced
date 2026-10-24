@@ -17,7 +17,7 @@ Las posiciones siguen una cuadrícula de 25 cm contada desde la pieza apuntada.
 | Celosía 1 × 1 | Claraboya 1 × 1 | Escuadra de esquina 1 × 1 |
 | Estante 1 m | Tabique de cristal 1 × 2 | Chapa perforada 1 × 1 |
 
-A esto se suman las **piezas de estructura**: vigas de 1, 2 y 4 m, viga reforzada, placas 1 × 1 y 2 × 1, marco, unión.
+Las antiguas **piezas de estructura** (vigas, placas 1 × 1 y 2 × 1, marco, unión) salieron del menú en la 0.44; las ya colocadas se quedan.
 
 Las piezas colocadas se tocan (tablas y tabiques en continuo). **Orientación**: al colocar, la tecla **B** (ajuste `BuildTiltKey`) pasa la pieza de derecha a inclinada, de lado y luego invertida: un tabique de pie contra una pared del casco, un poste tumbado en el suelo, un tabique de 2 m de largo y 1 m de alto. Modelos rehechos: veta de madera real, acero satinado, el cristal del casco. Sobre el casco, las piezas se alinean con sus casillas: una pieza de 1 m se centra en una casilla, una de 2 m en un borde de casilla, y las piezas finas (barandillas, tabiques, ventanas) se colocan en los bordes de las casillas como las paredes del juego: dos barandillas en ángulo recto se unen en la esquina. La colisión es la caja de la pieza (los huecos de una celosía son solo visuales).
 
@@ -39,6 +39,28 @@ Cuarta fila de la pestaña, investigación **Carpintería**; se colocan en el su
 | Planta en maceta | 1,2 m de alto | 2 madera, 1 cristal |
 
 La tela del sofá y del sillón y la alfombra toman el color de la pistola de pintura. **Puedes sentarte** en el sofá (3 plazas), el sillón, la silla, el taburete, la mesa y la mesa baja: míralos y pulsa **T** (el sitio libre más cercano); **T** o una tecla de movimiento para levantarte. Los demás jugadores te ven sentado. El escritorio, la alfombra, la librería y la planta son decorativos.
+
+**Más muebles** (fila bajo los muebles, Carpintería): cama (te sientas en el borde), litera, mesita de noche con lámpara, armario, cómoda, encimera de cocina (fregadero, grifo), frigorífico, mueble de TV, banco (3 plazas), silla de oficina (te puedes sentar), mesa redonda, jardinera. Solo madera, hierro, cristal y cobre.
+
+## Escaleras
+
+Fila de arriba de la pestaña. Se colocan en el suelo y **suben hacia atrás** (el pie del lado del jugador que las coloca); gíralas antes de colocar. Su colisión es una rampa bajo los peldaños: se suben andando, como las pendientes del casco.
+
+| Escalera | Tamaño | Investigación |
+|---|---|---|
+| Madera, madera suave | 1 m de alto en 1 m / en 2 m | Carpintería |
+| Industrial (rejilla), industrial suave | 1 m en 1 m / en 2 m | Construcción metálica |
+| Cristal (peldaños sobre viga cromada), cristal suave | 1 m en 1 m / en 2 m | Vidrio arquitectónico |
+| Futurista (bloques oscuros, bordes iluminados), futurista suave | 1 m en 1 m / en 2 m | Módulos de estación |
+| Caracol de acero, caracol futurista | 2 m de alto, ¾ de vuelta, 2 × 2 m de planta | Construcción metálica / Módulos de estación |
+
+Encadena tramos para subir más. El caracol necesita un hueco en el techo encima.
+
+## Letreros y puertas diagonales
+
+Última fila de la pestaña.
+- **Panel luminoso** (pared), **placa de puerta** (pequeña, junto a una puerta), **letrero holográfico** (en el suelo, texto flotando a la altura de los ojos): míralos y pulsa **T** para escribir el texto (40 caracteres) y elegir su color (7 colores). Para nombrar las salas: Puente, Enfermería, Bodega… Todos los jugadores lo ven, el anfitrión lo guarda con el mundo. Investigación *Ordenador de a bordo*.
+- **Puerta diagonal** (un cuadrado) y **puerta diagonal grande** (2 × 2): para las paredes diagonales, donde no caben las puertas del juego. Quita la pared diagonal, pon la puerta en el suelo en su lugar (gírala para la otra diagonal). Se abre sola cuando alguien se acerca y se cierra detrás. **No retiene el aire** como las puertas del juego. Investigación *Construcción metálica*.
 
 ## Casco reforzado
 

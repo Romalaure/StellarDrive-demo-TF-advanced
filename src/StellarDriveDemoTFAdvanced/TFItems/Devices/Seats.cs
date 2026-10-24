@@ -38,6 +38,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             [7443] = new[] { new Vector3(0f, 0.71f, 0f) },
             [7444] = new[] { new Vector3(-0.5f, 0.77f, -0.3f), new Vector3(0.5f, 0.77f, -0.3f) },
             [7445] = new[] { new Vector3(-0.3f, 0.43f, -0.15f), new Vector3(0.3f, 0.43f, -0.15f) },
+            [8200] = new[] { new Vector3(0f, 0.42f, -0.8f) },
+            [8208] = new[] { new Vector3(-0.52f, 0.47f, 0f), new Vector3(0f, 0.47f, 0f), new Vector3(0.52f, 0.47f, 0f) },
+            [8209] = new[] { new Vector3(0f, 0.53f, -0.02f) },
         };
 
         private const float Reach = 4f, EyeAbove = 0.68f, LegAngle = 12f;

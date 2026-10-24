@@ -70,6 +70,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.Trader.Install();
             Devices.Npc.Install();
             Cameras.CameraTablet.Install();
+            Construction.Signs.Install();
+            StellarDriveDemoTFAdvanced.Power.TractorBeam.Install();
             if (ToolsActive)
             {
                 Paint.PaintNet.InstallSerializers();
@@ -114,12 +116,15 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.Teleporter.Update();
             Devices.RadioSound.Update();
             Devices.PhotoMode.Update();
+            Devices.SelfAvatar.Update();
+            StellarDriveDemoTFAdvanced.Power.TractorKey.Update();
             Devices.PhotoCamera.Update();
             Devices.Seats.Update();
             if (ToolsActive)
             {
                 Paint.PaintNet.Update();
                 Paint.PaintHud.Update();
+                Paint.PaintZoop.Update();
                 Devices.ThirdPerson.Update();
                 Devices.SchematicTablet.Update();
                 Devices.KeySeatCompat.Update();
@@ -149,11 +154,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.NpcMenu.Draw();
             Devices.Teleporter.DrawHint();
             Devices.PhotoFrameMenu.Draw();
+            Construction.SignMenu.Draw();
             Devices.PhotoMode.Draw();
             Devices.PhotoCamera.Draw();
             if (ToolsActive)
             {
                 Paint.PaintHud.Draw();
+                Paint.PaintZoop.Draw();
                 Devices.SchematicsMenu.Draw();
                 Devices.SchematicTablet.Draw();
             }

@@ -64,9 +64,16 @@ Un emisor que se coloca **en el suelo, en medio de una abertura del casco**, de 
 - **Color**: pinta la puerta con la pistola de pintura, el campo toma su color.
 - **Gestor de puertas** (misma fila): una consola que lista todas las puertas de la nave y de lo acoplado a ella (cuántas, cuáles están activas) las enciende o apaga y las vuelve sólidas o atravesables, una a una o todas a la vez. Sin cable.
 - **Lado**: el campo se extiende a ambos lados del emisor, o solo a su izquierda o a su derecha (visto de frente al emisor, desde el lado sin tomas): colócalo entonces contra un lado de la abertura.
-- El campo es grueso (20 cm) y baja hasta el suelo. Mientras está activo, el riel no tiene colisión: se pasa por encima sin tropezar, y se puede pintar y desmontar incluso encendido.
+- **Grosor**: se ajusta en la ventana, de 5 cm a 3 m (20 cm por defecto). El campo baja hasta el suelo. Mientras está activo, el riel no tiene colisión: se pasa por encima sin tropezar, y se puede pintar y desmontar incluso encendido.
 - Toma el tamaño de la abertura: el campo se solapa medio metro con el casco alrededor y se ajusta solo al plano del casco.
 - Investigación **Tecnología de artefactos**, fila de los campos de fuerza de la pestaña TF Avanzado.
+
+## Rayo tractor
+
+Un emisor que se fija al casco (fila de artefactos de la pestaña TF Avanzado, investigación *Minería embarcada*): su rayo sale recto de la superficie donde se coloca.
+- Enciéndelo: míralo y pulsa **T**, o la tecla **Y** (`TractorKey`) desde el asiento de pilotaje (todos los rayos de la nave).
+- Con energía (3000 W), **engancha la nave más cercana en su rayo** (nave, pecio, pirata) hasta 150 m, la **atrae hasta 14 m** delante de él y la mantiene ahí, a tu velocidad (su giro se frena). Una nave pesada llega despacio. Apágalo para soltarla.
+- Toma de mando: con un cable solo funciona si la señal es mayor que 0. Toma de estado: 2 enganchado, 1 busca, 0 apagado, 3 sin energía.
 
 ## Tren de aterrizaje
 

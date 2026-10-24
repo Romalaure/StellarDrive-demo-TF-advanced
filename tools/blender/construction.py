@@ -1,7 +1,7 @@
-"""The TF Construction parts (7341-7367) and furniture (7440-7449), each in its part's frame and box
+"""The TF Construction parts (7341-7367), furniture (7440-7449, 8200-8211) and stairs (8220-8229), each in its part's frame and box
 (MaterialParts sizes): y out of the surface it stands on, the box from y = 0 up. Their pieces are
 named C<id>_<look>: Wood, WoodDark, Steel, SteelDark, Chrome, Glass, Fabric, FabricDark, Leaf,
-Pot, Soil, Rug, RugTrim, BookA, BookB, BookC (the mod gives each look its material: real wood
+Pot, Soil, Rug, RugTrim, BookA, BookB, BookC, Sheet, Screen, Lamp, Neon (the mod gives each look its material: real wood
 grain, satin metal, the hull's glass...). Pieces stand a few millimeters clear of the faces under
 them (no flicker). The helpers turn the part's frame into Blender's (game (x, y, z) = Blender (x, z, y))."""
 import math
@@ -416,5 +416,288 @@ for i in range(9):
     mid = (top[0] + d[0] * 0.1, top[1] + 0.04, top[2] + d[2] * 0.1)
     solid(P, "Leaf", [top, (mid[0] + side[0], mid[1], mid[2] + side[2]), tip, (mid[0] - side[0], mid[1], mid[2] - side[2]),
                       (top[0], top[1] + 0.006, top[2]), (mid[0] + side[0], mid[1] + 0.006, mid[2] + side[2]), (tip[0], tip[1] + 0.006, tip[2]), (mid[0] - side[0], mid[1] + 0.006, mid[2] - side[2])])
+
+# ======================= More furniture (8200-8211) =======================
+
+# 8200 Bed (1 x 0.55 x 2.1): a wooden frame, a mattress, a sheet, a folded blanket, a pillow, a headboard at +z
+P = 8200
+for x in (-0.46, 0.46):
+    for z in (-1.0, 1.0):
+        box(P, "WoodDark", (x, 0.08, z), (0.07, 0.16, 0.07), bevel=0.005)
+for s in (-1, 1):
+    box(P, "Wood", (s * 0.48, 0.2, 0), (0.04, 0.12, 2.06), bevel=0.005)
+box(P, "Wood", (0, 0.2, -1.03), (1.0, 0.12, 0.04), bevel=0.005)
+box(P, "Wood", (0, 0.5, 1.03), (1.0, 0.72, 0.05), bevel=0.01)
+box(P, "WoodDark", (0, 0.86, 1.03), (1.02, 0.03, 0.07), bevel=0.006)
+box(P, "Sheet", (0, 0.32, 0), (0.92, 0.18, 2.0), bevel=0.04, segments=3)
+box(P, "FabricDark", (0, 0.42, -0.45), (0.96, 0.05, 1.0), bevel=0.02, segments=2)
+box(P, "Fabric", (0, 0.45, -0.05), (0.97, 0.06, 0.22), bevel=0.025, segments=2)
+box(P, "Sheet", (0, 0.46, 0.8), (0.62, 0.1, 0.32), bevel=0.045, segments=3)
+
+# 8201 Bunk bed (1 x 1.8 x 2.1): a steel frame, two mattresses, a ladder at the front (-z) right
+P = 8201
+for x in (-0.47, 0.47):
+    for z in (-1.0, 1.0):
+        box(P, "SteelDark", (x, 0.9, z), (0.05, 1.8, 0.05), bevel=0.004)
+for y in (0.25, 1.15):
+    for s in (-1, 1):
+        box(P, "Steel", (s * 0.47, y, 0), (0.04, 0.08, 1.96), bevel=0.003)
+        box(P, "Steel", (0, y, s * 1.0), (0.9, 0.08, 0.04), bevel=0.003)
+    box(P, "SteelDark", (0, y + 0.03, 0), (0.88, 0.02, 1.94))
+    box(P, "Sheet", (0, y + 0.11, 0), (0.88, 0.14, 1.92), bevel=0.035, segments=3)
+    box(P, "FabricDark", (0, y + 0.19, -0.4), (0.9, 0.03, 1.0), bevel=0.012)
+    box(P, "Sheet", (0, y + 0.22, 0.75), (0.56, 0.08, 0.28), bevel=0.035, segments=3)
+# The upper bunk's guard rail at +x and -x
+for s in (-1, 1):
+    cyl(P, "Steel", (s * 0.47, 1.55, -0.95), (s * 0.47, 1.55, 0.95), 0.018, sides=12)
+for x in (0.18, 0.42):
+    box(P, "SteelDark", (x, 0.95, -1.06), (0.035, 1.6, 0.035), bevel=0.003)
+for k in range(5):
+    cyl(P, "Chrome", (0.18, 0.35 + k * 0.28, -1.06), (0.42, 0.35 + k * 0.28, -1.06), 0.014, sides=10)
+
+# 8202 Nightstand (0.5 x 0.55 x 0.42): a small cabinet, a drawer, a lamp
+P = 8202
+box(P, "Wood", (0, 0.24, 0), (0.5, 0.44, 0.42), bevel=0.008)
+box(P, "WoodDark", (0, 0.46, 0), (0.52, 0.03, 0.44), bevel=0.006)
+box(P, "WoodDark", (0, 0.33, -0.211), (0.44, 0.15, 0.01), bevel=0.003)
+box(P, "Chrome", (0, 0.33, -0.222), (0.1, 0.014, 0.012), bevel=0.003)
+for x in (-0.21, 0.21):
+    for z in (-0.17, 0.17):
+        box(P, "SteelDark", (x, 0.01, z), (0.04, 0.02, 0.04))
+cyl(P, "Chrome", (0.1, 0.475, 0.06), (0.1, 0.49, 0.06), 0.06, sides=16)
+cyl(P, "Chrome", (0.1, 0.49, 0.06), (0.1, 0.6, 0.06), 0.008, sides=8)
+cyl(P, "Lamp", (0.1, 0.55, 0.06), (0.1, 0.6, 0.06), 0.03, sides=12)
+cyl(P, "Sheet", (0.1, 0.54, 0.06), (0.1, 0.64, 0.06), 0.1, 0.065, sides=20, cap=False)
+
+# 8203 Wardrobe (1.2 x 2.1 x 0.6): a tall cabinet, two doors with long handles, a plinth and a cornice
+P = 8203
+box(P, "WoodDark", (0, 0.04, 0), (1.16, 0.08, 0.56))
+box(P, "Wood", (0, 1.05, 0.01), (1.2, 1.94, 0.58), bevel=0.008)
+box(P, "WoodDark", (0, 2.07, 0), (1.24, 0.06, 0.62), bevel=0.008)
+for s in (-1, 1):
+    box(P, "Wood", (s * 0.296, 1.05, -0.285), (0.58, 1.86, 0.02), bevel=0.006)
+    box(P, "Chrome", (s * 0.04, 1.1, -0.305), (0.016, 0.4, 0.016), bevel=0.004)
+    for y in (0.25, 1.85):
+        box(P, "WoodDark", (s * 0.296, y, -0.297), (0.5, 0.012, 0.006))
+
+# 8204 Dresser (1.2 x 0.85 x 0.5): a chest of six drawers in two columns
+P = 8204
+box(P, "Wood", (0, 0.44, 0.01), (1.2, 0.8, 0.48), bevel=0.008)
+box(P, "WoodDark", (0, 0.835, 0), (1.22, 0.03, 0.52), bevel=0.006)
+for i in range(3):
+    y = 0.18 + i * 0.25
+    for s in (-1, 1):
+        box(P, "WoodDark", (s * 0.295, y, -0.236), (0.56, 0.22, 0.012), bevel=0.004)
+        box(P, "Chrome", (s * 0.295, y + 0.04, -0.25), (0.14, 0.014, 0.014), bevel=0.003)
+for x in (-0.56, 0.56):
+    for z in (-0.2, 0.2):
+        cyl(P, "SteelDark", (x, 0.0, z), (x, 0.045, z), 0.02, sides=10)
+
+# 8205 Kitchen counter (1.2 x 0.9 x 0.6): a cabinet, a steel worktop with a sink and a tap
+P = 8205
+box(P, "SteelDark", (0, 0.04, 0.02), (1.16, 0.08, 0.54))
+box(P, "Wood", (0, 0.46, 0.01), (1.2, 0.76, 0.58), bevel=0.006)
+for s in (-1, 1):
+    box(P, "WoodDark", (s * 0.296, 0.46, -0.285), (0.58, 0.7, 0.018), bevel=0.004)
+    box(P, "Chrome", (s * 0.05, 0.72, -0.3), (0.016, 0.14, 0.016), bevel=0.003)
+box(P, "Steel", (0, 0.87, 0), (1.22, 0.04, 0.62), bevel=0.006)
+box(P, "SteelDark", (0.25, 0.85, -0.02), (0.44, 0.03, 0.36))
+box(P, "Chrome", (0.25, 0.89, -0.02), (0.46, 0.006, 0.38))
+cyl(P, "Chrome", (0.25, 0.89, 0.22), (0.25, 1.06, 0.22), 0.016, sides=12)
+cyl(P, "Chrome", (0.25, 1.06, 0.22), (0.25, 1.06, 0.05), 0.013, sides=12)
+cyl(P, "Chrome", (0.33, 0.89, 0.22), (0.33, 0.95, 0.22), 0.012, sides=8)
+# A chopping board and a pan on the left
+box(P, "WoodDark", (-0.3, 0.9, 0.0), (0.36, 0.02, 0.26), bevel=0.004)
+cyl(P, "SteelDark", (-0.3, 0.91, 0.0), (-0.3, 0.95, 0.0), 0.1, 0.11, sides=20)
+
+# 8206 Fridge (0.7 x 1.9 x 0.7): a tall body, two doors, long handles
+P = 8206
+box(P, "Steel", (0, 0.95, 0.01), (0.7, 1.86, 0.66), bevel=0.02, segments=2)
+box(P, "SteelDark", (0, 0.03, 0.01), (0.66, 0.06, 0.62))
+box(P, "Chrome", (0, 1.25, -0.335), (0.68, 1.22, 0.03), bevel=0.012, segments=2)
+box(P, "Chrome", (0, 0.36, -0.335), (0.68, 0.54, 0.03), bevel=0.012, segments=2)
+box(P, "SteelDark", (0, 0.645, -0.34), (0.66, 0.01, 0.03))
+for y0, y1 in ((0.95, 1.55), (0.45, 0.6)):
+    cyl(P, "SteelDark", (0.27, y0, -0.375), (0.27, y1, -0.375), 0.014, sides=10)
+box(P, "Screen", (-0.18, 1.55, -0.352), (0.14, 0.08, 0.004))
+
+# 8207 TV unit (1.6 x 1.3 x 0.45): a low cabinet, a flat screen on a stand, a speaker bar
+P = 8207
+box(P, "WoodDark", (0, 0.24, 0), (1.6, 0.44, 0.45), bevel=0.008)
+box(P, "Wood", (0, 0.465, 0), (1.62, 0.03, 0.47), bevel=0.006)
+for x in (-0.54, 0.0, 0.54):
+    box(P, "Wood", (x, 0.24, -0.226), (0.5, 0.36, 0.01), bevel=0.004)
+box(P, "SteelDark", (0, 0.49, 0.05), (0.36, 0.02, 0.2), bevel=0.004)
+box(P, "SteelDark", (0, 0.58, 0.08), (0.06, 0.18, 0.04))
+box(P, "SteelDark", (0, 0.92, 0.07), (1.4, 0.8, 0.05), bevel=0.01)
+box(P, "Screen", (0, 0.93, 0.043), (1.34, 0.74, 0.004))
+box(P, "SteelDark", (0, 0.515, -0.12), (0.9, 0.07, 0.09), bevel=0.02, segments=2)
+
+# 8208 Bench (1.6 x 0.46 x 0.45): a slatted wooden seat on two steel frames
+P = 8208
+for x in (-0.68, 0.68):
+    box(P, "SteelDark", (x, 0.21, -0.18), (0.04, 0.42, 0.04), bevel=0.003)
+    box(P, "SteelDark", (x, 0.21, 0.18), (0.04, 0.42, 0.04), bevel=0.003)
+    box(P, "SteelDark", (x, 0.4, 0), (0.05, 0.03, 0.42), bevel=0.003)
+    box(P, "SteelDark", (x, 0.02, 0), (0.06, 0.03, 0.44), bevel=0.003)
+for i in range(4):
+    z = -0.165 + i * 0.11
+    box(P, "Wood", (0, 0.44, z), (1.6, 0.04, 0.095), bevel=0.006)
+
+# 8209 Office chair (0.6 x 1.1 x 0.6): a five-star base on casters, a gas lift, a padded seat and back, arms
+P = 8209
+for i in range(5):
+    a = math.radians(90 + 72 * i)
+    tip = (0.28 * math.cos(a), 0.08, 0.28 * math.sin(a))
+    cyl(P, "SteelDark", (0, 0.08, 0), (tip[0], 0.07, tip[2]), 0.022, sides=10)
+    cyl(P, "SteelDark", (tip[0], 0.0, tip[2]), (tip[0], 0.055, tip[2]), 0.028, sides=12)
+cyl(P, "Chrome", (0, 0.08, 0), (0, 0.42, 0), 0.025, sides=14)
+cyl(P, "SteelDark", (0, 0.06, 0), (0, 0.2, 0), 0.04, sides=14)
+box(P, "SteelDark", (0, 0.43, 0), (0.3, 0.03, 0.3))
+box(P, "FabricDark", (0, 0.48, -0.02), (0.52, 0.08, 0.5), bevel=0.03, segments=3)
+box(P, "SteelDark", (0, 0.62, 0.26), (0.06, 0.3, 0.04))
+box(P, "FabricDark", (0, 0.86, 0.26), (0.46, 0.5, 0.07), bevel=0.03, segments=3)
+for s in (-1, 1):
+    box(P, "SteelDark", (s * 0.25, 0.58, 0.0), (0.03, 0.18, 0.03))
+    box(P, "FabricDark", (s * 0.25, 0.68, -0.02), (0.06, 0.03, 0.26), bevel=0.012)
+
+# 8210 Round table (1 x 0.75 x 1): a round wooden top on a pedestal
+P = 8210
+cyl(P, "Wood", (0, 0.71, 0), (0, 0.75, 0), 0.5, sides=40, bevel=0.006)
+cyl(P, "WoodDark", (0, 0.69, 0), (0, 0.71, 0), 0.42, sides=32)
+cyl(P, "SteelDark", (0, 0.03, 0), (0, 0.69, 0), 0.05, sides=16)
+cyl(P, "SteelDark", (0, 0.0, 0), (0, 0.03, 0), 0.3, 0.28, sides=32)
+cyl(P, "Pot", (0.12, 0.75, 0.1), (0.12, 0.85, 0.1), 0.04, 0.05, sides=14)
+cyl(P, "Leaf", (0.12, 0.85, 0.1), (0.12, 0.92, 0.1), 0.05, 0.02, sides=10)
+
+# 8211 Planter box (1.2 x 0.75 x 0.4): a long wooden box, soil, a row of leafy plants
+P = 8211
+box(P, "Wood", (0, 0.2, 0), (1.2, 0.4, 0.4), bevel=0.008)
+for s in (-1, 1):
+    box(P, "WoodDark", (0, 0.39, s * 0.19), (1.22, 0.04, 0.04), bevel=0.004)
+    box(P, "WoodDark", (s * 0.59, 0.39, 0), (0.04, 0.04, 0.4), bevel=0.004)
+box(P, "Soil", (0, 0.39, 0), (1.12, 0.03, 0.34))
+for k in range(5):
+    cx = -0.48 + k * 0.24
+    for i in range(6):
+        a = math.radians(i * 60 + k * 17)
+        top = (cx + 0.08 * math.cos(a), 0.55 + random.uniform(0.0, 0.18), 0.08 * math.sin(a))
+        rod(P, "Leaf", (cx, 0.4, 0), top, 0.006, sides=5)
+        d = (math.cos(a), 0, math.sin(a))
+        tip = (top[0] + d[0] * 0.12, top[1] + 0.03, top[2] + d[2] * 0.12)
+        side = (-d[2] * 0.04, 0, d[0] * 0.04)
+        mid = (top[0] + d[0] * 0.06, top[1] + 0.025, top[2] + d[2] * 0.06)
+        solid(P, "Leaf", [top, (mid[0] + side[0], mid[1], mid[2] + side[2]), tip, (mid[0] - side[0], mid[1], mid[2] - side[2]),
+                          (top[0], top[1] + 0.005, top[2]), (mid[0] + side[0], mid[1] + 0.005, mid[2] + side[2]), (tip[0], tip[1] + 0.005, tip[2]), (mid[0] - side[0], mid[1] + 0.005, mid[2] - side[2])])
+
+# ======================= Stairs (8220-8229) =======================
+# Straight flights climb toward +z: the foot at -z (in front of the player placing them), the top
+# edge at +z, rise H over run L. Spirals turn counterclockwise seen from above.
+
+
+def stringer(P, look, x, H, L, depth=0.16, t=0.04):
+    """A sloped side board under the steps, from the foot to the top edge."""
+    z0, z1 = -L / 2, L / 2
+    pts = [(x - t / 2, 0.0, z0 + 0.12), (x - t / 2, H - depth, z1), (x - t / 2, H, z1), (x - t / 2, depth, z0), (x - t / 2, 0.0, z0)]
+    solid(P, look, pts + [(p[0] + t, p[1], p[2]) for p in pts])
+
+
+def flight(P, style, H, L):
+    n = max(4, int(round(H / 0.2)))
+    rise, run = H / n, L / n
+    w = 1.0
+    for i in range(n):
+        y = (i + 1) * rise
+        zc = -L / 2 + (i + 0.5) * run
+        if style == "wood":
+            box(P, "Wood", (0, y - 0.025, zc + 0.01), (w - 0.1, 0.05, run + 0.02), bevel=0.006)
+            box(P, "WoodDark", (0, y - rise / 2 - 0.02, zc - run / 2 + 0.012), (w - 0.12, rise - 0.05, 0.02))
+        elif style == "iron":
+            box(P, "SteelDark", (0, y - 0.02, zc), (w - 0.1, 0.04, run - 0.01), bevel=0.003)
+            for k in range(7):
+                x = -0.39 + k * 0.13
+                box(P, "Steel", (x, y - 0.002, zc), (0.012, 0.006, run - 0.04))
+            box(P, "Steel", (0, y - 0.01, zc - run / 2 + 0.02), (w - 0.1, 0.02, 0.03))
+        elif style == "glass":
+            box(P, "Glass", (0, y - 0.025, zc), (w - 0.06, 0.04, run - 0.01))
+            box(P, "Chrome", (0, y - 0.05, zc), (0.16, 0.02, run * 0.8), bevel=0.004)
+            for x in (-0.4, 0.4):
+                cyl(P, "Chrome", (x, y - 0.05, zc), (x, y - 0.002, zc), 0.012, sides=8)
+        else:  # future: thick dark blocks, a light strip on each nosing, light under the tread
+            box(P, "SteelDark", (0, y - 0.04, zc), (w - 0.04, 0.08, run), bevel=0.012, segments=2)
+            box(P, "Neon", (0, y - 0.01, zc - run / 2 + 0.008), (w - 0.12, 0.012, 0.012))
+            box(P, "Neon", (0, y - 0.081, zc), (w - 0.3, 0.004, run * 0.5))
+    if style == "wood":
+        for x in (-0.47, 0.47):
+            stringer(P, "WoodDark", x, H, L)
+    elif style == "iron":
+        for x in (-0.47, 0.47):
+            stringer(P, "Steel", x, H, L, depth=0.18, t=0.03)
+    elif style == "glass":
+        # One central chrome spine under the treads
+        stringer(P, "Chrome", 0.0, H - 0.04, L, depth=0.1, t=0.08)
+    else:
+        for x in (-0.49, 0.49):
+            stringer(P, "SteelDark", x, H, L, depth=0.2, t=0.02)
+        # A light line along each side, just above the nosings
+        z0, z1 = -L / 2, L / 2
+        for x in (-0.5, 0.5):
+            solid(P, "Neon", [(x - 0.004, 0.02, z0), (x - 0.004, H + 0.02, z1), (x - 0.004, H + 0.035, z1), (x - 0.004, 0.035, z0),
+                              (x + 0.004, 0.02, z0), (x + 0.004, H + 0.02, z1), (x + 0.004, H + 0.035, z1), (x + 0.004, 0.035, z0)])
+
+
+flight(8220, "wood", 1.0, 1.0)
+flight(8221, "wood", 1.0, 2.0)
+flight(8222, "iron", 1.0, 1.0)
+flight(8223, "iron", 1.0, 2.0)
+flight(8224, "glass", 1.0, 1.0)
+flight(8225, "glass", 1.0, 2.0)
+flight(8226, "future", 1.0, 1.0)
+flight(8227, "future", 1.0, 2.0)
+
+
+def spiral(P, style, H=2.0, turn=270.0, steps=9, r0=0.1, r1=0.97):
+    rise = H / steps
+    da = math.radians(turn / steps)
+    pole = "SteelDark" if style == "iron" else "Chrome"
+    cyl(P, pole, (0, 0.0, 0), (0, H, 0), 0.08, sides=20)
+    cyl(P, "SteelDark", (0, 0.0, 0), (0, 0.03, 0), 0.2, sides=24)
+    for i in range(steps):
+        a0, a1 = i * da, (i + 1) * da
+        y = (i + 1) * rise
+        # A wedge tread from the pole out, its outer edge a little wider than the inner
+        pts = []
+        for (r, a) in ((r0, a0), (r1, a0), (r1, a1), (r0, a1)):
+            pts.append((r * math.cos(a), 0, r * math.sin(a)))
+        t = 0.05 if style == "iron" else 0.06
+        look = "Steel" if style == "iron" else "Glass"
+        solid(P, look, [(p[0], y - t, p[2]) for p in pts] + [(p[0], y, p[2]) for p in pts])
+        am = (a0 + a1) / 2
+        if style == "iron":
+            # A railing post at each tread's outer edge, chequer bars on top
+            cyl(P, "SteelDark", (0.93 * math.cos(am), y, 0.93 * math.sin(am)), (0.93 * math.cos(am), y + 0.9, 0.93 * math.sin(am)), 0.014, sides=8)
+            for k in range(3):
+                r = 0.35 + k * 0.2
+                cyl(P, "SteelDark", (r * math.cos(a0 + 0.08), y + 0.002, r * math.sin(a0 + 0.08)), (r * math.cos(a1 - 0.08), y + 0.002, r * math.sin(a1 - 0.08)), 0.006, sides=5)
+        else:
+            # A lit edge on each tread's front and a ring of light on the pole
+            solid(P, "Neon", [(r0 * math.cos(a0), y - 0.004, r0 * math.sin(a0)), (r1 * math.cos(a0), y - 0.004, r1 * math.sin(a0)),
+                              (r1 * math.cos(a0 + 0.02), y - 0.004, r1 * math.sin(a0 + 0.02)), (r0 * math.cos(a0 + 0.02), y - 0.004, r0 * math.sin(a0 + 0.02)),
+                              (r0 * math.cos(a0), y + 0.004, r0 * math.sin(a0)), (r1 * math.cos(a0), y + 0.004, r1 * math.sin(a0)),
+                              (r1 * math.cos(a0 + 0.02), y + 0.004, r1 * math.sin(a0 + 0.02)), (r0 * math.cos(a0 + 0.02), y + 0.004, r0 * math.sin(a0 + 0.02))])
+            cyl(P, "Neon", (0, y - 0.03, 0), (0, y - 0.01, 0), 0.085, sides=20)
+    if style == "iron":
+        # The handrail: a polyline over the post tops
+        prev = None
+        for i in range(steps + 1):
+            a = i * da
+            p = (0.93 * math.cos(a), i * rise + 0.9 + rise / 2, 0.93 * math.sin(a))
+            if prev is not None:
+                rod(P, "Steel", prev, p, 0.02, sides=10)
+            prev = p
+
+
+spiral(8228, "iron")
+spiral(8229, "future")
 
 export("construction.obj")

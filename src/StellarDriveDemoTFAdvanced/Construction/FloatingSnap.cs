@@ -314,6 +314,6 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         /// <summary>Parts that stand upright against a side face: this mod's construction sets, furniture, station modules and solar panels.</summary>
         private static bool Builds(ushort id) =>
-            StationModules.ById.ContainsKey(id) || id == StationModules.SolarId || (id >= 7331 && id <= 7367) || MaterialParts.IsFurniture(id);
+            StationModules.ById.ContainsKey(id) || id == StationModules.SolarId || (id >= 7331 && id <= 7367) || MaterialParts.IsConstruction(id) || Signs.IsSign(id) || DiagonalDoors.IsDoor(id);
     }
 }

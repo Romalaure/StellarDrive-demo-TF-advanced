@@ -17,7 +17,7 @@ Les positions suivent une grille de 25 cm comptée depuis la pièce visée, et l
 | Treillis 1 × 1 | Verrière 1 × 1 | Gousset d'angle 1 × 1 |
 | Étagère 1 m | Cloison vitrée 1 × 2 | Tôle perforée 1 × 1 |
 
-S'y ajoutent les **pièces de structure** : poutres 1, 2 et 4 m, poutre renforcée, plaques 1 × 1 et 2 × 1, cadre, jonction.
+Les anciennes **pièces de structure** (poutres, plaques 1 × 1 et 2 × 1, cadre, jonction) ont quitté le menu en 0.44 ; celles déjà posées restent.
 
 Modèles retravaillés : vrai grain de bois, acier satiné, verre de la coque. La collision est la boîte de la pièce (le vide d'un treillis est visuel).
 
@@ -39,6 +39,28 @@ Quatrième rangée de l'onglet, tech **Charpenterie** ; ils se posent au sol (ou
 | Plante en pot | 1,2 m de haut | 2 bois, 1 verre |
 
 Le tissu du canapé, du fauteuil et le tapis prennent la couleur du pistolet à peinture. **On s'assoit** sur le canapé (3 places), le fauteuil, la chaise, le tabouret, la table et la table basse : regarde-les et appuie sur **T** (place libre la plus proche) ; **T** ou une touche de déplacement pour se relever. Les autres joueurs te voient assis. Le bureau, le tapis, la bibliothèque et la plante sont décoratifs.
+
+**Autres meubles** (rangée sous les meubles, Charpenterie) : lit (on s'assoit au bord), lits superposés, table de chevet avec lampe, armoire, commode, plan de travail de cuisine (évier, robinet), réfrigérateur, meuble TV, banc (3 places), chaise de bureau (on s'y assoit), table ronde, jardinière. Bois, fer, verre et cuivre seulement.
+
+## Escaliers
+
+Rangée du haut de l'onglet. Ils se posent au sol et **montent vers l'arrière** (le pied du côté du joueur qui pose) ; tourne-les avant de poser. Leur collision est une rampe sous les marches : on y monte en marchant, comme sur les pentes de coque.
+
+| Escalier | Taille | Recherche |
+|---|---|---|
+| Bois, bois doux | 1 m de haut sur 1 m / sur 2 m | Charpenterie |
+| Industriel (caillebotis), industriel doux | 1 m sur 1 m / sur 2 m | Construction métallique |
+| Verre (marches sur poutre chromée), verre doux | 1 m sur 1 m / sur 2 m | Verrerie architecturale |
+| Futuriste (blocs sombres, nez de marche lumineux), futuriste doux | 1 m sur 1 m / sur 2 m | Modules de station |
+| Colimaçon en acier, colimaçon futuriste | 2 m de haut, ¾ de tour, 2 × 2 m au sol | Construction métallique / Modules de station |
+
+Mets des volées à la suite pour monter plus haut. Le colimaçon a besoin d'une trémie dans le plafond au-dessus.
+
+## Panneaux et portes diagonales
+
+Dernière rangée de l'onglet.
+- **Panneau lumineux** (mur), **plaque de porte** (petite, à côté d'une porte), **enseigne holographique** (au sol, texte flottant à hauteur des yeux) : regarde-les et appuie sur **T** pour écrire le texte (40 caractères) et choisir sa couleur (7 couleurs). Pour nommer les pièces : Pont, Infirmerie, Soute… Tous les joueurs le voient, l'hôte le garde avec le monde. Recherche *Ordinateur de bord*.
+- **Porte diagonale** (un carré) et **grande porte diagonale** (2 × 2) : pour les murs en diagonale, que les portes du jeu ne prennent pas. Enlève le mur diagonal, pose la porte au sol à sa place (tourne-la pour l'autre diagonale). Elle s'ouvre seule quand quelqu'un approche et se referme. Elle **ne retient pas l'air** comme les portes du jeu. Recherche *Construction métallique*.
 
 ## Coque renforcée
 

@@ -17,7 +17,7 @@ Positions follow a 25 cm grid counted from the aimed part.
 | Lattice 1 × 1 | Skylight 1 × 1 | Corner gusset 1 × 1 |
 | Shelf 1 m | Glass partition 1 × 2 | Perforated sheet 1 × 1 |
 
-On top of these come the **structural parts**: beams 1, 2 and 4 m, reinforced beam, plates 1 × 1 and 2 × 1, frame, junction.
+The old **structural parts** (beams, plates 1 × 1 and 2 × 1, frame, junction) left the menu in 0.44; the ones already placed stay.
 
 Placed parts touch (planks and partitions in a continuous run). **Orientation**: while placing, the **B** key (setting `BuildTiltKey`) turns the part from upright to tipped forward, on its side and upside down: a partition standing against a hull wall, a post lying on the floor, a 2 m long, 1 m high partition. Reworked models: real wood grain, satin steel, the hull's glass. On the hull, parts line up with its cells: a 1 m part is centered on a cell, a 2 m part on a cell's edge, and thin parts (railings, partitions, windows) stand on the cells' edges like the game's walls: two railings at a right angle meet at the corner. The collision is the part's box (the gaps of a lattice are only visual).
 
@@ -39,6 +39,28 @@ The tab's fourth row, research **Carpentry**; placed on floors (or beside a plac
 | Potted plant | 1.2 m high | 2 wood, 1 glass |
 
 The sofa's and armchair's fabric and the rug take the paint gun's color. **You can sit** on the sofa (3 seats), the armchair, the chair, the stool, the table and the coffee table: look at one and press **T** (the nearest free seat); **T** or a move key to get up. The other players see you seated. The desk, rug, bookcase and plant are decorative.
+
+**More furniture** (the row under the furniture, Carpentry): bed (sit on its edge), bunk bed, nightstand with a lamp, wardrobe, dresser, kitchen counter (sink, tap), fridge, TV unit, bench (3 seats), office chair (you can sit on it), round table, planter box. Wood, iron, glass and copper only.
+
+## Stairs
+
+Top row of the tab. They stand on floors and **climb toward the back** (the foot on the side of the player placing them); turn them before placing. Their collision is a ramp under the steps: you walk up them, like the hull's slopes.
+
+| Stairs | Size | Research |
+|---|---|---|
+| Wood, gentle wood | 1 m high over 1 m / over 2 m | Carpentry |
+| Industrial (grating), gentle industrial | 1 m over 1 m / over 2 m | Metal construction |
+| Glass (steps on a chrome spine), gentle glass | 1 m over 1 m / over 2 m | Architectural glass |
+| Futuristic (dark blocks, lit nosings), gentle futuristic | 1 m over 1 m / over 2 m | Station modules |
+| Steel spiral, futuristic spiral | 2 m high, ¾ of a turn, 2 × 2 m footprint | Metal construction / Station modules |
+
+Chain flights to climb higher. The spiral needs a hole in the ceiling above it.
+
+## Signs and diagonal doors
+
+Last row of the tab.
+- **Lit sign panel** (wall), **door plate** (small, beside a door), **holographic sign** (on the floor, text floating at eye height): look at one and press **T** to write its text (40 characters) and pick its color (7 colors). To name rooms: Bridge, Sickbay, Cargo… Every player sees it, the host keeps it with the world. Research *Ship computer*.
+- **Diagonal door** (one square) and **large diagonal door** (2 × 2): for diagonal walls, which the game's doors do not fit. Remove the diagonal wall, set the door on the floor in its place (turn it for the other diagonal). It opens by itself when someone comes near and closes behind them. It **does not hold air** like the game's doors. Research *Metal construction*.
 
 ## Reinforced hull
 

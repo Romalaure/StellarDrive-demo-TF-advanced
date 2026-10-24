@@ -24,9 +24,10 @@ namespace StellarDriveDemoTFAdvanced.Power
     /// unless it is set solid. It takes its color from the paint gun. It runs on the ship's power
     /// (<see cref="PowerCatalog.FieldDoorWattsPerSquareMeter"/> per m²).
     /// The whole setting is one value in the part's ConstantState (saved, synchronized):
-    /// (flags × 100000 + side × 10000 + width × 100 + height) × 10 + status, flags being
-    /// 1 width negative, 2 height negative, 4 solid; the side <see cref="Side"/> (0 for the doors
-    /// of 0.28) and the status <see cref="Status"/>.
+    /// (thickness × 1000000 + flags × 100000 + side × 10000 + width × 100 + height) × 10 + status,
+    /// flags being 1 width negative, 2 height negative, 4 solid; the side <see cref="Side"/> (0 for
+    /// the doors of 0.28), the thickness an index in <see cref="Thicknesses"/> (0, 20 cm, for the
+    /// doors before 0.44) and the status <see cref="Status"/>.
     /// The host runs the power; every game (host and players) seals its copy of the ship's rooms
     /// from the state, as the game does for its doors (<see cref="FieldDoorRooms"/>).
     /// </summary>
@@ -35,6 +36,8 @@ namespace StellarDriveDemoTFAdvanced.Power
         public const ushort Id = 7339;
         public const int MaxSize = 50;
         public const int DefaultWidth = 2, DefaultHeight = 3;
+        /// <summary>The field's thicknesses (m), by index; shown sorted in the door's window.</summary>
+        public static readonly float[] Thicknesses = { 0.2f, 0.05f, 0.1f, 0.35f, 0.5f, 1f, 2f, 3f };
         // Its only sockets (the game indexes a part's sockets by id: they must be 0 and up)
         public const byte PowerA = 0, PowerB = 1;
 
@@ -75,10 +78,13 @@ namespace StellarDriveDemoTFAdvanced.Power
             public readonly bool FlipHeight;
             /// <summary>Solid: nothing goes through the field.</summary>
             public readonly bool Solid;
+            /// <summary>Index in <see cref="Thicknesses"/>.</summary>
+            public readonly int Thick;
 
             /// <summary><paramref name="width"/> and <paramref name="height"/> signed (0 counts as 1).</summary>
-            public Config(int width, int height, Status status, Side side = Side.Center, bool solid = false)
+            public Config(int width, int height, Status status, Side side = Side.Center, bool solid = false, int thick = 0)
             {
+                Thick = thick >= 0 && thick < Thicknesses.Length ? thick : 0;
                 FlipWidth = width < 0;
                 FlipHeight = height < 0;
                 Width = Mathf.Clamp(Mathf.Abs(width), 1, MaxSize);
@@ -94,9 +100,12 @@ namespace StellarDriveDemoTFAdvanced.Power
             public bool Sealed => Status == Status.Up;
             private int Flags => (FlipWidth ? 1 : 0) | (FlipHeight ? 2 : 0) | (Solid ? 4 : 0);
             /// <summary>Everything but the status.</summary>
-            public long Setting => Flags * 100000L + (int)Side * 10000 + Width * 100 + Height;
+            public long Setting => Thick * 1000000L + Flags * 100000L + (int)Side * 10000 + Width * 100 + Height;
             public double Value => Setting * 10 + (int)Status;
-            public Config With(Status status) => new Config(SignedWidth, SignedHeight, status, Side, Solid);
+            public Config With(Status status) => new Config(SignedWidth, SignedHeight, status, Side, Solid, Thick);
+            public Config WithSolid(bool solid) => new Config(SignedWidth, SignedHeight, Status, Side, solid, Thick);
+            /// <summary>The field's thickness (m).</summary>
+            public float Thickness => Thicknesses[Thick];
 
             /// <summary>The side the field really goes to: a negative width mirrors it.</summary>
             public Side Toward => !FlipWidth ? Side : Side == Side.Left ? Side.Right : Side == Side.Right ? Side.Left : Side.Center;
@@ -115,7 +124,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             long v = (long)System.Math.Round(System.Math.Abs(value));
             int status = (int)(v % 10);
             long setting = v / 10;
-            int flags = (int)(setting / 100000 % 8);
+            int flags = (int)(setting / 100000 % 10 % 8);
+            int thick = (int)(setting / 1000000 % 10);
             long rest = setting % 100000;
             int side = (int)(rest / 10000);
             long size = rest % 10000;
@@ -129,7 +139,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 width = -width;
             if ((flags & 2) != 0)
                 height = -height;
-            return new Config(width, height, status <= (int)Status.Starting ? (Status)status : Status.Off, side <= (int)Side.Right ? (Side)side : Side.Center, (flags & 4) != 0);
+            return new Config(width, height, status <= (int)Status.Starting ? (Status)status : Status.Off, side <= (int)Side.Right ? (Side)side : Side.Center, (flags & 4) != 0, thick);
         }
 
         public static Config Decode(IStatefulPartState state) =>
@@ -148,7 +158,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static void OnRequest(NetworkConnection sender, TFMessageKind kind, uint shipId, ushort partId, string text)
         {
             string[] words = text.Split(' ');
-            if (words.Length != 2 || !long.TryParse(words[0], out long setting) || setting < 0 || setting >= 800000 || !int.TryParse(words[1], out int on))
+            if (words.Length != 2 || !long.TryParse(words[0], out long setting) || setting < 0 || setting >= 10000000 || !int.TryParse(words[1], out int on))
                 return;
             var ships = StellarDriveDemoTFAdvanced.Common.GameServices.ShipsServer;
             if (ships == null || !(ships.GetShip(shipId) is TrackedShipServer ship))
@@ -333,7 +343,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 }
                 if (!seal)
                     return;
-                Voxels(part.LocalPosition, part.LocalRotation, config.Width, config.Height, config.Shift, config.FlipHeight, out Vector3Int[] walls, out Vector3Int[] scan);
+                Voxels(part.LocalPosition, part.LocalRotation, config.Width, config.Height, config.Shift, config.FlipHeight, config.Thickness, out Vector3Int[] walls, out Vector3Int[] scan);
                 if (offset.HasValue)
                 {
                     Convert(walls, offset.Value, rotation);
@@ -355,11 +365,13 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static Vector3Int ToVoxel(Vector3 position) => Vector3Int.RoundToInt((position + Vector3.one * 0.5f) * ShipRoomsConstants.RoomVoxelResolution);
 
         /// <summary>
-        /// The field's wall voxels (three voxels thick) and the voxels on both sides of it the
-        /// game grows the rooms from, in the ship's room voxels (4 per meter, hull faces at k + ½ m).
+        /// The field's wall voxels (three voxels thick, more for a thick field) and the voxels on both
+        /// sides of it the game grows the rooms from, in the ship's room voxels (4 per meter, hull
+        /// faces at k + ½ m).
         /// </summary>
-        public static void Voxels(Vector3 position, Quaternion rotation, int width, int height, float shift, bool down, out Vector3Int[] walls, out Vector3Int[] scan)
+        public static void Voxels(Vector3 position, Quaternion rotation, int width, int height, float shift, bool down, float thickness, out Vector3Int[] walls, out Vector3Int[] scan)
         {
+            int layers = Mathf.Max(1, Mathf.CeilToInt(thickness * 0.5f * ShipRoomsConstants.RoomVoxelResolution));
             Vector3 right = rotation * Vector3.right, up = rotation * (down ? Vector3.down : Vector3.up), normal = rotation * Vector3.forward;
             Vector3 center = position + right * shift;
             // Along the grid: in the plane of the nearest hull faces
@@ -374,7 +386,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 for (float v = -Margin; v <= height + Margin + 0.001f; v += step)
                 {
                     Vector3 p = center + right * u + up * v;
-                    for (int t = -1; t <= 1; t++)
+                    for (int t = -layers; t <= layers; t++)
                         wallSet.Add(ToVoxel(p + normal * (t * voxel)));
                 }
             }
@@ -384,7 +396,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                 for (float v = 0.25f; v < height; v += 0.5f)
                 {
                     Vector3 p = center + right * u + up * v;
-                    foreach (float side in new[] { -3f, 3f })
+                    foreach (float side in new[] { -layers - 2f, layers + 2f })
                     {
                         Vector3Int seed = ToVoxel(p + normal * (side * voxel));
                         if (!wallSet.Contains(seed))

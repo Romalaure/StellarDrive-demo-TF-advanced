@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Ships.Interface.Model.Parts;
 using Ships.Interface.Model.Parts.Common;
 using Ships.Interface.Model.Parts.State;
@@ -103,9 +104,6 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static readonly Color PreviewColor = new Color(1f, 0.55f, 0.15f);
         private static readonly Color Dark = new Color(0.1f, 0.12f, 0.14f);
         private static Material _fieldMaterial;
-
-        // Half the field's thickness: two sheets with lit edges between them
-        private const float Half = 0.1f;
 
         private FieldDoor.Config _config = new FieldDoor.Config(FieldDoor.DefaultWidth, FieldDoor.DefaultHeight, FieldDoor.Status.Off);
         private readonly List<Renderer> _lights = new List<Renderer>();
@@ -273,6 +271,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             _builtWidth = width;
             _builtHeight = height;
             float shift = config.Shift, up = config.FlipHeight ? -1f : 1f;
+            // Two sheets, the field's thickness apart, with lit edges between them
+            float half = config.Thickness * 0.5f;
             int nx = Mathf.Clamp(width * 5, 6, 120) + 1, ny = Mathf.Clamp(height * 5, 6, 120) + 1;
             int face = nx * ny;
             var vertices = new Vector3[face * 2];
@@ -286,7 +286,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                     float along = j == 0 ? -0.05f : y;
                     for (int s = 0; s < 2; s++)
                     {
-                        vertices[s * face + j * nx + i] = new Vector3(x + shift, along * up, s == 0 ? -Half : Half);
+                        vertices[s * face + j * nx + i] = new Vector3(x + shift, along * up, s == 0 ? -half : half);
                         _points[s * face + j * nx + i] = new Vector2(x, y);
                     }
                 }
@@ -341,7 +341,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             }
             Vector3 eye = transform.InverseTransformPoint(camera.transform.position);
             float along = _config.FlipHeight ? -eye.y : eye.y;
-            if (_hadEye && Mathf.Sign(eye.z) != Mathf.Sign(_lastEye.z) && Mathf.Abs(eye.z - _lastEye.z) < 1.5f
+            if (_hadEye && Mathf.Sign(eye.z) != Mathf.Sign(_lastEye.z) && Mathf.Abs(eye.z - _lastEye.z) < 1.5f + _config.Thickness
                 && Mathf.Abs(eye.x - _config.Shift) < _config.Width * 0.5f + 0.3f && along > -0.5f && along < _config.Height + 0.5f)
             {
                 _touchAge = 0f;
@@ -409,11 +409,12 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static int _width = FieldDoor.DefaultWidth, _height = FieldDoor.DefaultHeight;
         private static FieldDoor.Side _side;
         private static bool _solid;
+        private static int _thick;
 
         private static readonly (int W, int H)[] Presets = { (1, 2), (2, 2), (2, 3), (3, 3), (4, 4), (6, 4), (8, 6), (10, 20) };
 
         /// <summary>The setting being chosen (shown as an outline on the door).</summary>
-        public static FieldDoor.Config Pending => new FieldDoor.Config(_width, _height, FieldDoor.Status.Off, _side, _solid);
+        public static FieldDoor.Config Pending => new FieldDoor.Config(_width, _height, FieldDoor.Status.Off, _side, _solid, _thick);
 
         public static bool IsEditing(PartKey door) => _open && ModMenu.IsOpen && _door.Equals(door);
 
@@ -426,6 +427,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             _height = config.SignedHeight;
             _side = config.Side;
             _solid = config.Solid;
+            _thick = config.Thick;
             ModMenu.Open(() => _open = false);
         }
 
@@ -441,11 +443,11 @@ namespace StellarDriveDemoTFAdvanced.Power
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
             float screenWidth = Screen.width / scale, screenHeight = Screen.height / scale;
             FieldDoor.Config config = Current(_door);
-            Rect area = DeviceUi.Window(screenWidth, screenHeight, 620f, 580f, Loc.Pick("PORTE À CHAMP DE FORCE", "FORCE FIELD DOOR", "PUERTA DE CAMPO DE FUERZA"));
+            Rect area = DeviceUi.Window(screenWidth, screenHeight, 620f, 640f, Loc.Pick("PORTE À CHAMP DE FORCE", "FORCE FIELD DOOR", "PUERTA DE CAMPO DE FUERZA"));
             GUILayout.BeginArea(area);
 
             GUILayout.Label(Describe(config), DeviceUi.Text);
-            GUILayout.Label(Loc.Pick($"Champ actuel : {config.SignedWidth} × {config.SignedHeight} m{(config.Solid ? ", solide" : "")}", $"Current field: {config.SignedWidth} × {config.SignedHeight} m{(config.Solid ? ", solid" : "")}", $"Campo actual: {config.SignedWidth} × {config.SignedHeight} m{(config.Solid ? ", sólido" : "")}"), DeviceUi.Muted);
+            GUILayout.Label(Loc.Pick($"Champ actuel : {config.SignedWidth} × {config.SignedHeight} m, {Thickness(config.Thickness)} d'épaisseur{(config.Solid ? ", solide" : "")}", $"Current field: {config.SignedWidth} × {config.SignedHeight} m, {Thickness(config.Thickness)} thick{(config.Solid ? ", solid" : "")}", $"Campo actual: {config.SignedWidth} × {config.SignedHeight} m, {Thickness(config.Thickness)} de grosor{(config.Solid ? ", sólido" : "")}"), DeviceUi.Muted);
             GUILayout.Space(10f);
 
             GUILayout.Label(Loc.Pick("TAILLE (le contour orange la montre)", "SIZE (the orange outline shows it)", "TAMAÑO (el contorno naranja lo muestra)"), DeviceUi.Muted);
@@ -480,6 +482,15 @@ namespace StellarDriveDemoTFAdvanced.Power
             GUILayout.Label(Loc.Pick("Gauche et droite vues face à l'émetteur, du côté sans prises.", "Left and right as seen facing the emitter, from the side without plugs.", "Izquierda y derecha vistas de frente al emisor, desde el lado sin tomas."), DeviceUi.Muted);
             GUILayout.Space(4f);
             GUILayout.BeginHorizontal();
+            GUILayout.Label(Loc.Pick("Épaisseur", "Thickness", "Grosor"), DeviceUi.Text, GUILayout.Width(90f));
+            foreach (int i in Enumerable.Range(0, FieldDoor.Thicknesses.Length).OrderBy(i => FieldDoor.Thicknesses[i]))
+            {
+                if (GUILayout.Button(Thickness(FieldDoor.Thicknesses[i]), i == _thick ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Height(30f)))
+                    _thick = i;
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(4f);
+            GUILayout.BeginHorizontal();
             GUILayout.Label(Loc.Pick("État", "State", "Estado"), DeviceUi.Text, GUILayout.Width(90f));
             if (GUILayout.Button(Loc.Pick("Traversable", "Walk-through", "Atravesable"), !_solid ? DeviceUi.Selected : DeviceUi.Button, GUILayout.Height(30f)))
                 _solid = false;
@@ -504,6 +515,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             GUILayout.EndArea();
             GUI.matrix = previous;
         }
+
+        private static string Thickness(float meters) => meters < 1f ? Mathf.RoundToInt(meters * 100f) + " cm" : meters.ToString("0") + " m";
 
         // From -MaxSize to MaxSize, never 0 (it jumps over it)
         private static int SizeRow(string label, int value)
@@ -576,7 +589,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                     box.enabled = config.Sealed && config.Solid;
                     float up = config.FlipHeight ? -1f : 1f;
                     box.transform.localPosition = new Vector3(config.Shift, config.Height * 0.5f * up, 0f);
-                    box.size = new Vector3(config.Width, config.Height, 0.2f);
+                    box.size = new Vector3(config.Width, config.Height, config.Thickness);
                 }
             }
         }

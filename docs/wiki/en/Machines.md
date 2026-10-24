@@ -64,9 +64,16 @@ An emitter you set **on the floor, in the middle of an opening in the hull**, fa
 - **Color**: paint the door with the paint gun, the field takes its color.
 - **Door manager** (same row): a console listing every door of the ship and of what is docked to it (how many, which ones are up) switching them on or off and making them solid or walk-through, one by one or all together. No cable.
 - **Side**: the field spreads on both sides of the emitter, or only to its left or its right (seen facing the emitter, from the side without plugs): then set it against one side of the opening.
-- The field is thick (20 cm) and goes down to the floor. While it is up the rail has no collision: you walk over it without bumping, and it can be painted and taken down even when on.
+- **Thickness**: set in the window, from 5 cm to 3 m (20 cm by default). The field goes down to the floor. While it is up the rail has no collision: you walk over it without bumping, and it can be painted and taken down even when on.
 - Take the opening's size: the field overlaps the hull around by half a meter, and settles into the hull's plane by itself.
 - Research **Artifact technology**, force field row of the TF Advanced tab.
+
+## Tractor beam
+
+An emitter to bolt to the hull (artifacts row of the TF Advanced tab, research *Ship mining*): its beam goes straight out of the surface it is placed on.
+- Switch it on: look at it and press **T**, or the **Y** key (`TractorKey`) from the pilot seat (every beam of the ship).
+- Powered (3,000 W), it **locks onto the nearest ship in its beam** (a ship, a wreck, a pirate) up to 150 m, **pulls it in to 14 m** in front of it and holds it there, at your speed (its spin is damped). A heavy ship comes slowly. Switch it off to let go.
+- Command socket: with a cable it only works while the signal is above 0. Status socket: 2 locked, 1 searching, 0 off, 3 no power.
 
 ## Landing gear
 

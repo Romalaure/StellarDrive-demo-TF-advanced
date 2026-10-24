@@ -13,7 +13,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
 {
     /// <summary>
     /// TF data saved with a world, in tf-data.json next to its world.json (like tf-paint.json):
-    /// capsule names, the photos hung in the frames and the station inhabitants hired. The game's own save is untouched.
+    /// capsule names, the photos hung in the frames, the station inhabitants hired and the signs' texts. The game's own save is untouched.
     /// </summary>
     internal static class WorldData
     {
@@ -27,6 +27,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
             public List<SavedName> photos = new List<SavedName>();
             /// <summary>Station inhabitants hired (their contract signed), not yet taken away.</summary>
             public List<SavedName> contracts = new List<SavedName>();
+            /// <summary>Signs: their "c|text".</summary>
+            public List<SavedName> signs = new List<SavedName>();
         }
 
         private sealed class SavedName
@@ -52,10 +54,14 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 contracts = Npc.Contracts
                     .Where(k => ships == null || ships.TryGetStatefulPart(new PartContext(k.ShipId, k.PartId), out _))
                     .Select(k => new SavedName { ship = k.ShipId, part = k.PartId, name = "hired" })
+                    .ToList(),
+                signs = Construction.Signs.ServerTexts
+                    .Where(e => ships == null || ships.TryGetStatefulPart(new PartContext(e.Key.ShipId, e.Key.PartId), out _))
+                    .Select(e => new SavedName { ship = e.Key.ShipId, part = e.Key.PartId, name = e.Value })
                     .ToList()
             };
             string path = Path.Combine(worldDirectory, FileName);
-            if (file.capsules.Count == 0 && file.photos.Count == 0 && file.contracts.Count == 0)
+            if (file.capsules.Count == 0 && file.photos.Count == 0 && file.contracts.Count == 0 && file.signs.Count == 0)
             {
                 if (File.Exists(path))
                     File.Delete(path);
@@ -74,6 +80,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
             TeleportCapsule.ServerNames.Clear();
             PhotoFrame.ServerFrames.Clear();
             Npc.Contracts.Clear();
+            Construction.Signs.ServerTexts.Clear();
             string path = Path.Combine(worldDirectory, FileName);
             if (!File.Exists(path))
                 return;
@@ -93,6 +100,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
             {
                 if (saved != null)
                     Npc.Contracts.Add(new PartKey(saved.ship, saved.part));
+            }
+            foreach (SavedName saved in file?.signs ?? new List<SavedName>())
+            {
+                (int color, string text) = Construction.Signs.Parse(saved?.name);
+                if (!string.IsNullOrEmpty(text))
+                    Construction.Signs.ServerTexts[new PartKey(saved.ship, saved.part)] = Construction.Signs.Format(color, text);
             }
         }
     }

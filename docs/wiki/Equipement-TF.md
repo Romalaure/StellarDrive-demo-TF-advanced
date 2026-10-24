@@ -36,3 +36,11 @@ Réglages : section `[TFAdvancedObjects]` (touche de la tablette `TabletKey`, to
 - **Mode photo** (touche **F8**, réglage `PhotoKey`, ou clic gauche avec l'**appareil photo** en main, pris au râtelier à outils) : la vue quitte le joueur et vole librement (souris pour regarder, ZQSD pour bouger, Espace/Ctrl pour monter et descendre, Maj plus vite, Alt plus lent, molette pour zoomer, R pour pencher et T pour redresser). L'interface du jeu disparaît. **F** change de filtre (noir et blanc, sépia, couleurs vives, cinéma, vision nocturne), **H** cache l'aide, **P**, Entrée ou clic prend la photo, Échap ou F8 revient.
 - Les photos vont dans `UserData/TFAdvanced/photos` (toute image PNG ou JPG mise là marche aussi).
 - **Cadre photo** (onglet TF Équipement, 3 bois + 1 verre) : regarde-le et appuie sur **T** pour choisir une photo. Elle est envoyée à l'hôte, gardée avec le monde et montrée à tous les joueurs. L'image regarde vers l'extérieur de la surface où le cadre est posé : idéal sur un mur.
+
+## Peinture par zone (BuildZoop)
+
+Pistolet à peinture en main, **maintiens la touche zoop** (celle du mod BuildZoop, **Maj** par défaut, ou Maj sans ce mod) : un coin se fixe où tu vises, une boîte orange va de ce coin à là où tu vises maintenant, avec le nombre de pièces dedans. **Clic** : tout ce qui est dans la boîte est peint d'un coup (murs, sols, pentes et pièces posées), avec la couleur, la finition et le camouflage du pistolet, du côté visé en premier (les deux avec « les deux côtés »).
+
+## Caméras et mode photo : ciel et joueur
+
+L'image des caméras de surveillance montre maintenant le **ciel des planètes** (atmosphère, nuages) par défaut (réglage `CameraPlanetSkyOn`, à couper si les images par seconde chutent). Dans l'image d'une caméra et en mode photo, **ton propre personnage** est visible en entier (tête comprise), habillé de ta tenue.

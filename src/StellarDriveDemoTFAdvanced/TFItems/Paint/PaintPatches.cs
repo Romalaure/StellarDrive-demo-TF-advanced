@@ -35,6 +35,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
             AccessTools.FieldRefAccess<PaintTool, int>("_layerMask");
         private static readonly AccessTools.FieldRef<PaintTool, bool> IsSpraying =
             AccessTools.FieldRefAccess<PaintTool, bool>("_isSpraying");
+        private static readonly AccessTools.FieldRef<HullHover, bool> HullFront =
+            AccessTools.FieldRefAccess<HullHover, bool>("_isFront");
 
         private static PartKey? _hoveredPart;
         private static PartKey? _lastPainted;
@@ -44,7 +46,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
         private static void AfterUpdateChecks(PaintTool __instance, CameraPhysicsData cameraPhysics)
         {
             _hoveredPart = null;
-            HoveringHull = HoveredHull(__instance) != null;
+            HullHover hull = HoveredHull(__instance);
+            HoveringHull = hull != null;
+            PaintZoop.Aim(__instance, cameraPhysics.CameraPos, cameraPhysics.Direction, RayDistance(__instance), LayerMask(__instance), hull == null || HullFront(hull));
             if (!Settings.PaintAllParts.Value || HoveringHull)
                 return;
 

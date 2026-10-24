@@ -33,10 +33,14 @@ namespace StellarDriveDemoTFAdvanced.Parts
 
         public const string ConstructionName = "TF Construction";
         public const int ConstructionRow = 0;
+        /// <summary>Stairs (the retired structural parts' row).</summary>
+        public const int StairsRow = 0;
         public const int WoodRow = 1;
         public const int GlassRow = 2;
         public const int IronRow = 3;
         public const int FurnitureRow = 4;
+        public const int MoreFurnitureRow = 5;
+        public const int SignRow = 6;
 
         /// <summary>Reinforced hull: the game's iron and glass pieces, tougher, their own tab.</summary>
         public const string ArmorName = "TF Blindage";

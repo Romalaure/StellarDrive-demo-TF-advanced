@@ -176,7 +176,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         }
 
         private static FieldDoor.Config WithSolid(FieldDoor.Config config, bool solid) =>
-            new FieldDoor.Config(config.SignedWidth, config.SignedHeight, config.Status, config.Side, solid);
+            config.WithSolid(solid);
 
         private static string Short(FieldDoor.Config config)
         {

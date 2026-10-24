@@ -64,9 +64,16 @@ Un émetteur à poser **au sol, au milieu d'une ouverture de la coque**, face à
 - **Couleur** : peins la porte au pistolet à peinture, le champ prend sa couleur.
 - **Gestionnaire de portes** (même rangée) : une console qui liste toutes les portes du vaisseau et de ce qui y est amarré (combien, lesquelles sont actives) les allume ou les coupe, et les rend solides ou traversables, une par une ou toutes ensemble. Pas de câble.
 - **Côté** : le champ part des deux côtés de l'émetteur, ou seulement à sa gauche ou à sa droite (vu face à l'émetteur, du côté sans prises) : pose-le alors contre un bord de l'ouverture.
-- Le champ est épais (20 cm) et descend jusqu'au sol. Quand il est actif, le rail n'a plus de collision : on passe dessus sans buter, et il se peint et se démonte même allumé.
+- **Épaisseur** : réglable dans la fenêtre, de 5 cm à 3 m (20 cm par défaut). Le champ descend jusqu'au sol. Quand il est actif, le rail n'a plus de collision : on passe dessus sans buter, et il se peint et se démonte même allumé.
 - Prends la taille de l'ouverture : le champ déborde d'un demi-mètre sur la coque autour, et se cale de lui-même dans le plan de la coque.
 - Recherche **Technologie des artefacts**, rangée des champs de force de l'onglet TF Avancé.
+
+## Rayon tracteur
+
+Un émetteur à fixer sur la coque (rangée des artefacts de l'onglet TF Avancé, recherche *Minage embarqué*) : son rayon part tout droit de la surface où on le pose.
+- Allume-le : regarde-le et appuie sur **T**, ou touche **Y** (`TractorKey`) depuis le siège de pilotage (tous les rayons du vaisseau).
+- Alimenté (3 000 W), il **accroche le vaisseau le plus proche dans son rayon** (vaisseau, épave, pirate) jusqu'à 150 m, le **tire jusqu'à 14 m** devant lui et le garde là, à ta vitesse (sa rotation est freinée). Un vaisseau lourd vient lentement. Éteins-le pour le lâcher.
+- Prise de commande : avec un câble, il ne marche que si le signal est au-dessus de 0. Prise d'état : 2 accroché, 1 cherche, 0 éteint, 3 sans courant.
 
 ## Train d'atterrissage
 

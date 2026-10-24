@@ -38,6 +38,10 @@ namespace StellarDriveDemoTFAdvanced.Parts
 
         private static IEnumerator Run()
         {
+            // Which part ids every mod took, by hundreds (to pick free ones for new parts)
+            AdvancedMod.Log.Msg("dev: part ids in use: " + string.Join(", ", Resources.FindObjectsOfTypeAll<Ships.Interface.Settings.PartSettings>()
+                .Where(p => p != null && p.id >= 7000).Select(p => p.id).Distinct().GroupBy(i => i / 100)
+                .OrderBy(g => g.Key).Select(g => $"{g.Key * 100}: {g.Min()}-{g.Max()} ({g.Count()})")));
             ushort[] ids = Settings.DevShowcase.Value.Split(',').Select(s => ushort.TryParse(s.Trim(), out ushort id) ? id : (ushort)0).Where(id => id != 0).ToArray();
             // Station modules are rooms: more room between them
             Spacing = ids.Any(id => id >= 7371 && id <= 7390 && id != 7381) ? 8f : 3f;

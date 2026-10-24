@@ -14,6 +14,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
     /// the game's precise placement on any surface. Their collision is the game's box collider
     /// from the part bounds, so the open frame's hole is visual only.
     /// Part space: +Y points out of the surface; beams run along +Y. Only call when SDModKit is loaded.
+    /// Retired in 0.44: no longer in the build menu nor the research, the ones already built stay.
     /// </summary>
     internal static class StructureParts
     {
@@ -72,7 +73,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             foreach (Spec part in All)
             {
                 Spec spec = part;
-                PartFactory.Register(spec.Id, Donor, AdvancedTab.ConstructionName, AdvancedTab.ConstructionRow, (settings, prefab) => Configure(spec, settings, prefab));
+                PartFactory.Register(spec.Id, Donor, "", AdvancedTab.ConstructionRow, (settings, prefab) => Configure(spec, settings, prefab));
             }
             AdvancedMod.Log.Msg($"registered {All.Length} structural parts");
         }

@@ -237,6 +237,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Cameras
                 _farFeed.enabled = false;
         }
 
+        /// <summary>Whether this camera draws the near scene of the tablet's feed (see <see cref="Devices.SelfAvatar"/>).</summary>
+        public static bool IsFeed(Camera camera) => camera != null && camera == _feed;
+
         private static List<CameraPartVisuals> Cameras() =>
             CameraPartVisuals.All
                 .Where(c => c != null && c.HasContext && c.Eye != null)

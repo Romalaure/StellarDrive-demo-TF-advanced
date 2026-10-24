@@ -86,6 +86,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             FieldDoor.Forget();
             Condenser.Forget();
             ShipMiningLaser.Forget();
+            TractorBeam.Forget();
             DarkMatter.Forget();
             Centrifuge.Forget();
             Portal.Forget();
@@ -119,6 +120,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             Propulsion.LandingGear.Command(_ships, _connections);
             Condenser.BeforeTransfers(power, _ships, _connections, deltaTime);
             ShipMiningLaser.BeforeTransfers(power, _ships, _connections, deltaTime);
+            TractorBeam.BeforeTransfers(power, _ships, _connections, deltaTime);
             DarkMatter.BeforeTransfers(power, _ships, _connections, deltaTime);
             Portal.BeforeTransfers(power, _ships, _connections, deltaTime);
             Solar.BeforeTransfers(power, _ships, deltaTime);
@@ -141,6 +143,8 @@ namespace StellarDriveDemoTFAdvanced.Power
             FieldDoor.AfterTransfers(deltaTime);
             Condenser.AfterTransfers(deltaTime);
             ShipMiningLaser.AfterTransfers(deltaTime);
+            if (_ships != null)
+                TractorBeam.AfterTransfers(_ships);
             DarkMatter.AfterTransfers(deltaTime);
             Portal.AfterTransfers(deltaTime);
             Solar.AfterTransfers();

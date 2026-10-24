@@ -73,6 +73,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         SitState = 75,
         /// <summary>Server to the player who sat: their seat Text ("" when up).</summary>
         SitSelf = 76,
+        /// <summary>Client to server: sign B of ship A gets Text ("c|text", empty clears it); server to clients: what it shows.</summary>
+        SignText = 77,
+        /// <summary>Client to server: switch the tractor beam B of ship A (B = 0: every one of ship A) on (Text "1") or off ("0").</summary>
+        TractorSwitch = 78,
 
         /// <summary>Client to server: copy the ship A (and what is attached to it) as schematic Text.</summary>
         SchematicCopy = 30,
