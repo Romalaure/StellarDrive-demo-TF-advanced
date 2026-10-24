@@ -42,6 +42,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 _version = OutfitDresser.Version;
                 OutfitDresser.Wear(_avatar, Outfits.Mine);
                 _renderers = _avatar.GetComponentsInChildren<Renderer>(true);
+                Show(_photoShown);
             }
         }
 
@@ -72,11 +73,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             return true;
         }
 
+        // Forced off rather than disabled: the pieces the avatar keeps disabled (the tools and
+        // accessories it holds only in use) stay so when it is shown
         private static void Show(bool shown)
         {
             foreach (Renderer renderer in _renderers)
                 if (renderer != null)
-                    renderer.enabled = shown;
+                    renderer.forceRenderingOff = !shown;
         }
 
         // The first-person body (and the tool in hand) under the view

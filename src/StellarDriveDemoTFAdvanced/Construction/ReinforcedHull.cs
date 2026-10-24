@@ -105,6 +105,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
         /// <summary>Clones the donors once they are loaded (looked for at most once a second until then).</summary>
         public static void EnsureBuilt()
         {
+            PivotedDoor.EnsureBuilt();
             if (!_registered || Built.Count == All.Length && Built.Values.All(c => c != null) || Time.realtimeSinceStartup < _nextTry)
                 return;
             _nextTry = Time.realtimeSinceStartup + 1f;
@@ -252,9 +253,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
             Dictionary<ushort, PartSettings> dict = Dict(__instance);
             if (dict == null)
                 return;
-            foreach (HullPartSettings clone in ReinforcedHull.Clones)
+            foreach (HullPartSettings clone in ReinforcedHull.Clones.Append(PivotedDoor.Clone))
             {
-                if (!dict.ContainsKey(clone.id))
+                if (clone != null && !dict.ContainsKey(clone.id))
                     dict[clone.id] = clone;
             }
         }

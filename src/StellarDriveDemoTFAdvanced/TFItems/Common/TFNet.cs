@@ -77,6 +77,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         SignText = 77,
         /// <summary>Client to server: switch the tractor beam B of ship A (B = 0: every one of ship A) on (Text "1") or off ("0").</summary>
         TractorSwitch = 78,
+        /// <summary>Client to server: automatic door B of ship A gets the state Text (1 open + 2 straight).</summary>
+        DoorState = 79,
 
         /// <summary>Client to server: copy the ship A (and what is attached to it) as schematic Text.</summary>
         SchematicCopy = 30,

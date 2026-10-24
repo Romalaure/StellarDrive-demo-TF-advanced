@@ -71,6 +71,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.Npc.Install();
             Cameras.CameraTablet.Install();
             Construction.Signs.Install();
+            Construction.DiagonalDoors.Install();
             StellarDriveDemoTFAdvanced.Power.TractorBeam.Install();
             if (ToolsActive)
             {
