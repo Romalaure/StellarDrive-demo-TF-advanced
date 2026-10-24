@@ -41,6 +41,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
         public const int FurnitureRow = 4;
         public const int MoreFurnitureRow = 5;
         public const int SignRow = 6;
+        public const int FutureFurnitureRow = 7;
 
         /// <summary>Reinforced hull: the game's iron and glass pieces, tougher, their own tab.</summary>
         public const string ArmorName = "TF Blindage";

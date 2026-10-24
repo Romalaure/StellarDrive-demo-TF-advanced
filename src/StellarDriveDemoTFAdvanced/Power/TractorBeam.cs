@@ -74,28 +74,32 @@ namespace StellarDriveDemoTFAdvanced.Power
             settings.snappingStyle = Ships.Interface.Model.SnappingStyle.PreciseOnAny;
             const float width = 0.8f;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, 0.32f, 0f), new Vector3(width, 0.64f, width));
-            // A square foot, a turning ring, a dish of coils around a central emitter
-            var model = new MachineModels.Model();
-            model.Armor.Box(new Vector3(0f, 0.06f, 0f), new Vector3(width, 0.12f, width));
-            model.Dark.Box(new Vector3(0f, 0.125f, 0f), new Vector3(width - 0.08f, 0.01f, width - 0.08f));
-            model.Armor.Cylinder(new Vector3(0f, 0.12f, 0f), new Vector3(0f, 0.22f, 0f), 0.3f, 0.26f, 24);
-            model.Glow.Cylinder(new Vector3(0f, 0.22f, 0f), new Vector3(0f, 0.235f, 0f), 0.26f, 0.26f, 24);
-            // The dish: a cone opening upward, its rim armored
-            model.Dark.Cylinder(new Vector3(0f, 0.235f, 0f), new Vector3(0f, 0.42f, 0f), 0.16f, 0.38f, 28, capA: true, capB: false);
-            model.Armor.Cylinder(new Vector3(0f, 0.42f, 0f), new Vector3(0f, 0.46f, 0f), 0.39f, 0.39f, 28, capA: false, capB: false);
-            for (int i = 0; i < 8; i++)
+            // Its Blender model (tools/blender/construction.py); the shapes below are the fallback
+            if (!Construction.MaterialParts.BlenderModel(Id, visuals))
             {
-                Quaternion turn = Quaternion.AngleAxis(i * 45f, Vector3.up);
-                // Coils around the dish, pointing at the emitter
-                model.Core.Cylinder(turn * new Vector3(0.3f, 0.44f, 0f), turn * new Vector3(0.24f, 0.52f, 0f), 0.03f, 0.022f, 10);
-                model.Armor.Box(turn * new Vector3(0.36f, 0.33f, 0f), new Vector3(0.05f, 0.18f, 0.05f), turn);
+                // A square foot, a turning ring, a dish of coils around a central emitter
+                var model = new MachineModels.Model();
+                model.Armor.Box(new Vector3(0f, 0.06f, 0f), new Vector3(width, 0.12f, width));
+                model.Dark.Box(new Vector3(0f, 0.125f, 0f), new Vector3(width - 0.08f, 0.01f, width - 0.08f));
+                model.Armor.Cylinder(new Vector3(0f, 0.12f, 0f), new Vector3(0f, 0.22f, 0f), 0.3f, 0.26f, 24);
+                model.Glow.Cylinder(new Vector3(0f, 0.22f, 0f), new Vector3(0f, 0.235f, 0f), 0.26f, 0.26f, 24);
+                // The dish: a cone opening upward, its rim armored
+                model.Dark.Cylinder(new Vector3(0f, 0.235f, 0f), new Vector3(0f, 0.42f, 0f), 0.16f, 0.38f, 28, capA: true, capB: false);
+                model.Armor.Cylinder(new Vector3(0f, 0.42f, 0f), new Vector3(0f, 0.46f, 0f), 0.39f, 0.39f, 28, capA: false, capB: false);
+                for (int i = 0; i < 8; i++)
+                {
+                    Quaternion turn = Quaternion.AngleAxis(i * 45f, Vector3.up);
+                    // Coils around the dish, pointing at the emitter
+                    model.Core.Cylinder(turn * new Vector3(0.3f, 0.44f, 0f), turn * new Vector3(0.24f, 0.52f, 0f), 0.03f, 0.022f, 10);
+                    model.Armor.Box(turn * new Vector3(0.36f, 0.33f, 0f), new Vector3(0.05f, 0.18f, 0.05f), turn);
+                }
+                // The emitter: a rod with three rings and a lit tip
+                model.Armor.Cylinder(new Vector3(0f, 0.25f, 0f), new Vector3(0f, 0.56f, 0f), 0.05f, 0.04f, 14);
+                foreach (float y in new[] { 0.34f, 0.42f, 0.5f })
+                    model.Glow.Cylinder(new Vector3(0f, y, 0f), new Vector3(0f, y + 0.015f, 0f), 0.07f, 0.07f, 16);
+                model.Light.Cylinder(new Vector3(0f, 0.56f, 0f), new Vector3(0f, 0.6f, 0f), 0.045f, 0.02f, 14);
+                MachineModels.Attach(visuals, model, "TractorBeam", MachineModels.Green, new Color(0.6f, 1f, 0.75f));
             }
-            // The emitter: a rod with three rings and a lit tip
-            model.Armor.Cylinder(new Vector3(0f, 0.25f, 0f), new Vector3(0f, 0.56f, 0f), 0.05f, 0.04f, 14);
-            foreach (float y in new[] { 0.34f, 0.42f, 0.5f })
-                model.Glow.Cylinder(new Vector3(0f, y, 0f), new Vector3(0f, y + 0.015f, 0f), 0.07f, 0.07f, 16);
-            model.Light.Cylinder(new Vector3(0f, 0.56f, 0f), new Vector3(0f, 0.6f, 0f), 0.045f, 0.02f, 14);
-            MachineModels.Attach(visuals, model, "TractorBeam", MachineModels.Green, new Color(0.6f, 1f, 0.75f));
             TFItems.Common.UsablePart.AddBox(visuals, new Vector3(0f, 0.32f, 0f), new Vector3(width + 0.1f, 0.7f, width + 0.1f));
             visuals.gameObject.AddComponent<TractorVisuals>();
             var bounds = prefab.GetComponent<ShipPartBounds>();

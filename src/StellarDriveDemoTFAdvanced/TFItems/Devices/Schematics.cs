@@ -258,8 +258,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
         /// <summary>
         /// The ship and everything attached to it: docked ships, the turning parts of its rotors
-        /// (separate ships held by the rotor) and ships inside its space, then the same for every
-        /// ship found.
+        /// (separate ships held by the rotor), the ships its tractor beams hold and ships inside its
+        /// space, then the same for every ship found.
         /// </summary>
         private static List<TrackedShipServer> AttachedShips(TrackedShipServer root, ShipsServerTracker ships, SpacesServer spaces)
         {
@@ -285,6 +285,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                         Add(rotor.AnchoredShipId);
                     else if (part.State is DockingDoorState door && door.IsDocked)
                         Add(door.DockedConnectedPart.ShipId);
+                    // A ship held in a tractor beam goes with the ship holding it
+                    else if (part.Settings != null && part.Settings.id == StellarDriveDemoTFAdvanced.Power.TractorBeam.Id && part.State is ConstantState beam)
+                    {
+                        (bool on, int status, uint target) = StellarDriveDemoTFAdvanced.Power.TractorBeam.Decode(beam.ConstantValue);
+                        if (on && status == StellarDriveDemoTFAdvanced.Power.TractorBeam.Locked && target != 0)
+                            Add(target);
+                    }
                 }
                 foreach (TrackedShipServer other in ships.Ships)
                 {

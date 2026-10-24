@@ -380,6 +380,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
                 selection.PaintBothSides = true;
             GUILayout.EndHorizontal();
             GUILayout.Space(4f);
+            PaintZoop.Bucket = GUILayout.Toggle(PaintZoop.Bucket, Loc.Pick("  Pot de peinture : un clic peint toute la coque (pas les meubles, lumières ni machines)", "  Paint pot: one click paints the whole hull (not furniture, lights or machines)", "  Bote de pintura: un clic pinta todo el casco (no muebles, luces ni máquinas)"), _toggle);
             selection.ReplaceAllIdenticalColors = GUILayout.Toggle(selection.ReplaceAllIdenticalColors, Loc.Pick("  Remplacer toute la même couleur", "  Replace all of the same color", "  Reemplazar todo el mismo color"), _toggle);
             GUILayout.Label(Loc.Pick("Face visée : peins un côté, retourne-toi, peins l'autre d'une autre couleur.", "Aimed side: paint one side, turn around, paint the other in another color.", "Cara apuntada: pinta un lado, date la vuelta, pinta el otro de otro color."), _muted);
         }

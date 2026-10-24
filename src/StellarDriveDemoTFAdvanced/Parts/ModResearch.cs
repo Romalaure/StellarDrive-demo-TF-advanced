@@ -54,7 +54,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
             new Tech { Id = 7508, Tab = new Vector2Int(0, 0), Name = Loc.Pick("Cartographie", "Cartography", "Cartografía"), Requires = new ushort[] { 14 }, Position = new Vector2Int(3, 0),
                 Parts = new ushort[] { 7381 }, Cost = new[] { (Copper, 10), (Glass, 10), (ModItems.Meteorite, 2) } },
             new Tech { Id = 7509, Tab = new Vector2Int(1, 4), Name = Loc.Pick("Modules de station", "Station modules", "Módulos de estación"), Requires = new ushort[] { 7501 }, Position = new Vector2Int(6, 6),
-                Parts = Range(7371, 7380).Concat(Range(7382, 7390)).Concat(new ushort[] { 8226, 8227, 8229 }).ToArray(), Cost = new[] { (Iron, 40), (Glass, 15), (ModItems.Titanium, 10) } },
+                Parts = Range(7371, 7380).Concat(Range(7382, 7390)).Concat(new ushort[] { 8226, 8227, 8229 }).Concat(Range(8240, 8256)).ToArray(), Cost = new[] { (Iron, 40), (Glass, 15), (ModItems.Titanium, 10) } },
             new Tech { Id = 7512, Tab = new Vector2Int(2, 2), Name = Loc.Pick("Énergie nucléaire", "Nuclear power", "Energía nuclear"), Requires = new ushort[] { 7507 }, Position = new Vector2Int(6, 2),
                 Parts = new ushort[] { 7396, 7397, 7398, 7316, 7317, 7471, 7472, 7320 }, Cost = new[] { (ModItems.Uranium, 10), (ModItems.Titanium, 15), (Copper, 20) } },
             new Tech { Id = 7510, Tab = new Vector2Int(3, 2), Name = Loc.Pick("Matière noire", "Dark matter", "Materia oscura"), Requires = new ushort[] { 7512 }, Position = new Vector2Int(7, 2),

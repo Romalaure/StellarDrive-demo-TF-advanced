@@ -40,7 +40,18 @@ Cuarta fila de la pestaña, investigación **Carpintería**; se colocan en el su
 
 La tela del sofá y del sillón y la alfombra toman el color de la pistola de pintura. **Puedes sentarte** en el sofá (3 plazas), el sillón, la silla, el taburete, la mesa y la mesa baja: míralos y pulsa **T** (el sitio libre más cercano); **T** o una tecla de movimiento para levantarte. Los demás jugadores te ven sentado. El escritorio, la alfombra, la librería y la planta son decorativos.
 
-**Más muebles** (fila bajo los muebles, Carpintería): cama (te sientas en el borde), litera, mesita de noche con lámpara, armario, cómoda, encimera de cocina (fregadero, grifo), frigorífico, mueble de TV, banco (3 plazas), silla de oficina (te puedes sentar), mesa redonda, jardinera. Solo madera, hierro, cristal y cobre.
+**Más muebles** (fila bajo los muebles, Carpintería): cama, litera, mesita de noche con lámpara, armario, cómoda, encimera de cocina (fregadero, grifo), frigorífico, mueble de TV, banco (3 plazas), silla de oficina (te puedes sentar), mesa redonda, jardinera. Solo madera, hierro, cristal y cobre.
+
+**Muebles futuristas** (fila siguiente, investigación *Módulos de estación*), para equipar las salas de una nave:
+- **ciencia**: mesa de laboratorio, tanque de especímenes (líquido luminoso), consola de análisis;
+- **almacén**: rack de servidores, caja de carga, estantería de almacén, bombonas;
+- **dormitorio**: cápsula de sueño, taquillas de la tripulación;
+- **cocina**: sintetizador de comida, isla de cocina;
+- **oficinas**: escritorio de mando (3 pantallas), mesa holográfica (un planeta que gira);
+- **salón / comedor**: sofá lounge (3 plazas), mesa de comedor con bancos (4 plazas), máquina expendedora;
+- **enfermería**: cama médica.
+
+**Dormir**: la cama, la litera, la cápsula de sueño y la cama médica: míralas y pulsa **T** para dormir y pasar la noche (como la espera del juego). No durante el vuelo.
 
 ## Escaleras
 
@@ -56,11 +67,12 @@ Fila de arriba de la pestaña. Se colocan en el suelo y **suben hacia atrás** (
 
 Encadena tramos para subir más. El caracol necesita un hueco en el techo encima.
 
-## Letreros y puertas diagonales
+## Letreros y puertas
 
 Última fila de la pestaña.
 - **Panel luminoso** (pared), **placa de puerta** (pequeña, junto a una puerta), **letrero holográfico** (en el suelo, texto flotando a la altura de los ojos): míralos y pulsa **T** para escribir el texto (40 caracteres) y elegir su color (7 colores). Para nombrar las salas: Puente, Enfermería, Bodega… Todos los jugadores lo ven, el anfitrión lo guarda con el mundo. Investigación *Ordenador de a bordo*.
-- **Puerta diagonal** (un cuadrado) y **puerta diagonal grande** (2 × 2): para las paredes diagonales, donde no caben las puertas del juego. Quita la pared diagonal, pon la puerta en el suelo en su lugar (gírala para la otra diagonal). Se abre sola cuando alguien se acerca y se cierra detrás. **No retiene el aire** como las puertas del juego. Investigación *Construcción metálica*.
+- **Puerta automática** (un cuadrado) y **puerta automática grande** (2 × 2): se abre sola cuando alguien se acerca y se cierra detrás. Puesta **en diagonal** (quita la pared diagonal, pon la puerta en el suelo en su lugar, gírala para la otra diagonal); mírala y pulsa **T** para ponerla **recta** (alineada con una pared normal), **T** otra vez para volver a diagonal. **No retiene el aire**. Investigación *Construcción metálica*.
+- **La puerta del juego en diagonal**: pon la puerta del juego como una pared y gírala (tecla de rotación): en una pared diagonal toma su versión diagonal, como las paredes del juego. Es la puerta de verdad: se abre con la tecla de interacción y sella la sala.
 
 ## Casco reforzado
 

@@ -23,7 +23,7 @@ Same part numbers as before: what is already built in your worlds stays. Keep th
 
 Without the TF mod, TF Advanced also provides (same items, same files: nothing is lost):
 - the TF mod's **paint gun**: it paints walls and floors, and also doors, machines and every placed part, with a finish (gloss, metal, glow), presets and **camouflage** patterns (forest, desert, arctic...). Take it from the tool rack, **left click** paints, **right click** opens the palette, **mouse wheel** picks a color. Colors are saved with the world (`tf-paint.json`);
-- the **schematic tablet**: take it from the tool rack, select it in your toolbar, **left click** to open its window. **Copy** saves the nearest ship (and what is attached to it); **Build** makes it again for free in front of you. Schematics are on your PC in `UserData/TF/schematics`, shared by all your worlds. The ship's paint is copied too;
+- the **schematic tablet**: take it from the tool rack, select it in your toolbar, **left click** to open its window. **Copy** saves the nearest ship (and what is attached to it); **Build** makes it again for free in front of you. Schematics are on your PC in `UserData/TF/schematics`, shared by all your worlds. The ship's paint is copied too, and ships held by a locked **tractor beam** are copied with the main ship;
 - the **third person view** while piloting: key **V** (`ThirdPersonKey`), mouse wheel for the distance (`ThirdPersonDistance`);
 - the **KeySeat** mod's seat keys saved at once and copied by schematics.
 
@@ -40,6 +40,8 @@ Settings: section `[TFAdvancedObjects]` (tablet key `TabletKey`, use key `UseKey
 ## Area paint (BuildZoop)
 
 Paint gun in hand, **hold the zoop key** (the BuildZoop mod's, **Shift** by default, or Shift without that mod): a corner is fixed where you aim, an orange box goes from it to where you aim now, with the number of parts in it. **Click**: everything in the box is painted at once (walls, floors, slopes and placed parts), with the gun's color, finish and camouflage, on the side aimed at first (both with "both sides").
+
+**Paint pot**: a checkbox in the gun's window (right click). One **click** paints **the whole hull** of the ship aimed at (walls, floors, slopes joined to the piece aimed at), leaving furniture, lights, machines and other placed parts alone.
 
 ## Cameras and photo mode: sky and player
 

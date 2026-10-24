@@ -23,7 +23,7 @@ Mêmes numéros de pièces qu'avant : ce qui est déjà construit dans vos monde
 
 Sans le mod TF, TF Advanced fournit aussi (mêmes objets, mêmes fichiers : rien n'est perdu) :
 - le **pistolet à peinture** du mod TF : il peint les murs et sols, mais aussi les portes, machines et toutes les pièces posées, avec une finition (brillance, métal, lumineux), des préréglages et des **camouflages** (forêt, désert, arctique...). Prends-le au râtelier, **clic gauche** peindre, **clic droit** palette, **molette** pipette. Les couleurs sont gardées avec le monde (`tf-paint.json`) ;
-- la **tablette schématique** : prends-la au râtelier, sélectionne-la dans ta barre d'outils, **clic gauche** pour ouvrir la fenêtre. **Copier** enregistre le vaisseau le plus proche (et ce qui y est attaché) ; **Construire** le recrée gratuitement devant toi. Les schématiques sont sur ton PC dans `UserData/TF/schematics`, partagées entre tous tes mondes. La peinture du vaisseau est copiée avec ;
+- la **tablette schématique** : prends-la au râtelier, sélectionne-la dans ta barre d'outils, **clic gauche** pour ouvrir la fenêtre. **Copier** enregistre le vaisseau le plus proche (et ce qui y est attaché) ; **Construire** le recrée gratuitement devant toi. Les schématiques sont sur ton PC dans `UserData/TF/schematics`, partagées entre tous tes mondes. La peinture du vaisseau est copiée avec, et les vaisseaux tenus par un **rayon tracteur** verrouillé sont copiés avec le vaisseau principal ;
 - la **vue à la troisième personne** en pilotant : touche **V** (`ThirdPersonKey`), molette pour la distance (`ThirdPersonDistance`) ;
 - les touches des sièges du mod **KeySeat** enregistrées tout de suite et recopiées par les schématiques.
 
@@ -40,6 +40,8 @@ Réglages : section `[TFAdvancedObjects]` (touche de la tablette `TabletKey`, to
 ## Peinture par zone (BuildZoop)
 
 Pistolet à peinture en main, **maintiens la touche zoop** (celle du mod BuildZoop, **Maj** par défaut, ou Maj sans ce mod) : un coin se fixe où tu vises, une boîte orange va de ce coin à là où tu vises maintenant, avec le nombre de pièces dedans. **Clic** : tout ce qui est dans la boîte est peint d'un coup (murs, sols, pentes et pièces posées), avec la couleur, la finition et le camouflage du pistolet, du côté visé en premier (les deux avec « les deux côtés »).
+
+**Pot de peinture** : case à cocher dans la fenêtre du pistolet (clic droit). Un **clic** peint d'un coup **toute la coque** du vaisseau visé (murs, sols, pentes reliés à la pièce visée), sans toucher aux meubles, lumières, machines ni autres pièces posées.
 
 ## Caméras et mode photo : ciel et joueur
 

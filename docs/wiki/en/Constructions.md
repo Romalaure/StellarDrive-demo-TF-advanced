@@ -40,7 +40,18 @@ The tab's fourth row, research **Carpentry**; placed on floors (or beside a plac
 
 The sofa's and armchair's fabric and the rug take the paint gun's color. **You can sit** on the sofa (3 seats), the armchair, the chair, the stool, the table and the coffee table: look at one and press **T** (the nearest free seat); **T** or a move key to get up. The other players see you seated. The desk, rug, bookcase and plant are decorative.
 
-**More furniture** (the row under the furniture, Carpentry): bed (sit on its edge), bunk bed, nightstand with a lamp, wardrobe, dresser, kitchen counter (sink, tap), fridge, TV unit, bench (3 seats), office chair (you can sit on it), round table, planter box. Wood, iron, glass and copper only.
+**More furniture** (the row under the furniture, Carpentry): bed, bunk bed, nightstand with a lamp, wardrobe, dresser, kitchen counter (sink, tap), fridge, TV unit, bench (3 seats), office chair (you can sit on it), round table, planter box. Wood, iron, glass and copper only.
+
+**Futuristic furniture** (the next row, research *Station modules*), to fit out a ship's rooms:
+- **science**: lab bench, specimen tank (glowing liquid), analysis console;
+- **storage**: server rack, cargo crate, storage rack, canisters;
+- **crew quarters**: sleep pod, crew lockers;
+- **galley**: food synthesizer, galley island;
+- **offices**: command desk (3 screens), holo table (a turning planet);
+- **lounge / mess**: lounge sofa (3 seats), mess table with benches (4 seats), vending machine;
+- **sickbay**: medical bed.
+
+**Sleeping**: the bed, the bunk bed, the sleep pod and the medical bed: look at one and press **T** to sleep through the night (like the game's waiting). Not during flight.
 
 ## Stairs
 
@@ -56,11 +67,12 @@ Top row of the tab. They stand on floors and **climb toward the back** (the foot
 
 Chain flights to climb higher. The spiral needs a hole in the ceiling above it.
 
-## Signs and diagonal doors
+## Signs and doors
 
 Last row of the tab.
 - **Lit sign panel** (wall), **door plate** (small, beside a door), **holographic sign** (on the floor, text floating at eye height): look at one and press **T** to write its text (40 characters) and pick its color (7 colors). To name rooms: Bridge, Sickbay, Cargo… Every player sees it, the host keeps it with the world. Research *Ship computer*.
-- **Diagonal door** (one square) and **large diagonal door** (2 × 2): for diagonal walls, which the game's doors do not fit. Remove the diagonal wall, set the door on the floor in its place (turn it for the other diagonal). It opens by itself when someone comes near and closes behind them. It **does not hold air** like the game's doors. Research *Metal construction*.
+- **Automatic door** (one square) and **large automatic door** (2 × 2): it opens by itself when someone comes near and closes behind them. Set **diagonally** (remove the diagonal wall, set the door on the floor in its place, turn it for the other diagonal); look at it and press **T** to make it **straight** (in line with a normal wall), **T** again for diagonal. It **does not hold air**. Research *Metal construction*.
+- **The game's door on diagonals**: place the game's door like a wall and turn it (rotate key): on a diagonal wall it takes its diagonal version, like the game's walls. It is the real door: it opens with the interact key and seals its room.
 
 ## Reinforced hull
 

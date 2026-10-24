@@ -23,7 +23,7 @@ Mismos números de pieza que antes: lo ya construido en tus mundos se conserva. 
 
 Sin el mod TF, TF Advanced también ofrece (mismos objetos, mismos archivos: nada se pierde):
 - la **pistola de pintura** del mod TF: pinta paredes y suelos, y también puertas, máquinas y todas las piezas colocadas, con acabado (brillo, metal, luminoso), preajustes y **camuflajes** (bosque, desierto, ártico...). Cógela del soporte, **clic izquierdo** pinta, **clic derecho** paleta, **rueda** cuentagotas. Los colores se guardan con el mundo (`tf-paint.json`);
-- la **tableta esquemática**: cógela del soporte, selecciónala en tu barra de herramientas, **clic izquierdo** para abrir su ventana. **Copiar** guarda la nave más cercana (y lo acoplado); **Construir** la vuelve a crear gratis delante de ti. Los esquemas están en tu PC en `UserData/TF/schematics`, compartidos por todos tus mundos. La pintura de la nave se copia también;
+- la **tableta esquemática**: cógela del soporte, selecciónala en tu barra de herramientas, **clic izquierdo** para abrir su ventana. **Copiar** guarda la nave más cercana (y lo acoplado); **Construir** la vuelve a crear gratis delante de ti. Los esquemas están en tu PC en `UserData/TF/schematics`, compartidos por todos tus mundos. La pintura de la nave se copia también, y las naves sujetas por un **rayo tractor** bloqueado se copian con la nave principal;
 - la **vista en tercera persona** al pilotar: tecla **V** (`ThirdPersonKey`), rueda del ratón para la distancia (`ThirdPersonDistance`);
 - las teclas de los asientos del mod **KeySeat** guardadas al instante y copiadas por los esquemas.
 
@@ -40,6 +40,8 @@ Ajustes: sección `[TFAdvancedObjects]` (tecla de la tableta `TabletKey`, tecla 
 ## Pintura por zona (BuildZoop)
 
 Con la pistola de pintura en la mano, **mantén la tecla zoop** (la del mod BuildZoop, **Mayús** por defecto, o Mayús sin ese mod): se fija una esquina donde apuntas, una caja naranja va de ella a donde apuntas ahora, con el número de piezas dentro. **Clic**: todo lo que hay en la caja se pinta de golpe (paredes, suelos, pendientes y piezas colocadas), con el color, el acabado y el camuflaje de la pistola, del lado apuntado primero (los dos con «ambos lados»).
+
+**Bote de pintura**: casilla en la ventana de la pistola (clic derecho). Un **clic** pinta de golpe **todo el casco** de la nave apuntada (paredes, suelos, pendientes unidos a la pieza apuntada), sin tocar muebles, luces, máquinas ni otras piezas colocadas.
 
 ## Cámaras y modo foto: cielo y jugador
 

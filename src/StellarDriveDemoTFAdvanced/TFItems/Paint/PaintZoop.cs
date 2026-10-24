@@ -27,6 +27,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
     /// aim now is shown, and a click paints everything in it at once (walls, floors and slopes, and
     /// placed parts), with the brush's color, finish and camouflage, on the side aimed at first
     /// (both with "both sides"). Same requests as single strokes, sent a few per frame.
+    /// The paint pot (a mode of the paint window): a click paints the whole hull of the ship aimed
+    /// at (every wall, floor and slope joined to the one aimed at), never its placed parts.
     /// </summary>
     internal static class PaintZoop
     {
@@ -49,6 +51,14 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
         private static bool _looked;
 
         public static bool Anchored => _anchored;
+
+        /// <summary>The paint pot mode: a click paints the whole hull.</summary>
+        public static bool Bucket;
+        private const int BucketLimit = 40000;
+        private static bool _bucketAim, _bucketFront;
+        private static uint _bucketShip;
+        private static IShipPartTargeter _bucketTargeter;
+        private static Vector3 _bucketAt;
 
         /// <summary>Held: the BuildZoop zoop key when that mod is there, Shift otherwise.</summary>
         private static bool Held
@@ -81,7 +91,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
         public static void Aim(PaintTool tool, Vector3 origin, Vector3 direction, float distance, int mask, bool hullFront)
         {
             _hasAim = false;
-            if (!Held || ModMenu.IsOpen || PaintHud.MenuOpen)
+            _bucketAim = false;
+            if (!(Held || Bucket) || ModMenu.IsOpen || PaintHud.MenuOpen)
             {
                 Cancel();
                 return;
@@ -94,6 +105,16 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
             PartHit local = ship.ConvertHitToLocalHit(hit);
             // Just under the surface aimed at: inside the floor or wall hit
             Vector3 at = local.Pos - local.Normal.normalized * 0.1f;
+            if (Bucket)
+            {
+                Cancel();
+                _bucketAim = true;
+                _bucketShip = ship.ShipId;
+                _bucketTargeter = ship;
+                _bucketAt = at;
+                _bucketFront = hullFront;
+                return;
+            }
             if (!_anchored)
             {
                 _anchored = true;
@@ -225,35 +246,17 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
         /// <summary>The click while the box is up: everything in it painted. True when the click is taken.</summary>
         public static bool Commit()
         {
+            if (Bucket)
+                return _bucketAim && Fill();
             if (!_anchored || !_hasAim)
                 return false;
             Collect();
             var selection = GameServices.PaintSelection;
-            var network = ServiceLocator.GetService<IShipInteractionNetworkService>();
-            IShipPartTargeter targeter = _targeter;
             if (selection == null)
                 return false;
             uint shipId = _ship;
-            bool both = selection.PaintBothSides, front = _front;
-            Color brush = selection.SelectedPaintColor;
-            foreach (HullPartPosition position in Hull)
-            {
-                HullPartPosition at = position;
-                Outbox.Enqueue(() =>
-                {
-                    if (network == null)
-                        return;
-                    Color color = Camouflage.Enabled ? Camouflage.ColorAt(at.VoxelCoord, brush) : brush;
-                    var paint = new Vector3Byte((byte)(color.r * 255f), (byte)(color.g * 255f), (byte)(color.b * 255f));
-                    HullPartColor current = targeter != null ? targeter.GetHullColor(at) : new HullPartColor(paint, paint);
-                    network.PaintHullPart(new PaintHullPartNetworkRequest
-                    {
-                        ShipId = shipId,
-                        Position = at,
-                        Color = new HullPartColor(front || both ? paint : current.Front, !front || both ? paint : current.Back)
-                    });
-                });
-            }
+            bool both = selection.PaintBothSides;
+            PaintHull(Hull, shipId, _targeter, _front, both);
             IShipsProvider provider = ServiceLocator.GetService<IShipsProvider>();
             foreach (ushort id in Floating)
             {
@@ -274,6 +277,76 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
             return true;
         }
 
+        // The paint pot: the hull joined to the voxel aimed at (26 neighbours), placed parts left alone
+        private static bool Fill()
+        {
+            IShipsProvider ships = ServiceLocator.GetService<IShipsProvider>();
+            var selection = GameServices.PaintSelection;
+            if (selection == null || ships == null || !ships.TryGetShip(_bucketShip, out IShipStateRead ship) || ship == null)
+                return false;
+            Vector3Int start = Vector3Int.RoundToInt(_bucketAt);
+            var seen = new HashSet<Vector3Int>();
+            var open = new Queue<Vector3Int>();
+            for (int x = -1; x <= 1; x++)
+                for (int y = -1; y <= 1; y++)
+                    for (int z = -1; z <= 1; z++)
+                    {
+                        Vector3Int c = start + new Vector3Int(x, y, z);
+                        if (ship.GetVoxel(c)?.HasPart == true && seen.Add(c))
+                            open.Enqueue(c);
+                    }
+            var hull = new List<HullPartPosition>();
+            while (open.Count > 0 && seen.Count < BucketLimit)
+            {
+                Vector3Int coord = open.Dequeue();
+                Ships.Grid.Model.ShipVoxel voxel = ship.GetVoxel(coord);
+                foreach (VoxelPartType type in new[] { VoxelPartType.Floor, VoxelPartType.ForwardWall, VoxelPartType.RightWall, VoxelPartType.Interior })
+                {
+                    HullPart? part = voxel?.GetPartFromType(type);
+                    if (part.HasValue && part.Value.Settings != null)
+                        hull.Add(new HullPartPosition(coord, type));
+                }
+                for (int x = -1; x <= 1; x++)
+                    for (int y = -1; y <= 1; y++)
+                        for (int z = -1; z <= 1; z++)
+                        {
+                            Vector3Int next = coord + new Vector3Int(x, y, z);
+                            if (!seen.Contains(next) && ship.GetVoxel(next)?.HasPart == true && seen.Add(next))
+                                open.Enqueue(next);
+                        }
+            }
+            if (hull.Count == 0)
+                return false;
+            PaintHull(hull, _bucketShip, _bucketTargeter, _bucketFront, selection.PaintBothSides);
+            _toast = Loc.Pick($"Pot de peinture : {hull.Count} pièces de coque", $"Paint pot: {hull.Count} hull pieces", $"Bote de pintura: {hull.Count} piezas de casco");
+            _toastUntil = Time.unscaledTime + 3f;
+            return true;
+        }
+
+        private static void PaintHull(List<HullPartPosition> hull, uint shipId, IShipPartTargeter targeter, bool front, bool both)
+        {
+            var network = ServiceLocator.GetService<IShipInteractionNetworkService>();
+            Color brush = GameServices.PaintSelection.SelectedPaintColor;
+            foreach (HullPartPosition position in hull)
+            {
+                HullPartPosition at = position;
+                Outbox.Enqueue(() =>
+                {
+                    if (network == null)
+                        return;
+                    Color color = Camouflage.Enabled ? Camouflage.ColorAt(at.VoxelCoord, brush) : brush;
+                    var paint = new Vector3Byte((byte)(color.r * 255f), (byte)(color.g * 255f), (byte)(color.b * 255f));
+                    HullPartColor current = targeter != null ? targeter.GetHullColor(at) : new HullPartColor(paint, paint);
+                    network.PaintHullPart(new PaintHullPartNetworkRequest
+                    {
+                        ShipId = shipId,
+                        Position = at,
+                        Color = new HullPartColor(front || both ? paint : current.Front, !front || both ? paint : current.Back)
+                    });
+                });
+            }
+        }
+
         private static string _toast;
         private static float _toastUntil;
 
@@ -283,7 +356,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
                 DeviceUi.Toast(Screen.width, Screen.height, _toast);
             if (!PaintHud.ToolActive || ModMenu.IsOpen)
                 return;
-            string text = _anchored && _hasAim
+            string text = Bucket
+                ? Loc.Pick("Pot de peinture · clic : toute la coque du vaisseau", "Paint pot · click: the whole ship's hull", "Bote de pintura · clic: todo el casco de la nave")
+                : _anchored && _hasAim
                 ? Loc.Pick($"Zone : {Hull.Count + Floating.Count} pièces · clic pour peindre", $"Area: {Hull.Count + Floating.Count} parts · click to paint", $"Zona: {Hull.Count + Floating.Count} piezas · clic para pintar")
                 : null;
             if (text == null)

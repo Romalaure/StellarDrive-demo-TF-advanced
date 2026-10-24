@@ -38,14 +38,18 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             [7443] = new[] { new Vector3(0f, 0.71f, 0f) },
             [7444] = new[] { new Vector3(-0.5f, 0.77f, -0.3f), new Vector3(0.5f, 0.77f, -0.3f) },
             [7445] = new[] { new Vector3(-0.3f, 0.43f, -0.15f), new Vector3(0.3f, 0.43f, -0.15f) },
-            [8200] = new[] { new Vector3(0f, 0.42f, -0.8f) },
             [8208] = new[] { new Vector3(-0.52f, 0.47f, 0f), new Vector3(0f, 0.47f, 0f), new Vector3(0.52f, 0.47f, 0f) },
             [8209] = new[] { new Vector3(0f, 0.53f, -0.02f) },
+            [8253] = new[] { new Vector3(-0.62f, 0.47f, -0.08f), new Vector3(0f, 0.47f, -0.08f), new Vector3(0.62f, 0.47f, -0.08f) },
+            [8254] = new[] { new Vector3(-0.5f, 0.47f, -0.62f), new Vector3(0.5f, 0.47f, -0.62f), new Vector3(-0.5f, 0.47f, 0.62f), new Vector3(0.5f, 0.47f, 0.62f) },
         };
 
         private const float Reach = 4f, EyeAbove = 0.68f, LegAngle = 12f;
 
         public static bool IsSeat(ushort id) => Points.ContainsKey(id);
+
+        /// <summary>The beds: the use key sleeps there, like the game's bed.</summary>
+        public static bool IsBed(ushort id) => id == 8200 || id == 8201 || id == 8247 || id == 8256;
 
         /// <summary>A seat of a piece: (ship, part, seat).</summary>
         internal struct Seat
@@ -372,6 +376,27 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             Quaternion look = camera.transform.rotation;
             camera.UpdateCamera(eye, look);
             Distant(__instance)?.UpdateCamera(eye, look);
+        }
+    }
+
+    /// <summary>
+    /// A bed: the use key lies down to pass the time like the game's bed (the player waits;
+    /// the night goes by once every player waits). Not while the ship flies.
+    /// </summary>
+    internal sealed class BedVisuals : UsablePart
+    {
+        public override string Label => Loc.Pick("Dormir (passer la nuit)", "Sleep (pass the night)", "Dormir (pasar la noche)");
+
+        public override void Use()
+        {
+            var context = new PartContext(Key.ShipId, Key.PartId);
+            var wait = Core.Services.ServiceLocator.GetService<WorldProvision.Interface.Services.IWaitPossibilityClientProvider>();
+            if (wait != null && !wait.CanWait(context))
+            {
+                Core.Services.ServiceLocator.GetService<UI.Interface.Services.IWarningsDisplay>()?.ShowTempWarning(Loc.Pick("Impossible de dormir pendant le vol", "Can't sleep while flying", "No se puede dormir en vuelo"));
+                return;
+            }
+            Core.Services.ServiceLocator.GetService<Managers.Interface.Services.IShipInteractionNetworkService>()?.Wait(new Managers.Interface.Model.PartInteractNetworkRequest { ShipId = Key.ShipId, PartId = Key.PartId });
         }
     }
 

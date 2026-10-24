@@ -40,7 +40,18 @@ Quatrième rangée de l'onglet, tech **Charpenterie** ; ils se posent au sol (ou
 
 Le tissu du canapé, du fauteuil et le tapis prennent la couleur du pistolet à peinture. **On s'assoit** sur le canapé (3 places), le fauteuil, la chaise, le tabouret, la table et la table basse : regarde-les et appuie sur **T** (place libre la plus proche) ; **T** ou une touche de déplacement pour se relever. Les autres joueurs te voient assis. Le bureau, le tapis, la bibliothèque et la plante sont décoratifs.
 
-**Autres meubles** (rangée sous les meubles, Charpenterie) : lit (on s'assoit au bord), lits superposés, table de chevet avec lampe, armoire, commode, plan de travail de cuisine (évier, robinet), réfrigérateur, meuble TV, banc (3 places), chaise de bureau (on s'y assoit), table ronde, jardinière. Bois, fer, verre et cuivre seulement.
+**Autres meubles** (rangée sous les meubles, Charpenterie) : lit, lits superposés, table de chevet avec lampe, armoire, commode, plan de travail de cuisine (évier, robinet), réfrigérateur, meuble TV, banc (3 places), chaise de bureau (on s'y assoit), table ronde, jardinière. Bois, fer, verre et cuivre seulement.
+
+**Meubles futuristes** (rangée suivante, recherche *Modules de station*), pour équiper les salles d'un vaisseau :
+- **science** : paillasse de labo, cuve à spécimen (liquide lumineux), console d'analyse ;
+- **stockage** : baie de serveurs, caisse de fret, étagère de stockage, bonbonnes ;
+- **dortoir** : capsule de sommeil, casiers d'équipage ;
+- **cuisine** : synthétiseur de repas, îlot de cuisine ;
+- **bureaux** : bureau de commandement (3 écrans), table holographique (planète qui tourne) ;
+- **salon / mess** : canapé lounge (3 places), table de mess avec bancs (4 places), distributeur ;
+- **infirmerie** : lit médical.
+
+**Dormir** : le lit, les lits superposés, la capsule de sommeil et le lit médical : regarde-les et appuie sur **T** pour dormir et passer la nuit (comme l'attente du jeu). Pas pendant le vol.
 
 ## Escaliers
 
@@ -56,11 +67,12 @@ Rangée du haut de l'onglet. Ils se posent au sol et **montent vers l'arrière**
 
 Mets des volées à la suite pour monter plus haut. Le colimaçon a besoin d'une trémie dans le plafond au-dessus.
 
-## Panneaux et portes diagonales
+## Panneaux et portes
 
 Dernière rangée de l'onglet.
 - **Panneau lumineux** (mur), **plaque de porte** (petite, à côté d'une porte), **enseigne holographique** (au sol, texte flottant à hauteur des yeux) : regarde-les et appuie sur **T** pour écrire le texte (40 caractères) et choisir sa couleur (7 couleurs). Pour nommer les pièces : Pont, Infirmerie, Soute… Tous les joueurs le voient, l'hôte le garde avec le monde. Recherche *Ordinateur de bord*.
-- **Porte diagonale** (un carré) et **grande porte diagonale** (2 × 2) : pour les murs en diagonale, que les portes du jeu ne prennent pas. Enlève le mur diagonal, pose la porte au sol à sa place (tourne-la pour l'autre diagonale). Elle s'ouvre seule quand quelqu'un approche et se referme. Elle **ne retient pas l'air** comme les portes du jeu. Recherche *Construction métallique*.
+- **Porte automatique** (un carré) et **grande porte automatique** (2 × 2) : elle s'ouvre seule quand quelqu'un approche et se referme derrière lui. Posée **en diagonale** (enlève le mur diagonal, pose la porte au sol à sa place, tourne-la pour l'autre diagonale) ; regarde-la et appuie sur **T** pour la mettre **droite** (dans l'alignement d'un mur normal), **T** encore pour revenir en diagonale. Elle **ne retient pas l'air**. Recherche *Construction métallique*.
+- **La porte du jeu en diagonale** : pose la porte du jeu comme un mur et tourne-la (touche de rotation) : sur un mur en diagonale, elle prend sa version diagonale, comme les murs du jeu. C'est la vraie porte : elle s'ouvre avec la touche d'interaction et ferme la pièce étanche.
 
 ## Coque renforcée
 

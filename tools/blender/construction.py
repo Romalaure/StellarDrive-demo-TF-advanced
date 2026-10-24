@@ -1,7 +1,7 @@
-"""The TF Construction parts (7341-7367), furniture (7440-7449, 8200-8211) and stairs (8220-8229), each in its part's frame and box
+"""The TF Construction parts (7341-7367), furniture (7440-7449, 8200-8211, 8240-8256), stairs (8220-8229) and the tractor beam (7486), each in its part's frame and box
 (MaterialParts sizes): y out of the surface it stands on, the box from y = 0 up. Their pieces are
 named C<id>_<look>: Wood, WoodDark, Steel, SteelDark, Chrome, Glass, Fabric, FabricDark, Leaf,
-Pot, Soil, Rug, RugTrim, BookA, BookB, BookC, Sheet, Screen, Lamp, Neon (the mod gives each look its material: real wood
+Pot, Soil, Rug, RugTrim, BookA, BookB, BookC, Sheet, Screen, ScreenLit, Lamp, Neon, White, Green, Red (the mod gives each look its material: real wood
 grain, satin metal, the hull's glass...). Pieces stand a few millimeters clear of the faces under
 them (no flicker). The helpers turn the part's frame into Blender's (game (x, y, z) = Blender (x, z, y))."""
 import math
@@ -699,5 +699,339 @@ def spiral(P, style, H=2.0, turn=270.0, steps=9, r0=0.1, r1=0.97):
 
 spiral(8228, "iron")
 spiral(8229, "future")
+
+
+# ======================= Futuristic furniture (8240-8256) =======================
+
+def lathe(part, look, profile, sides=32):
+    """A closed solid of revolution around y from a closed (r, y) profile, counterclockwise in (r, y)."""
+    bm = bmesh.new()
+    rings = []
+    for (r, y) in profile:
+        if r < 1e-6:
+            center = bm.verts.new(B((0.0, y, 0.0)))
+            rings.append([center] * sides)
+        else:
+            rings.append([bm.verts.new(B((r * math.cos(2 * math.pi * i / sides), y, r * math.sin(2 * math.pi * i / sides)))) for i in range(sides)])
+    n = len(rings)
+    for k in range(n):
+        r0, r1 = rings[k], rings[(k + 1) % n]
+        for i in range(sides):
+            j = (i + 1) % sides
+            face = []
+            for v in (r0[i], r0[j], r1[j], r1[i]):
+                if v not in face:
+                    face.append(v)
+            if len(face) >= 3:
+                try:
+                    bm.faces.new(face)
+                except ValueError:
+                    pass
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    name = "C%d_%s_lathe" % (part, look)
+    mesh = bpy.data.meshes.new(name)
+    bm.to_mesh(mesh)
+    bm.free()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    bpy.context.view_layer.objects.active = obj
+    return _finish(obj, "C%d_%s" % (part, look))
+
+
+def ball(part, look, center, r, segments=20, rings=12):
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=segments, ring_count=rings, radius=r, location=B(center))
+    obj = bpy.context.active_object
+    obj.name = "C%d_%s_ball" % (part, look)
+    return _finish(obj, "C%d_%s" % (part, look))
+
+
+def ring(part, look, center, r, minor, sides=40):
+    """A flat torus in the x-z plane."""
+    bpy.ops.mesh.primitive_torus_add(major_radius=r, minor_radius=minor, major_segments=sides, minor_segments=8, location=B(center))
+    obj = bpy.context.active_object
+    obj.name = "C%d_%s_ring" % (part, look)
+    return _finish(obj, "C%d_%s" % (part, look))
+
+
+# 7486 Tractor beam (0.8 x 0.64 x 0.8): an armored square foot, a turning collar, a dish of coils, the emitter
+P = 7486
+box(P, "SteelDark", (0, 0.06, 0), (0.8, 0.12, 0.8), bevel=0.02, segments=2)
+box(P, "Steel", (0, 0.124, 0), (0.7, 0.012, 0.7), bevel=0.004)
+for x in (-0.33, 0.33):
+    for z in (-0.33, 0.33):
+        cyl(P, "Chrome", (x, 0.12, z), (x, 0.135, z), 0.022, sides=10)
+lathe(P, "Steel", [(0.0, 0.13), (0.3, 0.13), (0.3, 0.2), (0.27, 0.225), (0.0, 0.225)])
+ring(P, "Green", (0, 0.215, 0), 0.285, 0.012)
+# The dish: a thick bowl, dark inside, a chrome lip
+lathe(P, "SteelDark", [(0.0, 0.225), (0.17, 0.225), (0.4, 0.43), (0.4, 0.45), (0.37, 0.45), (0.15, 0.27), (0.0, 0.27)], sides=40)
+ring(P, "Chrome", (0, 0.45, 0), 0.385, 0.018, sides=48)
+for i in range(8):
+    a = math.radians(i * 45 + 22.5)
+    c, s = math.cos(a), math.sin(a)
+    # A coil on the bowl pointing at the emitter, a lit tip
+    cyl(P, "Steel", (0.31 * c, 0.37, 0.31 * s), (0.22 * c, 0.5, 0.22 * s), 0.028, 0.02, sides=12)
+    for k in range(3):
+        t = 0.25 + k * 0.25
+        p = (0.31 * c + (0.22 - 0.31) * c * t, 0.37 + 0.13 * t, 0.31 * s + (0.22 - 0.31) * s * t)
+        cyl(P, "Chrome", (p[0], p[1] - 0.006, p[2]), (p[0], p[1] + 0.006, p[2]), 0.034, sides=12)
+    ball(P, "Green", (0.22 * c, 0.505, 0.22 * s), 0.022, segments=10, rings=6)
+# The emitter: a mast with lit rings and a glowing lens
+cyl(P, "Chrome", (0, 0.27, 0), (0, 0.56, 0), 0.045, 0.035, sides=16)
+for y in (0.34, 0.42, 0.5):
+    ring(P, "Green", (0, y, 0), 0.06, 0.012, sides=20)
+ball(P, "Lamp", (0, 0.585, 0), 0.04, segments=14, rings=8)
+cyl(P, "SteelDark", (0, 0.55, 0), (0, 0.575, 0), 0.055, sides=16)
+
+# 8240 Lab bench (1.6 x 0.95 x 0.7): white cupboards, a dark top, a microscope, glowing flasks
+P = 8240
+box(P, "SteelDark", (0, 0.04, 0.02), (1.54, 0.08, 0.62))
+box(P, "White", (0, 0.45, 0.01), (1.6, 0.76, 0.66), bevel=0.012, segments=2)
+for x in (-0.6, -0.2, 0.2, 0.6):
+    box(P, "White", (x, 0.45, -0.325), (0.38, 0.66, 0.012), bevel=0.004)
+    box(P, "SteelDark", (x + 0.13, 0.62, -0.335), (0.012, 0.14, 0.012))
+box(P, "Neon", (0, 0.82, -0.33), (1.56, 0.012, 0.006))
+box(P, "SteelDark", (0, 0.855, 0), (1.62, 0.05, 0.7), bevel=0.008)
+# The microscope
+box(P, "SteelDark", (-0.45, 0.895, 0.05), (0.18, 0.03, 0.22), bevel=0.006)
+cyl(P, "White", (-0.45, 0.9, 0.13), (-0.45, 1.12, 0.1), 0.025, sides=12)
+cyl(P, "Chrome", (-0.45, 1.13, 0.08), (-0.45, 1.0, -0.02), 0.022, sides=14)
+cyl(P, "SteelDark", (-0.45, 1.16, 0.1), (-0.45, 1.22, 0.14), 0.014, sides=10)
+cyl(P, "Chrome", (-0.45, 0.98, 0.02), (-0.45, 0.985, 0.02), 0.06, sides=16)
+# Flasks
+for k, (x, z, h) in enumerate(((0.15, 0.05, 0.16), (0.3, -0.05, 0.2), (0.45, 0.1, 0.13))):
+    lathe(P, "Glass", [(0.0, 0.88), (0.05, 0.88), (0.05, 0.88 + h * 0.5), (0.018, 0.88 + h * 0.8), (0.018, 0.88 + h), (0.0, 0.88 + h)], sides=16)
+    cyl(P, "Green", (x, 0.885, z), (x, 0.88 + h * 0.4, z), 0.044, sides=14)
+# (the lathes are made on the axis: move each flask in place)
+flasks = sorted([o for o in bpy.data.objects if o.name.startswith("C8240_Glass_lathe")], key=lambda o: o.name)
+for o, (x, z, h) in zip(flasks, ((0.15, 0.05, 0.16), (0.3, -0.05, 0.2), (0.45, 0.1, 0.13))):
+    o.location = B((x, 0, z))
+box(P, "ScreenLit", (-0.05, 0.9, 0.18), (0.26, 0.02, 0.18), rotation=(0, 0, 0))
+
+# 8241 Specimen tank (0.8 x 2.1 x 0.8): a steel base and cap, a glass tube, the green liquid, a floating shape
+P = 8241
+lathe(P, "SteelDark", [(0.0, 0.0), (0.4, 0.0), (0.4, 0.18), (0.36, 0.25), (0.0, 0.25)])
+ring(P, "Neon", (0, 0.2, 0), 0.385, 0.01)
+cyl(P, "Glass", (0, 0.25, 0), (0, 1.88, 0), 0.33, sides=32)
+cyl(P, "Green", (0, 0.27, 0), (0, 1.6, 0), 0.31, sides=32)
+ball(P, "SteelDark", (0, 1.0, 0), 0.14, segments=14, rings=10)
+lathe(P, "SteelDark", [(0.0, 1.88), (0.36, 1.88), (0.4, 1.95), (0.4, 2.06), (0.2, 2.1), (0.0, 2.1)])
+ring(P, "Neon", (0, 1.93, 0), 0.385, 0.01)
+for a in (45, 135, 225, 315):
+    c, s = math.cos(math.radians(a)), math.sin(math.radians(a))
+    cyl(P, "Chrome", (0.35 * c, 0.25, 0.35 * s), (0.35 * c, 1.88, 0.35 * s), 0.014, sides=8)
+
+# 8242 Analysis console (1.0 x 1.3 x 0.6): a white stand, a slanted desk, a lit screen and keys
+P = 8242
+box(P, "SteelDark", (0, 0.02, 0.05), (0.6, 0.04, 0.45), bevel=0.006)
+box(P, "White", (0, 0.42, 0.08), (0.3, 0.8, 0.3), bevel=0.02, segments=2)
+box(P, "White", (0, 0.86, -0.04), (1.0, 0.06, 0.5), bevel=0.012, rotation=(-18, 0, 0))
+box(P, "Neon", (0, 0.88, -0.1), (0.7, 0.012, 0.22), rotation=(-18, 0, 0))
+box(P, "SteelDark", (0, 1.08, 0.2), (0.9, 0.42, 0.04), bevel=0.01, rotation=(12, 0, 0))
+box(P, "ScreenLit", (0, 1.08, 0.177), (0.84, 0.36, 0.005), rotation=(12, 0, 0))
+
+# 8243 Server rack (0.7 x 2.0 x 0.9): a dark cabinet, a glass door, servers with lights
+P = 8243
+box(P, "SteelDark", (0, 1.0, 0.02), (0.7, 2.0, 0.86), bevel=0.01)
+for k in range(9):
+    y = 0.22 + k * 0.19
+    box(P, "Steel", (0, y, -0.37), (0.6, 0.16, 0.06), bevel=0.004)
+    for i in range(6):
+        look = "Green" if (i + k) % 3 else ("Red" if k % 4 == 0 else "Neon")
+        box(P, look, (-0.24 + i * 0.03, y + 0.04, -0.402), (0.012, 0.012, 0.004))
+    box(P, "SteelDark", (0.15, y, -0.401), (0.22, 0.1, 0.004))
+box(P, "Glass", (0, 1.0, -0.43), (0.66, 1.94, 0.012))
+box(P, "Chrome", (0.3, 1.0, -0.445), (0.016, 0.5, 0.016))
+box(P, "Neon", (0, 1.985, -0.4), (0.66, 0.012, 0.01))
+
+# 8244 Cargo crate (1 x 1 x 1): white, reinforced corners, light stripes, a red label
+P = 8244
+box(P, "White", (0, 0.5, 0), (0.96, 0.96, 0.96), bevel=0.02, segments=2)
+for x in (-0.47, 0.47):
+    for z in (-0.47, 0.47):
+        box(P, "SteelDark", (x, 0.5, z), (0.07, 1.0, 0.07), bevel=0.008)
+for y in (0.03, 0.97):
+    for s in (-1, 1):
+        box(P, "SteelDark", (0, y, s * 0.47), (1.0, 0.06, 0.07), bevel=0.006)
+        box(P, "SteelDark", (s * 0.47, y, 0), (0.07, 0.06, 1.0), bevel=0.006)
+for s in (-1, 1):
+    box(P, "Neon", (0, 0.72, s * 0.483), (0.8, 0.02, 0.006))
+    box(P, "Neon", (s * 0.483, 0.72, 0), (0.006, 0.02, 0.8))
+box(P, "Red", (-0.22, 0.42, -0.483), (0.26, 0.12, 0.006))
+
+# 8245 Storage rack (1.6 x 2.0 x 0.6): steel uprights, four shelves, crates and bins
+P = 8245
+for x in (-0.77, 0.77):
+    for z in (-0.27, 0.27):
+        box(P, "Steel", (x, 1.0, z), (0.05, 2.0, 0.05), bevel=0.004)
+random.seed(42)
+for k, y in enumerate((0.08, 0.6, 1.12, 1.64)):
+    box(P, "SteelDark", (0, y, 0), (1.58, 0.04, 0.58), bevel=0.004)
+    box(P, "Neon", (0, y - 0.025, -0.29), (1.5, 0.01, 0.006))
+    x = -0.72
+    while x < 0.6:
+        w = random.uniform(0.25, 0.42)
+        h = random.uniform(0.2, 0.38)
+        look = random.choice(("White", "White", "SteelDark", "Steel"))
+        box(P, look, (x + w / 2, y + 0.02 + h / 2, random.uniform(-0.04, 0.04)), (w - 0.03, h, 0.46), bevel=0.01)
+        x += w + 0.02
+
+# 8246 Canisters on a pallet (1 x 1.2 x 1): a steel pallet, two white canisters with red bands
+P = 8246
+box(P, "SteelDark", (0, 0.06, 0), (1.0, 0.12, 1.0), bevel=0.01)
+for x in (-0.3, 0.3):
+    box(P, "Steel", (x, 0.02, 0), (0.08, 0.04, 1.0))
+for (x, z) in ((-0.24, -0.1), (0.24, 0.12)):
+    lathe(P, "White", [(0.0, 0.12), (0.22, 0.12), (0.24, 0.16), (0.24, 1.08), (0.2, 1.14), (0.0, 1.14)])
+    o = bpy.context.active_object
+    o.location = B((x, 0, z))
+    for y in (0.35, 0.85):
+        ring(P, "Red", (x, y, z), 0.243, 0.014, sides=32)
+    cyl(P, "SteelDark", (x, 1.14, z), (x, 1.19, z), 0.05, sides=12)
+
+# 8247 Sleep pod (1.1 x 1.2 x 2.2): a white shell, a mattress, a glass canopy, lit trim
+P = 8247
+box(P, "SteelDark", (0, 0.05, 0), (1.0, 0.1, 2.1), bevel=0.01)
+box(P, "White", (0, 0.32, 0), (1.1, 0.44, 2.2), bevel=0.08, segments=3)
+box(P, "Fabric", (0, 0.58, 0.05), (0.9, 0.12, 1.95), bevel=0.04, segments=2)
+box(P, "Sheet", (0, 0.66, 0.78), (0.6, 0.1, 0.3), bevel=0.04, segments=2)
+box(P, "FabricDark", (0, 0.65, -0.35), (0.92, 0.04, 1.0), bevel=0.015)
+box(P, "White", (0, 0.85, 1.05), (1.1, 0.7, 0.1), bevel=0.04, segments=2)
+# The canopy: a half tube of glass over the mattress
+bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.52, depth=1.7, location=B((0, 0.6, -0.12)), rotation=(math.radians(90), 0, 0))
+can = bpy.context.active_object
+can.name = "C8247_Glass_canopy"
+bpy.context.view_layer.update()
+bm = bmesh.new()
+bm.from_mesh(can.data)
+bmesh.ops.delete(bm, geom=[v for v in bm.verts if (can.matrix_world @ v.co).z < 0.6], context='VERTS')
+bm.to_mesh(can.data)
+bm.free()
+_finish(can, "C8247_Glass")
+for s in (-1, 1):
+    box(P, "Neon", (s * 0.551, 0.4, 0), (0.006, 0.02, 2.0))
+box(P, "ScreenLit", (0.3, 0.9, 0.995), (0.3, 0.16, 0.006))
+
+# 8248 Crew lockers (0.9 x 2.0 x 0.5): two tall lockers, vented doors, a light line
+P = 8248
+box(P, "SteelDark", (0, 1.0, 0.01), (0.9, 2.0, 0.48), bevel=0.01)
+for s in (-1, 1):
+    box(P, "White", (s * 0.222, 1.02, -0.235), (0.42, 1.88, 0.02), bevel=0.006)
+    for k in range(5):
+        box(P, "SteelDark", (s * 0.222, 1.65 + k * 0.04, -0.247), (0.26, 0.012, 0.006))
+    box(P, "Chrome", (s * 0.05, 1.05, -0.252), (0.016, 0.22, 0.016))
+    box(P, "Neon", (s * 0.222, 1.4, -0.247), (0.08, 0.016, 0.004))
+box(P, "Neon", (0, 0.06, -0.24), (0.86, 0.012, 0.006))
+
+# 8249 Food synthesizer (0.8 x 1.8 x 0.6): a white unit, a menu screen, a lit hatch, a tray
+P = 8249
+box(P, "White", (0, 0.9, 0.01), (0.8, 1.8, 0.58), bevel=0.03, segments=2)
+box(P, "SteelDark", (0, 0.95, -0.24), (0.56, 0.42, 0.14), bevel=0.01)
+box(P, "Lamp", (0, 1.15, -0.2), (0.5, 0.012, 0.1))
+box(P, "Chrome", (0, 0.76, -0.24), (0.5, 0.012, 0.16))
+cyl(P, "White", (0, 0.77, -0.24), (0, 0.8, -0.24), 0.09, 0.11, sides=20)
+box(P, "ScreenLit", (0, 1.45, -0.292), (0.5, 0.26, 0.006))
+box(P, "Neon", (0, 1.7, -0.292), (0.6, 0.014, 0.006))
+for k in range(4):
+    box(P, "SteelDark", (0, 0.2 + k * 0.08, -0.292), (0.5, 0.02, 0.006))
+
+# 8250 Galley island (1.6 x 0.95 x 0.8): a white body, a steel top, two lit induction plates
+P = 8250
+box(P, "SteelDark", (0, 0.04, 0), (1.5, 0.08, 0.7))
+box(P, "White", (0, 0.47, 0), (1.6, 0.8, 0.8), bevel=0.02, segments=2)
+box(P, "Neon", (0, 0.085, -0.37), (1.5, 0.012, 0.006))
+box(P, "Steel", (0, 0.89, 0), (1.64, 0.04, 0.84), bevel=0.008)
+for x in (-0.35, 0.35):
+    box(P, "SteelDark", (x, 0.912, 0), (0.5, 0.005, 0.5))
+    for r in (0.09, 0.15):
+        ring(P, "Red", (x, 0.916, 0), r, 0.005, sides=32)
+box(P, "SteelDark", (0, 0.47, -0.402), (1.5, 0.6, 0.006))
+cyl(P, "SteelDark", (0.0, 0.915, 0.25), (0.0, 0.97, 0.25), 0.11, 0.12, sides=24)
+
+# 8251 Command desk (1.8 x 1.25 x 0.8): two white sides, a dark top, three lit screens
+P = 8251
+for x in (-0.84, 0.84):
+    box(P, "White", (x, 0.37, 0), (0.1, 0.74, 0.78), bevel=0.02, segments=2)
+box(P, "SteelDark", (0, 0.76, 0), (1.8, 0.05, 0.8), bevel=0.012)
+box(P, "Neon", (0, 0.733, -0.4), (1.7, 0.01, 0.006))
+box(P, "White", (0, 0.45, 0.3), (1.6, 0.5, 0.03))
+for (x, yaw) in ((-0.56, 20), (0.0, 0), (0.56, -20)):
+    box(P, "SteelDark", (x, 0.8, 0.22), (0.12, 0.03, 0.1))
+    box(P, "SteelDark", (x, 0.88, 0.25), (0.03, 0.16, 0.03))
+    box(P, "SteelDark", (x, 1.05, 0.24), (0.52, 0.32, 0.03), bevel=0.006, rotation=(0, yaw, 0))
+    c, s = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+    box(P, "ScreenLit", (x - 0.017 * s, 1.05, 0.24 - 0.017 * c), (0.48, 0.28, 0.004), rotation=(0, yaw, 0))
+box(P, "SteelDark", (0, 0.792, -0.15), (0.5, 0.015, 0.16), bevel=0.003)
+box(P, "Neon", (0, 0.801, -0.15), (0.46, 0.003, 0.12))
+
+# 8252 Holo table (1.4 x 1.5 x 1.4): a white drum, a dark glass top ringed with light, a planet above
+P = 8252
+lathe(P, "White", [(0.0, 0.0), (0.5, 0.0), (0.55, 0.1), (0.42, 0.7), (0.7, 0.82), (0.7, 0.88), (0.0, 0.88)], sides=48)
+cyl(P, "Glass", (0, 0.88, 0), (0, 0.9, 0), 0.66, sides=48)
+ring(P, "Neon", (0, 0.88, 0), 0.68, 0.012, sides=48)
+cyl(P, "Neon", (0, 0.9, 0), (0, 0.905, 0), 0.12, sides=24)
+ball(P, "Neon", (0, 1.22, 0), 0.16, segments=20, rings=12)
+ring(P, "Neon", (0, 1.22, 0), 0.27, 0.006, sides=48)
+ball(P, "Neon", (0.38, 1.3, 0.1), 0.035, segments=10, rings=6)
+
+# 8253 Lounge sofa (2.0 x 0.85 x 0.9): a white shell on a glow, dark cushions
+P = 8253
+box(P, "SteelDark", (0, 0.05, 0.02), (1.8, 0.1, 0.7), bevel=0.02)
+box(P, "Neon", (0, 0.03, 0.02), (1.84, 0.012, 0.74))
+box(P, "White", (0, 0.27, 0), (2.0, 0.34, 0.9), bevel=0.06, segments=3)
+box(P, "White", (0, 0.6, 0.38), (2.0, 0.5, 0.14), bevel=0.06, segments=3)
+for s in (-1, 1):
+    box(P, "White", (s * 0.94, 0.55, 0), (0.12, 0.3, 0.9), bevel=0.05, segments=3)
+for x in (-0.6, 0.0, 0.6):
+    box(P, "FabricDark", (x, 0.47, -0.06), (0.58, 0.1, 0.66), bevel=0.04, segments=3)
+    box(P, "FabricDark", (x, 0.66, 0.26), (0.56, 0.32, 0.1), bevel=0.04, segments=3)
+
+# 8254 Mess table (2.0 x 0.75 x 1.6): a long white table and two benches
+P = 8254
+box(P, "White", (0, 0.73, 0), (2.0, 0.04, 0.8), bevel=0.012)
+box(P, "Neon", (0, 0.708, 0), (1.9, 0.006, 0.7))
+for x in (-0.8, 0.8):
+    box(P, "SteelDark", (x, 0.36, 0), (0.08, 0.7, 0.5), bevel=0.01)
+    box(P, "SteelDark", (x, 0.02, 0), (0.12, 0.04, 1.5), bevel=0.006)
+for s in (-1, 1):
+    box(P, "White", (0, 0.43, s * 0.62), (1.9, 0.06, 0.34), bevel=0.012)
+    box(P, "FabricDark", (0, 0.47, s * 0.62), (1.8, 0.03, 0.3), bevel=0.01)
+    for x in (-0.8, 0.8):
+        box(P, "SteelDark", (x, 0.2, s * 0.62), (0.06, 0.4, 0.2))
+for (x, z) in ((-0.5, -0.2), (0.5, -0.2), (-0.5, 0.2), (0.5, 0.2)):
+    box(P, "Steel", (x, 0.756, z), (0.32, 0.012, 0.24), bevel=0.004)
+
+# 8255 Vending machine (0.9 x 1.9 x 0.8): white body, a glass front full of boxes, a screen
+P = 8255
+box(P, "White", (0, 0.95, 0.02), (0.9, 1.9, 0.76), bevel=0.03, segments=2)
+box(P, "SteelDark", (-0.1, 1.12, -0.3), (0.6, 1.3, 0.14))
+for k in range(5):
+    y = 0.58 + k * 0.25
+    box(P, "Steel", (-0.1, y - 0.03, -0.3), (0.58, 0.012, 0.12))
+    for i in range(5):
+        box(P, ("BookA", "BookB", "BookC", "Red", "Green")[(i + k) % 5], (-0.34 + i * 0.12, y + 0.05, -0.3), (0.08, 0.14, 0.08))
+box(P, "Glass", (-0.1, 1.12, -0.375), (0.62, 1.32, 0.012))
+box(P, "ScreenLit", (0.32, 1.35, -0.362), (0.16, 0.22, 0.006))
+for k in range(3):
+    for i in range(3):
+        box(P, "SteelDark", (0.28 + i * 0.04, 1.12 - k * 0.04, -0.362), (0.03, 0.03, 0.006))
+box(P, "SteelDark", (-0.1, 0.3, -0.36), (0.5, 0.14, 0.04))
+box(P, "Neon", (0.0, 1.88, -0.362), (0.84, 0.014, 0.006))
+
+# 8256 Medical bed (1.0 x 1.4 x 2.1): a white pedestal, a mattress, an arm and a monitor at the head
+P = 8256
+box(P, "SteelDark", (0, 0.03, 0), (0.7, 0.06, 1.4), bevel=0.01)
+box(P, "White", (0, 0.35, 0), (0.4, 0.6, 1.0), bevel=0.05, segments=2)
+box(P, "White", (0, 0.68, 0), (1.0, 0.08, 2.1), bevel=0.03, segments=2)
+box(P, "Sheet", (0, 0.77, 0), (0.92, 0.12, 2.0), bevel=0.04, segments=3)
+box(P, "Sheet", (0, 0.86, 0.78), (0.56, 0.08, 0.28), bevel=0.035, segments=3)
+box(P, "Neon", (0, 0.64, -1.051), (0.9, 0.014, 0.006))
+for s in (-1, 1):
+    box(P, "Neon", (s * 0.501, 0.68, 0), (0.006, 0.014, 2.0))
+cyl(P, "Chrome", (0.42, 0.72, 1.0), (0.42, 1.25, 1.0), 0.02, sides=10)
+cyl(P, "Chrome", (0.42, 1.25, 1.0), (0.3, 1.3, 0.8), 0.016, sides=10)
+box(P, "SteelDark", (0.3, 1.3, 0.78), (0.36, 0.22, 0.03), bevel=0.006, rotation=(0, 20, 0))
+box(P, "ScreenLit", (0.295, 1.3, 0.765), (0.32, 0.18, 0.004), rotation=(0, 20, 0))
+
 
 export("construction.obj")
