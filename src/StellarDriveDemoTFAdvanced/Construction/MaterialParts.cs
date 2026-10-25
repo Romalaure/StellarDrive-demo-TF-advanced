@@ -324,11 +324,14 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 child.AddComponent<MeshFilter>().sharedMesh = piece.Value;
                 var renderer = child.AddComponent<MeshRenderer>();
                 renderer.sharedMaterial = material;
-                renderer.shadowCastingMode = glass || look == "Rug" || look == "RugTrim" ? ShadowCastingMode.Off : ShadowCastingMode.On;
+                // Lit pieces and rugs cast no shadow: fewer draws for a room full of furniture
+                renderer.shadowCastingMode = glass || look == "Rug" || look == "RugTrim" || Glows(look) ? ShadowCastingMode.Off : ShadowCastingMode.On;
                 any = true;
             }
             return any;
         }
+
+        private static bool Glows(string look) => look == "Neon" || look == "ScreenLit" || look == "Lamp" || look == "Green" || look == "Red";
 
         private static readonly System.Collections.Generic.Dictionary<string, Material> Looks = new System.Collections.Generic.Dictionary<string, Material>();
 

@@ -746,12 +746,40 @@ def ball(part, look, center, r, segments=20, rings=12):
     return _finish(obj, "C%d_%s" % (part, look))
 
 
-def ring(part, look, center, r, minor, sides=40):
+def ring(part, look, center, r, minor, sides=40, minor_sides=8):
     """A flat torus in the x-z plane."""
-    bpy.ops.mesh.primitive_torus_add(major_radius=r, minor_radius=minor, major_segments=sides, minor_segments=8, location=B(center))
+    bpy.ops.mesh.primitive_torus_add(major_radius=r, minor_radius=minor, major_segments=sides, minor_segments=minor_sides, location=B(center))
     obj = bpy.context.active_object
     obj.name = "C%d_%s_ring" % (part, look)
     return _finish(obj, "C%d_%s" % (part, look))
+
+
+# From here on, round pieces get as few faces as their size needs: a ship full of furniture draws
+# them all, and small details read the same with 6 sides as with 20
+_cyl, _lathe, _ball, _ring, _box2 = cyl, lathe, ball, ring, box
+
+
+def box(part, look, center, size, bevel=0.0, rotation=(0, 0, 0), segments=1):
+    small = min(size)
+    return _box2(part, look, center, size, 0.0 if small < 0.05 or bevel < 0.003 else bevel, rotation, 1 if small < 0.15 else segments)
+
+
+def cyl(part, look, a, b, r, rb=None, sides=20, bevel=0.0, cap=True):
+    big = max(r, rb or 0.0)
+    return _cyl(part, look, a, b, r, rb, min(sides, 6 if big < 0.012 else 8 if big < 0.03 else 12 if big < 0.1 else 24), bevel, cap)
+
+
+def lathe(part, look, profile, sides=32, at=(0.0, 0.0, 0.0)):
+    big = max(r for r, _ in profile)
+    return _lathe(part, look, profile, min(sides, 12 if big < 0.06 else 20 if big < 0.25 else 32), at)
+
+
+def ball(part, look, center, r, segments=20, rings=12):
+    return _ball(part, look, center, r, min(segments, 6 if r < 0.02 else 10 if r < 0.08 else 16), min(rings, 4 if r < 0.02 else 6 if r < 0.08 else 10))
+
+
+def ring(part, look, center, r, minor, sides=40):
+    return _ring(part, look, center, r, minor, min(sides, 16 if r < 0.1 else 32), 4 if minor < 0.01 else 6)
 
 
 # 7486 Tractor beam (0.8 x 0.64 x 0.8): an armored square foot, a turning collar, a dish of coils, the emitter
@@ -1501,11 +1529,11 @@ for k in range(5):
         x = -0.32 + i * 0.145
         # The spiral holding the packets
         prev = None
-        for t in range(25):
-            a = t * 0.8
-            p = (x + 0.04 * math.cos(a), y + 0.0 + 0.04 * math.sin(a), -0.36 + t * 0.006)
+        for t in range(9):
+            a = t * 1.6
+            p = (x + 0.04 * math.cos(a), y + 0.04 * math.sin(a), -0.36 + t * 0.017)
             if prev:
-                cyl(P, "Chrome", prev, p, 0.003, sides=5)
+                cyl(P, "Chrome", prev, p, 0.004, sides=4)
             prev = p
         look = ("BookA", "BookB", "BookC", "Red", "Green", "Orange")[(i + k * 2) % 6]
         h = random.uniform(0.1, 0.16)
