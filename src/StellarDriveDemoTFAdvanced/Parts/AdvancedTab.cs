@@ -42,6 +42,11 @@ namespace StellarDriveDemoTFAdvanced.Parts
         public const int MoreFurnitureRow = 5;
         public const int SignRow = 6;
         public const int FutureFurnitureRow = 7;
+        public const int BathroomRow = 8;
+        /// <summary>The hangar: workbench, crane, floor markings.</summary>
+        public const int HangarRow = 9;
+        /// <summary>Screens, pipes, cables, vents and signs for the walls.</summary>
+        public const int WallDressingRow = 10;
 
         /// <summary>Reinforced hull: the game's iron and glass pieces, tougher, their own tab.</summary>
         public const string ArmorName = "TF Blindage";

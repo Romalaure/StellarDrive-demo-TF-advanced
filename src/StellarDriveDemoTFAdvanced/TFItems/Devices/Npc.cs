@@ -288,7 +288,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         }
 
         // From the player to a point of a ship's space, the player outside or inside a ship (its own space)
-        private static float Distance(TrackedPlayerServer player, TrackedShipServer ship, Vector3 at)
+        internal static float Distance(TrackedPlayerServer player, TrackedShipServer ship, Vector3 at)
         {
             if (player.SpaceId == ship.SpaceId)
                 return Vector3.Distance(at, player.Position);

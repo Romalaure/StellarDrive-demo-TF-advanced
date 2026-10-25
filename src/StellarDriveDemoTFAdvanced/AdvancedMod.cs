@@ -130,6 +130,7 @@ namespace StellarDriveDemoTFAdvanced
             Try("the tractor beam", Power.TractorBeam.Register);
             Try("the wood, glass and iron parts", Construction.MaterialParts.Register);
             Try("the reinforced hull", Construction.ReinforcedHull.Register);
+            Try("the hull windows", Construction.HullWindows.Register);
             Try("the ship mining laser", Power.MiningLaserParts.Register);
             Try("the station modules", Construction.StationModules.Register);
             Try("the cartography table", Construction.ScannerTable.Register);
@@ -198,6 +199,8 @@ namespace StellarDriveDemoTFAdvanced
                 Worlds.LootChests.Update();
             if (_inGame && TFItems.TFItemsMod.Active)
                 Construction.BuildTilt.Update();
+            if (_inGame && TFItems.TFItemsMod.Active)
+                Construction.FurnitureUses.Update();
             if (_inGame)
                 Worlds.LootCaches.Update();
             if (_inGame && GameServices.IsServer)

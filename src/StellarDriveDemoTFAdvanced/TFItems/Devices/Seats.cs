@@ -41,6 +41,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             [8208] = new[] { new Vector3(-0.52f, 0.47f, 0f), new Vector3(0f, 0.47f, 0f), new Vector3(0.52f, 0.47f, 0f) },
             [8209] = new[] { new Vector3(0f, 0.53f, -0.02f) },
             [8253] = new[] { new Vector3(-0.62f, 0.47f, -0.08f), new Vector3(0f, 0.47f, -0.08f), new Vector3(0.62f, 0.47f, -0.08f) },
+            [8267] = new[] { new Vector3(0f, 0.45f, -0.03f) },
             [8254] = new[] { new Vector3(-0.5f, 0.47f, -0.62f), new Vector3(0.5f, 0.47f, -0.62f), new Vector3(-0.5f, 0.47f, 0.62f), new Vector3(0.5f, 0.47f, 0.62f) },
         };
 

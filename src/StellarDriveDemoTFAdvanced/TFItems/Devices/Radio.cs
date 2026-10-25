@@ -420,7 +420,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
     }
 
     /// <summary>A speaker: heard like its ship's radios; using it opens the radio that plays (or any radio of the ship).</summary>
-    internal sealed class SpeakerVisuals : UsablePart
+    internal class SpeakerVisuals : UsablePart
     {
         public override string Label => Loc.Pick("Enceinte (radio)", "Speaker (radio)", "Altavoz (radio)");
 
@@ -812,5 +812,11 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         // The radio itself and the speakers of its ship
         public static IEnumerable<UsablePart> Sources(PartKey key) =>
             UsablePart.All.Where(part => part != null && part.HasContext && (part is RadioVisuals && part.Key.Equals(key) || part is SpeakerVisuals && part.Key.ShipId == key.ShipId));
+    }
+
+    /// <summary>The server rack (a piece of furniture): a radio relay, heard like the ship's speakers.</summary>
+    internal sealed class RelayVisuals : SpeakerVisuals
+    {
+        public override string Label => Loc.Pick("Relais radio (ouvrir la radio)", "Radio relay (open the radio)", "Repetidor de radio (abrir la radio)");
     }
 }

@@ -40,10 +40,12 @@ namespace StellarDriveDemoTFAdvanced.Construction
             public (uint Item, int Count)[] Cost;
             public Vector3 Size;
             public Action<Model> Build;
-            /// <summary>The set: 0 wood, 1 glass, 2 iron, 3 furniture, 4 stairs, 5 more furniture, 6 futuristic furniture (build menu row and research).</summary>
+            /// <summary>The set: 0 wood, 1 glass, 2 iron, 3 furniture, 4 stairs, 5 more furniture, 6 futuristic furniture, 7 bathroom, 8 hangar, 9 wall dressing (build menu row and research).</summary>
             public int Set;
-            /// <summary>Stairs: 1 a straight flight climbing toward +z (rise Size.y over run Size.z), 2 a spiral (270°, around y).</summary>
+            /// <summary>Stairs: 1 a straight flight climbing toward +z (rise Size.y over run Size.z), 2 a spiral (270°, around y), 3 a landing (its top Size.y up), 4 a flight's railing (along a run of Size.z).</summary>
             public int Stairs;
+            /// <summary>The game part it is made from, when it keeps that part's work (a chest's storage, the star map); else a blank Signal Display.</summary>
+            public string Donor;
         }
 
         private const uint Wood = 110, Glass = 102, Iron = 101, Copper = 112;
@@ -164,25 +166,25 @@ namespace StellarDriveDemoTFAdvanced.Construction
             new Spec { Id = 8242, Set = 6, Label = Loc.Pick("Console d'analyse", "Analysis console", "Consola de análisis"), Mass = 30f, Cost = new[] { (Iron, 3), (Glass, 2), (Copper, 3) }, Size = new Vector3(1.0f, 1.3f, 0.6f),
                 Description = Loc.Pick("Un pupitre incliné sur un pied blanc, son écran allumé et un clavier lumineux.", "A slanted desk on a white stand, its screen lit and a glowing keyboard.", "Un pupitre inclinado sobre un pie blanco, con la pantalla encendida y un teclado luminoso."), Build = m => Furniture(m, 1.0f, 1.3f, 0.6f) },
             new Spec { Id = 8243, Set = 6, Label = Loc.Pick("Baie de serveurs", "Server rack", "Rack de servidores"), Mass = 70f, Cost = new[] { (Iron, 6), (Copper, 4), (Glass, 1) }, Size = new Vector3(0.7f, 2.0f, 0.9f),
-                Description = Loc.Pick("Une armoire sombre derrière une porte vitrée, pleine de serveurs aux voyants clignotants.", "A dark cabinet behind a glass door, full of servers with blinking lights.", "Un armario oscuro tras una puerta de cristal, lleno de servidores con luces parpadeantes."), Build = m => Furniture(m, 0.7f, 2.0f, 0.9f) },
-            new Spec { Id = 8244, Set = 6, Label = Loc.Pick("Caisse de fret", "Cargo crate", "Caja de carga"), Mass = 30f, Cost = new[] { (Iron, 4) }, Size = new Vector3(1.0f, 1.0f, 1.0f),
-                Description = Loc.Pick("Une caisse blanche renforcée aux coins, rayée de lumière : la soute (décorative, rien ne s'y range).", "A white crate with reinforced corners and light stripes: the hold (decorative, nothing goes in).", "Una caja blanca con esquinas reforzadas y franjas de luz: la bodega (decorativa, no guarda nada)."), Build = m => Furniture(m, 1.0f, 1.0f, 1.0f) },
+                Description = Loc.Pick("Une armoire sombre derrière une porte vitrée, pleine de serveurs aux voyants clignotants. Relais radio : elle joue la radio du vaisseau comme une enceinte (T pour ouvrir la radio).", "A dark cabinet behind a glass door, full of servers with blinking lights. Radio relay: it plays the ship's radio like a speaker (T opens the radio).", "Un armario oscuro tras una puerta de cristal, lleno de servidores con luces parpadeantes. Repetidor de radio: suena la radio de la nave como un altavoz (T abre la radio)."), Build = m => Furniture(m, 0.7f, 2.0f, 0.9f) },
+            new Spec { Id = 8244, Set = 6, Label = Loc.Pick("Caisse de fret", "Cargo crate", "Caja de carga"), Mass = 30f, Cost = new[] { (Iron, 4) }, Size = new Vector3(1.0f, 1.0f, 1.0f), Donor = "StorageChest",
+                Description = Loc.Pick("Une caisse blanche renforcée aux coins, rayée de lumière : la soute. Elle s'ouvre comme un coffre et garde ce qu'on y range.", "A white crate with reinforced corners and light stripes: the hold. It opens like a chest and keeps what you put in.", "Una caja blanca con esquinas reforzadas y franjas de luz: la bodega. Se abre como un cofre y guarda lo que metas."), Build = m => Furniture(m, 1.0f, 1.0f, 1.0f) },
             new Spec { Id = 8245, Set = 6, Label = Loc.Pick("Rayonnage de stockage", "Storage rack", "Estantería de almacén"), Mass = 45f, Cost = new[] { (Iron, 6) }, Size = new Vector3(1.6f, 2.0f, 0.6f),
                 Description = Loc.Pick("Quatre étagères d'acier chargées de caisses et de bacs.", "Four steel shelves loaded with crates and bins.", "Cuatro estantes de acero cargados de cajas y cubetas."), Build = m => Furniture(m, 1.6f, 2.0f, 0.6f) },
             new Spec { Id = 8246, Set = 6, Label = Loc.Pick("Bidons sur palette", "Canisters on a pallet", "Bidones en palé"), Mass = 35f, Cost = new[] { (Iron, 4), (Copper, 1) }, Size = new Vector3(1.0f, 1.2f, 1.0f),
                 Description = Loc.Pick("Deux grands bidons blancs cerclés de rouge sur une palette d'acier.", "Two big white canisters with red bands on a steel pallet.", "Dos grandes bidones blancos con franjas rojas sobre un palé de acero."), Build = m => Furniture(m, 1.0f, 1.2f, 1.0f) },
             new Spec { Id = 8247, Set = 6, Label = Loc.Pick("Capsule de sommeil", "Sleep pod", "Cápsula de sueño"), Mass = 60f, Cost = new[] { (Iron, 5), (Glass, 3), (Copper, 1) }, Size = new Vector3(1.1f, 1.2f, 2.2f),
                 Description = Loc.Pick("Une couchette fermée par une verrière, bordée de lumière : le dortoir. T pour dormir et passer la nuit (pas en vol).", "A bunk closed by a glass canopy, lined with light: the dormitory. T to sleep and pass the night (not in flight).", "Una litera cerrada por una cúpula de cristal, bordeada de luz: el dormitorio. T para dormir y pasar la noche (no en vuelo)."), Build = m => Furniture(m, 1.1f, 1.2f, 2.2f) },
-            new Spec { Id = 8248, Set = 6, Label = Loc.Pick("Casiers d'équipage", "Crew lockers", "Taquillas de tripulación"), Mass = 40f, Cost = new[] { (Iron, 5) }, Size = new Vector3(0.9f, 2.0f, 0.5f),
-                Description = Loc.Pick("Deux casiers hauts à portes ventilées, une ligne de lumière (décoratifs).", "Two tall lockers with vented doors and a light line (decorative).", "Dos taquillas altas con puertas ventiladas y una línea de luz (decorativas)."), Build = m => Furniture(m, 0.9f, 2.0f, 0.5f) },
+            new Spec { Id = 8248, Set = 6, Label = Loc.Pick("Casiers d'équipage", "Crew lockers", "Taquillas de tripulación"), Mass = 40f, Cost = new[] { (Iron, 5) }, Size = new Vector3(0.9f, 2.0f, 0.5f), Donor = "StorageChest",
+                Description = Loc.Pick("Deux casiers hauts à portes ventilées, une ligne de lumière. Ils s'ouvrent comme un coffre et gardent ce qu'on y range.", "Two tall lockers with vented doors and a light line. They open like a chest and keep what you put in.", "Dos taquillas altas con puertas ventiladas y una línea de luz. Se abren como un cofre y guardan lo que metas."), Build = m => Furniture(m, 0.9f, 2.0f, 0.5f) },
             new Spec { Id = 8249, Set = 6, Label = Loc.Pick("Synthétiseur de repas", "Food synthesizer", "Sintetizador de comida"), Mass = 50f, Cost = new[] { (Iron, 4), (Glass, 1), (Copper, 3) }, Size = new Vector3(0.8f, 1.8f, 0.6f),
-                Description = Loc.Pick("Un meuble blanc avec un écran de menu et une niche éclairée où sort le plat : la cuisine.", "A white unit with a menu screen and a lit hatch where the meal comes out: the galley.", "Un mueble blanco con una pantalla de menú y un hueco iluminado por donde sale el plato: la cocina."), Build = m => Furniture(m, 0.8f, 1.8f, 0.6f) },
+                Description = Loc.Pick("Un meuble blanc avec un écran de menu et une niche éclairée où sort le plat : la cuisine. T pour prendre un repas : il remet ta santé au maximum (un par minute).", "A white unit with a menu screen and a lit hatch where the meal comes out: the galley. T to take a meal: it brings your health back to full (one a minute).", "Un mueble blanco con una pantalla de menú y un hueco iluminado por donde sale el plato: la cocina. T para tomar una comida: te devuelve toda la salud (una por minuto)."), Build = m => Furniture(m, 0.8f, 1.8f, 0.6f) },
             new Spec { Id = 8250, Set = 6, Label = Loc.Pick("Îlot de cuisine", "Galley island", "Isla de cocina"), Mass = 50f, Cost = new[] { (Iron, 5), (Copper, 2) }, Size = new Vector3(1.6f, 0.95f, 0.8f),
                 Description = Loc.Pick("Un îlot blanc au plan d'acier avec deux plaques à induction allumées.", "A white island with a steel top and two lit induction plates.", "Una isla blanca con encimera de acero y dos placas de inducción encendidas."), Build = m => Furniture(m, 1.6f, 0.95f, 0.8f) },
             new Spec { Id = 8251, Set = 6, Label = Loc.Pick("Bureau de commandement", "Command desk", "Escritorio de mando"), Mass = 45f, Cost = new[] { (Iron, 4), (Glass, 3), (Copper, 3) }, Size = new Vector3(1.8f, 1.25f, 0.8f),
                 Description = Loc.Pick("Un bureau sombre sur deux flancs blancs, trois écrans allumés : le bureau du capitaine.", "A dark desk on two white sides with three lit screens: the captain's office.", "Un escritorio oscuro sobre dos laterales blancos, con tres pantallas encendidas: el despacho del capitán."), Build = m => Furniture(m, 1.8f, 1.25f, 0.8f) },
-            new Spec { Id = 8252, Set = 6, Label = Loc.Pick("Table holographique", "Holo table", "Mesa holográfica"), Mass = 55f, Cost = new[] { (Iron, 4), (Glass, 3), (Copper, 3), (103u, 1) }, Size = new Vector3(1.4f, 1.5f, 1.4f),
-                Description = Loc.Pick("Une table ronde lumineuse qui projette une planète et ses anneaux au-dessus d'elle : la salle de briefing.", "A glowing round table projecting a planet and its rings above it: the briefing room.", "Una mesa redonda luminosa que proyecta un planeta y sus anillos encima: la sala de reuniones."), Build = m => Furniture(m, 1.4f, 1.5f, 1.4f) },
+            new Spec { Id = 8252, Set = 6, Label = Loc.Pick("Table holographique", "Holo table", "Mesa holográfica"), Mass = 55f, Cost = new[] { (Iron, 4), (Glass, 3), (Copper, 3), (103u, 1) }, Size = new Vector3(1.4f, 1.5f, 1.4f), Donor = "StarMap",
+                Description = Loc.Pick("Une table ronde lumineuse qui projette la carte du système au-dessus d'elle : la salle de briefing. Comme la carte stellaire du jeu : vise une planète pour la cibler, ses prises se branchent à l'ordinateur de visée.", "A glowing round table projecting the star system's map above it: the briefing room. Like the game's star map: aim at a planet to target it, its sockets wire to the targeting computer.", "Una mesa redonda luminosa que proyecta el mapa del sistema encima: la sala de reuniones. Como el mapa estelar del juego: apunta a un planeta para marcarlo, sus tomas se conectan al ordenador de puntería."), Build = m => Furniture(m, 1.4f, 1.5f, 1.4f) },
             new Spec { Id = 8253, Set = 6, Label = Loc.Pick("Canapé de salon", "Lounge sofa", "Sofá de salón"), Mass = 40f, Cost = new[] { (Iron, 3), (Wood, 2), (Copper, 1) }, Size = new Vector3(2.0f, 0.85f, 0.9f),
                 Description = Loc.Pick("Un canapé blanc aux coussins sombres posé sur une lueur : le salon. Trois places, T pour s'asseoir.", "A white sofa with dark cushions floating on a glow: the lounge. Three seats, T to sit.", "Un sofá blanco con cojines oscuros sobre un resplandor: el salón. Tres plazas, T para sentarse."), Build = m => Furniture(m, 2.0f, 0.85f, 0.9f) },
             new Spec { Id = 8254, Set = 6, Label = Loc.Pick("Table de réfectoire", "Mess table", "Mesa de comedor"), Mass = 55f, Cost = new[] { (Iron, 6), (Copper, 1) }, Size = new Vector3(2.0f, 0.75f, 1.6f),
@@ -191,6 +193,35 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 Description = Loc.Pick("Un distributeur vitré plein de boîtes colorées, avec un écran : pour le self ou une coursive.", "A glass-fronted vending machine full of colored boxes, with a screen: for the mess or a corridor.", "Una máquina expendedora con frente de cristal llena de cajas de colores y una pantalla: para el comedor o un pasillo."), Build = m => Furniture(m, 0.9f, 1.9f, 0.8f) },
             new Spec { Id = 8256, Set = 6, Label = Loc.Pick("Lit médical", "Medical bed", "Cama médica"), Mass = 50f, Cost = new[] { (Iron, 4), (Glass, 1), (Copper, 3) }, Size = new Vector3(1.0f, 1.4f, 2.1f),
                 Description = Loc.Pick("Un lit sur un socle blanc avec un bras et un moniteur allumé : l'infirmerie. T pour s'y reposer et passer la nuit.", "A bed on a white pedestal with an arm and a lit monitor: the sickbay. T to rest and pass the night.", "Una cama sobre un pedestal blanco con un brazo y un monitor encendido: la enfermería. T para descansar y pasar la noche."), Build = m => Furniture(m, 1.0f, 1.4f, 2.1f) },
+            // Bathroom (on floors; the mirror on a wall)
+            new Spec { Id = 8265, Set = 7, Label = Loc.Pick("Douche", "Shower", "Ducha"), Mass = 45f, Cost = new[] { (Glass, 4), (Iron, 3), (Copper, 2) }, Size = new Vector3(1.0f, 2.2f, 1.0f),
+                Description = Loc.Pick("Une cabine vitrée sur un bac, pommeau au plafond et mitigeur. T pour ouvrir ou couper l'eau.", "A glass cubicle on a tray, a ceiling shower head and a mixer. T to turn the water on or off.", "Una cabina de cristal sobre un plato, alcachofa en el techo y grifo. T para abrir o cerrar el agua."), Build = m => Furniture(m, 1.0f, 2.2f, 1.0f) },
+            new Spec { Id = 8266, Set = 7, Label = Loc.Pick("Lavabo", "Sink", "Lavabo"), Mass = 25f, Cost = new[] { (Iron, 2), (Copper, 1), (Glass, 1) }, Size = new Vector3(0.7f, 1.0f, 0.5f),
+                Description = Loc.Pick("Une vasque blanche sur un meuble, un robinet chromé. T pour ouvrir ou couper l'eau.", "A white basin on a cabinet, a chrome tap. T to turn the water on or off.", "Un lavabo blanco sobre un mueble, un grifo cromado. T para abrir o cerrar el agua."), Build = m => Furniture(m, 0.7f, 1.0f, 0.5f) },
+            new Spec { Id = 8267, Set = 7, Label = Loc.Pick("Toilettes", "Toilet", "Inodoro"), Mass = 25f, Cost = new[] { (Iron, 2), (Copper, 1) }, Size = new Vector3(0.45f, 0.8f, 0.7f),
+                Description = Loc.Pick("Une cuvette blanche et son réservoir à bouton lumineux. T pour s'asseoir.", "A white bowl and its tank with a lit button. T to sit.", "Un inodoro blanco y su cisterna con botón iluminado. T para sentarse."), Build = m => Furniture(m, 0.45f, 0.8f, 0.7f) },
+            new Spec { Id = 8268, Set = 9, Label = Loc.Pick("Miroir", "Mirror", "Espejo"), Mass = 6f, Cost = new[] { (Glass, 2), (Iron, 1) }, Size = new Vector3(0.6f, 0.03f, 0.9f),
+                Description = Loc.Pick("Un miroir rétroéclairé à poser sur un mur. Il reflète la pièce (les reflets de l'environnement : rien de plus à calculer).", "A backlit mirror for a wall. It reflects the room (the environment's reflections: nothing more to render).", "Un espejo retroiluminado para una pared. Refleja la sala (los reflejos del entorno: nada más que calcular)."), Build = m => Furniture(m, 0.6f, 0.03f, 0.9f) },
+            // Hangar
+            new Spec { Id = 8269, Set = 8, Label = Loc.Pick("Établi", "Workbench", "Banco de trabajo"), Mass = 60f, Cost = new[] { (Iron, 6), (Wood, 2), (Copper, 2) }, Size = new Vector3(1.8f, 1.9f, 0.8f), Donor = "StorageChest",
+                Description = Loc.Pick("Un établi d'atelier : plan de travail, étau, panneau à outils et lampe. Ses tiroirs s'ouvrent comme un coffre et gardent les outils et les pièces.", "A workshop bench: a worktop, a vice, a tool board and a lamp. Its drawers open like a chest and keep tools and parts.", "Un banco de taller: encimera, tornillo, panel de herramientas y lámpara. Sus cajones se abren como un cofre y guardan herramientas y piezas."), Build = m => Furniture(m, 1.8f, 1.9f, 0.8f) },
+            new Spec { Id = 8271, Set = 8, Label = Loc.Pick("Marquage au sol", "Floor marking", "Marcado de suelo"), Mass = 2f, Cost = new[] { (Iron, 1), (Copper, 1) }, Size = new Vector3(1.0f, 0.02f, 1.0f),
+                Description = Loc.Pick("Bandes jaunes et noires et chevrons lumineux, pour les aires de pose du hangar. T : éteint, allumé, clignotant.", "Yellow and black bands and lit chevrons, for the hangar's landing pads. T: off, lit, blinking.", "Bandas amarillas y negras y chevrones luminosos, para las zonas de aterrizaje del hangar. T: apagado, encendido, parpadeante."), Build = m => Furniture(m, 1.0f, 0.02f, 1.0f) },
+            // Wall dressing (flat on a wall, like the signs)
+            new Spec { Id = 8272, Set = 9, Label = Loc.Pick("Écran mural", "Wall screen", "Pantalla de pared"), Mass = 6f, Cost = new[] { (Glass, 2), (Copper, 2), (Iron, 1) }, Size = new Vector3(1.2f, 0.06f, 0.7f),
+                Description = Loc.Pick("Un écran fin où défilent des données et des courbes.", "A thin screen scrolling data and charts.", "Una pantalla fina donde pasan datos y gráficas."), Build = m => Furniture(m, 1.2f, 0.06f, 0.7f) },
+            new Spec { Id = 8273, Set = 9, Label = Loc.Pick("Tuyaux muraux", "Wall pipes", "Tuberías de pared"), Mass = 10f, Cost = new[] { (Iron, 2), (Copper, 2) }, Size = new Vector3(1.0f, 0.16f, 1.0f),
+                Description = Loc.Pick("Trois tuyaux sur colliers, une vanne et un manomètre, pour habiller les coursives. Mets-en plusieurs à la suite.", "Three pipes on clamps, a valve and a gauge, to dress the corridors. Put several in a row.", "Tres tuberías con abrazaderas, una válvula y un manómetro, para vestir los pasillos. Pon varias seguidas."), Build = m => Furniture(m, 1.0f, 0.16f, 1.0f) },
+            new Spec { Id = 8274, Set = 9, Label = Loc.Pick("Câbles muraux", "Wall cables", "Cables de pared"), Mass = 4f, Cost = new[] { (Copper, 2) }, Size = new Vector3(1.0f, 0.08f, 1.0f),
+                Description = Loc.Pick("Une goulotte et des faisceaux de câbles colorés tenus par des attaches.", "A cable tray and bundles of colored cables held by ties.", "Una canaleta y mazos de cables de colores sujetos con bridas."), Build = m => Furniture(m, 1.0f, 0.08f, 1.0f) },
+            new Spec { Id = 8275, Set = 9, Label = Loc.Pick("Grille d'aération", "Vent grille", "Rejilla de ventilación"), Mass = 5f, Cost = new[] { (Iron, 2), (Copper, 1) }, Size = new Vector3(0.6f, 0.08f, 0.6f),
+                Description = Loc.Pick("Une grille sur un ventilateur qui tourne (seulement quand on est près et qu'on la voit).", "A grille over a turning fan (only while you are near and see it).", "Una rejilla sobre un ventilador que gira (solo cuando estás cerca y la ves)."), Build = m => Furniture(m, 0.6f, 0.08f, 0.6f) },
+            new Spec { Id = 8276, Set = 9, Label = Loc.Pick("Panneau sortie", "Exit sign", "Señal de salida"), Mass = 1f, Cost = new[] { (Iron, 1), (Copper, 1) }, Size = new Vector3(0.5f, 0.03f, 0.3f),
+                Description = Loc.Pick("Un panneau vert lumineux : une porte et une flèche.", "A lit green sign: a door and an arrow.", "Una señal verde iluminada: una puerta y una flecha."), Build = m => Furniture(m, 0.5f, 0.03f, 0.3f) },
+            new Spec { Id = 8277, Set = 9, Label = Loc.Pick("Panneau danger", "Hazard sign", "Señal de peligro"), Mass = 1f, Cost = new[] { (Iron, 1), (Copper, 1) }, Size = new Vector3(0.4f, 0.03f, 0.4f),
+                Description = Loc.Pick("Un triangle jaune et un point d'exclamation.", "A yellow triangle and an exclamation mark.", "Un triángulo amarillo y un signo de exclamación."), Build = m => Furniture(m, 0.4f, 0.03f, 0.4f) },
+            new Spec { Id = 8278, Set = 9, Label = Loc.Pick("Panneau flèche", "Arrow sign", "Señal de flecha"), Mass = 1f, Cost = new[] { (Iron, 1), (Copper, 1) }, Size = new Vector3(0.5f, 0.03f, 0.25f),
+                Description = Loc.Pick("Une flèche lumineuse pour guider dans les coursives (la touche de rotation la tourne).", "A lit arrow to guide along the corridors (the rotate key turns it).", "Una flecha iluminada para guiar por los pasillos (la tecla de rotación la gira)."), Build = m => Furniture(m, 0.5f, 0.03f, 0.25f) },
             // Stairs (on floors; a flight climbs 1 m toward the back, away from the player placing it)
             new Spec { Id = 8220, Set = 4, Stairs = 1, Label = Loc.Pick("Escalier en bois", "Wooden stairs", "Escalera de madera"), Mass = 25f, Cost = new[] { (Wood, 4) }, Size = new Vector3(1f, 1f, 1f),
                 Description = Loc.Pick("Volée de cinq marches en bois sur deux limons : monte 1 m sur 1 m. Mets-en plusieurs à la suite pour monter plus haut.", "A flight of five wooden steps on two stringers: climbs 1 m over 1 m. Chain several to climb higher.", "Un tramo de cinco peldaños de madera sobre dos zancas: sube 1 m en 1 m. Encadena varios para subir más."), Build = m => Furniture(m, 1f, 1f, 1f) },
@@ -212,9 +243,18 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 Description = Loc.Pick("Escalier en colimaçon en acier avec rampe : monte 2 m en trois quarts de tour sur 2 × 2 m. Il faut une trémie au plafond.", "Steel spiral staircase with a handrail: climbs 2 m in three quarters of a turn on 2 × 2 m. It needs a hole in the ceiling.", "Escalera de caracol de acero con pasamanos: sube 2 m en tres cuartos de vuelta en 2 × 2 m. Necesita un hueco en el techo."), Build = m => Furniture(m, 2f, 2f, 2f) },
             new Spec { Id = 8229, Set = 4, Stairs = 2, Label = Loc.Pick("Colimaçon futuriste", "Futuristic spiral stairs", "Caracol futurista"), Mass = 50f, Cost = new[] { (Glass, 6), (Iron, 4), (Copper, 3) }, Size = new Vector3(2f, 2f, 2f),
                 Description = Loc.Pick("Marches de verre autour d'un mât chromé, bords lumineux : monte 2 m en trois quarts de tour sur 2 × 2 m.", "Glass steps around a chrome mast, lit edges: climbs 2 m in three quarters of a turn on 2 × 2 m.", "Peldaños de cristal alrededor de un mástil cromado, bordes iluminados: sube 2 m en tres cuartos de vuelta en 2 × 2 m."), Build = m => Furniture(m, 2f, 2f, 2f) },
+
+            new Spec { Id = 8261, Set = 4, Stairs = 4, Label = Loc.Pick("Rampe d'escalier", "Stair railing", "Barandilla de escalera"), Mass = 8f, Cost = new[] { (Iron, 2) }, Size = new Vector3(0.06f, 2f, 1f),
+                Description = Loc.Pick("Une rampe en acier qui suit la pente d'une volée de 1 m : vise le côté d'un escalier posé, elle s'y colle.", "A steel railing that follows the slope of a 1 m flight: aim at the side of a placed flight and it sits against it.", "Una barandilla de acero que sigue la pendiente de un tramo de 1 m: apunta al lado de una escalera colocada y se pega a ella."), Build = m => Furniture(m, 0.06f, 2f, 1f) },
+            new Spec { Id = 8262, Set = 4, Stairs = 4, Label = Loc.Pick("Rampe d'escalier doux", "Gentle stair railing", "Barandilla de escalera suave"), Mass = 12f, Cost = new[] { (Iron, 3) }, Size = new Vector3(0.06f, 2f, 2f),
+                Description = Loc.Pick("La rampe des escaliers doux (2 m de long) : vise le côté d'un escalier doux posé.", "The railing of the gentle stairs (2 m long): aim at the side of a placed gentle flight.", "La barandilla de las escaleras suaves (2 m): apunta al lado de una escalera suave colocada."), Build = m => Furniture(m, 0.06f, 2f, 2f) },
+            new Spec { Id = 8263, Set = 4, Stairs = 3, Label = Loc.Pick("Palier 1 × 1", "Landing 1 × 1", "Rellano 1 × 1"), Mass = 25f, Cost = new[] { (Iron, 3) }, Size = new Vector3(1f, 1f, 1f),
+                Description = Loc.Pick("Une plateforme de 1 m de haut au caillebotis bordé de lumière : pose-la au bout d'un escalier, puis vise l'un de ses côtés avec le suivant pour tourner.", "A 1 m high platform with a lit-edged grating: put it at the top of a flight, then aim the next one at any of its sides to turn.", "Una plataforma de 1 m de alto con rejilla de bordes iluminados: ponla al final de una escalera y apunta la siguiente a cualquiera de sus lados para girar."), Build = m => Furniture(m, 1f, 1f, 1f) },
+            new Spec { Id = 8264, Set = 4, Stairs = 3, Label = Loc.Pick("Palier 2 × 2", "Landing 2 × 2", "Rellano 2 × 2"), Mass = 60f, Cost = new[] { (Iron, 8) }, Size = new Vector3(2f, 1f, 2f),
+                Description = Loc.Pick("Un grand palier de 2 × 2 m, 1 m de haut : les escaliers en repartent de n'importe quel côté.", "A big 2 × 2 m landing, 1 m high: flights go on from any of its sides.", "Un gran rellano de 2 × 2 m, 1 m de alto: las escaleras siguen desde cualquiera de sus lados."), Build = m => Furniture(m, 2f, 1f, 2f) },
         };
 
-        public static bool IsFurniture(ushort id) => id >= 7440 && id <= 7449 || id >= 8200 && id <= 8211 || id >= 8240 && id <= 8256;
+        public static bool IsFurniture(ushort id) => id >= 7440 && id <= 7449 || id >= 8200 && id <= 8211 || id >= 8240 && id <= 8256 || id >= 8265 && id <= 8278;
 
         private static readonly System.Collections.Generic.HashSet<ushort> Ids = new System.Collections.Generic.HashSet<ushort>(All.Select(s => s.Id));
 
@@ -226,6 +266,18 @@ namespace StellarDriveDemoTFAdvanced.Construction
         /// their models still reach the ends, where two pieces share a post.
         /// </summary>
         public static bool IsThin(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && IsThin(spec);
+
+        /// <summary>
+        /// What a flight or a landing chains on: its size, the height one walks onto it at (a flight
+        /// from its foot, a landing on its top) and the height one leaves it at; null for anything else.
+        /// </summary>
+        public static (Vector3 Size, float Entry, float Exit)? Chain(ushort id) =>
+            All.FirstOrDefault(s => s.Id == id) is Spec spec && (spec.Stairs == 1 || spec.Stairs == 3) ? (spec.Size, spec.Stairs == 3 ? spec.Size.y : 0f, spec.Size.y) : ((Vector3, float, float)?)null;
+
+        public static bool IsLanding(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && spec.Stairs == 3;
+
+        /// <summary>A flight's railing: the run it follows (that of the flights it goes with); null for anything else.</summary>
+        public static float? RailRun(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && spec.Stairs == 4 ? spec.Size.z : (float?)null;
 
         /// <summary>A straight flight's size (rise y over run z), null for anything else.</summary>
         public static Vector3? StairSize(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && spec.Stairs == 1 ? spec.Size : (Vector3?)null;
@@ -250,8 +302,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 Spec spec = part;
                 int row = spec.Set == 0 ? AdvancedTab.WoodRow : spec.Set == 1 ? AdvancedTab.GlassRow : spec.Set == 2 ? AdvancedTab.IronRow
-                    : spec.Set == 4 ? AdvancedTab.StairsRow : spec.Set == 5 ? AdvancedTab.MoreFurnitureRow : spec.Set == 6 ? AdvancedTab.FutureFurnitureRow : AdvancedTab.FurnitureRow;
-                PartFactory.Register(spec.Id, Donor, AdvancedTab.ConstructionName, row, (settings, prefab) => Configure(spec, settings, prefab));
+                    : spec.Set == 4 ? AdvancedTab.StairsRow : spec.Set == 5 ? AdvancedTab.MoreFurnitureRow : spec.Set == 6 ? AdvancedTab.FutureFurnitureRow
+                    : spec.Set == 7 ? AdvancedTab.BathroomRow : spec.Set == 8 ? AdvancedTab.HangarRow : spec.Set == 9 ? AdvancedTab.WallDressingRow : AdvancedTab.FurnitureRow;
+                PartFactory.Register(spec.Id, spec.Donor ?? Donor, AdvancedTab.ConstructionName, row, (settings, prefab) => Configure(spec, settings, prefab));
             }
             AdvancedMod.Log.Msg($"registered {All.Length} wood, glass and iron construction parts");
         }
@@ -265,25 +318,31 @@ namespace StellarDriveDemoTFAdvanced.Construction
         private static void Configure(Spec spec, PartSettings settings, GameObject prefab)
         {
             PartFactory.Describe(settings, spec.Label, spec.Description, spec.Mass, spec.Cost);
-            settings.internalStateClass = null;
             // On any face of the hull, and on other placed parts (see FloatingSnap); furniture on floors
-            settings.snappingStyle = spec.Set >= 3 ? Ships.Interface.Model.SnappingStyle.PreciseOnFloor : Ships.Interface.Model.SnappingStyle.PreciseOnAny;
+            settings.snappingStyle = spec.Set >= 3 && spec.Set != 9 ? Ships.Interface.Model.SnappingStyle.PreciseOnFloor : Ships.Interface.Model.SnappingStyle.PreciseOnAny;
+            if (spec.Donor != null)
+            {
+                ConfigureOnDonor(spec, prefab);
+                return;
+            }
+            // The pieces with a switch keep it in their state (shared and saved by the game)
+            settings.internalStateClass = FurnitureUses.HasState(spec.Id) ? Power.PowerCatalog.MachineStateClass : null;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, spec.Size.y * 0.5f, 0f), BoxSize(spec));
             int layer = visuals.gameObject.layer;
-            if (spec.Stairs != 0)
+            if (spec.Stairs == 1 || spec.Stairs == 2)
                 StairColliders.Attach(prefab, spec.Size, spec.Stairs == 2);
-            // The seats: look at the piece and press the use key to sit
-            if (TFItems.Devices.Seats.IsSeat(spec.Id) || TFItems.Devices.Seats.IsBed(spec.Id))
+            // The pieces one uses: look at it and press the use key (sit, sleep, eat, water...)
+            System.Type use = FurnitureUses.VisualsFor(spec.Id);
+            if (use != null)
             {
                 TFItems.Common.UsablePart.AddBox(visuals, new Vector3(0f, spec.Size.y * 0.5f, 0f), spec.Size + new Vector3(0.1f, 0.1f, 0.1f));
                 var plain = visuals.GetComponent<Ships.Parts.Common.DefaultShipPartVisuals>();
                 if (plain != null)
                     Object.DestroyImmediate(plain);
-                if (TFItems.Devices.Seats.IsBed(spec.Id))
-                    visuals.gameObject.AddComponent<TFItems.Devices.BedVisuals>();
-                else
-                    visuals.gameObject.AddComponent<TFItems.Devices.SeatVisuals>();
+                visuals.gameObject.AddComponent(use);
             }
+            else if (FurnitureUses.Spins(spec.Id))
+                visuals.gameObject.AddComponent<SpinningParts>();
             if (BlenderModel(spec, visuals, layer))
                 return;
             var model = new Model();
@@ -293,6 +352,28 @@ namespace StellarDriveDemoTFAdvanced.Construction
             Add(visuals, layer, "TFA_Build" + spec.Id + "Iron", model.Iron, hull ?? LitMaterials.Get("TFA_BuildIron", new Color(0.6f, 0.62f, 0.65f), 0.7f, 0.4f));
             Add(visuals, layer, "TFA_Build" + spec.Id + "DarkIron", model.DarkIron, hull ?? LitMaterials.Get("TFA_BuildDarkIron", new Color(0.25f, 0.26f, 0.28f), 0.7f, 0.4f));
             Add(visuals, layer, "TF_NoPaint_Build" + spec.Id + "Glass", model.Glass, GlassMaterial(), ShadowCastingMode.Off);
+        }
+
+        // A piece kept on a game part for its work (a chest's storage, the star map): the game
+        // part's model hidden, its box the piece's, the Blender model in its place
+        private static void ConfigureOnDonor(Spec spec, GameObject prefab)
+        {
+            Transform visual = prefab.GetComponentInChildren<Ships.Parts.Common.Model.Reactions.IShipPartVisual>(true)?.GameObject.transform;
+            if (visual == null)
+            {
+                AdvancedMod.Log.Warning($"construction {spec.Id}: no visual on the {spec.Donor}");
+                return;
+            }
+            GameSkin.Capture(prefab);
+            Power.NuclearParts.HideDonorModel(visual);
+            PartFactory.SetBounds(prefab, new Vector3(0f, spec.Size.y * 0.5f, 0f), spec.Size);
+            if (spec.Donor == "StarMap")
+                FurnitureUses.FitStarMap(prefab, spec.Size);
+            var holder = new GameObject("TFA_Model") { layer = visual.gameObject.layer };
+            holder.transform.SetParent(visual, false);
+            holder.transform.SetPositionAndRotation(prefab.transform.position, prefab.transform.rotation);
+            if (!BlenderModel(spec, holder.transform, holder.layer))
+                AdvancedMod.Log.Warning($"construction {spec.Id}: no Blender model");
         }
 
         /// <summary>A part's Blender model from construction.obj (pieces C&lt;id&gt;_&lt;look&gt;), for parts made elsewhere (the tractor beam).</summary>
@@ -311,16 +392,28 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 if (!piece.Key.StartsWith(prefix))
                     continue;
                 string look = piece.Key.Substring(prefix.Length);
+                // Pieces that turn (a fan): C<id>_Spin_<look>, turned about their own middle
+                bool spin = look.StartsWith(SpinningParts.Prefix);
+                if (spin)
+                    look = look.Substring(SpinningParts.Prefix.Length);
                 Material material = Look(look);
                 if (material == null)
                     continue;
-                bool glass = look == "Glass";
+                bool glass = look == "Glass" || look == "Water";
                 // The hull's glass reads its highlight from UV1 (the shapes made here set "none" too)
                 if (glass && piece.Value.uv2.Length == 0)
                     piece.Value.SetUVs(1, Enumerable.Repeat(new Vector2(0.125f, 0.5f), piece.Value.vertexCount).ToList());
                 // Glass keeps its look when painted; the rest takes the paint
                 var child = new GameObject((glass ? "TF_NoPaint_Build" : "TFA_Build") + spec.Id + look) { layer = layer };
                 child.transform.SetParent(visuals, false);
+                if (spin)
+                {
+                    var pivot = new GameObject(SpinningParts.Prefix + spec.Id) { layer = layer };
+                    pivot.transform.SetParent(visuals, false);
+                    pivot.transform.localPosition = piece.Value.bounds.center;
+                    child.transform.SetParent(pivot.transform, false);
+                    child.transform.localPosition = -piece.Value.bounds.center;
+                }
                 child.AddComponent<MeshFilter>().sharedMesh = piece.Value;
                 var renderer = child.AddComponent<MeshRenderer>();
                 renderer.sharedMaterial = material;
@@ -331,7 +424,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             return any;
         }
 
-        private static bool Glows(string look) => look == "Neon" || look == "ScreenLit" || look == "Lamp" || look == "Green" || look == "Red";
+        private static bool Glows(string look) => look == "Neon" || look == "ScreenLit" || look == "Lamp" || look == "Green" || look == "Red" || look == "Mark" || look == "ScreenData" || look == "Mirror";
 
         private static readonly System.Collections.Generic.Dictionary<string, Material> Looks = new System.Collections.Generic.Dictionary<string, Material>();
 
@@ -367,10 +460,16 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 case "Black": material = LitMaterials.Get("TFA_CBlack", new Color(0.06f, 0.065f, 0.075f), 0.2f, 0.45f); break;
                 case "Orange": material = LitMaterials.Get("TFA_COrange", new Color(0.95f, 0.45f, 0.1f), 0.1f, 0.4f); break;
                 case "Neon": material = LitMaterials.Get("TFA_CNeon", new Color(0.3f, 0.85f, 1f), 0f, 0.5f, new Color(0.5f, 1.6f, 2.4f)); break;
+                case "Yellow": material = LitMaterials.Get("TFA_CYellow", new Color(0.95f, 0.75f, 0.1f), 0.1f, 0.45f); break;
+                case "Mirror": material = LitMaterials.Get("TFA_CMirror", new Color(0.92f, 0.93f, 0.95f), 1f, 0.97f); break;
+                case "Water": material = GlassMaterial(); break;
+                // Lit by FurnitureUses: the floor marking's lights (off, lit, blinking) and the wall screens' scrolling data
+                case "Mark": material = FurnitureUses.MarkMaterial(0); break;
+                case "ScreenData": material = FurnitureUses.ScreenMaterial(); break;
             }
             // Plain surfaces: without the panel texture LitMaterials lays on (its seams drew dark
             // crosses over fabrics, plates and the lit screens)
-            if (material != null && look != "Wood" && look != "WoodDark" && look != "Glass" && look != "Screen")
+            if (material != null && look != "Wood" && look != "WoodDark" && look != "Glass" && look != "Water" && look != "Screen" && look != "Mark" && look != "ScreenData")
             {
                 foreach (string map in new[] { "_BaseMap", "_MainTex", "_BumpMap" })
                     if (material.HasProperty(map))

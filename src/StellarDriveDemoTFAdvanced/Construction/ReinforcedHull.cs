@@ -106,6 +106,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
         public static void EnsureBuilt()
         {
             PivotedDoor.EnsureBuilt();
+            HullWindows.EnsureBuilt();
             if (!_registered || Built.Count == All.Length && Built.Values.All(c => c != null) || Time.realtimeSinceStartup < _nextTry)
                 return;
             _nextTry = Time.realtimeSinceStartup + 1f;
@@ -253,7 +254,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             Dictionary<ushort, PartSettings> dict = Dict(__instance);
             if (dict == null)
                 return;
-            foreach (HullPartSettings clone in ReinforcedHull.Clones.Append(PivotedDoor.Clone))
+            foreach (HullPartSettings clone in ReinforcedHull.Clones.Append(PivotedDoor.Clone).Concat(HullWindows.Clones))
             {
                 if (clone != null && !dict.ContainsKey(clone.id))
                     dict[clone.id] = clone;

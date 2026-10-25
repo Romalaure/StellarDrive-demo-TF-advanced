@@ -44,14 +44,28 @@ Le tissu du canapé, du fauteuil et le tapis prennent la couleur du pistolet à 
 
 **Meubles futuristes** (rangée suivante, recherche *Modules de station*), pour équiper les salles d'un vaisseau :
 - **science** : paillasse de labo, cuve à spécimen (liquide lumineux), console d'analyse ;
-- **stockage** : baie de serveurs, caisse de fret, étagère de stockage, bonbonnes ;
-- **dortoir** : capsule de sommeil, casiers d'équipage ;
-- **cuisine** : synthétiseur de repas, îlot de cuisine ;
-- **bureaux** : bureau de commandement (3 écrans), table holographique (planète qui tourne) ;
+- **stockage** : baie de serveurs (relais radio), caisse de fret (coffre), étagère de stockage, bonbonnes ;
+- **dortoir** : capsule de sommeil, casiers d'équipage (coffre) ;
+- **cuisine** : synthétiseur de repas (soigne), îlot de cuisine ;
+- **bureaux** : bureau de commandement (3 écrans), table holographique (carte du système) ;
 - **salon / mess** : canapé lounge (3 places), table de mess avec bancs (4 places), distributeur ;
 - **infirmerie** : lit médical.
 
 **Dormir** : le lit, les lits superposés, la capsule de sommeil et le lit médical : regarde-les et appuie sur **T** pour dormir et passer la nuit (comme l'attente du jeu). Pas pendant le vol.
+
+**Ils servent** :
+- **ranger** : la caisse de fret, les casiers d'équipage et l'établi s'ouvrent comme le coffre du jeu et gardent ce qu'on y met ;
+- **manger** : regarde le synthétiseur de repas et appuie sur **T** : un repas remet ta santé au maximum (un par minute ; il faut être à côté) ;
+- **la radio** : la baie de serveurs est un relais, elle joue la radio du vaisseau comme une enceinte (**T** ouvre la radio) ;
+- **la carte** : la table holographique projette la carte du système comme la carte stellaire du jeu : vise une planète pour la cibler ; ses prises se branchent à l'ordinateur de visée.
+
+**Salle de bain** (rangée suivante, *Modules de station*) : douche (cabine vitrée) et lavabo — **T** ouvre ou coupe l'eau, que tous les joueurs voient couler ; toilettes (**T** pour s'asseoir) ; miroir rétroéclairé (au mur, il reflète la pièce).
+
+**Hangar** (rangée suivante) : **établi** (plan de travail, étau, panneau à outils ; ses tiroirs se rangent), **bras de grue** (au plafond : allumé avec **T** et alimenté, il accroche le vaisseau sous lui jusqu'à 30 m et le tient à 3 m sous son crochet ; branché comme le rayon tracteur), **marquage au sol** (bandes et chevrons ; **T** : allumé, clignotant, éteint).
+
+**Habillage mural** (dernière rangée, se pose à plat sur un mur ou un sol) : écran mural (données qui défilent), tuyaux, câbles (à mettre à la suite), grille d'aération (son ventilateur tourne), panneaux sortie, danger et flèche.
+
+L'eau, les ventilateurs et les écrans ne s'animent que près de toi et à la vue : une pièce pleine de meubles garde ses FPS.
 
 ## Escaliers
 
@@ -67,12 +81,15 @@ Rangée du haut de l'onglet. Ils se posent au sol et **montent vers l'arrière**
 
 **À la suite** : vise un escalier droit déjà posé avec un autre escalier droit, il se pose au bout du premier, dans le même sens (on peut mélanger raide et doux) ; pour monter plus haut. Le colimaçon a besoin d'une trémie dans le plafond au-dessus.
 
+**Paliers et rampes** : le **palier 1 × 1** et le **palier 2 × 2** (1 m de haut) se posent au bout d'un escalier (vise-le) ; vise ensuite **un côté du palier** avec l'escalier suivant : il en repart dans cette direction, pour tourner. La **rampe d'escalier** (et la **rampe d'escalier doux**) se colle sur le côté visé d'un escalier droit et suit sa pente.
+
 ## Panneaux et portes
 
 Dernière rangée de l'onglet.
 - **Panneau lumineux** (mur), **plaque de porte** (petite, à côté d'une porte), **enseigne holographique** (au sol, texte flottant à hauteur des yeux) : regarde-les et appuie sur **T** pour écrire le texte (40 caractères) et choisir sa couleur (7 couleurs). Pour nommer les pièces : Pont, Infirmerie, Soute… Tous les joueurs le voient, l'hôte le garde avec le monde. Recherche *Ordinateur de bord*.
 - **Porte automatique** (un carré) et **grande porte automatique** (2 × 2) : elle s'ouvre seule quand quelqu'un approche et se referme derrière lui. Posée **en diagonale** (enlève le mur diagonal, pose la porte au sol à sa place, tourne-la pour l'autre diagonale) ; ou **droite** (dans l'alignement d'un mur normal) : choisis pendant la pose avec la touche **B** (l'aperçu montre le choix). Elle **ne retient pas l'air**. Recherche *Construction métallique*.
 - **La porte du jeu en diagonale** : pose la porte du jeu comme un mur et tourne-la (touche de rotation) : sur un mur en diagonale, elle prend sa version diagonale, comme les murs du jeu. C'est la vraie porte : elle s'ouvre avec la touche d'interaction et ferme la pièce étanche.
+- **Parois de coque** (rangée du verre) : **paroi à hublots** (deux hublots ronds boulonnés) et **paroi vitrée** (grande fenêtre), 2 × 2 m. Elles se posent comme un mur et la touche de rotation les met **en diagonale** (un hublot, une fenêtre plus étroite). C'est de la vraie coque : elles ferment la pièce étanche et gardent l'air ; elles ne s'ouvrent pas. Recherche *Verrerie architecturale*.
 
 ## Coque renforcée
 

@@ -1,8 +1,8 @@
-"""The TF Construction parts (7341-7367), furniture (7440-7449, 8200-8211, 8240-8256), stairs (8220-8229) and the tractor beam (7486), each in its part's frame and box
+"""The TF Construction parts (7341-7367), furniture (7440-7449, 8200-8211, 8240-8256, 8265-8278), stairs (8220-8229, 8261-8264), hull windows (8257-8260), the tractor beam (7486) and the crane (8270), each in its part's frame and box
 (MaterialParts sizes): y out of the surface it stands on, the box from y = 0 up. Their pieces are
 named C<id>_<look>: Wood, WoodDark, Steel, SteelDark, Chrome, Glass, Fabric, FabricDark, Leaf,
-Pot, Soil, Rug, RugTrim, BookA, BookB, BookC, Sheet, Screen, ScreenLit, Lamp, Neon, White, Green, Red, Black, Orange (the mod gives each look its material: real wood
-grain, satin metal, the hull's glass...). Pieces stand a few millimeters clear of the faces under
+Pot, Soil, Rug, RugTrim, BookA, BookB, BookC, Sheet, Screen, ScreenLit, Lamp, Neon, White, Green, Red, Black, Orange, Yellow, Mirror, Water, Mark, ScreenData (the mod gives each look its material: real wood
+grain, satin metal, the hull's glass...); C<id>_Spin_<look> pieces turn about their middle. Pieces stand a few millimeters clear of the faces under
 them (no flicker). The helpers turn the part's frame into Blender's (game (x, y, z) = Blender (x, z, y))."""
 import math
 import os
@@ -1443,17 +1443,7 @@ for r in (0.2, 0.36):
     ring(P, "Neon", (0, 0.887, 0), r, 0.003, sides=40)
 lathe(P, "Chrome", [(0.0, 0.88), (0.1, 0.88), (0.08, 0.92), (0.0, 0.93)], sides=24)
 ball(P, "Neon", (0, 0.925, 0), 0.04, segments=14, rings=8)
-cyl(P, "Glass", (0, 0.92, 0), (0, 1.45, 0), 0.06, 0.4, sides=32, cap=False)
-ball(P, "Neon", (0, 1.2, 0), 0.15, segments=24, rings=14)
-for k in range(5):
-    a = math.radians(k * 72 + 10)
-    ball(P, "Black", (0.14 * math.cos(a) * 0.8, 1.2 + 0.1 * math.sin(a * 2), 0.14 * math.sin(a) * 0.8 - 0.03), 0.035, segments=8, rings=5)
-with Group() as g:
-    ring(P, "Neon", (0, 0, 0), 0.25, 0.006, sides=48)
-    ring(P, "Neon", (0, 0, 0), 0.29, 0.003, sides=48)
-place(g.objs, (0, 1.2, 0), (18, 0, 8))
-ball(P, "White", (0.36, 1.3, 0.1), 0.035, segments=10, rings=6)
-ball(P, "Neon", (-0.3, 1.1, -0.2), 0.022, segments=8, rings=5)
+# (the hologram above it is the game's star map, see FurnitureUses.FitStarMap)
 
 # 8253 Lounge sofa (2.0 x 0.85 x 0.9): a white shell on a lit plinth, three seat and back cushions
 # with seams, curved arms with a tray, cushions to lean on
@@ -1601,6 +1591,409 @@ for a in (0, 180):
 box(P, "Glass", (-0.35, 1.25, 1.0), (0.08, 0.14, 0.03), bevel=0.012)
 box(P, "Neon", (-0.35, 1.22, 1.0), (0.06, 0.08, 0.02), bevel=0.008)
 cyl(P, "Glass", (-0.35, 1.18, 1.0), (-0.3, 0.8, 0.6), 0.003, sides=5)
+
+
+# ======================= Hull windows =======================
+# 8257-8260: hull walls with portholes or a window, in the game door's frame: centered on its
+# middle, the wall in the x-y plane (z across it), 2 x 2 (the pivoted ones 1.41 wide). Both faces
+# get the same details.
+
+
+def holed_square(P, look, cx, cy, half, r, t, n=32):
+    """A square plate (half-size half) around (cx, cy) with a round hole of radius r, t thick."""
+    def edge(a):
+        dx, dy = math.cos(a), math.sin(a)
+        s = half / max(abs(dx), abs(dy))
+        return (cx + dx * s, cy + dy * s)
+    for i in range(n):
+        a0, a1 = 2 * math.pi * i / n, 2 * math.pi * (i + 1) / n
+        i0 = (cx + r * math.cos(a0), cy + r * math.sin(a0))
+        i1 = (cx + r * math.cos(a1), cy + r * math.sin(a1))
+        o0, o1 = edge(a0), edge(a1)
+        ring2 = [i0, i1, o1, o0]
+        solid(P, look, [(x, y, -t / 2) for x, y in ring2] + [(x, y, t / 2) for x, y in ring2])
+
+
+def porthole(P, cx, cy, r, t):
+    """The porthole's glass, a bolted flange on each face and a lit ring inside."""
+    cyl(P, "Glass", (cx, cy, -0.012), (cx, cy, 0.012), r + 0.005, sides=32)
+    for s in (-1, 1):
+        z = s * (t / 2 + 0.012)
+        with Group() as g:
+            ring(P, "Steel", (0, 0, 0), r + 0.035, 0.022, sides=32)
+        for o in g.objs:
+            o.rotation_euler = (math.radians(90), 0, 0)
+            o.location = B((cx, cy, z))
+        for k in range(8):
+            a = math.radians(k * 45 + 22.5)
+            x, y = cx + (r + 0.035) * math.cos(a), cy + (r + 0.035) * math.sin(a)
+            cyl(P, "Chrome", (x, y, z), (x, y, z + s * 0.03), 0.009, sides=6)
+        with Group() as g:
+            ring(P, "Neon", (0, 0, 0), r + 0.004, 0.005, sides=32)
+        for o in g.objs:
+            o.rotation_euler = (math.radians(90), 0, 0)
+            o.location = B((cx, cy, s * (t / 2 + 0.002)))
+
+
+def wall_frame(P, w, t):
+    """The dark edge round the 2 m high wall and its seams on both faces."""
+    for x in (-w / 2 + 0.03, w / 2 - 0.03):
+        box(P, "SteelDark", (x, 0, 0), (0.06, 2.0, t + 0.02), bevel=0.006)
+    for y in (-0.97, 0.97):
+        box(P, "SteelDark", (0, y, 0), (w - 0.12, 0.06, t + 0.02), bevel=0.006)
+    for s in (-1, 1):
+        box(P, "Black", (0, -0.62, s * (t / 2 + 0.001)), (w - 0.14, 0.012, 0.004))
+        box(P, "Neon", (0, -0.9, s * (t / 2 + 0.003)), (w - 0.2, 0.012, 0.004))
+
+
+T = 0.1
+# 8257 Porthole wall 2 x 2: two portholes
+P = 8257
+for cx in (-0.5, 0.5):
+    holed_square(P, "Steel", cx, 0.15, 0.5, 0.32, T)
+    box(P, "Steel", (cx, 0.825, 0), (1.0, 0.35, T))
+    box(P, "Steel", (cx, -0.675, 0), (1.0, 0.65, T))
+    porthole(P, cx, 0.15, 0.32, T)
+wall_frame(P, 2.0, T)
+# 8258 the pivoted one, 1.41 wide: one porthole
+P = 8258
+W = 2 ** 0.5
+holed_square(P, "Steel", 0, 0.15, 0.5, 0.32, T)
+box(P, "Steel", (0, 0.825, 0), (1.0, 0.35, T))
+box(P, "Steel", (0, -0.675, 0), (1.0, 0.65, T))
+for s in (-1, 1):
+    box(P, "Steel", (s * (0.5 + (W / 2 - 0.5) / 2), 0, 0), (W / 2 - 0.5, 2.0, T))
+porthole(P, 0, 0.15, 0.32, T)
+wall_frame(P, W, T)
+
+
+def window_wall(P, w, ow, oh, cy, mullions):
+    """A wall with an ow x oh window around (0, cy): plates round the opening, a frame, the glass."""
+    top, bottom = cy + oh / 2, cy - oh / 2
+    box(P, "Steel", (0, (top + 1) / 2, 0), (w, 1 - top, T))
+    box(P, "Steel", (0, (bottom - 1) / 2, 0), (w, bottom + 1, T))
+    for s in (-1, 1):
+        box(P, "Steel", (s * (ow / 2 + (w / 2 - ow / 2) / 2), cy, 0), (w / 2 - ow / 2, oh, T))
+    box(P, "Glass", (0, cy, 0), (ow, oh, 0.02))
+    for s in (-1, 1):
+        z = s * (T / 2 + 0.015)
+        for x in (-ow / 2, ow / 2):
+            box(P, "SteelDark", (x, cy, z), (0.06, oh + 0.06, 0.03), bevel=0.006)
+        for y in (top, bottom):
+            box(P, "SteelDark", (0, y, z), (ow + 0.06, 0.06, 0.03), bevel=0.006)
+        for x in mullions:
+            box(P, "SteelDark", (x, cy, z), (0.04, oh, 0.024), bevel=0.004)
+        box(P, "Neon", (0, bottom - 0.05, s * (T / 2 + 0.003)), (ow, 0.01, 0.004))
+        for x in (-ow / 2 - 0.06, ow / 2 + 0.06):
+            for y in (top + 0.06, bottom - 0.06):
+                cyl(P, "Chrome", (x, y, s * T / 2), (x, y, s * (T / 2 + 0.012)), 0.01, sides=6)
+    wall_frame(P, w, T)
+
+
+# 8259 Window wall 2 x 2, 8260 its pivoted one
+window_wall(8259, 2.0, 1.6, 1.1, 0.15, (0.0,))
+window_wall(8260, W, 1.0, 1.1, 0.15, ())
+
+# ======================= Stairs: railings and landings =======================
+
+
+def stair_railing(P, run):
+    """A railing along a flight climbing 1 m over run toward +z: posts, a chrome handrail, glass."""
+    def floor(z):
+        return (z + run / 2) / run
+    posts = [-run / 2 + 0.04, run / 2 - 0.04] + ([0.0] if run > 1.5 else [])
+    for z in posts:
+        y0 = floor(z)
+        box(P, "SteelDark", (0, y0 + 0.47, z), (0.05, 0.94, 0.05), bevel=0.006)
+        box(P, "Black", (0, y0 + 0.015, z), (0.06, 0.03, 0.08))
+    a, b = (0, floor(-run / 2) + 0.95, -run / 2), (0, floor(run / 2) + 0.95, run / 2)
+    cyl(P, "Chrome", a, b, 0.022, sides=12)
+    cyl(P, "Neon", (0, a[1] - 0.03, a[2]), (0, b[1] - 0.03, b[2]), 0.006, sides=6)
+    z0, z1 = -run / 2 + 0.07, run / 2 - 0.07
+    pts = [(z0, floor(z0) + 0.12), (z1, floor(z1) + 0.12), (z1, floor(z1) + 0.86), (z0, floor(z0) + 0.86)]
+    solid(P, "Glass", [(-0.006, y, z) for z, y in pts] + [(0.006, y, z) for z, y in pts])
+    for z, y in pts:
+        cyl(P, "Chrome", (-0.02, y, z), (0.02, y, z), 0.012, sides=8)
+
+
+stair_railing(8261, 1.0)
+stair_railing(8262, 2.0)
+
+
+def landing(P, w, d):
+    """A 1 m high block: dark body, white side panels with light lines, a grating top lit round the edge."""
+    box(P, "SteelDark", (0, 0.47, 0), (w, 0.94, d), bevel=0.01)
+    for s in (-1, 1):
+        box(P, "White", (0, 0.5, s * (d / 2 + 0.004)), (w - 0.1, 0.7, 0.01), bevel=0.004)
+        box(P, "White", (s * (w / 2 + 0.004), 0.5, 0), (0.01, 0.7, d - 0.1), bevel=0.004)
+        box(P, "Neon", (0, 0.2, s * (d / 2 + 0.01)), (w - 0.14, 0.012, 0.004))
+        box(P, "Neon", (s * (w / 2 + 0.01), 0.2, 0), (0.004, 0.012, d - 0.14))
+        box(P, "Black", (0, 0.02, s * (d / 2 + 0.002)), (w, 0.04, 0.008))
+        box(P, "Black", (s * (w / 2 + 0.002), 0.02, 0), (0.008, 0.04, d))
+    box(P, "Black", (0, 0.955, 0), (w, 0.03, d))
+    n = int(round(w / 0.1))
+    for i in range(n):
+        x = -w / 2 + (i + 0.5) * w / n
+        box(P, "Steel", (x, 0.982, 0), (w / n * 0.6, 0.024, d - 0.04))
+    for s in (-1, 1):
+        box(P, "SteelDark", (0, 0.985, s * (d / 2 - 0.02)), (w, 0.03, 0.04))
+        box(P, "SteelDark", (s * (w / 2 - 0.02), 0.985, 0), (0.04, 0.03, d))
+        box(P, "Neon", (0, 0.996, s * (d / 2 - 0.004)), (w - 0.02, 0.008, 0.008))
+        box(P, "Neon", (s * (w / 2 - 0.004), 0.996, 0), (0.008, 0.008, d - 0.02))
+
+
+landing(8263, 1.0, 1.0)
+landing(8264, 2.0, 2.0)
+
+# ======================= Bathroom =======================
+
+# 8265 Shower (1 x 2.2 x 1): a white tray, a tiled back wall, glass sides and door in chrome frames,
+# a ceiling head on an arm, a mixer, light lines
+P = 8265
+box(P, "White", (0, 0.04, 0), (1.0, 0.08, 1.0), bevel=0.01)
+cyl(P, "Chrome", (0, 0.08, 0.1), (0, 0.084, 0.1), 0.04, sides=12)
+box(P, "White", (0, 1.14, 0.475), (1.0, 2.12, 0.05))
+for k in range(1, 9):
+    box(P, "Black", (0, 0.08 + k * 0.235, 0.448), (0.98, 0.006, 0.004))
+for k in (-2, -1, 1, 2):
+    box(P, "Black", (k * 0.2, 1.14, 0.448), (0.006, 2.1, 0.004))
+for s in (-1, 1):
+    box(P, "Glass", (s * 0.49, 1.14, 0), (0.012, 2.0, 0.9))
+    box(P, "Chrome", (s * 0.49, 2.15, 0), (0.03, 0.03, 1.0))
+    box(P, "Chrome", (s * 0.49, 1.12, -0.48), (0.03, 2.08, 0.03))
+box(P, "Glass", (0, 1.14, -0.49), (0.9, 2.0, 0.012))
+box(P, "Chrome", (0, 2.15, -0.49), (1.0, 0.03, 0.03))
+vhandle(P, 0.35, 0.95, 1.3, -0.5, r=0.009, out=0.03)
+# The head on its arm, the mixer
+cyl(P, "Chrome", (0, 2.1, 0.45), (0, 2.1, 0.14), 0.015, sides=10)
+cyl(P, "Chrome", (0, 2.1, 0.12), (0, 2.06, 0.12), 0.11, sides=24)
+cyl(P, "SteelDark", (0, 2.057, 0.12), (0, 2.054, 0.12), 0.095, sides=24)
+cyl(P, "Chrome", (0, 1.15, 0.45), (0, 1.15, 0.4), 0.045, sides=16)
+cyl(P, "Chrome", (0, 1.15, 0.4), (0.09, 1.15, 0.4), 0.012, sides=8)
+box(P, "Neon", (0, 1.4, 0.447), (0.12, 0.012, 0.004))
+for s in (-1, 1):
+    box(P, "Neon", (s * 0.47, 1.14, 0.447), (0.012, 2.0, 0.004))
+
+# 8266 Sink (0.7 x 1 x 0.5): a white cabinet on a dark plinth, a slab, a round basin, a chrome tap
+P = 8266
+box(P, "SteelDark", (0, 0.04, 0.02), (0.62, 0.08, 0.42))
+box(P, "White", (0, 0.45, 0.01), (0.66, 0.74, 0.46), bevel=0.01)
+box(P, "Black", (0, 0.45, -0.222), (0.006, 0.66, 0.006))
+for s in (-1, 1):
+    vhandle(P, s * 0.04, 0.6, 0.72, -0.225, r=0.007, out=0.02)
+box(P, "Neon", (0, 0.81, -0.232), (0.6, 0.008, 0.006))
+box(P, "White", (0, 0.845, 0), (0.7, 0.05, 0.5), bevel=0.01)
+lathe(P, "White", [(0.0, 0.868), (0.2, 0.868), (0.235, 0.95), (0.215, 0.95), (0.18, 0.888), (0.0, 0.888)], sides=32, at=(0, 0, -0.03))
+cyl(P, "Chrome", (0, 0.889, -0.03), (0, 0.891, -0.03), 0.025, sides=12)
+cyl(P, "Chrome", (0, 0.87, 0.18), (0, 1.0, 0.18), 0.02, sides=12)
+cyl(P, "Chrome", (0, 0.99, 0.18), (0, 0.97, 0.06), 0.013, sides=10)
+cyl(P, "Chrome", (0, 1.0, 0.18), (0, 1.02, 0.12), 0.007, sides=6)
+
+# 8267 Toilet (0.45 x 0.8 x 0.7): a bowl on a foot, a seat, a tank with a lit flush button, the lid up
+P = 8267
+lathe(P, "White", [(0.0, 0.0), (0.12, 0.0), (0.13, 0.15), (0.19, 0.36), (0.2, 0.41), (0.0, 0.41)], sides=32, at=(0, 0, -0.06))
+cyl(P, "Water", (0, 0.405, -0.06), (0, 0.41, -0.06), 0.15, sides=24)
+with Group() as g:
+    ring(P, "White", (0, 0, 0), 0.165, 0.025, sides=32)
+place(g.objs, (0, 0.435, -0.06))
+box(P, "White", (0, 0.6, 0.27), (0.42, 0.4, 0.16), bevel=0.02)
+box(P, "White", (0, 0.81, 0.27), (0.44, 0.02, 0.18), bevel=0.006)
+cyl(P, "Neon", (0, 0.82, 0.27), (0, 0.826, 0.27), 0.03, sides=12)
+box(P, "White", (0, 0.65, 0.165), (0.34, 0.42, 0.02), bevel=0.008, rotation=(-8, 0, 0))
+box(P, "SteelDark", (0, 0.4, 0.33), (0.3, 0.08, 0.04))
+
+# 8268 Mirror (0.6 x 0.03 x 0.9, flat on a wall, face +y): a dark back, the glass, a light all round
+P = 8268
+box(P, "Black", (0, 0.006, 0), (0.6, 0.012, 0.9), bevel=0.004)
+box(P, "Mirror", (0, 0.016, 0), (0.56, 0.008, 0.86))
+for s in (-1, 1):
+    box(P, "Neon", (s * 0.296, 0.014, 0), (0.008, 0.01, 0.86))
+    box(P, "Neon", (0, 0.014, s * 0.446), (0.6, 0.01, 0.008))
+    box(P, "Chrome", (s * 0.285, 0.022, 0), (0.012, 0.006, 0.88))
+
+# ======================= Hangar =======================
+
+# 8269 Workbench (1.8 x 1.9 x 0.8): two drawer cabinets, a wooden top, a vice, a tool board with
+# tools and bins, a lamp on an arm
+P = 8269
+for cx in (-0.62, 0.62):
+    box(P, "SteelDark", (cx, 0.44, 0.0), (0.54, 0.86, 0.74), bevel=0.008)
+    for k in range(4):
+        y = 0.13 + k * 0.2
+        box(P, "Orange", (cx, y, -0.375), (0.5, 0.18, 0.016), bevel=0.004)
+        handle(P, cx - 0.1, cx + 0.1, y + 0.05, -0.384, r=0.007, out=0.018)
+box(P, "SteelDark", (0, 0.15, 0.1), (0.7, 0.03, 0.6))
+for x in (-0.33, 0.33):
+    box(P, "SteelDark", (x, 0.45, 0.33), (0.04, 0.88, 0.04))
+box(P, "WoodDark", (0, 0.92, 0), (1.8, 0.06, 0.8), bevel=0.006)
+box(P, "Neon", (0, 0.885, -0.395), (1.7, 0.008, 0.006))
+# The vice
+box(P, "SteelDark", (-0.7, 1.0, -0.28), (0.18, 0.1, 0.16), bevel=0.006)
+box(P, "SteelDark", (-0.7, 1.0, -0.4), (0.18, 0.1, 0.04), bevel=0.004)
+cyl(P, "Chrome", (-0.7, 1.0, -0.42), (-0.7, 1.0, -0.5), 0.012, sides=8)
+cyl(P, "Chrome", (-0.78, 1.0, -0.5), (-0.62, 1.0, -0.5), 0.008, sides=6)
+# The tool board and its tools
+box(P, "Steel", (0, 1.41, 0.375), (1.8, 0.9, 0.03))
+for i in range(17):
+    for j in range(8):
+        box(P, "Black", (-0.8 + i * 0.1, 1.02 + j * 0.11, 0.358), (0.012, 0.012, 0.004))
+for k, x in enumerate((-0.75, -0.65, -0.55)):
+    cyl(P, "Chrome", (x, 1.55, 0.35), (x, 1.3 - k * 0.04, 0.35), 0.006, sides=6)
+    cyl(P, ("Orange", "Red", "Black")[k] if k != 1 else "Orange", (x, 1.55, 0.35), (x, 1.66, 0.35), 0.016, sides=8)
+box(P, "WoodDark", (-0.3, 1.45, 0.35), (0.03, 0.32, 0.02))
+box(P, "SteelDark", (-0.3, 1.62, 0.35), (0.14, 0.05, 0.04), bevel=0.004)
+for k, x in enumerate((0.0, 0.08, 0.16)):
+    box(P, "Chrome", (x, 1.42 + k * 0.02, 0.352), (0.024, 0.26 + k * 0.04, 0.008))
+    with Group() as g:
+        ring(P, "Chrome", (0, 0, 0), 0.025, 0.007, sides=12)
+    for o in g.objs:
+        o.rotation_euler = (math.radians(90), 0, 0)
+        o.location = B((x, 1.56 + k * 0.04, 0.352))
+for k in range(4):
+    box(P, ("Orange", "Black", "Orange", "Black")[k], (0.42 + k * 0.12, 1.12, 0.32), (0.1, 0.08, 0.08), bevel=0.004)
+box(P, "SteelDark", (0.6, 1.05, 0.33), (0.5, 0.012, 0.1))
+# The lamp
+cyl(P, "Chrome", (0.75, 1.86, 0.37), (0.75, 1.86, 0.1), 0.012, sides=8)
+cyl(P, "SteelDark", (0.75, 1.86, 0.1), (0.75, 1.8, 0.08), 0.06, 0.08, sides=16)
+cyl(P, "Lamp", (0.75, 1.795, 0.078), (0.75, 1.79, 0.078), 0.07, sides=16)
+box(P, "Black", (0.0, 1.0, 0.36), (1.0, 0.04, 0.04))
+for k in range(6):
+    box(P, "Green" if k % 2 else "Neon", (-0.4 + k * 0.16, 1.0, 0.338), (0.03, 0.012, 0.004))
+
+# 8270 Crane arm (0.8 x 0.64 x 0.8, under a ceiling: +y points down): a bolted plate, a slewing ring,
+# a yellow winch housing with hazard stripes, the drum, the cable, the hook block and the hook at 0.62
+P = 8270
+box(P, "SteelDark", (0, 0.03, 0), (0.6, 0.06, 0.6), bevel=0.006)
+for x in (-0.25, 0.25):
+    for z in (-0.25, 0.25):
+        cyl(P, "Chrome", (x, 0.06, z), (x, 0.07, z), 0.014, sides=6)
+with Group() as g:
+    ring(P, "Chrome", (0, 0, 0), 0.2, 0.014, sides=32)
+place(g.objs, (0, 0.075, 0))
+box(P, "Yellow", (0, 0.18, 0), (0.36, 0.2, 0.3), bevel=0.012)
+for s in (-1, 1):
+    box(P, "Black", (s * 0.181, 0.18, 0), (0.004, 0.06, 0.26))
+    for k in range(4):
+        box(P, "Black", (s * 0.183, 0.18, -0.1 + k * 0.066), (0.004, 0.05, 0.022), rotation=(30, 0, 0))
+cyl(P, "Black", (-0.14, 0.32, 0), (0.14, 0.32, 0), 0.06, sides=16)
+for x in (-0.15, 0.15):
+    cyl(P, "SteelDark", (x, 0.32, 0), (x + (0.01 if x > 0 else -0.01), 0.32, 0), 0.07, sides=16)
+cyl(P, "Chrome", (0, 0.36, -0.03), (0, 0.46, -0.03), 0.006, sides=6)
+box(P, "Yellow", (0, 0.49, -0.03), (0.12, 0.06, 0.08), bevel=0.008)
+cyl(P, "SteelDark", (-0.06, 0.49, -0.03), (0.06, 0.49, -0.03), 0.025, sides=10)
+cyl(P, "Chrome", (0, 0.52, -0.03), (0, 0.56, -0.03), 0.01, sides=8)
+with Group() as g:
+    ring(P, "Steel", (0, 0, 0), 0.04, 0.011, sides=16)
+for o in g.objs:
+    o.rotation_euler = (math.radians(90), 0, 0)
+    o.location = B((0, 0.6, -0.03))
+cyl(P, "Red", (0.15, 0.285, -0.12), (0.15, 0.3, -0.12), 0.018, sides=8)
+
+# 8271 Floor marking (1 x 0.02 x 1): a dark square, hazard bands round the edge, lit chevrons
+P = 8271
+box(P, "Black", (0, 0.003, 0), (1.0, 0.006, 1.0))
+n = 10
+for i in range(n):
+    look = "Yellow" if i % 2 == 0 else "Black"
+    c = -0.5 + (i + 0.5) / n
+    for s in (-1, 1):
+        box(P, look, (c, 0.008, s * 0.46), (1.0 / n, 0.004, 0.08))
+        box(P, look, (s * 0.46, 0.008, c * 0.84), (0.08, 0.004, 0.84 / n))
+for z in (-0.18, 0.1):
+    for s in (-1, 1):
+        box(P, "Mark", (s * 0.1, 0.01, z), (0.05, 0.006, 0.3), rotation=(0, s * 45, 0))
+for x in (-0.38, 0.38):
+    for z in (-0.38, 0.38):
+        box(P, "Mark", (x, 0.011, z), (0.05, 0.006, 0.05))
+
+# ======================= Wall dressing (flat on a wall: +y out of it) =======================
+
+# 8272 Wall screen (1.2 x 0.06 x 0.7): a dark bezel, the scrolling data, a mount, a status line
+P = 8272
+box(P, "SteelDark", (0, 0.01, 0), (0.5, 0.02, 0.3))
+box(P, "Black", (0, 0.035, 0), (1.2, 0.03, 0.7), bevel=0.006)
+box(P, "ScreenData", (0, 0.0505, 0.02), (1.12, 0.004, 0.58))
+box(P, "Neon", (-0.2, 0.0505, -0.32), (0.6, 0.004, 0.012))
+box(P, "Green", (0.52, 0.0505, -0.32), (0.02, 0.004, 0.02))
+for x in (-0.56, 0.56):
+    for z in (-0.31, 0.31):
+        cyl(P, "Chrome", (x, 0.05, z), (x, 0.054, z), 0.006, sides=6)
+
+# 8273 Wall pipes (1 x 0.16 x 1): three pipes along x (they line up end to end), clamps, a valve, a gauge
+P = 8273
+for z, r, look in ((-0.3, 0.05, "Chrome"), (0.0, 0.04, "Orange"), (0.3, 0.03, "White")):
+    cyl(P, look, (-0.5, r + 0.04, z), (0.5, r + 0.04, z), r, sides=16)
+    for x in (-0.35, 0.35):
+        cyl(P, "SteelDark", (x - 0.02, r + 0.04, z), (x + 0.02, r + 0.04, z), r + 0.012, sides=16)
+        box(P, "SteelDark", (x, 0.02, z), (0.04, 0.04, 2 * r + 0.02))
+cyl(P, "SteelDark", (0.1, 0.08, 0.0), (0.1, 0.14, 0.0), 0.012, sides=8)
+with Group() as g:
+    ring(P, "Orange", (0, 0, 0), 0.05, 0.008, sides=20)
+place(g.objs, (0.1, 0.145, 0.0))
+cyl(P, "SteelDark", (-0.15, 0.08, -0.3), (-0.15, 0.13, -0.3), 0.015, sides=8)
+cyl(P, "Chrome", (-0.15, 0.13, -0.3), (-0.15, 0.15, -0.3), 0.04, sides=16)
+cyl(P, "White", (-0.15, 0.15, -0.3), (-0.15, 0.153, -0.3), 0.034, sides=16)
+box(P, "Black", (-0.14, 0.155, -0.3), (0.028, 0.003, 0.004), rotation=(0, 30, 0))
+box(P, "Black", (0.25, 0.115, 0.0), (0.05, 0.004, 0.08))
+
+# 8274 Wall cables (1 x 0.08 x 1): a tray, five cables along it, ties, a loop dropping out
+P = 8274
+box(P, "SteelDark", (0, 0.03, 0.25), (1.0, 0.06, 0.14))
+box(P, "Black", (0, 0.045, 0.25), (1.0, 0.04, 0.11))
+for k, look in enumerate(("Orange", "Black", "White", "Neon", "SteelDark")):
+    z = -0.15 + k * 0.035
+    cyl(P, look, (-0.5, 0.025, z), (0.5, 0.025, z), 0.011, sides=8)
+for x in (-0.4, -0.15, 0.1, 0.35):
+    box(P, "Black", (x, 0.026, -0.08), (0.02, 0.03, 0.2))
+prev = None
+for t in range(9):
+    a = math.pi * t / 8
+    p = (-0.3 + 0.6 * t / 8, 0.03, 0.25 - 0.32 * math.sin(a))
+    if prev:
+        cyl(P, "Orange", prev, p, 0.009, sides=6)
+    prev = p
+
+# 8275 Vent grille (0.6 x 0.08 x 0.6): a frame, a dark well, a turning fan (Spin_), louvres, screws
+P = 8275
+for s in (-1, 1):
+    box(P, "SteelDark", (s * 0.28, 0.04, 0), (0.04, 0.08, 0.6), bevel=0.004)
+    box(P, "SteelDark", (0, 0.04, s * 0.28), (0.52, 0.08, 0.04), bevel=0.004)
+box(P, "Black", (0, 0.004, 0), (0.52, 0.008, 0.52))
+cyl(P, "Spin_SteelDark", (0, 0.01, 0), (0, 0.05, 0), 0.04, sides=12)
+for a in (0, 90, 180, 270):
+    c, s = math.cos(math.radians(a)), math.sin(math.radians(a))
+    box(P, "Spin_Steel", (0.13 * c, 0.03, 0.13 * s), (0.18, 0.006, 0.07), rotation=(20, -a, 0))
+for k in range(8):
+    box(P, "Steel", (0, 0.068, -0.23 + k * 0.066), (0.52, 0.008, 0.022), rotation=(25, 0, 0))
+for x in (-0.28, 0.28):
+    for z in (-0.28, 0.28):
+        cyl(P, "Chrome", (x, 0.08, z), (x, 0.084, z), 0.008, sides=6)
+
+# 8276 Exit sign (0.5 x 0.03 x 0.3): a lit green panel, a doorway and an arrow in white
+P = 8276
+box(P, "Black", (0, 0.008, 0), (0.5, 0.016, 0.3), bevel=0.004)
+box(P, "Green", (0, 0.019, 0), (0.46, 0.006, 0.26))
+for x in (-0.16, -0.04):
+    box(P, "White", (x, 0.024, 0.0), (0.02, 0.004, 0.18))
+box(P, "White", (-0.1, 0.024, 0.08), (0.14, 0.004, 0.02))
+box(P, "White", (0.08, 0.024, 0.0), (0.18, 0.004, 0.03))
+for s in (-1, 1):
+    box(P, "White", (0.15, 0.024, s * 0.03), (0.09, 0.004, 0.03), rotation=(0, -s * 40, 0))
+
+# 8277 Hazard sign (0.4 x 0.03 x 0.4): a yellow triangle and an exclamation mark
+P = 8277
+box(P, "Black", (0, 0.008, 0), (0.4, 0.016, 0.4), bevel=0.004)
+tri = [(0.0, 0.17), (0.17, -0.13), (-0.17, -0.13)]
+solid(P, "Yellow", [(x, 0.016, z) for x, z in tri] + [(x, 0.022, z) for x, z in tri])
+box(P, "Black", (0, 0.025, 0.04), (0.035, 0.004, 0.13))
+box(P, "Black", (0, 0.025, -0.07), (0.035, 0.004, 0.035))
+
+# 8278 Arrow sign (0.5 x 0.03 x 0.25): a lit arrow
+P = 8278
+box(P, "Black", (0, 0.008, 0), (0.5, 0.016, 0.25), bevel=0.004)
+box(P, "Neon", (-0.05, 0.019, 0), (0.28, 0.006, 0.06))
+head = [(0.09, 0.09), (0.21, 0.0), (0.09, -0.09)]
+solid(P, "Neon", [(x, 0.016, z) for x, z in head] + [(x, 0.022, z) for x, z in head])
 
 
 export("construction.obj")

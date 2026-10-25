@@ -163,14 +163,37 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 SnappingStyle style = Placing != null ? Placing.snappingStyle : SnappingStyle.PreciseOnAny;
                 bool modules = StationModules.ById.ContainsKey(placingId) && StationModules.ById.ContainsKey(targetId);
 
-                // A flight aimed at a flight goes on from its top edge, the same way
-                if (hasTarget && MaterialParts.StairSize(placingId) is Vector3 next && MaterialParts.StairSize(targetId) is Vector3 below)
+                // A flight or a landing aimed at a flight goes on from its top edge, the same way; aimed
+                // at a landing, from the side aimed at (the stairs turn there). Its floor meets the
+                // other's: a landing stands on the floor up to the flight's top
+                if (hasTarget && MaterialParts.Chain(placingId) is var (next, entry, _) && MaterialParts.Chain(targetId) is var (below, _, exit))
                 {
-                    Vector3 at = targetPos + targetRot * new Vector3(0f, below.y + BuildGap, (below.z + next.z) * 0.5f + BuildGap);
-                    var chained = new FloatingPartPlacement(at, Nearest(targetRot * Vector3.forward), Nearest(targetRot * Vector3.up));
+                    Quaternion landingTurn = Quaternion.identity;
+                    float reach = below.z * 0.5f;
+                    if (MaterialParts.IsLanding(targetId))
+                    {
+                        Vector3 local = Quaternion.Inverse(targetRot) * (props.Hit.Pos - targetPos);
+                        bool across = Mathf.Abs(local.x) / below.x > Mathf.Abs(local.z) / below.z;
+                        landingTurn = Quaternion.Euler(0f, across ? (local.x > 0f ? 90f : -90f) : local.z > 0f ? 0f : 180f, 0f);
+                        reach = (across ? below.x : below.z) * 0.5f;
+                    }
+                    Quaternion onward = targetRot * landingTurn;
+                    Vector3 at = targetPos + targetRot * new Vector3(0f, exit - entry + BuildGap, 0f) + onward * new Vector3(0f, 0f, reach + next.z * 0.5f + BuildGap);
+                    var chained = new FloatingPartPlacement(at, Nearest(onward * Vector3.forward), Nearest(onward * Vector3.up));
                     LastTried = $"{at:F2} stairs on stairs";
                     if (ship.IsFloatingPlacementFree(chained, props.Bounds))
                         return chained;
+                }
+
+                // A flight's railing aimed at a flight of its run: along the side aimed at
+                if (hasTarget && MaterialParts.RailRun(placingId) is float run && MaterialParts.StairSize(targetId) is Vector3 flight && Mathf.Abs(flight.z - run) < 0.01f)
+                {
+                    float sideX = Vector3.Dot(props.Hit.Pos - targetPos, targetRot * Vector3.right) >= 0f ? 1f : -1f;
+                    Vector3 at = targetPos + targetRot * new Vector3(sideX * (flight.x * 0.5f + props.Bounds.extents.x + BuildGap), 0f, 0f);
+                    var railed = new FloatingPartPlacement(at, Nearest(targetRot * Vector3.forward), Nearest(targetRot * Vector3.up));
+                    LastTried = $"{at:F2} railing on stairs";
+                    if (ship.IsFloatingPlacementFree(railed, props.Bounds))
+                        return railed;
                 }
 
                 // The part's upright: the preview's, snapped to the ship's axes

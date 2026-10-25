@@ -420,9 +420,9 @@ namespace StellarDriveDemoTFAdvanced.Parts
             for (int i = 0; i < ids.Length; i++)
             {
                 float x = (i - (ids.Length - 1) * 0.5f) * Spacing;
-                if (ids[i] == 14 || ids[i] == Construction.PivotedDoor.Id)
+                if (ids[i] == 14 || ids[i] == Construction.PivotedDoor.Id || Construction.HullWindows.IsWindow(ids[i]))
                 {
-                    bool pivoted = ids[i] != 14;
+                    bool pivoted = ids[i] == Construction.PivotedDoor.Id || ids[i] == Construction.HullWindows.PortholePivoted || ids[i] == Construction.HullWindows.WindowPivoted;
                     doors.Append(doors.Length > 0 ? "," : "").Append(string.Format(CultureInfo.InvariantCulture,
                         "{{\"id\":{0},\"settingsId\":{1},\"coord\":{{\"x\":{2},\"y\":0,\"z\":0}},\"orientationId\":{3},\"voxelPartTypeId\":{4}}}",
                         200 + i, ids[i], Mathf.RoundToInt(x), pivoted ? 6 : 0, pivoted ? 3 : 1));

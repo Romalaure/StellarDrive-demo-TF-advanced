@@ -44,14 +44,28 @@ La tela del sofá y del sillón y la alfombra toman el color de la pistola de pi
 
 **Muebles futuristas** (fila siguiente, investigación *Módulos de estación*), para equipar las salas de una nave:
 - **ciencia**: mesa de laboratorio, tanque de especímenes (líquido luminoso), consola de análisis;
-- **almacén**: rack de servidores, caja de carga, estantería de almacén, bombonas;
-- **dormitorio**: cápsula de sueño, taquillas de la tripulación;
-- **cocina**: sintetizador de comida, isla de cocina;
-- **oficinas**: escritorio de mando (3 pantallas), mesa holográfica (un planeta que gira);
+- **almacén**: rack de servidores (repetidor de radio), caja de carga (un cofre), estantería de almacén, bombonas;
+- **dormitorio**: cápsula de sueño, taquillas de la tripulación (un cofre);
+- **cocina**: sintetizador de comida (cura), isla de cocina;
+- **oficinas**: escritorio de mando (3 pantallas), mesa holográfica (el mapa del sistema);
 - **salón / comedor**: sofá lounge (3 plazas), mesa de comedor con bancos (4 plazas), máquina expendedora;
 - **enfermería**: cama médica.
 
 **Dormir**: la cama, la litera, la cápsula de sueño y la cama médica: míralas y pulsa **T** para dormir y pasar la noche (como la espera del juego). No durante el vuelo.
+
+**Para qué sirven**:
+- **guardar**: la caja de carga, las taquillas y el banco de trabajo se abren como el cofre del juego y guardan lo que metas;
+- **comer**: mira el sintetizador de comida y pulsa **T**: una comida te devuelve toda la salud (una por minuto; ponte a su lado);
+- **la radio**: el rack de servidores es un repetidor, suena la radio de la nave como un altavoz (**T** abre la radio);
+- **el mapa**: la mesa holográfica proyecta el mapa del sistema como el mapa estelar del juego: apunta a un planeta para marcarlo; sus tomas se conectan al ordenador de puntería.
+
+**Baño** (fila siguiente, *Módulos de estación*): ducha (cabina de cristal) y lavabo — **T** abre o cierra el agua, que todos los jugadores ven correr; inodoro (**T** para sentarse); espejo retroiluminado (en la pared, refleja la sala).
+
+**Hangar** (fila siguiente): **banco de trabajo** (encimera, tornillo, panel de herramientas; sus cajones guardan cosas), **brazo grúa** (en el techo: encendido con **T** y con energía, engancha la nave bajo él hasta 30 m y la sujeta a 3 m bajo su gancho; se conecta como el rayo tractor), **marcado de suelo** (bandas y chevrones; **T**: encendido, parpadeante, apagado).
+
+**Revestimiento de pared** (última fila, se pone plano en una pared o un suelo): pantalla de pared (datos que pasan), tuberías, cables (para poner seguidos), rejilla de ventilación (su ventilador gira), señales de salida, peligro y flecha.
+
+El agua, los ventiladores y las pantallas solo se mueven cerca de ti y a la vista: una sala llena de muebles mantiene sus FPS.
 
 ## Escaleras
 
@@ -67,12 +81,15 @@ Fila de arriba de la pestaña. Se colocan en el suelo y **suben hacia atrás** (
 
 **Seguidos**: apunta a un tramo recto ya colocado con otro tramo recto, se coloca al final del primero, en el mismo sentido (se pueden mezclar empinado y suave); para subir más. El caracol necesita un hueco en el techo encima.
 
+**Rellanos y barandillas**: el **rellano 1 × 1** y el **rellano 2 × 2** (1 m de alto) se ponen al final de una escalera (apúntala); luego apunta la siguiente escalera a **un lado del rellano**: sigue en esa dirección, para girar. La **barandilla de escalera** (y la **barandilla de escalera suave**) se pega al lado apuntado de una escalera recta y sigue su pendiente.
+
 ## Letreros y puertas
 
 Última fila de la pestaña.
 - **Panel luminoso** (pared), **placa de puerta** (pequeña, junto a una puerta), **letrero holográfico** (en el suelo, texto flotando a la altura de los ojos): míralos y pulsa **T** para escribir el texto (40 caracteres) y elegir su color (7 colores). Para nombrar las salas: Puente, Enfermería, Bodega… Todos los jugadores lo ven, el anfitrión lo guarda con el mundo. Investigación *Ordenador de a bordo*.
 - **Puerta automática** (un cuadrado) y **puerta automática grande** (2 × 2): se abre sola cuando alguien se acerca y se cierra detrás. Puesta **en diagonal** (quita la pared diagonal, pon la puerta en el suelo en su lugar, gírala para la otra diagonal); o **recta** (alineada con una pared normal): elígelo al colocarla con la tecla **B** (la vista previa lo muestra). **No retiene el aire**. Investigación *Construcción metálica*.
 - **La puerta del juego en diagonal**: pon la puerta del juego como una pared y gírala (tecla de rotación): en una pared diagonal toma su versión diagonal, como las paredes del juego. Es la puerta de verdad: se abre con la tecla de interacción y sella la sala.
+- **Paredes de casco** (fila del cristal): **pared con ojos de buey** (dos ojos de buey redondos atornillados) y **pared con ventana** (una ventana amplia), 2 × 2 m. Se colocan como una pared y la tecla de rotación las pone **en diagonal** (un ojo de buey, una ventana más estrecha). Son casco de verdad: cierran la sala estanca y guardan el aire; no se abren. Investigación *Vidrio arquitectónico*.
 
 ## Casco reforzado
 

@@ -63,7 +63,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
         }
 
         // The door's model and colliders sit on (0.5, 0.5) of its 2 x 2: centered on the square, narrowed
-        private static void Shape(GameObject part)
+        internal static void Shape(GameObject part)
         {
             foreach (Transform t in part.GetComponentsInChildren<Transform>(true))
             {

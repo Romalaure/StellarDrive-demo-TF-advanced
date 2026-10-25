@@ -286,7 +286,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                     else if (part.State is DockingDoorState door && door.IsDocked)
                         Add(door.DockedConnectedPart.ShipId);
                     // A ship held in a tractor beam goes with the ship holding it
-                    else if (part.Settings != null && part.Settings.id == StellarDriveDemoTFAdvanced.Power.TractorBeam.Id && part.State is ConstantState beam)
+                    else if (part.Settings != null && StellarDriveDemoTFAdvanced.Power.TractorBeam.IsBeam(part.Settings.id) && part.State is ConstantState beam)
                     {
                         (bool on, int status, uint target) = StellarDriveDemoTFAdvanced.Power.TractorBeam.Decode(beam.ConstantValue);
                         if (on && status == StellarDriveDemoTFAdvanced.Power.TractorBeam.Locked && target != 0)

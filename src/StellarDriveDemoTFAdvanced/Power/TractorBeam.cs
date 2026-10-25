@@ -40,8 +40,17 @@ namespace StellarDriveDemoTFAdvanced.Power
     internal static class TractorBeam
     {
         public const ushort Id = 7486;
+        /// <summary>The hangar's crane arm: the same beam, short (<see cref="CraneRange"/>), holding close under its hook.</summary>
+        public const ushort CraneId = 8270;
         public const byte CommandSocket = 3;
         public const float Range = 150f, HoldDistance = 14f, MaxForce = 800000f, MaxAcceleration = 12f, Watts = 3000f;
+        public const float CraneRange = 30f, CraneHold = 3f, CraneWatts = 1200f;
+
+        public static bool IsBeam(ushort id) => id == Id || id == CraneId;
+
+        private static float RangeOf(ushort id) => id == CraneId ? CraneRange : Range;
+
+        private static float HoldOf(ushort id) => id == CraneId ? CraneHold : HoldDistance;
         // Status
         public const int Off = 0, Searching = 1, Locked = 2, NoPower = 3;
 
@@ -60,12 +69,20 @@ namespace StellarDriveDemoTFAdvanced.Power
 
         public static void Register()
         {
-            PartFactory.Register(Id, "SignalDisplay", AdvancedTab.Name, AdvancedTab.ArtifactsRow, Configure);
+            PartFactory.Register(Id, "SignalDisplay", AdvancedTab.Name, AdvancedTab.ArtifactsRow, (settings, prefab) => Configure(Id, settings, prefab));
+            PartFactory.Register(CraneId, "SignalDisplay", AdvancedTab.ConstructionName, AdvancedTab.HangarRow, (settings, prefab) => Configure(CraneId, settings, prefab));
         }
 
-        private static void Configure(PartSettings settings, GameObject prefab)
+        private static void Configure(ushort id, PartSettings settings, GameObject prefab)
         {
-            PartFactory.Describe(settings, Loc.Pick("Rayon tracteur", "Tractor beam", "Rayo tractor"),
+            if (id == CraneId)
+                PartFactory.Describe(settings, Loc.Pick("Bras de grue", "Crane arm", "Brazo grúa"),
+                    Loc.Pick($"Un treuil à crochet pour le plafond du hangar : allumé (regarde-le et appuie sur T) et alimenté ({CraneWatts:0} W), il accroche le vaisseau sous lui jusqu'à {CraneRange:0} m, le monte à {CraneHold:0} m sous le crochet et l'y tient. Branché comme le rayon tracteur.",
+                        $"A hook winch for the hangar's ceiling: switched on (look at it and press T) and powered ({CraneWatts:0} W), it hooks the ship under it up to {CraneRange:0} m away, lifts it to {CraneHold:0} m under the hook and holds it there. Wired like the tractor beam.",
+                        $"Un torno con gancho para el techo del hangar: encendido (míralo y pulsa T) y con energía ({CraneWatts:0} W), engancha la nave bajo él hasta {CraneRange:0} m, la sube a {CraneHold:0} m bajo el gancho y la sujeta. Se conecta como el rayo tractor."),
+                    40f, new[] { (101u, 8), (112u, 6), (103u, 2) });
+            else
+                PartFactory.Describe(settings, Loc.Pick("Rayon tracteur", "Tractor beam", "Rayo tractor"),
                 Loc.Pick($"Un émetteur à fixer sur la coque : son rayon part tout droit de la surface où on le pose. Allumé (regarde-le et appuie sur T, ou touche Y depuis le siège de pilotage) et alimenté ({Watts:0} W), il accroche le vaisseau le plus proche dans son rayon (vaisseau, épave, pirate) jusqu'à {Range:0} m, le tire jusqu'à {HoldDistance:0} m devant lui et le garde là, à ta vitesse. Un vaisseau lourd vient lentement. Éteins-le pour le lâcher. Prise de commande : avec un câble, il ne marche que si le signal est au-dessus de 0. Prise d'état : 2 accroché, 1 cherche, 0 éteint, 3 sans courant.",
                     $"An emitter that bolts to the hull: its beam goes straight out of the surface it is placed on. Switched on (look at it and press T, or the Y key from the pilot seat) and powered ({Watts:0} W), it locks onto the nearest ship in its beam (a ship, a wreck, a pirate) up to {Range:0} m, pulls it in to {HoldDistance:0} m in front of it and holds it there, at your speed. A heavy ship comes slowly. Switch it off to let go. Command socket: with a cable it only works while the signal is above 0. Status socket: 2 locked, 1 searching, 0 off, 3 no power.",
                     $"Un emisor que se fija al casco: su rayo sale recto de la superficie donde se coloca. Encendido (míralo y pulsa T, o la tecla Y desde el asiento de pilotaje) y con energía ({Watts:0} W), engancha la nave más cercana en su rayo (nave, pecio, pirata) hasta {Range:0} m, la atrae hasta {HoldDistance:0} m delante de él y la mantiene ahí, a tu velocidad. Una nave pesada llega despacio. Apágalo para soltarla. Toma de mando: con un cable solo funciona si la señal es mayor que 0. Toma de estado: 2 enganchado, 1 busca, 0 apagado, 3 sin energía."),
@@ -75,7 +92,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             const float width = 0.8f;
             Transform visuals = PartFactory.BlankFromSignalDisplay(prefab, new Vector3(0f, 0.32f, 0f), new Vector3(width, 0.64f, width));
             // Its Blender model (tools/blender/construction.py); the shapes below are the fallback
-            if (!Construction.MaterialParts.BlenderModel(Id, visuals))
+            if (!Construction.MaterialParts.BlenderModel(id, visuals) && id == Id)
             {
                 // A square foot, a turning ring, a dish of coils around a central emitter
                 var model = new MachineModels.Model();
@@ -101,7 +118,10 @@ namespace StellarDriveDemoTFAdvanced.Power
                 MachineModels.Attach(visuals, model, "TractorBeam", MachineModels.Green, new Color(0.6f, 1f, 0.75f));
             }
             TFItems.Common.UsablePart.AddBox(visuals, new Vector3(0f, 0.32f, 0f), new Vector3(width + 0.1f, 0.7f, width + 0.1f));
-            visuals.gameObject.AddComponent<TractorVisuals>();
+            if (id == CraneId)
+                visuals.gameObject.AddComponent<CraneVisuals>();
+            else
+                visuals.gameObject.AddComponent<TractorVisuals>();
             var bounds = prefab.GetComponent<ShipPartBounds>();
             PowerParts.GraftRow(prefab, bounds, 0.06f, -width * 0.5f, 0.12f,
                 (PowerCatalog.MachinePowerA, CableType.Power), (PowerCatalog.MachineSignal, CableType.Signal), (CommandSocket, CableType.Signal), (PowerCatalog.MachinePowerB, CableType.Power));
@@ -122,7 +142,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             bool on = text == "1";
             foreach (StatefulPart part in ship.GetAllStatefulParts<ConstantState>().ToList())
             {
-                if (part.Settings == null || part.Settings.id != Id || partId != 0 && part.Id != partId)
+                if (part.Settings == null || !IsBeam(part.Settings.id) || partId != 0 && part.Id != partId)
                     continue;
                 var state = (ConstantState)part.State;
                 (bool _, int status, uint target) = Decode(state.ConstantValue);
@@ -168,7 +188,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             {
                 foreach (StatefulPart part in ship.GetAllStatefulParts<ConstantState>())
                 {
-                    if (part.Settings == null || part.Settings.id != Id)
+                    if (part.Settings == null || !IsBeam(part.Settings.id))
                         continue;
                     if (!Runtimes.TryGetValue((ship.Id, part.Id), out Runtime rt))
                         Runtimes[(ship.Id, part.Id)] = rt = new Runtime();
@@ -182,7 +202,7 @@ namespace StellarDriveDemoTFAdvanced.Power
                     if (!power.TryGetGroupFromSocket(new EntityPartSocket(ship.Id, part.Id, PowerCatalog.MachinePowerA), out PowerGroupServerState group)
                         && !power.TryGetGroupFromSocket(new EntityPartSocket(ship.Id, part.Id, PowerCatalog.MachinePowerB), out group))
                         continue;
-                    group.TotalPowerNeeded += Watts * deltaTime;
+                    group.TotalPowerNeeded += (part.Settings.id == CraneId ? CraneWatts : Watts) * deltaTime;
                     rt.Group = group;
                 }
             }
@@ -242,6 +262,7 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static bool Aim(ShipsServerTracker ships, Entry entry)
         {
             Runtime rt = entry.Runtime;
+            float range = RangeOf(entry.Part.Settings.id), hold = HoldOf(entry.Part.Settings.id);
             Ray(entry.Ship, entry.Part, out Vector3 origin, out Vector3 direction);
             var own = new HashSet<uint>();
             if (ships.TryGetTrackedRootShip(entry.Ship.Id, out TrackedShipServer root))
@@ -259,17 +280,17 @@ namespace StellarDriveDemoTFAdvanced.Power
                 distance = to.magnitude;
                 return distance < range && distance > 0.5f && Vector3.Angle(direction, to) < cone;
             }
-            if (rt.Target != 0 && ships.TryGetTrackedShip(rt.Target, out TrackedShipServer held) && InBeam(held, 40f, Range * 1.3f, out float now))
+            if (rt.Target != 0 && ships.TryGetTrackedShip(rt.Target, out TrackedShipServer held) && InBeam(held, 40f, range * 1.3f, out float now))
             {
                 // Pulled in to the hold distance, a few meters a second
-                rt.Hold = Mathf.Max(HoldDistance, Mathf.Min(rt.Hold, now + 2f) - 4f * Time.fixedDeltaTime);
+                rt.Hold = Mathf.Max(hold, Mathf.Min(rt.Hold, now + 2f) - 4f * Time.fixedDeltaTime);
                 return true;
             }
             TrackedShipServer best = null;
             float bestDistance = float.MaxValue;
             foreach (TrackedShipServer ship in ships.LoadedRootShips)
             {
-                if (InBeam(ship, 12f, Range, out float distance) && distance < bestDistance)
+                if (InBeam(ship, 12f, range, out float distance) && distance < bestDistance)
                 {
                     best = ship;
                     bestDistance = distance;
@@ -278,7 +299,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             if (best == null)
                 return false;
             rt.Target = best.Id;
-            rt.Hold = Mathf.Max(HoldDistance, bestDistance);
+            rt.Hold = Mathf.Max(hold, bestDistance);
             AdvancedMod.Log.Msg($"tractor beam {entry.Ship.Id}:{entry.Part.Id} locked on ship {best.Id} at {bestDistance:0} m");
             return true;
         }
@@ -334,14 +355,14 @@ namespace StellarDriveDemoTFAdvanced.Power
     /// back along it), a faint short one while it searches; the use key switches it. From the
     /// pilot seat, the tractor key switches every beam of the ship flown.
     /// </summary>
-    internal sealed class TractorVisuals : TFItems.Common.UsablePart
+    internal class TractorVisuals : TFItems.Common.UsablePart
     {
         private static readonly Color BeamColor = new Color(0.35f, 1f, 0.6f);
         private static Material _beamMaterial;
         private static Mesh _beamMesh;
         public static readonly Dictionary<PartKey, double> Values = new Dictionary<PartKey, double>();
 
-        private double _value;
+        protected double _value;
         private Transform _beam, _ring;
 
         public override string Label => Loc.Pick("Rayon tracteur", "Tractor beam", "Rayo tractor") + (TractorBeam.Decode(_value).On ? Loc.Pick(" (allumé)", " (on)", " (encendido)") : Loc.Pick(" (éteint)", " (off)", " (apagado)"));
@@ -474,5 +495,11 @@ namespace StellarDriveDemoTFAdvanced.Power
                 return;
             TractorBeam.Switch(ship, 0, !any);
         }
+    }
+
+    /// <summary>The crane arm: the tractor beam's work under another name.</summary>
+    internal sealed class CraneVisuals : TractorVisuals
+    {
+        public override string Label => Loc.Pick("Bras de grue", "Crane arm", "Brazo grúa") + (TractorBeam.Decode(_value).On ? Loc.Pick(" (allumé)", " (on)", " (encendido)") : Loc.Pick(" (éteint)", " (off)", " (apagado)"));
     }
 }

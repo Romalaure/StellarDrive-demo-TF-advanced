@@ -79,6 +79,12 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         TractorSwitch = 78,
         /// <summary>Client to server: automatic door B of ship A gets the state Text (1 open + 2 straight).</summary>
         DoorState = 79,
+        /// <summary>Client to server: serve me a meal from the food synthesizer B of ship A.</summary>
+        Meal = 80,
+        /// <summary>Server to one client: how the meal went, Text is for the player.</summary>
+        MealResult = 81,
+        /// <summary>Client to server: piece B of ship A (shower, sink, floor marking) switches to the mode Text.</summary>
+        FurnitureMode = 82,
 
         /// <summary>Client to server: copy the ship A (and what is attached to it) as schematic Text.</summary>
         SchematicCopy = 30,
