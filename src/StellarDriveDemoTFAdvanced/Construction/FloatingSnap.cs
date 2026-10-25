@@ -181,7 +181,10 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     Vector3 at = targetPos + targetRot * new Vector3(0f, exit - entry + BuildGap, 0f) + onward * new Vector3(0f, 0f, reach + next.z * 0.5f + BuildGap);
                     var chained = new FloatingPartPlacement(at, Nearest(onward * Vector3.forward), Nearest(onward * Vector3.up));
                     LastTried = $"{at:F2} stairs on stairs";
-                    if (ship.IsFloatingPlacementFree(chained, props.Bounds))
+                    // (the flight's ramp slab reaches a little past its top edge, under the next piece's near side)
+                    Bounds clear = props.Bounds;
+                    clear.SetMinMax(clear.min + new Vector3(0f, 0f, 0.2f), clear.max);
+                    if (ship.IsFloatingPlacementFree(chained, props.Bounds) || ship.IsFloatingPlacementFree(chained, clear))
                         return chained;
                 }
 
