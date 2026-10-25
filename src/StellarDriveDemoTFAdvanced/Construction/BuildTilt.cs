@@ -8,7 +8,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
     /// How a construction part being placed is turned beyond what the game allows (its up out of
     /// the face aimed at, turned about it): the tilt key (B) cycles upright, tipped forward, on its
     /// side and upside down, so a plank wall can stand on a hull wall, a post lie along a floor, a
-    /// window close a sloped opening. Reset when another part is chosen.
+    /// window close a sloped opening. Reset when another part is chosen. For an automatic door the
+    /// key switches it between diagonal and straight instead.
     /// </summary>
     internal static class BuildTilt
     {
@@ -18,6 +19,10 @@ namespace StellarDriveDemoTFAdvanced.Construction
         private static ushort _part;
         private static float _seen = -10f;
         private static GUIStyle _hint;
+        private static bool _door;
+
+        /// <summary>The automatic door being placed goes straight (else diagonal).</summary>
+        public static bool DoorStraight { get; private set; }
 
         /// <summary>The tilt of the part being placed (asked while its preview is placed).</summary>
         public static Quaternion For(ushort partId)
@@ -27,8 +32,17 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 _part = partId;
                 _index = 0;
             }
+            _door = false;
             _seen = Time.unscaledTime;
             return Tilts[_index];
+        }
+
+        /// <summary>Asked by an automatic door's build preview: straight or diagonal.</summary>
+        public static bool ForDoor()
+        {
+            _door = true;
+            _seen = Time.unscaledTime;
+            return DoorStraight;
         }
 
         /// <summary>Development: the tilt the next placements get.</summary>
@@ -42,7 +56,11 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         public static void Update()
         {
-            if (Placing && !ModMenu.IsOpen && Key.WasPressed)
+            if (!Placing || ModMenu.IsOpen || !Key.WasPressed)
+                return;
+            if (_door)
+                DoorStraight = !DoorStraight;
+            else
                 _index = (_index + 1) % Tilts.Length;
         }
 
@@ -63,7 +81,10 @@ namespace StellarDriveDemoTFAdvanced.Construction
             float width = Screen.width / scale, height = Screen.height / scale;
             var rect = new Rect(width / 2f - 200f, height - 200f, 400f, 30f);
             TFItems.Devices.DeviceUi.Panel(rect);
-            GUI.Label(rect, $"[{Key.Label}]  " + Loc.Pick("Orientation : ", "Orientation: ", "Orientación: ") + Name(_index), _hint);
+            string text = _door
+                ? Loc.Pick("Porte : ", "Door: ", "Puerta: ") + (DoorStraight ? Loc.Pick("droite", "straight", "recta") : Loc.Pick("en diagonale", "diagonal", "en diagonal"))
+                : Loc.Pick("Orientation : ", "Orientation: ", "Orientación: ") + Name(_index);
+            GUI.Label(rect, $"[{Key.Label}]  " + text, _hint);
             GUI.matrix = previous;
         }
     }

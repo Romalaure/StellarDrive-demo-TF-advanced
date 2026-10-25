@@ -93,6 +93,39 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 openPos.SetValue(interaction, new Vector3((pos.x - 0.5f) * Narrow, pos.y, pos.z));
             if (openSize?.GetValue(interaction) is Vector3 size)
                 openSize.SetValue(interaction, new Vector3(size.x * Narrow, size.y, size.z));
+            TurnIntoPivotedFrame(part);
+        }
+
+        // The game turns a pivoted piece by (forward along the diagonal, up out of the wall): its
+        // right points down. The door, made upright, is turned into that frame, or it lay down.
+        private static readonly Quaternion Turn = Quaternion.LookRotation(Vector3.up, Vector3.left);
+
+        private static void TurnIntoPivotedFrame(GameObject part)
+        {
+            foreach (Transform child in part.transform)
+            {
+                // The game copies the collider object alone, at the part's place: turn what it holds
+                if (child.GetComponent<Ships.Parts.Common.Model.Reactions.IShipPartDynamicCollider>() != null)
+                {
+                    foreach (Transform piece in child)
+                        Rotate(piece);
+                }
+                else
+                    Rotate(child);
+            }
+            var bounds = part.GetComponent<ShipPartBounds>();
+            if (bounds != null)
+            {
+                bounds.center = Turn * bounds.center;
+                Vector3 s = Turn * bounds.bounds;
+                bounds.bounds = new Vector3(Mathf.Abs(s.x), Mathf.Abs(s.y), Mathf.Abs(s.z));
+            }
+        }
+
+        private static void Rotate(Transform t)
+        {
+            t.localPosition = Turn * t.localPosition;
+            t.localRotation = Turn * t.localRotation;
         }
     }
 }

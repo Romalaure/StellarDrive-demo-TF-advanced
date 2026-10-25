@@ -71,7 +71,7 @@ Top row of the tab. They stand on floors and **climb toward the back** (the foot
 
 Last row of the tab.
 - **Lit sign panel** (wall), **door plate** (small, beside a door), **holographic sign** (on the floor, text floating at eye height): look at one and press **T** to write its text (40 characters) and pick its color (7 colors). To name rooms: Bridge, Sickbay, Cargo… Every player sees it, the host keeps it with the world. Research *Ship computer*.
-- **Automatic door** (one square) and **large automatic door** (2 × 2): it opens by itself when someone comes near and closes behind them. Set **diagonally** (remove the diagonal wall, set the door on the floor in its place, turn it for the other diagonal); look at it and press **T** to make it **straight** (in line with a normal wall), **T** again for diagonal. It **does not hold air**. Research *Metal construction*.
+- **Automatic door** (one square) and **large automatic door** (2 × 2): it opens by itself when someone comes near and closes behind them. Set **diagonally** (remove the diagonal wall, set the door on the floor in its place, turn it for the other diagonal); or **straight** (in line with a normal wall): choose while placing it with the **B** key (the preview shows it). It **does not hold air**. Research *Metal construction*.
 - **The game's door on diagonals**: place the game's door like a wall and turn it (rotate key): on a diagonal wall it takes its diagonal version, like the game's walls. It is the real door: it opens with the interact key and seals its room.
 
 ## Reinforced hull

@@ -71,7 +71,7 @@ Fila de arriba de la pestaña. Se colocan en el suelo y **suben hacia atrás** (
 
 Última fila de la pestaña.
 - **Panel luminoso** (pared), **placa de puerta** (pequeña, junto a una puerta), **letrero holográfico** (en el suelo, texto flotando a la altura de los ojos): míralos y pulsa **T** para escribir el texto (40 caracteres) y elegir su color (7 colores). Para nombrar las salas: Puente, Enfermería, Bodega… Todos los jugadores lo ven, el anfitrión lo guarda con el mundo. Investigación *Ordenador de a bordo*.
-- **Puerta automática** (un cuadrado) y **puerta automática grande** (2 × 2): se abre sola cuando alguien se acerca y se cierra detrás. Puesta **en diagonal** (quita la pared diagonal, pon la puerta en el suelo en su lugar, gírala para la otra diagonal); mírala y pulsa **T** para ponerla **recta** (alineada con una pared normal), **T** otra vez para volver a diagonal. **No retiene el aire**. Investigación *Construcción metálica*.
+- **Puerta automática** (un cuadrado) y **puerta automática grande** (2 × 2): se abre sola cuando alguien se acerca y se cierra detrás. Puesta **en diagonal** (quita la pared diagonal, pon la puerta en el suelo en su lugar, gírala para la otra diagonal); o **recta** (alineada con una pared normal): elígelo al colocarla con la tecla **B** (la vista previa lo muestra). **No retiene el aire**. Investigación *Construcción metálica*.
 - **La puerta del juego en diagonal**: pon la puerta del juego como una pared y gírala (tecla de rotación): en una pared diagonal toma su versión diagonal, como las paredes del juego. Es la puerta de verdad: se abre con la tecla de interacción y sella la sala.
 
 ## Casco reforzado

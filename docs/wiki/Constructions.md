@@ -71,7 +71,7 @@ Rangée du haut de l'onglet. Ils se posent au sol et **montent vers l'arrière**
 
 Dernière rangée de l'onglet.
 - **Panneau lumineux** (mur), **plaque de porte** (petite, à côté d'une porte), **enseigne holographique** (au sol, texte flottant à hauteur des yeux) : regarde-les et appuie sur **T** pour écrire le texte (40 caractères) et choisir sa couleur (7 couleurs). Pour nommer les pièces : Pont, Infirmerie, Soute… Tous les joueurs le voient, l'hôte le garde avec le monde. Recherche *Ordinateur de bord*.
-- **Porte automatique** (un carré) et **grande porte automatique** (2 × 2) : elle s'ouvre seule quand quelqu'un approche et se referme derrière lui. Posée **en diagonale** (enlève le mur diagonal, pose la porte au sol à sa place, tourne-la pour l'autre diagonale) ; regarde-la et appuie sur **T** pour la mettre **droite** (dans l'alignement d'un mur normal), **T** encore pour revenir en diagonale. Elle **ne retient pas l'air**. Recherche *Construction métallique*.
+- **Porte automatique** (un carré) et **grande porte automatique** (2 × 2) : elle s'ouvre seule quand quelqu'un approche et se referme derrière lui. Posée **en diagonale** (enlève le mur diagonal, pose la porte au sol à sa place, tourne-la pour l'autre diagonale) ; ou **droite** (dans l'alignement d'un mur normal) : choisis pendant la pose avec la touche **B** (l'aperçu montre le choix). Elle **ne retient pas l'air**. Recherche *Construction métallique*.
 - **La porte du jeu en diagonale** : pose la porte du jeu comme un mur et tourne-la (touche de rotation) : sur un mur en diagonale, elle prend sa version diagonale, comme les murs du jeu. C'est la vraie porte : elle s'ouvre avec la touche d'interaction et ferme la pièce étanche.
 
 ## Coque renforcée

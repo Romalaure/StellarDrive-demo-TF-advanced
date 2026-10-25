@@ -20,10 +20,10 @@ namespace StellarDriveDemoTFAdvanced.Construction
     /// <summary>
     /// Automatic sliding doors set on a floor: across the diagonal of one floor square (or of
     /// 2 × 2), for the diagonal walls, or straight along the square's front edge (-z), in place of
-    /// a straight wall. Look at one and press the use key (T) to switch it between the two. It
-    /// opens by itself when someone comes near and closes behind them. Its state is the part's
-    /// ConstantState, kept and shared by the game: 1 open, 2 straight. Placed parts do not seal a
-    /// room: it does not hold air like the game's doors.
+    /// a straight wall: chosen while placing it with the tilt key (see <see cref="BuildTilt"/>), the
+    /// player who placed it then asks for that layout. It opens by itself when someone comes near
+    /// and closes behind them. Its state is the part's ConstantState, kept and shared by the game:
+    /// 1 open, 2 straight. Placed parts do not seal a room: it does not hold air like the game's doors.
     /// </summary>
     internal static class DiagonalDoors
     {
@@ -54,9 +54,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
         {
             PartFactory.Describe(settings,
                 squares == 1 ? Loc.Pick("Porte automatique", "Automatic door", "Puerta automática") : Loc.Pick("Grande porte automatique", "Large automatic door", "Puerta automática grande"),
-                Loc.Pick($"Une porte coulissante qui s'ouvre seule quand quelqu'un approche, posée au sol sur {(squares == 2 ? "2 × 2 cases" : "une case")}. En diagonale pour les murs en diagonale (enlève le mur, pose la porte à sa place), ou droite le long du bord avant de la case, à la place d'un mur droit : regarde-la et appuie sur T pour passer de l'une à l'autre. Ne retient pas l'air comme les portes du jeu.",
-                    $"A sliding door that opens by itself when someone comes near, set on the floor over {(squares == 2 ? "2 × 2 squares" : "one square")}. Diagonal for the diagonal walls (remove the wall, put the door in its place), or straight along the square's front edge, in place of a straight wall: look at it and press T to switch. It does not hold air like the game's doors.",
-                    $"Una puerta corredera que se abre sola cuando alguien se acerca, puesta en el suelo sobre {(squares == 2 ? "2 × 2 casillas" : "una casilla")}. En diagonal para las paredes diagonales (quita la pared, pon la puerta en su lugar), o recta a lo largo del borde delantero de la casilla, en lugar de una pared recta: mírala y pulsa T para cambiar. No retiene el aire como las puertas del juego."),
+                Loc.Pick($"Une porte coulissante qui s'ouvre seule quand quelqu'un approche, posée au sol sur {(squares == 2 ? "2 × 2 cases" : "une case")}. En diagonale pour les murs en diagonale (enlève le mur, pose la porte à sa place), ou droite le long du bord avant de la case, à la place d'un mur droit : choisis pendant la pose avec la touche B. Ne retient pas l'air comme les portes du jeu.",
+                    $"A sliding door that opens by itself when someone comes near, set on the floor over {(squares == 2 ? "2 × 2 squares" : "one square")}. Diagonal for the diagonal walls (remove the wall, put the door in its place), or straight along the square's front edge, in place of a straight wall: choose while placing it with the B key. It does not hold air like the game's doors.",
+                    $"Una puerta corredera que se abre sola cuando alguien se acerca, puesta en el suelo sobre {(squares == 2 ? "2 × 2 casillas" : "una casilla")}. En diagonal para las paredes diagonales (quita la pared, pon la puerta en su lugar), o recta a lo largo del borde delantero de la casilla, en lugar de una pared recta: elígelo al colocarla con la tecla B. No retiene el aire como las puertas del juego."),
                 squares == 1 ? 40f : 70f, squares == 1 ? new[] { (101u, 4), (102u, 1), (112u, 1) } : new[] { (101u, 7), (102u, 2), (112u, 2) });
             settings.internalStateClass = Power.PowerCatalog.MachineStateClass;
             settings.snappingStyle = Ships.Interface.Model.SnappingStyle.PreciseOnFloor;
@@ -73,7 +73,6 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 root.SetActive(!straight);
                 Layout(root.transform, layer, Width(squares, straight));
             }
-            UsablePart.AddBox(visuals, new Vector3(0f, Height * 0.5f, 0f), size);
             var plain = visuals.GetComponent<Ships.Parts.Common.DefaultShipPartVisuals>();
             if (plain != null)
                 Object.DestroyImmediate(plain);
@@ -133,6 +132,33 @@ namespace StellarDriveDemoTFAdvanced.Construction
             var renderer = child.AddComponent<MeshRenderer>();
             renderer.sharedMaterial = material;
             renderer.shadowCastingMode = shadows;
+        }
+
+        // A straight door this player just placed: its layout is asked once it shows up
+        private static (uint Ship, Vector3 Coord, float Time)? _pending;
+
+        [HarmonyLib.HarmonyPatch(typeof(Tools.Build.BuildToolLocalClient), "PlacePart")]
+        private static class RememberPlaced
+        {
+            private static void Postfix(Tools.Build.Model.SnappedPreviewPlacement snappedPlacement)
+            {
+                if (snappedPlacement?.PartSettings == null || !IsDoor(snappedPlacement.PartSettings.id) || !snappedPlacement.FloatingPartPlacement.HasValue)
+                    return;
+                _pending = BuildTilt.DoorStraight ? (snappedPlacement.ShipId, snappedPlacement.FloatingPartPlacement.Value.Coord, Time.unscaledTime) : ((uint, Vector3, float)?)null;
+            }
+        }
+
+        /// <summary>True once, for the door this player just placed straight.</summary>
+        public static bool TakePending(PartKey door)
+        {
+            if (!_pending.HasValue || _pending.Value.Ship != door.ShipId || Time.unscaledTime - _pending.Value.Time > 10f)
+                return false;
+            var ships = Core.Services.ServiceLocator.GetService<Ships.Interface.Services.IShipsProvider>();
+            if (ships == null || !ships.TryGetShip(door.ShipId, out Ships.Interface.Model.State.IShipStateRead ship) || !ship.TryGetStatefulPart(door.PartId, out StatefulPart part)
+                || (part.LocalPosition - _pending.Value.Coord).sqrMagnitude > 0.01f)
+                return false;
+            _pending = null;
+            return true;
         }
 
         public static int Decode(IStatefulPartState state) => state is ConstantState constant ? Mathf.Clamp((int)constant.ConstantValue, 0, 3) : 0;
@@ -195,25 +221,28 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
     /// <summary>
     /// The door on screen: the panels slide apart while it is open; this player coming near opens
-    /// it, and once they walked away (nobody else near) closes it. The use key turns it.
+    /// it, and once they walked away (nobody else near) closes it. As a build preview it shows the
+    /// layout chosen with the tilt key.
     /// </summary>
-    internal sealed class DiagonalDoorVisuals : UsablePart
+    internal sealed class DiagonalDoorVisuals : Ships.Parts.Common.DefaultShipPartVisuals, Ships.Parts.Common.Model.IContextAwarePart
     {
+        public PartKey Key { get; private set; }
+        public bool HasContext { get; private set; }
+
         private int _value, _squares = 1;
         private Transform _diagonal, _straight;
         private readonly Transform[] _leaves = new Transform[2];
         private float _open, _next, _left;
         private bool _wasNear;
 
-        public override string Label => (_value & DiagonalDoors.Straight) != 0
-            ? Loc.Pick("Porte : mettre en diagonale", "Door: set diagonal", "Puerta: poner en diagonal")
-            : Loc.Pick("Porte : mettre droite", "Door: set straight", "Puerta: poner recta");
-
-        public override void Use() => Ask(_value ^ DiagonalDoors.Straight);
-
-        protected override void Awake()
+        public void SetContext(Ships.Parts.Common.Utils.ShipPartContext context)
         {
-            base.Awake();
+            Key = new PartKey(context.Part.ShipId, context.Part.PartId);
+            HasContext = true;
+        }
+
+        private void Awake()
+        {
             _diagonal = transform.Find(DiagonalDoors.DiagonalName);
             _straight = transform.Find(DiagonalDoors.StraightName);
             foreach (Transform child in transform)
@@ -244,6 +273,18 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         private void LateUpdate()
         {
+            if (!HasContext)
+            {
+                // The build preview: the layout chosen with the tilt key
+                int preview = BuildTilt.ForDoor() ? DiagonalDoors.Straight : 0;
+                if (preview != _value)
+                {
+                    _value = preview;
+                    Show();
+                }
+            }
+            else if ((_value & DiagonalDoors.Straight) == 0 && Time.unscaledTime >= _next && DiagonalDoors.TakePending(Key))
+                Ask(_value | DiagonalDoors.Straight);
             bool straight = (_value & DiagonalDoors.Straight) != 0, open = (_value & DiagonalDoors.Open) != 0;
             if (HasContext && Time.unscaledTime >= _next)
             {

@@ -415,13 +415,26 @@ namespace StellarDriveDemoTFAdvanced.Parts
         private static string Json(ushort[] ids)
         {
             var parts = new System.Collections.Generic.List<(ushort, Vector3, int, int)>();
+            // The game's door (14) and its pivoted twin stand in the hull: straight on a wall, pivoted on a diagonal
+            var doors = new StringBuilder();
             for (int i = 0; i < ids.Length; i++)
-                parts.Add((ids[i], new Vector3((i - (ids.Length - 1) * 0.5f) * Spacing, -0.46f, 0f), 2, 4));
-            return Json(parts, Mathf.CeilToInt((ids.Length - 1) * Spacing * 0.5f) + 2);
+            {
+                float x = (i - (ids.Length - 1) * 0.5f) * Spacing;
+                if (ids[i] == 14 || ids[i] == Construction.PivotedDoor.Id)
+                {
+                    bool pivoted = ids[i] != 14;
+                    doors.Append(doors.Length > 0 ? "," : "").Append(string.Format(CultureInfo.InvariantCulture,
+                        "{{\"id\":{0},\"settingsId\":{1},\"coord\":{{\"x\":{2},\"y\":0,\"z\":0}},\"orientationId\":{3},\"voxelPartTypeId\":{4}}}",
+                        200 + i, ids[i], Mathf.RoundToInt(x), pivoted ? 6 : 0, pivoted ? 3 : 1));
+                }
+                else
+                    parts.Add((ids[i], new Vector3(x, -0.46f, 0f), 2, 4));
+            }
+            return Json(parts, Mathf.CeilToInt((ids.Length - 1) * Spacing * 0.5f) + 2, doors.ToString());
         }
 
         /// <summary>Export JSON of a test ship: a floor of hull, then the given placed parts (settings id, coordinates, forward and up orientation ids).</summary>
-        public static string Json(System.Collections.Generic.IList<(ushort Id, Vector3 Coord, int Forward, int Up)> placed, int halfX)
+        public static string Json(System.Collections.Generic.IList<(ushort Id, Vector3 Coord, int Forward, int Up)> placed, int halfX, string statefulHull = "")
         {
             ushort[] ids = placed.Select(p => p.Id).ToArray();
             var hull = new StringBuilder();
@@ -468,7 +481,7 @@ namespace StellarDriveDemoTFAdvanced.Parts
             var sb = new StringBuilder();
             sb.Append("{\"rootShipId\":1,\"cables\":[],\"ships\":[{");
             sb.Append("\"id\":1,\"relativeSpaceId\":0,\"spaceId\":0,\"position\":{\"x\":0,\"y\":0,\"z\":0},\"velocity\":{\"x\":0,\"y\":0,\"z\":0},\"rotation\":{\"x\":0,\"y\":0,\"z\":0,\"w\":1},");
-            sb.Append("\"rooms\":[],\"hullParts\":[").Append(hull).Append("],\"statefulFloatingParts\":[").Append(parts).Append("],\"statefulHullParts\":[],");
+            sb.Append("\"rooms\":[],\"hullParts\":[").Append(hull).Append("],\"statefulFloatingParts\":[").Append(parts).Append("],\"statefulHullParts\":[").Append(statefulHull).Append("],");
             foreach (var list in lists)
                 sb.Append('"').Append(list.Key).Append("\":[").Append(string.Join(",", list.Value)).Append("],");
             foreach (string empty in new[] { "thrustersStates", "beaconStates", "leverStates", "warpDriveStates",
