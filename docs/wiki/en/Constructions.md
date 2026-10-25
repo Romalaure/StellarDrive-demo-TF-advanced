@@ -65,7 +65,7 @@ Top row of the tab. They stand on floors and **climb toward the back** (the foot
 | Futuristic (dark blocks, lit nosings), gentle futuristic | 1 m over 1 m / over 2 m | Station modules |
 | Steel spiral, futuristic spiral | 2 m high, ¾ of a turn, 2 × 2 m footprint | Metal construction / Station modules |
 
-Chain flights to climb higher. The spiral needs a hole in the ceiling above it.
+**Chaining**: aim at a straight flight already placed with another straight flight, it goes on from the end of the first one, the same way (steep and gentle mix); to climb higher. The spiral needs a hole in the ceiling above it.
 
 ## Signs and doors
 

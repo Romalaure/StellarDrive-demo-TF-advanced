@@ -86,6 +86,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 (7343, new Vector3(9f, -0.46f, 0f), 0, 4),
                 (7342, new Vector3(9f, -0.46f, -2f), 0, 4),
                 (StationModules.StairsId, new Vector3(0f, -0.46f, -16f), 0, 4),
+                (8220, new Vector3(14f, -0.46f, 0f), 0, 4),
             };
             uint first = Showcase.LoadShip(Showcase.Json(placed, 9), player, spaces, ships, worldIds, 20f);
             MelonLoader.MelonCoroutines.Start(Pin(spaces, ships, first, 40f));
@@ -115,6 +116,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 ("corridor at the stairs' upper door", StationModules.CorridorId, new Vector3(1.4f, 3.6f, -9f), Vector3.back),
                 ("corner on the hub's right wall", StationModules.CornerId, new Vector3(6f, 1.2f, 1.3f), Vector3.left),
                 ("game signal display on the hub's left wall", 82, new Vector3(-6f, 1.8f, -1.3f), Vector3.right),
+                ("gentle stairs after the stairs (expect 14, 0.54, 1.50)", 8221, new Vector3(14f, 3f, 0f), Vector3.down),
             };
             PartSettings[] all = Resources.FindObjectsOfTypeAll<PartSettings>();
             foreach (var probe in probes)

@@ -163,6 +163,16 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 SnappingStyle style = Placing != null ? Placing.snappingStyle : SnappingStyle.PreciseOnAny;
                 bool modules = StationModules.ById.ContainsKey(placingId) && StationModules.ById.ContainsKey(targetId);
 
+                // A flight aimed at a flight goes on from its top edge, the same way
+                if (hasTarget && MaterialParts.StairSize(placingId) is Vector3 next && MaterialParts.StairSize(targetId) is Vector3 below)
+                {
+                    Vector3 at = targetPos + targetRot * new Vector3(0f, below.y + BuildGap, (below.z + next.z) * 0.5f + BuildGap);
+                    var chained = new FloatingPartPlacement(at, Nearest(targetRot * Vector3.forward), Nearest(targetRot * Vector3.up));
+                    LastTried = $"{at:F2} stairs on stairs";
+                    if (ship.IsFloatingPlacementFree(chained, props.Bounds))
+                        return chained;
+                }
+
                 // The part's upright: the preview's, snapped to the ship's axes
                 PartOrientation upright = Nearest(props.PartUp);
                 bool side = Mathf.Abs(Vector3.Dot(n, upright.GetVector3())) < 0.5f;

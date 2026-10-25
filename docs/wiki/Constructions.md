@@ -65,7 +65,7 @@ Rangée du haut de l'onglet. Ils se posent au sol et **montent vers l'arrière**
 | Futuriste (blocs sombres, nez de marche lumineux), futuriste doux | 1 m sur 1 m / sur 2 m | Modules de station |
 | Colimaçon en acier, colimaçon futuriste | 2 m de haut, ¾ de tour, 2 × 2 m au sol | Construction métallique / Modules de station |
 
-Mets des volées à la suite pour monter plus haut. Le colimaçon a besoin d'une trémie dans le plafond au-dessus.
+**À la suite** : vise un escalier droit déjà posé avec un autre escalier droit, il se pose au bout du premier, dans le même sens (on peut mélanger raide et doux) ; pour monter plus haut. Le colimaçon a besoin d'une trémie dans le plafond au-dessus.
 
 ## Panneaux et portes
 

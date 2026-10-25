@@ -65,7 +65,7 @@ Fila de arriba de la pestaña. Se colocan en el suelo y **suben hacia atrás** (
 | Futurista (bloques oscuros, bordes iluminados), futurista suave | 1 m en 1 m / en 2 m | Módulos de estación |
 | Caracol de acero, caracol futurista | 2 m de alto, ¾ de vuelta, 2 × 2 m de planta | Construcción metálica / Módulos de estación |
 
-Encadena tramos para subir más. El caracol necesita un hueco en el techo encima.
+**Seguidos**: apunta a un tramo recto ya colocado con otro tramo recto, se coloca al final del primero, en el mismo sentido (se pueden mezclar empinado y suave); para subir más. El caracol necesita un hueco en el techo encima.
 
 ## Letreros y puertas
 

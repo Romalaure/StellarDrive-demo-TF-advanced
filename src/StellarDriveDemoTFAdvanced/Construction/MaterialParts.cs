@@ -157,7 +157,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             new Spec { Id = 8211, Set = 5, Label = Loc.Pick("Jardinière", "Planter box", "Jardinera"), Mass = 25f, Cost = new[] { (Wood, 3), (Glass, 1) }, Size = new Vector3(1.22f, 0.75f, 0.42f),
                 Description = Loc.Pick("Longue jardinière en bois plantée d'une rangée de plantes vertes.", "A long wooden planter with a row of green plants.", "Una jardinera larga de madera con una fila de plantas verdes."), Build = m => Furniture(m, 1.22f, 0.75f, 0.42f) },
             // Futuristic furniture (a ship's rooms: science, storage, dormitory, galley, office, lounge, mess, sickbay)
-            new Spec { Id = 8240, Set = 6, Label = Loc.Pick("Paillasse de laboratoire", "Lab bench", "Mesa de laboratorio"), Mass = 40f, Cost = new[] { (Iron, 4), (Glass, 2), (Copper, 1) }, Size = new Vector3(1.6f, 0.95f, 0.7f),
+            new Spec { Id = 8240, Set = 6, Label = Loc.Pick("Paillasse de laboratoire", "Lab bench", "Mesa de laboratorio"), Mass = 40f, Cost = new[] { (Iron, 4), (Glass, 2), (Copper, 1) }, Size = new Vector3(1.6f, 1.3f, 0.7f),
                 Description = Loc.Pick("Paillasse blanche à placards, plan de travail sombre, microscope et fioles lumineuses : la salle scientifique.", "A white bench with cupboards, a dark worktop, a microscope and glowing flasks: the science room.", "Mesa blanca con armarios, encimera oscura, microscopio y matraces luminosos: la sala científica."), Build = m => Furniture(m, 1.6f, 0.95f, 0.7f) },
             new Spec { Id = 8241, Set = 6, Label = Loc.Pick("Cuve à spécimen", "Specimen tank", "Tanque de especímenes"), Mass = 60f, Cost = new[] { (Glass, 6), (Iron, 3), (Copper, 2) }, Size = new Vector3(0.8f, 2.1f, 0.8f),
                 Description = Loc.Pick("Un grand tube de verre rempli d'un liquide vert lumineux, sur un socle et sous un chapeau d'acier.", "A tall glass tube filled with a glowing green liquid, on a steel base and under a steel cap.", "Un tubo alto de cristal lleno de un líquido verde luminoso, sobre una base y bajo una tapa de acero."), Build = m => Furniture(m, 0.8f, 2.1f, 0.8f) },
@@ -226,6 +226,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
         /// their models still reach the ends, where two pieces share a post.
         /// </summary>
         public static bool IsThin(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && IsThin(spec);
+
+        /// <summary>A straight flight's size (rise y over run z), null for anything else.</summary>
+        public static Vector3? StairSize(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && spec.Stairs == 1 ? spec.Size : (Vector3?)null;
 
         private static bool IsThin(Spec spec) => spec.Set <= 2 && spec.Size.z < 0.1f && spec.Size.x >= 1f && spec.Size.y >= 0.5f;
 
@@ -358,11 +361,13 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 case "Green": material = LitMaterials.Get("TFA_CGreen", new Color(0.15f, 0.85f, 0.3f), 0f, 0.6f, new Color(0.15f, 1.3f, 0.35f)); break;
                 case "Red": material = LitMaterials.Get("TFA_CRed", new Color(1f, 0.25f, 0.2f), 0f, 0.5f, new Color(2.2f, 0.4f, 0.3f)); break;
                 case "ScreenLit": material = LitMaterials.Get("TFA_CScreenLit", new Color(0.15f, 0.45f, 0.7f), 0.1f, 0.9f, new Color(0.3f, 0.9f, 1.6f)); break;
+                case "Black": material = LitMaterials.Get("TFA_CBlack", new Color(0.06f, 0.065f, 0.075f), 0.2f, 0.45f); break;
+                case "Orange": material = LitMaterials.Get("TFA_COrange", new Color(0.95f, 0.45f, 0.1f), 0.1f, 0.4f); break;
                 case "Neon": material = LitMaterials.Get("TFA_CNeon", new Color(0.3f, 0.85f, 1f), 0f, 0.5f, new Color(0.5f, 1.6f, 2.4f)); break;
             }
             // Plain surfaces: without the panel texture LitMaterials lays on (its seams drew dark
-            // crosses over fabrics and plates)
-            if (material != null && look != "Wood" && look != "WoodDark" && look != "Glass" && look != "Screen" && look != "ScreenLit")
+            // crosses over fabrics, plates and the lit screens)
+            if (material != null && look != "Wood" && look != "WoodDark" && look != "Glass" && look != "Screen")
             {
                 foreach (string map in new[] { "_BaseMap", "_MainTex", "_BumpMap" })
                     if (material.HasProperty(map))
