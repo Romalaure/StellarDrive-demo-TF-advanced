@@ -38,6 +38,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
         private bool _built;
         private TextMeshProUGUI _header;
         private TextMeshProUGUI[] _panels;
+        private int[] _shapes;
         private ComputerSection[] _sections;
         private Image[] _backgrounds;
         private Image _divider;
@@ -77,6 +78,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                 }
             }
             TryBuild();
+            _nextCheck = Time.unscaledTime + Random.value * CheckInterval;
         }
 
         public void SetContext(ShipPartContext context)
@@ -127,8 +129,39 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             for (int i = 0; i < _panels.Length; i++)
             {
                 string title = $"<color={ComputerStyle.Hex(ComputerStyle.Line)}><b>{SectionTitle(_sections[i])}</b></color>\n";
-                _panels[i].text = title + _formatter.Write(_sections[i], snap, reading.Messages, reading.SampleMs, TelemetryHub.Rate);
+                SetText(i, title + _formatter.Write(_sections[i], snap, reading.Messages, reading.SampleMs, TelemetryHub.Rate));
             }
+        }
+
+        // Auto-size runs TMP's layout many times: only when the text's shape changes, else the fitted size stays
+        private void SetText(int i, string value)
+        {
+            TextMeshProUGUI text = _panels[i];
+            if (text.text == value)
+                return;
+            int lines = 1, longest = 0, run = 0;
+            foreach (char c in value)
+            {
+                if (c == '\n')
+                {
+                    lines++;
+                    run = 0;
+                }
+                else
+                    longest = Mathf.Max(longest, ++run);
+            }
+            int shape = lines * 1000 + longest / 6;
+            if (shape != _shapes[i])
+            {
+                _shapes[i] = shape;
+                text.enableAutoSizing = true;
+            }
+            else if (text.enableAutoSizing)
+            {
+                text.fontSize = text.fontSize;
+                text.enableAutoSizing = false;
+            }
+            text.text = value;
         }
 
         private void ShowIdle()
@@ -140,7 +173,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
             _header.text = Loc.Pick("<b>ORDINATEUR DE BORD</b>", "<b>SHIP COMPUTER</b>", "<b>ORDENADOR DE A BORDO</b>");
             string dim = ComputerStyle.Hex(ComputerStyle.TextDim);
             for (int i = 0; i < _panels.Length; i++)
-                _panels[i].text = $"<color={ComputerStyle.Hex(ComputerStyle.Line)}><b>{SectionTitle(_sections[i])}</b></color>\n<color={dim}>{Loc.Pick("en attente du vaisseau", "waiting for the ship", "esperando a la nave")}</color>";
+                SetText(i, $"<color={ComputerStyle.Hex(ComputerStyle.Line)}><b>{SectionTitle(_sections[i])}</b></color>\n<color={dim}>{Loc.Pick("en attente du vaisseau", "waiting for the ship", "esperando a la nave")}</color>");
         }
 
         // Shown in the header, so alerts are seen even on a screen without the DIAGNOSTICS section
@@ -201,6 +234,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
 
             _sections = SectionsFor(_layout);
             _panels = new TextMeshProUGUI[_sections.Length];
+            _shapes = new int[_sections.Length];
             _backgrounds = new Image[_sections.Length];
 
             _header = NewText(rect, font, layer, 22f, 12f);

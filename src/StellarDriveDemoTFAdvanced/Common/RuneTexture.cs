@@ -10,6 +10,7 @@ namespace StellarDriveDemoTFAdvanced.Common
     internal static class RuneTexture
     {
         private const int Width = 2048, Height = 128, Glyphs = 24;
+        private const float Reach = 30f;
         private static Texture2D _strip;
 
         /// <summary>White glyphs on transparent (tint them with the material's color).</summary>
@@ -66,10 +67,14 @@ namespace StellarDriveDemoTFAdvanced.Common
                     // Strokes of this glyph and its neighbours (a glow may spill over)
                     for (int n = g - 1; n <= g + 1; n++)
                     {
+                        Vector2 offset = n < 0 ? new Vector2(-Width, 0f) : n >= Glyphs ? new Vector2(Width, 0f) : Vector2.zero;
                         foreach ((Vector2 a, Vector2 b) in strokes[(n + Glyphs) % Glyphs])
                         {
-                            Vector2 offset = n < 0 ? new Vector2(-Width, 0f) : n >= Glyphs ? new Vector2(Width, 0f) : Vector2.zero;
-                            d = Mathf.Min(d, Segment(p, a + offset, b + offset));
+                            Vector2 s0 = a + offset, s1 = b + offset;
+                            // The glow is under 1/255 past 28 px
+                            if (p.x < Mathf.Min(s0.x, s1.x) - Reach || p.x > Mathf.Max(s0.x, s1.x) + Reach || p.y < Mathf.Min(s0.y, s1.y) - Reach || p.y > Mathf.Max(s0.y, s1.y) + Reach)
+                                continue;
+                            d = Mathf.Min(d, Segment(p, s0, s1));
                         }
                     }
                     // The two rails and their ticks

@@ -30,7 +30,7 @@ namespace StellarDriveDemoTFAdvanced.Common
 
         private static readonly Dictionary<MethodBase, Entry> Entries = new Dictionary<MethodBase, Entry>();
         private static readonly string[] FrameNames = { "Update", "LateUpdate", "FixedUpdate", "OnGUI", "OnUpdate", "OnLateUpdate", "OnFixedUpdate",
-            "ServerUpdate", "Tick", "Draw", "BeforeTransfers", "AfterTransfers", "Steer" };
+            "ServerUpdate", "Tick", "Draw", "BeforeTransfers", "AfterTransfers", "Steer", "UpdatePortals", "UpdateRadars", "TickResearch", "RunSelfTest" };
         private static float _since, _nextReport;
         private static int _frames, _gcStart, _reports;
         /// <summary>The A/B window: this mod's renderers hidden, to see what drawing them costs.</summary>
@@ -376,12 +376,17 @@ namespace StellarDriveDemoTFAdvanced.Common
         }
 
         private static int _writes, _same;
+        private static readonly Dictionary<string, int> SameBy = new Dictionary<string, int>();
 
         private static void CountSame(Ships.Interface.Model.ShipState __instance, ushort id, Ships.Interface.Model.Parts.StateTypes.IStatefulPartState state)
         {
             _writes++;
-            if (__instance.TryGetPart(id, out var part) && Equals(part.State, state))
-                _same++;
+            if (!__instance.TryGetPart(id, out var part) || !Equals(part.State, state))
+                return;
+            _same++;
+            MethodBase caller = new StackTrace(2, false).GetFrames()?.Select(f => f.GetMethod()).FirstOrDefault(m => m != null && m.Name != "SetPartState");
+            string key = $"{caller?.DeclaringType?.Name}.{caller?.Name} {state?.GetType().Name} ship {__instance.Id}";
+            SameBy[key] = SameBy.TryGetValue(key, out int n) ? n + 1 : 1;
         }
 
         private static void Before(out long __state) => __state = Stopwatch.GetTimestamp();
@@ -453,6 +458,9 @@ namespace StellarDriveDemoTFAdvanced.Common
                 AdvancedMod.Log.Msg($"dev: profile   {ms / frames,7:0.000} ms/frame {calls / frames,8:0.0} calls/frame  {name}");
             }
             AdvancedMod.Log.Msg($"dev: profile part state writes {_writes / seconds:0}/s, of which unchanged {_same / seconds:0}/s");
+            foreach (var by in SameBy.OrderByDescending(b => b.Value).Take(14))
+                AdvancedMod.Log.Msg($"dev: profile   unchanged {by.Value / seconds:0}/s from {by.Key}");
+            SameBy.Clear();
             _writes = _same = 0;
             ReportPhases(frames);
             if (_reports == 4)
