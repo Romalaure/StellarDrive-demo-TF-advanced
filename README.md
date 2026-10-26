@@ -278,6 +278,20 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Escaliers, meubles, hublots, portes automatiques, rayon tracteur (v0.44)
+
+- **TF Construction refaite dans Blender** (bois veiné, acier satiné, verre de la coque) ; touche **B** pour incliner la pièce (debout, couchée, sur le côté, à l'envers) ; sur la coque, les pièces s'alignent sur les cases et les rambardes, cloisons et fenêtres se posent sur leurs bords comme les murs du jeu.
+- **Escaliers** : 10 escaliers (bois, industriel, verre, futuriste, raides, doux, deux colimaçons) qui s'enchaînent au bout l'un de l'autre, et leurs rampes.
+- **Meubles** : salon, chambre (lits où dormir), cuisine, bureau, salle de bain, hangar (établi, bras de grue, marquages au sol), décor mural, meubles futuristes ; on s'assoit sur canapés, fauteuils, chaises, tabourets et tables. Meubles utiles : rangement, repas, relais radio, table de carte stellaire.
+- **Hublots et murs vitrés** pour la coque, **panneaux lumineux** et enseignes holographiques (texte et couleur avec T).
+- **Portes automatiques** (1 et 2 cases, droites ou diagonales) qui s'ouvrent à l'approche ; la porte du jeu tient debout sur les murs diagonaux.
+- **Rayon tracteur** : accroche le vaisseau le plus proche et le tient à 14 m ; les schémas copient le vaisseau tenu.
+- **Moteur titan à matière noire** (10 × 10 m), cinq nouvelles lampes modélisées dans Blender, dalle lumineuse, pot de peinture, peinture d'une zone entière (touche BuildZoop), portes de champ de force jusqu'à 50 × 50 m.
+- **Train d'atterrissage** sous le plancher, enceinte et radio debout contre les murs ; la radio passe la musique de l'hôte aux joueurs dont le téléchargement échoue.
+- **Appareil photo** en main (mode photo au clic), cadre photo débloqué dès le départ, coffres de butin remodelés, carte stellaire qui change de galaxie.
+- **Performances** : écrans de l'ordinateur de bord sans pics de 14 ms, plus de blocage à 55 fps (réglage SteadyFrameRate retiré), moins de faces et d'ombres sur les meubles.
+- Les poutres, plaques, cadre et jonction quittent le menu (celles posées restent) ; les paliers 1 × 1 et 2 × 2 sont retirés.
+
 ## Mode photo, cadre photo, robots du comptoir, stations solides (v0.43)
 
 - **Mode photo** (touche **F8**) : la caméra vole librement (souris, ZQSD, Espace/Ctrl, Maj/Alt, molette pour zoomer, R/T pour pencher), l'interface disparaît, **F** change de filtre (noir et blanc, sépia, vif, cinéma, vision nocturne), **P**, Entrée ou clic prend la photo dans `UserData/TFAdvanced/photos`.

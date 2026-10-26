@@ -46,6 +46,20 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Stairs, furniture, portholes, automatic doors, tractor beam (v0.44)
+
+- **TF Construction remade in Blender** (wood grain, satin steel, the hull's glass); **B** key to tilt the part (upright, lying, on its side, upside down); on the hull, parts line up with the cells and railings, partitions and windows stand on their edges like the game's walls.
+- **Stairs**: 10 flights (wood, industrial, glass, futuristic, steep, gentle, two spirals) that chain end to end, and their railings.
+- **Furniture**: living room, bedroom (beds to sleep in), kitchen, office, bathroom, hangar (workbench, crane arm, floor markings), wall dressing, futuristic furniture; sit on sofas, armchairs, chairs, stools and tables. Useful furniture: storage, meals, radio relay, star map table.
+- **Portholes and window walls** for the hull, **lit sign panels** and holographic signs (text and color with T).
+- **Automatic doors** (1 and 2 squares, straight or diagonal) that open when someone comes near; the game's door stands upright on diagonal walls.
+- **Tractor beam**: locks the nearest ship and holds it at 14 m; schematics copy the held ship.
+- **Titan dark matter engine** (10 × 10 m), five new lamps modelled in Blender, light tile, paint pot, area painting (BuildZoop key), force field doors up to 50 × 50 m.
+- **Landing gear** under the floor, speaker and radio upright on walls; the radio sends the host's music to players whose download fails.
+- **Camera item** in hand (photo mode on click), photo frame unlocked from the start, remodelled loot chests, star map that switches galaxy.
+- **Performance**: ship computer screens without 14 ms spikes, no more 55 fps lock (SteadyFrameRate setting removed), fewer faces and shadows on furniture.
+- Beams, plates, frame and junction leave the menu (placed ones stay); the 1 × 1 and 2 × 2 landings are removed.
+
 ## Photo mode, photo frame, trading post robots, solid stations (v0.43)
 
 - **Photo mode** (**F8** key): the camera flies freely (mouse, WASD, Space/Ctrl, Shift/Alt, wheel to zoom, R/T to tilt), the interface goes, **F** changes the filter (black and white, sepia, vivid, cinema, night vision), **P**, Enter or a click takes the photo into `UserData/TFAdvanced/photos`.
