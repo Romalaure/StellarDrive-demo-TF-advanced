@@ -42,7 +42,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             public Action<Model> Build;
             /// <summary>The set: 0 wood, 1 glass, 2 iron, 3 furniture, 4 stairs, 5 more furniture, 6 futuristic furniture, 7 bathroom, 8 hangar, 9 wall dressing (build menu row and research).</summary>
             public int Set;
-            /// <summary>Stairs: 1 a straight flight climbing toward +z (rise Size.y over run Size.z), 2 a spiral (270°, around y), 3 a landing (its top Size.y up), 4 a flight's railing (along a run of Size.z).</summary>
+            /// <summary>Stairs: 1 a straight flight climbing toward +z (rise Size.y over run Size.z), 2 a spiral (270°, around y), 4 a flight's railing (along a run of Size.z).</summary>
             public int Stairs;
             /// <summary>The game part it is made from, when it keeps that part's work (a chest's storage, the star map); else a blank Signal Display.</summary>
             public string Donor;
@@ -248,10 +248,6 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 Description = Loc.Pick("Une rampe en acier qui suit la pente d'une volée de 1 m : vise le côté d'un escalier posé, elle s'y colle.", "A steel railing that follows the slope of a 1 m flight: aim at the side of a placed flight and it sits against it.", "Una barandilla de acero que sigue la pendiente de un tramo de 1 m: apunta al lado de una escalera colocada y se pega a ella."), Build = m => Furniture(m, 0.06f, 2f, 1f) },
             new Spec { Id = 8262, Set = 4, Stairs = 4, Label = Loc.Pick("Rampe d'escalier doux", "Gentle stair railing", "Barandilla de escalera suave"), Mass = 12f, Cost = new[] { (Iron, 3) }, Size = new Vector3(0.06f, 2f, 2f),
                 Description = Loc.Pick("La rampe des escaliers doux (2 m de long) : vise le côté d'un escalier doux posé.", "The railing of the gentle stairs (2 m long): aim at the side of a placed gentle flight.", "La barandilla de las escaleras suaves (2 m): apunta al lado de una escalera suave colocada."), Build = m => Furniture(m, 0.06f, 2f, 2f) },
-            new Spec { Id = 8263, Set = 4, Stairs = 3, Label = Loc.Pick("Palier 1 × 1", "Landing 1 × 1", "Rellano 1 × 1"), Mass = 25f, Cost = new[] { (Iron, 3) }, Size = new Vector3(1f, 1f, 1f),
-                Description = Loc.Pick("Une plateforme de 1 m de haut au caillebotis bordé de lumière : pose-la au bout d'un escalier, puis vise l'un de ses côtés avec le suivant pour tourner.", "A 1 m high platform with a lit-edged grating: put it at the top of a flight, then aim the next one at any of its sides to turn.", "Una plataforma de 1 m de alto con rejilla de bordes iluminados: ponla al final de una escalera y apunta la siguiente a cualquiera de sus lados para girar."), Build = m => Furniture(m, 1f, 1f, 1f) },
-            new Spec { Id = 8264, Set = 4, Stairs = 3, Label = Loc.Pick("Palier 2 × 2", "Landing 2 × 2", "Rellano 2 × 2"), Mass = 60f, Cost = new[] { (Iron, 8) }, Size = new Vector3(2f, 1f, 2f),
-                Description = Loc.Pick("Un grand palier de 2 × 2 m, 1 m de haut : les escaliers en repartent de n'importe quel côté.", "A big 2 × 2 m landing, 1 m high: flights go on from any of its sides.", "Un gran rellano de 2 × 2 m, 1 m de alto: las escaleras siguen desde cualquiera de sus lados."), Build = m => Furniture(m, 2f, 1f, 2f) },
         };
 
         public static bool IsFurniture(ushort id) => id >= 7440 && id <= 7449 || id >= 8200 && id <= 8211 || id >= 8240 && id <= 8256 || id >= 8265 && id <= 8278;
@@ -268,13 +264,10 @@ namespace StellarDriveDemoTFAdvanced.Construction
         public static bool IsThin(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && IsThin(spec);
 
         /// <summary>
-        /// What a flight or a landing chains on: its size, the height one walks onto it at (a flight
-        /// from its foot, a landing on its top) and the height one leaves it at; null for anything else.
+        /// What a flight chains on: its size and the height one leaves it at; null for anything else.
         /// </summary>
-        public static (Vector3 Size, float Entry, float Exit)? Chain(ushort id) =>
-            All.FirstOrDefault(s => s.Id == id) is Spec spec && (spec.Stairs == 1 || spec.Stairs == 3) ? (spec.Size, spec.Stairs == 3 ? spec.Size.y : 0f, spec.Size.y) : ((Vector3, float, float)?)null;
-
-        public static bool IsLanding(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && spec.Stairs == 3;
+        public static (Vector3 Size, float Exit)? Chain(ushort id) =>
+            All.FirstOrDefault(s => s.Id == id) is Spec spec && spec.Stairs == 1 ? (spec.Size, spec.Size.y) : ((Vector3, float)?)null;
 
         /// <summary>A flight's railing: the run it follows (that of the flights it goes with); null for anything else.</summary>
         public static float? RailRun(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && spec.Stairs == 4 ? spec.Size.z : (float?)null;

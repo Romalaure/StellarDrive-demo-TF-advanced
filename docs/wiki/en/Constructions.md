@@ -81,7 +81,7 @@ Top row of the tab. They stand on floors and **climb toward the back** (the foot
 
 **Chaining**: aim at a straight flight already placed with another straight flight, it goes on from the end of the first one, the same way (steep and gentle mix); to climb higher. The spiral needs a hole in the ceiling above it.
 
-**Landings and railings**: the **1 × 1 landing** and the **2 × 2 landing** (1 m high) go at the top of a flight (aim at it); then aim the next flight at **one side of the landing**: it goes on that way, to turn. The **stair railing** (and the **gentle stair railing**) sits against the side of a straight flight you aim at and follows its slope.
+**Railings**: the **stair railing** (and the **gentle stair railing**) sits against the side of a straight flight you aim at and follows its slope.
 
 ## Signs and doors
 

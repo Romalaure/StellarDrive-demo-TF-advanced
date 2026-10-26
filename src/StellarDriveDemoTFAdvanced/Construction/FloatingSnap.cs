@@ -56,6 +56,29 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 if (IsPrecise(originType) && (targetTag == "ShipFloatingPart" || targetTag == "Interactable"))
                     __result = Instance;
+                else if (targetTag == "HullFloor" && Placing != null && DiagonalDoors.IsDoor(Placing.id) && __result != null)
+                    __result = new OnSquares(__result);
+            }
+        }
+
+        // An automatic door on the hull floor sits on its squares (1 x 1 on a square, 2 x 2 on a corner), so its straight layout meets the walls
+        private sealed class OnSquares : ISnapDetector
+        {
+            private readonly ISnapDetector _game;
+
+            public OnSquares(ISnapDetector game) => _game = game;
+
+            public Pivot? DetectPivot(HitSnapDetectionProperties props, IShipPartPlacements shipGrid) => _game.DetectPivot(props, shipGrid);
+
+            public IPartPlacement DetectSnapPlacement(HitSnapDetectionProperties props, IShipPartPlacements shipGrid)
+            {
+                IPartPlacement placement = _game.DetectSnapPlacement(props, shipGrid);
+                if (!(placement is FloatingPartPlacement free))
+                    return placement;
+                float half = Placing != null && Placing.id == DiagonalDoors.LargeId ? 0.5f : 0f;
+                Vector3 c = free.Coord;
+                var squared = new FloatingPartPlacement(new Vector3(Mathf.Round(c.x - half) + half, c.y, Mathf.Round(c.z - half) + half), free.ForwardOrientation, free.UpOrientation);
+                return shipGrid.IsFloatingPlacementFree(squared, props.Bounds) ? squared : placement;
             }
         }
 
@@ -163,23 +186,11 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 SnappingStyle style = Placing != null ? Placing.snappingStyle : SnappingStyle.PreciseOnAny;
                 bool modules = StationModules.ById.ContainsKey(placingId) && StationModules.ById.ContainsKey(targetId);
 
-                // A flight or a landing aimed at a flight goes on from its top edge, the same way; aimed
-                // at a landing, from the side aimed at (the stairs turn there). Its floor meets the
-                // other's: a landing stands on the floor up to the flight's top
-                if (hasTarget && MaterialParts.Chain(placingId) is var (next, entry, _) && MaterialParts.Chain(targetId) is var (below, _, exit))
+                // A flight aimed at a flight goes on from its top edge, its floor meeting the other's
+                if (hasTarget && MaterialParts.Chain(placingId) is var (next, _) && MaterialParts.Chain(targetId) is var (below, exit))
                 {
-                    Quaternion landingTurn = Quaternion.identity;
-                    float reach = below.z * 0.5f;
-                    if (MaterialParts.IsLanding(targetId))
-                    {
-                        Vector3 local = Quaternion.Inverse(targetRot) * (props.Hit.Pos - targetPos);
-                        bool across = Mathf.Abs(local.x) / below.x > Mathf.Abs(local.z) / below.z;
-                        landingTurn = Quaternion.Euler(0f, across ? (local.x > 0f ? 90f : -90f) : local.z > 0f ? 0f : 180f, 0f);
-                        reach = (across ? below.x : below.z) * 0.5f;
-                    }
-                    Quaternion onward = targetRot * landingTurn;
-                    Vector3 at = targetPos + targetRot * new Vector3(0f, exit - entry + BuildGap, 0f) + onward * new Vector3(0f, 0f, reach + next.z * 0.5f + BuildGap);
-                    var chained = new FloatingPartPlacement(at, Nearest(onward * Vector3.forward), Nearest(onward * Vector3.up));
+                    Vector3 at = targetPos + targetRot * new Vector3(0f, exit + BuildGap, below.z * 0.5f + next.z * 0.5f + BuildGap);
+                    var chained = new FloatingPartPlacement(at, Nearest(targetRot * Vector3.forward), Nearest(targetRot * Vector3.up));
                     LastTried = $"{at:F2} stairs on stairs";
                     // (the flight's ramp slab reaches a little past its top edge, under the next piece's near side)
                     Bounds clear = props.Bounds;

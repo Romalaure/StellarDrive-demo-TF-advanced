@@ -87,7 +87,6 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 (7342, new Vector3(9f, -0.46f, -2f), 0, 4),
                 (StationModules.StairsId, new Vector3(0f, -0.46f, -16f), 0, 4),
                 (8220, new Vector3(14f, -0.46f, 0f), 0, 4),
-                (8263, new Vector3(18f, -0.46f, 0f), 0, 4),
             };
             uint first = Showcase.LoadShip(Showcase.Json(placed, 9), player, spaces, ships, worldIds, 20f);
             MelonLoader.MelonCoroutines.Start(Pin(spaces, ships, first, 40f));
@@ -118,9 +117,11 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 ("corner on the hub's right wall", StationModules.CornerId, new Vector3(6f, 1.2f, 1.3f), Vector3.left),
                 ("game signal display on the hub's left wall", 82, new Vector3(-6f, 1.8f, -1.3f), Vector3.right),
                 ("gentle stairs after the stairs (expect 14, 0.54, 1.50)", 8221, new Vector3(14f, 3f, 0f), Vector3.down),
-                ("landing after the stairs (expect 14, -0.46, 1.00)", 8263, new Vector3(14f, 3f, 0f), Vector3.down),
-                ("stairs off the landing's right side (expect 19, 0.54, 0, forward right)", 8220, new Vector3(18.45f, 3f, 0f), Vector3.down),
                 ("railing along the stairs (expect 14.53, -0.46, 0)", 8261, new Vector3(14.3f, 3f, 0f), Vector3.down),
+                ("automatic door on the hub's floor", DiagonalDoors.SmallId, new Vector3(1.2f, 1.5f, 1.2f), Vector3.down),
+                ("automatic door on the hull floor", DiagonalDoors.SmallId, new Vector3(5f, 1.5f, 1f), Vector3.down),
+                ("automatic door on the hull floor, near a square edge", DiagonalDoors.SmallId, new Vector3(5.45f, 1.5f, 0.55f), Vector3.down),
+                ("automatic door aimed at the hub's left wall", DiagonalDoors.SmallId, new Vector3(-6f, 1.2f, 1.3f), Vector3.right),
             };
             PartSettings[] all = Resources.FindObjectsOfTypeAll<PartSettings>();
             foreach (var probe in probes)

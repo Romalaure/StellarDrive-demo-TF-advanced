@@ -81,7 +81,7 @@ Rangée du haut de l'onglet. Ils se posent au sol et **montent vers l'arrière**
 
 **À la suite** : vise un escalier droit déjà posé avec un autre escalier droit, il se pose au bout du premier, dans le même sens (on peut mélanger raide et doux) ; pour monter plus haut. Le colimaçon a besoin d'une trémie dans le plafond au-dessus.
 
-**Paliers et rampes** : le **palier 1 × 1** et le **palier 2 × 2** (1 m de haut) se posent au bout d'un escalier (vise-le) ; vise ensuite **un côté du palier** avec l'escalier suivant : il en repart dans cette direction, pour tourner. La **rampe d'escalier** (et la **rampe d'escalier doux**) se colle sur le côté visé d'un escalier droit et suit sa pente.
+**Rampes** : la **rampe d'escalier** (et la **rampe d'escalier doux**) se colle sur le côté visé d'un escalier droit et suit sa pente.
 
 ## Panneaux et portes
 

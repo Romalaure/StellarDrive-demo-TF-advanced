@@ -1,4 +1,4 @@
-"""The TF Construction parts (7341-7367), furniture (7440-7449, 8200-8211, 8240-8256, 8265-8278), stairs (8220-8229, 8261-8264), hull windows (8257-8260), the tractor beam (7486) and the crane (8270), each in its part's frame and box
+"""The TF Construction parts (7341-7367), furniture (7440-7449, 8200-8211, 8240-8256, 8265-8278), stairs (8220-8229, 8261-8262), hull windows (8257-8260), the tractor beam (7486) and the crane (8270), each in its part's frame and box
 (MaterialParts sizes): y out of the surface it stands on, the box from y = 0 up. Their pieces are
 named C<id>_<look>: Wood, WoodDark, Steel, SteelDark, Chrome, Glass, Fabric, FabricDark, Leaf,
 Pot, Soil, Rug, RugTrim, BookA, BookB, BookC, Sheet, Screen, ScreenLit, Lamp, Neon, White, Green, Red, Black, Orange, Yellow, Mirror, Water, Mark, ScreenData (the mod gives each look its material: real wood
@@ -1694,7 +1694,7 @@ def window_wall(P, w, ow, oh, cy, mullions):
 window_wall(8259, 2.0, 1.6, 1.1, 0.15, (0.0,))
 window_wall(8260, W, 1.0, 1.1, 0.15, ())
 
-# ======================= Stairs: railings and landings =======================
+# ======================= Stairs: railings =======================
 
 
 def stair_railing(P, run):
@@ -1719,31 +1719,6 @@ def stair_railing(P, run):
 stair_railing(8261, 1.0)
 stair_railing(8262, 2.0)
 
-
-def landing(P, w, d):
-    """A 1 m high block: dark body, white side panels with light lines, a grating top lit round the edge."""
-    box(P, "SteelDark", (0, 0.47, 0), (w, 0.94, d), bevel=0.01)
-    for s in (-1, 1):
-        box(P, "White", (0, 0.5, s * (d / 2 + 0.004)), (w - 0.1, 0.7, 0.01), bevel=0.004)
-        box(P, "White", (s * (w / 2 + 0.004), 0.5, 0), (0.01, 0.7, d - 0.1), bevel=0.004)
-        box(P, "Neon", (0, 0.2, s * (d / 2 + 0.01)), (w - 0.14, 0.012, 0.004))
-        box(P, "Neon", (s * (w / 2 + 0.01), 0.2, 0), (0.004, 0.012, d - 0.14))
-        box(P, "Black", (0, 0.02, s * (d / 2 + 0.002)), (w, 0.04, 0.008))
-        box(P, "Black", (s * (w / 2 + 0.002), 0.02, 0), (0.008, 0.04, d))
-    box(P, "Black", (0, 0.955, 0), (w, 0.03, d))
-    n = int(round(w / 0.1))
-    for i in range(n):
-        x = -w / 2 + (i + 0.5) * w / n
-        box(P, "Steel", (x, 0.982, 0), (w / n * 0.6, 0.024, d - 0.04))
-    for s in (-1, 1):
-        box(P, "SteelDark", (0, 0.985, s * (d / 2 - 0.02)), (w, 0.03, 0.04))
-        box(P, "SteelDark", (s * (w / 2 - 0.02), 0.985, 0), (0.04, 0.03, d))
-        box(P, "Neon", (0, 0.996, s * (d / 2 - 0.004)), (w - 0.02, 0.008, 0.008))
-        box(P, "Neon", (s * (w / 2 - 0.004), 0.996, 0), (0.008, 0.008, d - 0.02))
-
-
-landing(8263, 1.0, 1.0)
-landing(8264, 2.0, 2.0)
 
 # ======================= Bathroom =======================
 

@@ -81,7 +81,7 @@ Fila de arriba de la pestaña. Se colocan en el suelo y **suben hacia atrás** (
 
 **Seguidos**: apunta a un tramo recto ya colocado con otro tramo recto, se coloca al final del primero, en el mismo sentido (se pueden mezclar empinado y suave); para subir más. El caracol necesita un hueco en el techo encima.
 
-**Rellanos y barandillas**: el **rellano 1 × 1** y el **rellano 2 × 2** (1 m de alto) se ponen al final de una escalera (apúntala); luego apunta la siguiente escalera a **un lado del rellano**: sigue en esa dirección, para girar. La **barandilla de escalera** (y la **barandilla de escalera suave**) se pega al lado apuntado de una escalera recta y sigue su pendiente.
+**Barandillas**: la **barandilla de escalera** (y la **barandilla de escalera suave**) se pega al lado apuntado de una escalera recta y sigue su pendiente.
 
 ## Letreros y puertas
 
