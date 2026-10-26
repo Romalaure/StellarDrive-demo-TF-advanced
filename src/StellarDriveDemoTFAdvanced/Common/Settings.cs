@@ -43,7 +43,6 @@ namespace StellarDriveDemoTFAdvanced.Common
         public static MelonPreferences_Entry<float> PirateApproachKmPerSecond { get; private set; }
         public static MelonPreferences_Entry<bool> RadarAlarm { get; private set; }
         public static MelonPreferences_Entry<float> LootPingMinutes { get; private set; }
-        public static MelonPreferences_Entry<bool> SteadyFrameRate { get; private set; }
         public static MelonPreferences_Entry<bool> Weather { get; private set; }
         public static MelonPreferences_Entry<bool> LowPerformance { get; private set; }
         public static MelonPreferences_Entry<bool> FastFlightShadows { get; private set; }
@@ -186,8 +185,6 @@ namespace StellarDriveDemoTFAdvanced.Common
                 description: "For modest computers: one forest per planet instead of several (TF Gaïa), lighter rain and snow, no auroras. The forests change on the next start.");
             DevWeather = _category.CreateEntry("DevWeather", "",
                 description: "For mod development: force the weather (Clear, Rain, Storm, Snow, Sand, Ash). Empty: the planets' own.");
-            SteadyFrameRate = _category.CreateEntry("SteadyFrameRate", true,
-                description: "With vertical sync on and the game slower than the screen (60 fps on 165 Hz), frames alternate 2 and 3 screen refreshes and turning ships jerk: wait the same number of refreshes for every frame (55 fps on 165 Hz, steady). Never under 45 fps.");
             DevNuclearTest = _category.CreateEntry("DevNuclearTest", 0,
                 description: "For mod development: with DevWorld, an engine part id: a wired test ship with a centrifuge, a nuclear reactor and that engine.");
             DevMachineShield = _category.CreateEntry("DevMachineShield", 0,

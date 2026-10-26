@@ -114,6 +114,15 @@ namespace StellarDriveDemoTFAdvanced.Common
                 }
             }
             AdvancedMod.Log.Msg($"dev: profile: timing {count} method(s)");
+            MethodInfo balance = AccessTools.Method("Ships.Cables.Fluids.FluidGroupServerState:BalanceContainersPressureWithinGroup");
+            if (balance != null)
+                harmony.Patch(balance, prefix: new HarmonyMethod(typeof(DevProfiler), nameof(Before)), postfix: new HarmonyMethod(typeof(DevProfiler), nameof(AfterGroup)));
+            foreach (string step in new[] { "UpdateRooms", "UpdateParts", "UpdateMass", "PrepareConsumers", "PreparePowerProducers", "UpdateSignalEmitters" })
+            {
+                MethodInfo shipStep = AccessTools.Method(typeof(Ships.TrackedShipServer), step);
+                if (shipStep != null)
+                    harmony.Patch(shipStep, prefix: new HarmonyMethod(typeof(DevProfiler), nameof(Before)), postfix: new HarmonyMethod(typeof(DevProfiler), nameof(AfterShip)));
+            }
             InstallPhases();
             MethodInfo view = AccessTools.Method(typeof(Planets.PlanetObjects), "UpdateVisibleObjectsCreation");
             if (view != null)
@@ -259,7 +268,9 @@ namespace StellarDriveDemoTFAdvanced.Common
                          "Managers.Server.WorldPhysicsServerUpdater", "Managers.Client.WorldPhysicsClientUpdater",
                          "Planets.Services.PlanetColliders", "Planets.Terrain.Meshes.Colliders.PlanetMeshCollider",
                          "Planets.EnvironmentGeneration.PlanetDenseEnvironmentPhysics", "Planets.EnvironmentGeneration.PlanetHotspotsEnvironmentPhysics",
-                         "Planets.EnvironmentGeneration.PlanetStaticEnvironmentPhysics", "Planets.Terrain.Meshes.Colliders.PlanetMeshColliderChunk", "Planets.Terrain.Meshes.PlanetMeshCpuGenerator", "Planets.Terrain.Evaluation.Services.PlanetTerrainPointCpuCalculator" })
+                         "Planets.EnvironmentGeneration.PlanetStaticEnvironmentPhysics", "Planets.Terrain.Meshes.Colliders.PlanetMeshColliderChunk", "Planets.Terrain.Meshes.PlanetMeshCpuGenerator", "Planets.Terrain.Evaluation.Services.PlanetTerrainPointCpuCalculator",
+                         "Ships.Cables.ConnectionsServerTracker", "Ships.Cables.Fluids.FluidsServerTracker", "Ships.Cables.Fluids.FluidGroupServerState", "Ships.Cables.Power.PowerServerTracker",
+                         "Ships.Cables.SignalConnectionsServerUpdater", "Ships.Services.SpacesMagnetsServerCache" })
             {
                 Type type = AccessTools.TypeByName(name);
                 if (type == null)
@@ -383,10 +394,29 @@ namespace StellarDriveDemoTFAdvanced.Common
             _writes++;
             if (!__instance.TryGetPart(id, out var part) || !Equals(part.State, state))
                 return;
-            _same++;
+            if (++_same % 64 != 0)
+                return;
             MethodBase caller = new StackTrace(2, false).GetFrames()?.Select(f => f.GetMethod()).FirstOrDefault(m => m != null && m.Name != "SetPartState");
             string key = $"{caller?.DeclaringType?.Name}.{caller?.Name} {state?.GetType().Name} ship {__instance.Id}";
-            SameBy[key] = SameBy.TryGetValue(key, out int n) ? n + 1 : 1;
+            SameBy[key] = SameBy.TryGetValue(key, out int n) ? n + 64 : 64;
+        }
+
+        private static readonly Dictionary<uint, long> ShipTicks = new Dictionary<uint, long>();
+
+        private static void AfterShip(long __state, Ships.TrackedShipServer __instance)
+        {
+            long spent = Stopwatch.GetTimestamp() - __state;
+            ShipTicks[__instance.Id] = ShipTicks.TryGetValue(__instance.Id, out long t) ? t + spent : spent;
+        }
+
+        private static readonly Dictionary<int, (long Ticks, int Calls)> GroupTicks = new Dictionary<int, (long, int)>();
+
+        private static void AfterGroup(long __state, object __instance)
+        {
+            long spent = Stopwatch.GetTimestamp() - __state;
+            int size = Traverse.Create(__instance).Field("_fluidContainersCache").Property("Count").GetValue<int>();
+            GroupTicks.TryGetValue(size, out var t);
+            GroupTicks[size] = (t.Ticks + spent, t.Calls + 1);
         }
 
         private static void Before(out long __state) => __state = Stopwatch.GetTimestamp();
@@ -461,6 +491,12 @@ namespace StellarDriveDemoTFAdvanced.Common
             foreach (var by in SameBy.OrderByDescending(b => b.Value).Take(14))
                 AdvancedMod.Log.Msg($"dev: profile   unchanged {by.Value / seconds:0}/s from {by.Key}");
             SameBy.Clear();
+            foreach (var ship in ShipTicks.OrderByDescending(p => p.Value).Take(8))
+                AdvancedMod.Log.Msg($"dev: profile   ship {ship.Key} parts update {ship.Value * 1000.0 / Stopwatch.Frequency / frames:0.000} ms/frame");
+            ShipTicks.Clear();
+            foreach (var group in GroupTicks.OrderByDescending(p => p.Value.Ticks).Take(8))
+                AdvancedMod.Log.Msg($"dev: profile   fluid groups of {group.Key} containers: {group.Value.Calls / frames:0.0}/frame, {group.Value.Ticks * 1000.0 / Stopwatch.Frequency / frames:0.000} ms/frame");
+            GroupTicks.Clear();
             _writes = _same = 0;
             ReportPhases(frames);
             if (_reports == 4)

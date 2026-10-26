@@ -578,7 +578,6 @@ Réglage : `BlackHole` (section `[TFAdvanced]`, les deux trous noirs), identique
 | `Pirates` / `PirateIntervalMinutes` | `true` / `12` | pirates (avec Arsenal) et temps moyen dans l'espace entre deux attaques (min) |
 | `PirateRaidStartKm` / `PirateApproachKmPerSecond` | `25000` / `250` | distance où un raid pirate est repéré et sa vitesse d'approche |
 | `RadarAlarm` | `true` | alerte à l'écran quand un radar près de vous voit un raid arriver |
-| `SteadyFrameRate` | `true` | synchro verticale activée et jeu plus lent que l'écran : même nombre de rafraîchissements pour chaque image, pour des rotations sans à-coups (jamais sous 45 fps) |
 | `RadarWatts` / `CloakWatts` (`[TFAdvancedPower]`) | `400` / `6000` | courant du radar courte portée (×3 longue portée, ×8 espace profond) et du générateur d'invisibilité |
 | `CondenserWatts` / `CondenserOxygenPerSecond` (`[TFAdvancedPower]`) | `1500` / `0.05` | condenseur à cryonite |
 | `QuantumGyroFactor` (`[TFAdvancedPower]`) | `5` | couple du gyroscope quantique, en gyroscopes |

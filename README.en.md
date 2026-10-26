@@ -314,7 +314,6 @@ The [suggested route](docs/wiki/en/Itineraire.md) and the [planets](docs/wiki/en
 | `EngineSeatControl` | `true` | nuclear and dark matter engines obey the pilot seat (`false`: they push as soon as they are fed) |
 | `PirateRaidStartKm` / `PirateApproachKmPerSecond` | `25000` / `250` | where a pirate raid is spotted (km) and how fast it closes in (km/s) |
 | `RadarAlarm` | `true` | on-screen alert when a radar near you sees a raid coming |
-| `SteadyFrameRate` | `true` | vertical sync on and game slower than the screen: same number of refreshes for every frame, so turns don't jerk (never under 45 fps) |
 | `RadarWatts` / `CloakWatts` (`[TFAdvancedPower]`) | `400` / `6000` | power of the short range radar (x3 long range, x8 deep space) and of the stealth generator |
 | `Pirates` / `PirateIntervalMinutes` | `true` / `12` | pirates (with Arsenal) and mean time in space between two attacks (min) |
 | `PirateSafeRadiusKm` | `2000` | pirate-free zone around 442 Otrera b (km, 0: none) |
