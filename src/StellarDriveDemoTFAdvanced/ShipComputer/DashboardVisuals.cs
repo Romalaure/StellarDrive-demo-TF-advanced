@@ -151,7 +151,7 @@ namespace StellarDriveDemoTFAdvanced.ShipComputer
                     longest = Mathf.Max(longest, ++run);
             }
             int shape = lines * 1000 + longest / 6;
-            if (shape != _shapes[i])
+            if (shape != _shapes[i] || (!text.enableAutoSizing && text.isTextTruncated))
             {
                 _shapes[i] = shape;
                 text.enableAutoSizing = true;
