@@ -17,7 +17,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
         public static bool ToolActive;
         public static bool MenuOpen;
 
-        private const float PanelWidth = 452f;
+        private const float PanelWidth = 476f;
         private const float CardWidth = 300f;
         private const int PickerSize = 176;
 

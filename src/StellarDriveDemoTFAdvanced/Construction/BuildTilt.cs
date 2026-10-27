@@ -8,8 +8,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
     /// How a construction part being placed is turned beyond what the game allows (its up out of
     /// the face aimed at, turned about it): the tilt key (B) cycles upright, tipped forward, on its
     /// side and upside down, so a plank wall can stand on a hull wall, a post lie along a floor, a
-    /// window close a sloped opening. Reset when another part is chosen. For an automatic door the
-    /// key switches it between diagonal and straight instead.
+    /// window close a sloped opening. Reset when another part is chosen. An automatic door switches
+    /// between diagonal and straight with the mouse wheel instead, along with the game's rotation.
     /// </summary>
     internal static class BuildTilt
     {
@@ -37,9 +37,13 @@ namespace StellarDriveDemoTFAdvanced.Construction
             return Tilts[_index];
         }
 
-        /// <summary>Asked by an automatic door's build preview: straight or diagonal.</summary>
+        /// <summary>Asked by an automatic door with no context: straight or diagonal if it is the build preview.</summary>
         public static bool ForDoor()
         {
+            // Thumbnails have no context either: only the door the build tool is placing counts
+            var placing = FloatingSnap.Placing;
+            if (placing == null || !DiagonalDoors.IsDoor(placing.id) || Time.unscaledTime - FloatingSnap.PlacingSeen > 0.5f)
+                return false;
             _door = true;
             _seen = Time.unscaledTime;
             return DoorStraight;
@@ -56,12 +60,22 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         public static void Update()
         {
-            if (!Placing || ModMenu.IsOpen || !Key.WasPressed)
+            if (!Placing || _door || ModMenu.IsOpen || !Key.WasPressed)
                 return;
-            if (_door)
+            _index = (_index + 1) % Tilts.Length;
+        }
+
+        [HarmonyLib.HarmonyPatch(typeof(Tools.Build.BuildToolLocalClient), nameof(Tools.Build.BuildToolLocalClient.ExecuteScrollAction))]
+        private static class DoorWheel
+        {
+            // Each notch switches the layout and the game turns the door every second one: the wheel goes through all 8
+            private static bool Prefix()
+            {
+                if (!_door || !Placing)
+                    return true;
                 DoorStraight = !DoorStraight;
-            else
-                _index = (_index + 1) % Tilts.Length;
+                return DoorStraight;
+            }
         }
 
         private static string Name(int i) => i == 0 ? Loc.Pick("droite", "upright", "derecha")
@@ -71,7 +85,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         public static void Draw()
         {
-            bool tilt = Placing && Key.Key != UnityEngine.InputSystem.Key.None;
+            bool tilt = Placing && (_door || Key.Key != UnityEngine.InputSystem.Key.None);
             bool free = Time.unscaledTime - HullMount.FreeSeen < 0.5f && HullMount.FreeLabel != "?";
             if (!tilt && !free || ModMenu.IsOpen)
                 return;
@@ -84,7 +98,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             var rect = new Rect(width / 2f - 280f, height - 200f, 560f, 30f);
             TFItems.Devices.DeviceUi.Panel(rect);
             string text = !tilt ? ""
-                : _door ? $"[{Key.Label}]  " + Loc.Pick("Porte : ", "Door: ", "Puerta: ") + (DoorStraight ? Loc.Pick("droite", "straight", "recta") : Loc.Pick("en diagonale", "diagonal", "en diagonal"))
+                : _door ? Loc.Pick("[Molette]  Porte : ", "[Wheel]  Door: ", "[Rueda]  Puerta: ") + (DoorStraight ? Loc.Pick("droite", "straight", "recta") : Loc.Pick("en diagonale", "diagonal", "en diagonal"))
                 : $"[{Key.Label}]  " + Loc.Pick("Orientation : ", "Orientation: ", "Orientación: ") + Name(_index);
             if (free)
                 text += (tilt ? "    " : "") + $"[{HullMount.FreeLabel}]  " + Loc.Pick("placement libre", "free placement", "colocación libre");

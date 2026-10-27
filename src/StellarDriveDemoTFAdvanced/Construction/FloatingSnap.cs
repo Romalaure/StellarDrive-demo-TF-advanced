@@ -29,6 +29,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
         /// <summary>The collider the build tool's ray hit and the part being placed, for the detector.</summary>
         internal static Collider HitCollider;
         internal static PartSettings Placing;
+        internal static float PlacingSeen = -10f;
         /// <summary>The last place tried, for the development check.</summary>
         internal static string LastTried;
 
@@ -46,6 +47,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             {
                 HitCollider = hit.collider;
                 Placing = state.partSettings;
+                PlacingSeen = Time.unscaledTime;
             }
         }
 
@@ -198,6 +200,16 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     Bounds clear = props.Bounds;
                     clear.SetMinMax(clear.min + new Vector3(0f, 0f, 0.2f), clear.max);
                     if (ship.IsFloatingPlacementFree(chained, props.Bounds) || ship.IsFloatingPlacementFree(chained, clear))
+                        return chained;
+                }
+
+                // A railing aimed at a railing goes on from its top end, like the flights it follows
+                if (hasTarget && MaterialParts.RailRun(placingId) is float nextRun && MaterialParts.RailRun(targetId) is float belowRun)
+                {
+                    Vector3 at = targetPos + targetRot * new Vector3(0f, MaterialParts.FlightRise(belowRun) + BuildGap, belowRun * 0.5f + nextRun * 0.5f + BuildGap);
+                    var chained = new FloatingPartPlacement(at, Nearest(targetRot * Vector3.forward), Nearest(targetRot * Vector3.up));
+                    LastTried = $"{at:F2} railing on railing";
+                    if (ship.IsFloatingPlacementFree(chained, props.Bounds))
                         return chained;
                 }
 

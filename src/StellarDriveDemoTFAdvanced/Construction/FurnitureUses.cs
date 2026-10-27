@@ -200,7 +200,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             foreach (Ships.Parts.StarMap.PlanetsHologram hologram in prefab.GetComponentsInChildren<Ships.Parts.StarMap.PlanetsHologram>(true))
             {
                 hologram.transform.localPosition = new Vector3(0f, size.y - 0.3f, 0f);
-                hologram.transform.localScale = Vector3.one * 0.6f;
+                hologram.transform.localScale = Vector3.one;
             }
             // Its plugs at the foot of the drum
             foreach (SocketObject socket in prefab.GetComponentsInChildren<SocketObject>(true))

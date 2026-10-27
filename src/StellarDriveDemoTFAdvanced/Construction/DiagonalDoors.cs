@@ -20,7 +20,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
     /// <summary>
     /// Automatic sliding doors set on a floor: across the diagonal of one floor square (or of
     /// 2 × 2), for the diagonal walls, or straight along the square's front edge (-z), in place of
-    /// a straight wall: chosen while placing it with the tilt key (see <see cref="BuildTilt"/>), the
+    /// a straight wall: chosen while placing it with the mouse wheel (see <see cref="BuildTilt"/>), the
     /// player who placed it then asks for that layout. It opens by itself when someone comes near
     /// and closes behind them. Its state is the part's ConstantState, kept and shared by the game:
     /// 1 open, 2 straight. Placed parts do not seal a room: it does not hold air like the game's doors.
@@ -54,9 +54,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
         {
             PartFactory.Describe(settings,
                 squares == 1 ? Loc.Pick("Porte automatique", "Automatic door", "Puerta automática") : Loc.Pick("Grande porte automatique", "Large automatic door", "Puerta automática grande"),
-                Loc.Pick($"Une porte coulissante qui s'ouvre seule quand quelqu'un approche, posée au sol sur {(squares == 2 ? "2 × 2 cases" : "une case")}. En diagonale pour les murs en diagonale (enlève le mur, pose la porte à sa place), ou droite le long du bord avant de la case, à la place d'un mur droit : choisis pendant la pose avec la touche B. Ne retient pas l'air comme les portes du jeu.",
-                    $"A sliding door that opens by itself when someone comes near, set on the floor over {(squares == 2 ? "2 × 2 squares" : "one square")}. Diagonal for the diagonal walls (remove the wall, put the door in its place), or straight along the square's front edge, in place of a straight wall: choose while placing it with the B key. It does not hold air like the game's doors.",
-                    $"Una puerta corredera que se abre sola cuando alguien se acerca, puesta en el suelo sobre {(squares == 2 ? "2 × 2 casillas" : "una casilla")}. En diagonal para las paredes diagonales (quita la pared, pon la puerta en su lugar), o recta a lo largo del borde delantero de la casilla, en lugar de una pared recta: elígelo al colocarla con la tecla B. No retiene el aire como las puertas del juego."),
+                Loc.Pick($"Une porte coulissante qui s'ouvre seule quand quelqu'un approche, posée au sol sur {(squares == 2 ? "2 × 2 cases" : "une case")}. En diagonale pour les murs en diagonale (enlève le mur, pose la porte à sa place), ou droite le long du bord avant de la case, à la place d'un mur droit : choisis pendant la pose avec la molette. Ne retient pas l'air comme les portes du jeu.",
+                    $"A sliding door that opens by itself when someone comes near, set on the floor over {(squares == 2 ? "2 × 2 squares" : "one square")}. Diagonal for the diagonal walls (remove the wall, put the door in its place), or straight along the square's front edge, in place of a straight wall: choose while placing it with the mouse wheel. It does not hold air like the game's doors.",
+                    $"Una puerta corredera que se abre sola cuando alguien se acerca, puesta en el suelo sobre {(squares == 2 ? "2 × 2 casillas" : "una casilla")}. En diagonal para las paredes diagonales (quita la pared, pon la puerta en su lugar), o recta a lo largo del borde delantero de la casilla, en lugar de una pared recta: elígelo al colocarla con la rueda del ratón. No retiene el aire como las puertas del juego."),
                 squares == 1 ? 40f : 70f, squares == 1 ? new[] { (101u, 4), (102u, 1), (112u, 1) } : new[] { (101u, 7), (102u, 2), (112u, 2) });
             settings.internalStateClass = Power.PowerCatalog.MachineStateClass;
             settings.snappingStyle = Ships.Interface.Model.SnappingStyle.PreciseOnFloor;
@@ -275,7 +275,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
         {
             if (!HasContext)
             {
-                // The build preview: the layout chosen with the tilt key
+                // The build preview: the layout chosen with the wheel
                 int preview = BuildTilt.ForDoor() ? DiagonalDoors.Straight : 0;
                 if (preview != _value)
                 {

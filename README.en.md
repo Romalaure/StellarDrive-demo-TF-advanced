@@ -46,6 +46,14 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Fixes (v0.45.1)
+
+- **Automatic doors**: straight or diagonal is chosen with the **mouse wheel**, along with the game's rotation (the wheel goes through all 8 layouts); the "[B] Door: straight" message no longer stays on screen.
+- **Brush**: the buttons on the right of the panel are reachable again.
+- **Furniture**: a soft shadow on the floor under each piece, so it blends into the room.
+- **Holo table**: the galaxy is bigger.
+- **Stair railings**: aim at a placed railing and the next one chains on from its end, like the stairs.
+
 ## Synced radio, queue, free placement, reliability (v0.45)
 
 - **Radio**: every player hears the same part of the track (the host starts it); YouTube video **titles**; a **queue** of 30 tracks ("+ Queue", "+" on a game track, click to jump, "x" to remove); **Previous / Next** and **repeat track, repeat list, shuffle**; a clickable **progress bar** to move in the track; **radio volume for everyone** next to your own volume; the equalizer bars follow the **real sound**.

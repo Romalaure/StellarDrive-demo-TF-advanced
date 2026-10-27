@@ -278,6 +278,14 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Correctifs (v0.45.1)
+
+- **Portes automatiques** : droite ou en diagonale se choisit à la **molette**, avec la rotation du jeu (la molette passe par les 8 positions) ; le message « [B] Porte : droite » ne reste plus affiché en permanence.
+- **Pinceau** : les boutons de droite du panneau sont de nouveau accessibles.
+- **Meubles** : une ombre douce au sol sous chaque meuble, pour qu'il se fonde dans la pièce.
+- **Table holographique** : la galaxie est plus grande.
+- **Rampes d'escalier** : vise une rampe posée, la suivante se met à la chaîne au bout, comme les escaliers.
+
 ## Radio synchronisée, file d'attente, placement libre, fiabilité (v0.45)
 
 - **Radio** : tous les joueurs entendent le même passage du morceau (l'hôte donne le départ) ; **titre** des vidéos YouTube ; **file d'attente** de 30 morceaux (« + File », « + » sur une musique du jeu, clic pour y aller, « x » pour retirer) ; **Précédent / Suivant** et modes **répéter le morceau, répéter la liste, aléatoire** ; **barre de progression** cliquable pour avancer ou reculer ; **volume de la radio pour tous** à côté de son propre volume ; les barres de l'égaliseur suivent le **vrai son**.

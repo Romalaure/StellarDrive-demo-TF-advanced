@@ -272,6 +272,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
         /// <summary>A flight's railing: the run it follows (that of the flights it goes with); null for anything else.</summary>
         public static float? RailRun(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && spec.Stairs == 4 ? spec.Size.z : (float?)null;
 
+        /// <summary>How high the flights of that run climb (what a railing along one rises by).</summary>
+        public static float FlightRise(float run) => All.FirstOrDefault(s => s.Stairs == 1 && Mathf.Abs(s.Size.z - run) < 0.01f)?.Size.y ?? 1f;
+
         /// <summary>A straight flight's size (rise y over run z), null for anything else.</summary>
         public static Vector3? StairSize(ushort id) => All.FirstOrDefault(s => s.Id == id) is Spec spec && spec.Stairs == 1 ? spec.Size : (Vector3?)null;
 
@@ -337,7 +340,10 @@ namespace StellarDriveDemoTFAdvanced.Construction
             else if (FurnitureUses.Spins(spec.Id))
                 visuals.gameObject.AddComponent<SpinningParts>();
             if (BlenderModel(spec, visuals, layer))
+            {
+                ContactShadow(spec, visuals, layer);
                 return;
+            }
             var model = new Model();
             spec.Build(model);
             Material hull = HullMaterial();
@@ -367,6 +373,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
             holder.transform.SetPositionAndRotation(prefab.transform.position, prefab.transform.rotation);
             if (!BlenderModel(spec, holder.transform, holder.layer))
                 AdvancedMod.Log.Warning($"construction {spec.Id}: no Blender model");
+            else
+                ContactShadow(spec, holder.transform, holder.layer);
         }
 
         /// <summary>A part's Blender model from construction.obj (pieces C&lt;id&gt;_&lt;look&gt;), for parts made elsewhere (the tractor beam).</summary>
@@ -415,6 +423,57 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 any = true;
             }
             return any;
+        }
+
+        private static Mesh _shadowQuad;
+        private static Material _shadowMaterial;
+
+        // A soft dark patch on the floor under a piece of furniture: the game's shadows alone leave it floating
+        private static void ContactShadow(Spec spec, Transform visuals, int layer)
+        {
+            if (spec.Set < 3 || spec.Set == 9 || spec.Stairs != 0 || spec.Size.y < 0.15f)
+                return;
+            if (_shadowMaterial == null)
+            {
+                Material blended = TransparentMaterials.Blended("TFA_ContactShadow", new Color(0f, 0f, 0f, 0.55f));
+                if (blended == null)
+                    return;
+                _shadowMaterial = new Material(blended) { name = "TFA_ContactShadowSoft" };
+                _shadowMaterial.SetTexture("_BaseMap", ShadowTexture());
+                _shadowQuad = new Mesh { name = "TFA_ContactShadow" };
+                _shadowQuad.vertices = new[] { new Vector3(-0.5f, 0f, -0.5f), new Vector3(-0.5f, 0f, 0.5f), new Vector3(0.5f, 0f, 0.5f), new Vector3(0.5f, 0f, -0.5f) };
+                _shadowQuad.uv = new[] { new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(1f, 0f) };
+                _shadowQuad.triangles = new[] { 0, 1, 2, 0, 2, 3 };
+                _shadowQuad.RecalculateNormals();
+                _shadowQuad.RecalculateBounds();
+            }
+            var go = new GameObject("TF_NoPaint_ContactShadow") { layer = layer };
+            go.transform.SetParent(visuals, false);
+            go.transform.localPosition = new Vector3(0f, 0.008f, 0f);
+            go.transform.localScale = new Vector3(spec.Size.x + 0.3f, 1f, spec.Size.z + 0.3f);
+            go.AddComponent<MeshFilter>().sharedMesh = _shadowQuad;
+            var renderer = go.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = _shadowMaterial;
+            renderer.shadowCastingMode = ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+        }
+
+        // Dark under the piece, fading out over the 15 cm around it
+        private static Texture2D ShadowTexture()
+        {
+            const int n = 64;
+            var texture = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, name = "TFA_ContactShadow" };
+            var pixels = new Color32[n * n];
+            for (int y = 0; y < n; y++)
+                for (int x = 0; x < n; x++)
+                {
+                    float u = Mathf.Abs((x + 0.5f) / n * 2f - 1f), v = Mathf.Abs((y + 0.5f) / n * 2f - 1f);
+                    float a = (1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.55f, 1f, u))) * (1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.55f, 1f, v)));
+                    pixels[y * n + x] = new Color32(255, 255, 255, (byte)(a * 255f));
+                }
+            texture.SetPixels32(pixels);
+            texture.Apply(false, true);
+            return texture;
         }
 
         private static bool Glows(string look) => look == "Neon" || look == "ScreenLit" || look == "Lamp" || look == "Green" || look == "Red" || look == "Mark" || look == "ScreenData" || look == "Mirror";
