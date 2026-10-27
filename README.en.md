@@ -53,7 +53,7 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 - **Furniture**: drawn with the game's part shader (same lighting and shading), so it blends into the ship; wood keeps its grain.
 - **Tractor beam**: your ship is pulled toward the target as hard as it is pulled toward you (a shuttle no longer tows a station without moving); a ship with a player aboard can no longer be caught.
 - **Holo table**: the galaxy is bigger.
-- **Stair railings**: aim at the end of a placed railing and the next one chains on, up or down, like the stairs.
+- **Stair railings**: aimed at the floor beside a flight, a railing sits against its side (it used to stay on the floor grid); aim at the end of a placed railing and the next one chains on, up or down, like the stairs.
 
 ## Synced radio, queue, free placement, reliability (v0.45)
 

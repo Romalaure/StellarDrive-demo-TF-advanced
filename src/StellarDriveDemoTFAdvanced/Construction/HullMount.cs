@@ -35,6 +35,11 @@ namespace StellarDriveDemoTFAdvanced.Construction
             ushort id = FloatingSnap.Placing.id;
             if (FloatingSnap.Placing.name.StartsWith("TFA_") && !DiagonalDoors.IsDoor(id))
                 FreeSeen = Time.unscaledTime;
+            if (FloatingSnap.RailNearFlight(props, shipGrid, id) is IPartPlacement railed)
+            {
+                __result = railed;
+                return;
+            }
             if (TFItems.Lights.LampCatalog.IsLamp(id) && id != TFItems.Lights.LampCatalog.FloorPanelId)
             {
                 ToTheEdge(props, shipGrid, ref __result, placed);

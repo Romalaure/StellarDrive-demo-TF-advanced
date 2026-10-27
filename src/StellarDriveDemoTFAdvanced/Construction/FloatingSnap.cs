@@ -28,6 +28,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
     {
         /// <summary>The collider the build tool's ray hit and the part being placed, for the detector.</summary>
         internal static Collider HitCollider;
+        internal static Vector3 HitPoint;
         internal static PartSettings Placing;
         internal static float PlacingSeen = -10f;
         /// <summary>The last place tried, for the development check.</summary>
@@ -46,6 +47,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             private static void Prefix(SnapDetectionState state, RaycastHit hit)
             {
                 HitCollider = hit.collider;
+                HitPoint = hit.point;
                 Placing = state.partSettings;
                 PlacingSeen = Time.unscaledTime;
             }
@@ -108,14 +110,17 @@ namespace StellarDriveDemoTFAdvanced.Construction
         }
 
         /// <summary>The part the collider belongs to: its frame in the ship and its settings id (0 when unknown).</summary>
-        private static bool TryTarget(IShipPartPlacements ship, out Vector3 position, out Quaternion rotation, out ushort settingsId)
+        private static bool TryTarget(IShipPartPlacements ship, out Vector3 position, out Quaternion rotation, out ushort settingsId) =>
+            TargetOf(HitCollider, ship, out position, out rotation, out settingsId);
+
+        private static bool TargetOf(Collider collider, IShipPartPlacements ship, out Vector3 position, out Quaternion rotation, out ushort settingsId)
         {
             position = Vector3.zero;
             rotation = Quaternion.identity;
             settingsId = 0;
-            if (HitCollider == null)
+            if (collider == null)
                 return false;
-            ShipPartIdentifier part = HitCollider.GetComponentInParent<ShipPartIdentifier>();
+            ShipPartIdentifier part = collider.GetComponentInParent<ShipPartIdentifier>();
             if (part == null)
                 return false;
             Transform t = part.transform;
@@ -129,6 +134,38 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 ushort.TryParse(end > 4 ? name.Substring(4, end - 4) : name.Substring(4), out settingsId);
             }
             return true;
+        }
+
+        private static readonly Collider[] Near = new Collider[64];
+
+        /// <summary>
+        /// A railing aimed at the floor beside a flight of its run (within a meter or so): along that
+        /// flight's side nearest the aim, as if aimed at the flight. Null when there is none.
+        /// </summary>
+        internal static IPartPlacement RailNearFlight(HitSnapDetectionProperties props, IShipPartPlacements ship, ushort placingId)
+        {
+            if (!(MaterialParts.RailRun(placingId) is float run) || HitCollider == null)
+                return null;
+            int count = HitCollider.gameObject.scene.GetPhysicsScene().OverlapSphere(HitPoint, 1.5f, Near, Tools.Common.RaycastMasks.BuildDetectionLayer, QueryTriggerInteraction.Ignore);
+            Vector3 aim = props.Hit.Pos;
+            IPartPlacement best = null;
+            float bestDistance = float.MaxValue;
+            for (int i = 0; i < count; i++)
+            {
+                if (!TargetOf(Near[i], ship, out Vector3 at, out Quaternion rotation, out ushort id) || !(MaterialParts.StairSize(id) is Vector3 flight) || Mathf.Abs(flight.z - run) > 0.01f)
+                    continue;
+                float sideX = Vector3.Dot(aim - at, rotation * Vector3.right) >= 0f ? 1f : -1f;
+                Vector3 coord = at + rotation * new Vector3(sideX * (flight.x * 0.5f + props.Bounds.extents.x + BuildGap), 0f, 0f);
+                float distance = (coord - aim).sqrMagnitude;
+                if (distance >= bestDistance)
+                    continue;
+                var railed = new FloatingPartPlacement(coord, Nearest(rotation * Vector3.forward), Nearest(rotation * Vector3.up));
+                if (!ship.IsFloatingPlacementFree(railed, props.Bounds))
+                    continue;
+                best = railed;
+                bestDistance = distance;
+            }
+            return best;
         }
 
         /// <summary>
@@ -228,6 +265,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     if (ship.IsFloatingPlacementFree(railed, props.Bounds))
                         return railed;
                 }
+
+                if (MaterialParts.RailRun(placingId) != null && RailNearFlight(props, ship, placingId) is IPartPlacement nearFlight)
+                    return nearFlight;
 
                 // The part's upright: the preview's, snapped to the ship's axes
                 PartOrientation upright = Nearest(props.PartUp);

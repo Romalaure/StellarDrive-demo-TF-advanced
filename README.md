@@ -285,7 +285,7 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 - **Meubles** : dessinés avec le shader des pièces du jeu (même éclairage et même ombrage), pour qu'ils se fondent dans le vaisseau ; le bois garde son grain.
 - **Rayon tracteur** : ton vaisseau est tiré vers la cible aussi fort qu'elle vers toi (une navette ne remorque plus une station sans bouger) ; un vaisseau avec un joueur à bord ne peut plus être accroché.
 - **Table holographique** : la galaxie est plus grande.
-- **Rampes d'escalier** : vise le bout d'une rampe posée, la suivante se met à la chaîne vers le haut ou vers le bas, comme les escaliers.
+- **Rampes d'escalier** : visée sur le sol à côté d'un escalier, la rampe se colle à son côté (avant, elle restait sur la grille du sol) ; vise le bout d'une rampe posée, la suivante se met à la chaîne vers le haut ou vers le bas, comme les escaliers.
 
 ## Radio synchronisée, file d'attente, placement libre, fiabilité (v0.45)
 

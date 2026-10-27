@@ -87,6 +87,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 (7342, new Vector3(9f, -0.46f, -2f), 0, 4),
                 (StationModules.StairsId, new Vector3(0f, -0.46f, -16f), 0, 4),
                 (8220, new Vector3(14f, -0.46f, 0f), 0, 4),
+                (8220, new Vector3(4f, -0.46f, -1f), 0, 4),
             };
             uint first = Showcase.LoadShip(Showcase.Json(placed, 9), player, spaces, ships, worldIds, 20f);
             MelonLoader.MelonCoroutines.Start(Pin(spaces, ships, first, 40f));
@@ -118,12 +119,15 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 ("game signal display on the hub's left wall", 82, new Vector3(-6f, 1.8f, -1.3f), Vector3.right),
                 ("gentle stairs after the stairs (expect 14, 0.54, 1.50)", 8221, new Vector3(14f, 3f, 0f), Vector3.down),
                 ("railing along the stairs (expect 14.53, -0.46, 0)", 8261, new Vector3(14.3f, 3f, 0f), Vector3.down),
+                ("railing aimed at the hull floor beside the stairs (expect 4.53, -0.46, -1)", 8261, new Vector3(5.0f, 1.5f, -0.8f), Vector3.down),
+                ("railing aimed at the hull floor far from the stairs", 8261, new Vector3(7.5f, 1.5f, 1f), Vector3.down),
                 ("automatic door on the hub's floor", DiagonalDoors.SmallId, new Vector3(1.2f, 1.5f, 1.2f), Vector3.down),
                 ("automatic door on the hull floor", DiagonalDoors.SmallId, new Vector3(5f, 1.5f, 1f), Vector3.down),
                 ("automatic door on the hull floor, near a square edge", DiagonalDoors.SmallId, new Vector3(5.45f, 1.5f, 0.55f), Vector3.down),
                 ("automatic door aimed at the hub's left wall", DiagonalDoors.SmallId, new Vector3(-6f, 1.2f, 1.3f), Vector3.right),
             };
             PartSettings[] all = Resources.FindObjectsOfTypeAll<PartSettings>();
+            var doors = new List<(string Name, PartSettings Settings, FloatingPartPlacement Placement)>();
             foreach (var probe in probes)
             {
                 PartSettings settings = all.FirstOrDefault(s => s != null && s.id == probe.Id);
@@ -135,6 +139,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     continue;
                 }
                 FloatingSnap.HitCollider = hit.collider;
+                FloatingSnap.HitPoint = hit.point;
                 FloatingSnap.Placing = settings;
                 PartHit local = proxy.ConvertHitToLocalHit(hit);
                 var props = new HitSnapDetectionProperties(local, Quaternion.identity, settings.size, settings.Bounds);
@@ -144,8 +149,40 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 FloatingSnap.LastTried = null;
                 AdvancedMod.Log.Msg($"dev: snap test: {probe.Name}: hit {hit.collider.name} tag {hit.collider.tag} at {local.Pos:F2} normal {local.Normal:F2} style {settings.snappingStyle} -> {where}");
                 if (placement is FloatingPartPlacement p)
-                    placed.Add((probe.Id, p.Coord, (int)p.ForwardOrientation, (int)p.UpOrientation));
+                {
+                    if (DiagonalDoors.IsDoor(probe.Id))
+                        doors.Add((probe.Name, settings, p));
+                    else
+                        placed.Add((probe.Id, p.Coord, (int)p.ForwardOrientation, (int)p.UpOrientation));
+                }
             }
+            // The build tool's own request for each door: does the host add it?
+            var service = ServiceLocator.GetService<Managers.Interface.Services.IShipInteractionNetworkService>();
+            PartSettings plank = all.FirstOrDefault(x => x != null && x.id == 7343);
+            if (plank != null)
+                doors.Add(("control: plank wall", plank, new FloatingPartPlacement(new Vector3(9f, -0.46f, 4f), PartOrientation.Forward, PartOrientation.Up)));
+            foreach (var door in doors)
+            {
+                int before = ships.GetShip(first)?.PartCount ?? -1;
+                bool items = player.HasItemsInInventory(door.Settings.BuildingCost);
+                if (!items)
+                    player.AddItemsToInventory(door.Settings.BuildingCost);
+                service?.PlaceFloatingPart(new Managers.Interface.Model.PlaceFloatingPartNetworkRequest { ShipId = first, SettingsId = door.Settings.id, Placement = door.Placement });
+                yield return Worlds.StationVisit.Wait(1.5f);
+                int after = ships.GetShip(first)?.PartCount ?? -1;
+                AdvancedMod.Log.Msg($"dev: snap test: placed {door.Name}: parts {before} -> {after}, items {items}, free build {player.IsUsingCheatFreeBuild}");
+            }
+            yield return Worlds.StationVisit.Wait(2f);
+            foreach (DiagonalDoorVisuals shown in Object.FindObjectsByType<DiagonalDoorVisuals>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                var renderers = shown.GetComponentsInChildren<Renderer>(true);
+                AdvancedMod.Log.Msg($"dev: snap test: door visual {shown.name} context {shown.HasContext} key {shown.Key.ShipId}:{shown.Key.PartId} active {shown.gameObject.activeInHierarchy} at {shown.transform.position:F1} renderers {renderers.Count(r => r.enabled && r.gameObject.activeInHierarchy)}/{renderers.Length} children {string.Join(",", shown.transform.Cast<Transform>().Select(c => c.name + (c.gameObject.activeSelf ? "" : "(off)")))}");
+            }
+            yield return Showcase.PhotographFrom(first, "snaptest_doors", new List<(Vector3, Vector3)>
+            {
+                (new Vector3(5.5f, 3.5f, -2.5f), new Vector3(0f, -1f, 0.9f)),
+                (new Vector3(0f, 1.6f, 0f), new Vector3(1f, -0.6f, 1f)),
+            });
             // The stairwell's walking surface: heights along the stairs (left side) and the middle
             foreach (float sx in new[] { -1.35f, 0f })
             {
@@ -163,6 +200,13 @@ namespace StellarDriveDemoTFAdvanced.Construction
             MelonLoader.MelonCoroutines.Start(Pin(spaces, ships, second, 20f));
             yield return Worlds.StationVisit.Wait(3f);
             yield return Showcase.Photograph(second, "snaptest");
+            // The railing beside the stairs, from its side and from the foot of the stairs
+            yield return Showcase.PhotographFrom(second, "snaptest_rail", new List<(Vector3, Vector3)>
+            {
+                (new Vector3(16.6f, 0.6f, 0.2f), new Vector3(-1f, -0.05f, 0f)),
+                (new Vector3(14.8f, 0.4f, -2.2f), new Vector3(-0.1f, 0f, 1f)),
+                (new Vector3(12.2f, 0.6f, 0.2f), new Vector3(1f, -0.05f, 0f)),
+            });
             AdvancedMod.Log.Msg("dev: snap test done");
         }
     }
