@@ -149,7 +149,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
             GUILayout.Space(8f);
 
             // The sections are taller than a 1080p screen: they scroll, so the presets stay reachable
-            _panelScroll = GUILayout.BeginScrollView(_panelScroll, GUIStyle.none, GUI.skin.verticalScrollbar);
+            _panelScroll = GUILayout.BeginScrollView(_panelScroll, GUIStyle.none, GUI.skin.verticalScrollbar, GUILayout.ExpandHeight(true));
             DrawMode();
             GUILayout.Space(8f);
             if (Camouflage.Enabled)

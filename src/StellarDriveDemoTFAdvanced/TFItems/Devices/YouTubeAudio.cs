@@ -33,6 +33,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             public string Text(string french, string english, string spanish) =>
                 Language == Loc.Language.French ? french : Language == Loc.Language.Spanish ? spanish : english;
             public string WavPath;
+            /// <summary>Seconds of sound in the WAV, once ready.</summary>
+            public float Duration;
             public string Error;
             /// <summary>Client: the sound comes from the host (this player's own download failed).</summary>
             public bool FromHost;
@@ -108,6 +110,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             File.Move(partial, wav);
         }
 
+        /// <summary>The job for this video if one was started, without starting one.</summary>
+        public static Job Peek(string videoId)
+        {
+            lock (Jobs)
+                return Jobs.TryGetValue(videoId, out Job job) ? job : null;
+        }
+
         /// <summary>Starts (or finds) the job for this video. Poll its status.</summary>
         public static Job Request(string videoId)
         {
@@ -176,9 +185,30 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
         private static void Finish(Job job, string wav)
         {
+            job.Duration = WavSeconds(wav);
             job.WavPath = wav;
             job.Step = job.Text("Prêt", "Ready", "Listo");
             job.Status = State.Ready;
+        }
+
+        // The decoder writes a plain 44-byte header: byte rate at 28, data size at 40
+        private static float WavSeconds(string wav)
+        {
+            try
+            {
+                using (var reader = new BinaryReader(File.OpenRead(wav)))
+                {
+                    reader.BaseStream.Position = 28;
+                    int byteRate = reader.ReadInt32();
+                    reader.BaseStream.Position = 40;
+                    int size = reader.ReadInt32();
+                    return byteRate > 0 ? size / (float)byteRate : 0f;
+                }
+            }
+            catch (Exception)
+            {
+                return 0f;
+            }
         }
 
         private static string EnsureYtDlp(Job job)

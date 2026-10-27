@@ -117,6 +117,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems
             Devices.Outfits.Update();
             Devices.Teleporter.Update();
             Devices.RadioSound.Update();
+            Devices.Radio.ServerUpdate();
             Devices.PhotoMode.Update();
             Devices.SelfAvatar.Update();
             StellarDriveDemoTFAdvanced.Power.TractorKey.Update();
