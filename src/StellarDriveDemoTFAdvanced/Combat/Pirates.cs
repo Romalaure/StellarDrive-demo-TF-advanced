@@ -138,7 +138,7 @@ namespace StellarDriveDemoTFAdvanced.Combat
                     File.Delete(path);
                 return;
             }
-            File.WriteAllLines(path, All.Values.Select(p => string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} {1} {2:0}", p.ShipId, p.Design.Key, p.Health))
+            SafeFile.WriteAllLines(path, All.Values.Select(p => string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} {1} {2:0}", p.ShipId, p.Design.Key, p.Health))
                 .Concat(DeadBases.Select(id => $"{id} dead 0")));
         }
 

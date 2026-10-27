@@ -67,12 +67,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                     File.Delete(path);
                 return;
             }
-            string temp = path + ".tmp";
-            File.WriteAllText(temp, JsonConvert.SerializeObject(file, Formatting.Indented));
-            if (File.Exists(path))
-                File.Replace(temp, path, null);
-            else
-                File.Move(temp, path);
+StellarDriveDemoTFAdvanced.Common.SafeFile.WriteAllText(path, JsonConvert.SerializeObject(file, Formatting.Indented));
         }
 
         public static void Load(string worldDirectory)
@@ -82,9 +77,9 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
             Npc.Contracts.Clear();
             Construction.Signs.ServerTexts.Clear();
             string path = Path.Combine(worldDirectory, FileName);
-            if (!File.Exists(path))
+            var file = StellarDriveDemoTFAdvanced.Common.SafeFile.ReadJson<SaveFile>(path);
+            if (file == null)
                 return;
-            var file = JsonConvert.DeserializeObject<SaveFile>(File.ReadAllText(path));
             foreach (SavedName saved in file?.capsules ?? new List<SavedName>())
             {
                 string name = TeleportCapsule.CleanName(saved?.name);

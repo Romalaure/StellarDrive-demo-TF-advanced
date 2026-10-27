@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using MelonLoader.Utils;
 using Newtonsoft.Json;
 using StellarDriveDemoTFAdvanced.TFItems.Common;
@@ -95,27 +96,33 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
             try
             {
                 string path = FilePath();
-                if (File.Exists(path))
+                var file = StellarDriveDemoTFAdvanced.Common.SafeFile.ReadJson<BrushFile>(path);
+                if (file != null)
                 {
-                    var file = JsonConvert.DeserializeObject<BrushFile>(File.ReadAllText(path));
-                    if (file?.presets != null)
-                        Presets.AddRange(file.presets);
-                    if (file?.current != null)
+                    if (file.presets != null)
+                        Presets.AddRange(file.presets.Where(preset => preset != null));
+                    if (file.current != null)
                         Finish = file.current.Finish;
-                    if (file?.camo != null)
+                    if (file.camo != null)
                         LoadCamo(file.camo);
                     return;
                 }
             }
             catch (Exception e)
             {
+                // Not overwritten with the defaults by the next save: the player's presets may still be in it
+                _unreadable = true;
                 TFMod.Log.Error("could not read paint presets: " + e.Message);
             }
             Presets.AddRange(DefaultPresets());
         }
 
+        private static bool _unreadable;
+
         public static void Save()
         {
+            if (_unreadable)
+                return;
             try
             {
                 var selection = GameServices.PaintSelection;
@@ -134,7 +141,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
                 };
                 string path = FilePath();
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
-                File.WriteAllText(path, JsonConvert.SerializeObject(file, Formatting.Indented));
+                StellarDriveDemoTFAdvanced.Common.SafeFile.WriteAllText(path, JsonConvert.SerializeObject(file, Formatting.Indented));
             }
             catch (Exception e)
             {

@@ -148,7 +148,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
         {
             Directory.CreateDirectory(Folder);
             string path = System.IO.Path.Combine(Folder, FileNameFor(file.name));
-            File.WriteAllText(path, JsonConvert.SerializeObject(file, Formatting.Indented));
+            StellarDriveDemoTFAdvanced.Common.SafeFile.WriteAllText(path, JsonConvert.SerializeObject(file, Formatting.Indented));
             TFMod.Log.Msg($"schematic '{file.name}' saved: {file.ships} ship(s), {file.parts} part(s) -> {path}");
         }
 
@@ -637,6 +637,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             }
         }
 
+        private const int MaxJsonChars = 40_000_000;
+
         private static bool Receive(int from, uint transfer, ushort index, string text, out string json)
         {
             json = null;
@@ -659,7 +661,19 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             {
                 using (var zip = new GZipStream(new MemoryStream(Convert.FromBase64String(string.Concat(pieces))), CompressionMode.Decompress))
                 using (var reader = new StreamReader(zip, System.Text.Encoding.UTF8))
-                    json = reader.ReadToEnd();
+                {
+                    // A few kilobytes can unpack to gigabytes: read no more than any real ship needs
+                    var unpacked = new System.Text.StringBuilder();
+                    var buffer = new char[8192];
+                    int read;
+                    while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        if (unpacked.Length + read > MaxJsonChars)
+                            throw new InvalidDataException("more than " + MaxJsonChars / 1_000_000 + " million characters");
+                        unpacked.Append(buffer, 0, read);
+                    }
+                    json = unpacked.ToString();
+                }
                 return true;
             }
             catch (Exception e)

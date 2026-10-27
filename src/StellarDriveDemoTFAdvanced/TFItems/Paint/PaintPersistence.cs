@@ -75,22 +75,14 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
                 return;
             }
 
-            string temp = path + ".tmp";
-            File.WriteAllText(temp, JsonConvert.SerializeObject(file, Formatting.Indented));
-            if (File.Exists(path))
-                File.Replace(temp, path, null);
-            else
-                File.Move(temp, path);
+StellarDriveDemoTFAdvanced.Common.SafeFile.WriteAllText(path, JsonConvert.SerializeObject(file, Formatting.Indented));
         }
 
         public static void Load(string worldDirectory)
         {
             PaintNet.Server.Clear();
             string path = Path.Combine(worldDirectory, FileName);
-            if (!File.Exists(path))
-                return;
-
-            var file = JsonConvert.DeserializeObject<SaveFile>(File.ReadAllText(path));
+            var file = StellarDriveDemoTFAdvanced.Common.SafeFile.ReadJson<SaveFile>(path);
             if (file?.parts == null)
                 return;
 

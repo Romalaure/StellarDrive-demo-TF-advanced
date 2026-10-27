@@ -85,6 +85,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         MealResult = 81,
         /// <summary>Client to server: piece B of ship A (shower, sink, floor marking) switches to the mode Text.</summary>
         FurnitureMode = 82,
+        /// <summary>Server to one client: its TF Advanced version is not the host's (Text: the host's version).</summary>
+        VersionMismatch = 83,
 
         /// <summary>Client to server: copy the ship A (and what is attached to it) as schematic Text.</summary>
         SchematicCopy = 30,
@@ -128,6 +130,64 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         /// <summary>Raised on clients when they leave a world.</summary>
         public static event Action Disconnected;
 
+        // Each listener on its own: one failing must not keep the others from sending their state or forgetting the old world
+        private static void Raise(Action handlers, string when)
+        {
+            if (handlers == null)
+                return;
+            foreach (Action handler in handlers.GetInvocationList())
+            {
+                try
+                {
+                    handler();
+                }
+                catch (Exception e)
+                {
+                    TFMod.Log.Error($"{when}: {handler.Method.DeclaringType?.Name}: {e}");
+                }
+            }
+        }
+
+        private static void Raise(Action<NetworkConnection> handlers, NetworkConnection connection)
+        {
+            if (handlers == null)
+                return;
+            foreach (Action<NetworkConnection> handler in handlers.GetInvocationList())
+            {
+                try
+                {
+                    handler(connection);
+                }
+                catch (Exception e)
+                {
+                    TFMod.Log.Error($"sending the world's state to a player: {handler.Method.DeclaringType?.Name}: {e}");
+                }
+            }
+        }
+
+        public static readonly string Version =
+            typeof(TFNet).Assembly.GetCustomAttributes(typeof(MelonLoader.MelonInfoAttribute), false) is object[] infos && infos.Length > 0
+                ? ((MelonLoader.MelonInfoAttribute)infos[0]).Version : "?";
+
+        private static string _mismatch;
+        private static float _mismatchUntil;
+
+        /// <summary>A warning on screen for a while when this player's version is not the host's.</summary>
+        public static void DrawVersionWarning()
+        {
+            if (_mismatch != null && Time.unscaledTime < _mismatchUntil)
+                Devices.DeviceUi.Toast(Screen.width, Screen.height, _mismatch);
+        }
+
+        private static void OnVersionMismatch(TFMessageKind kind, uint a, ushort b, string hostVersion)
+        {
+            TFMod.Log.Warning($"the host runs TF Advanced {hostVersion}, this game {Version}");
+            _mismatch = StellarDriveDemoTFAdvanced.Common.Loc.Pick($"TF Advanced : l'hôte a la version {hostVersion}, toi {Version}. Installez la même version.",
+                $"TF Advanced: the host has version {hostVersion}, you have {Version}. Install the same version.",
+                $"TF Advanced: el anfitrión tiene la versión {hostVersion}, tú la {Version}. Instalad la misma versión.");
+            _mismatchUntil = Time.unscaledTime + 20f;
+        }
+
         public static void InstallSerializers()
         {
             GenericWriter<TFMessage>.SetWrite((writer, m) =>
@@ -148,6 +208,11 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
 
         public static void OnServer(TFMessageKind kind, ServerHandler handler) => ServerHandlers[kind] = handler;
 
+        static TFNet()
+        {
+            ClientHandlers[TFMessageKind.VersionMismatch] = OnVersionMismatch;
+        }
+
         public static void OnClient(TFMessageKind kind, ClientHandler handler) => ClientHandlers[kind] = handler;
 
         public static bool IsServer => _network != null && _network.IsServerStarted;
@@ -162,7 +227,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 if (_clientWasStarted)
                 {
                     _synced = false;
-                    Disconnected?.Invoke();
+                    Raise(Disconnected, "leaving the world");
                 }
                 _clientWasStarted = false;
                 return;
@@ -177,8 +242,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
             if (GameServices.ShipsClient == null)
                 return;
             _synced = true;
-            SendToServer(TFMessageKind.Sync, 0, 0, "");
-            Synced?.Invoke();
+            SendToServer(TFMessageKind.Sync, 0, 0, Version);
+            Raise(Synced, "joining the world");
         }
 
         public static void SendToServer(TFMessageKind kind, uint a, ushort b, string text)
@@ -251,8 +316,13 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
             {
                 if (kind == TFMessageKind.Sync)
                 {
+                    if (sender != null && !sender.IsLocalClient && message.Text != Version)
+                    {
+                        TFMod.Log.Warning($"a player joined with TF Advanced {(message.Text.Length > 0 ? message.Text : "of an older version")}, this world runs {Version}: some of the mod's things will not work for them");
+                        SendTo(sender, TFMessageKind.VersionMismatch, 0, 0, Version);
+                    }
                     if (sender != null)
-                        SyncRequested?.Invoke(sender);
+                        Raise(SyncRequested, sender);
                     return;
                 }
                 if (ServerHandlers.TryGetValue(kind, out ServerHandler handler))

@@ -102,70 +102,71 @@ namespace StellarDriveDemoTFAdvanced.TFItems
         public static void OnSceneLoaded()
         {
             if (Active)
-                Common.GameServices.Invalidate();
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Common.GameServices.Invalidate", () => Common.GameServices.Invalidate());
             if (ToolsActive)
-                Devices.KeySeatCompat.Reset();
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Devices.KeySeatCompat.Reset", () => Devices.KeySeatCompat.Reset());
         }
 
         public static void Update()
         {
             if (!Active)
                 return;
-            Cameras.CameraTablet.Update();
-            Common.TFNet.Update();
-            Common.UsableParts.Update();
-            Devices.Outfits.Update();
-            Devices.Teleporter.Update();
-            Devices.RadioSound.Update();
-            Devices.Radio.ServerUpdate();
-            Devices.PhotoMode.Update();
-            Devices.SelfAvatar.Update();
-            StellarDriveDemoTFAdvanced.Power.TractorKey.Update();
-            Devices.PhotoCamera.Update();
-            Devices.Seats.Update();
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Cameras.CameraTablet.Update", () => Cameras.CameraTablet.Update());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Common.TFNet.Update", () => Common.TFNet.Update());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Common.UsableParts.Update", () => Common.UsableParts.Update());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Devices.Outfits.Update", () => Devices.Outfits.Update());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Devices.Teleporter.Update", () => Devices.Teleporter.Update());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Devices.RadioSound.Update", () => Devices.RadioSound.Update());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Devices.Radio.ServerUpdate", () => Devices.Radio.ServerUpdate());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Devices.PhotoMode.Update", () => Devices.PhotoMode.Update());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Devices.SelfAvatar.Update", () => Devices.SelfAvatar.Update());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("StellarDriveDemoTFAdvanced.Power.TractorKey.Update", () => StellarDriveDemoTFAdvanced.Power.TractorKey.Update());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Devices.PhotoCamera.Update", () => Devices.PhotoCamera.Update());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Devices.Seats.Update", () => Devices.Seats.Update());
             if (ToolsActive)
             {
-                Paint.PaintNet.Update();
-                Paint.PaintHud.Update();
-                Paint.PaintZoop.Update();
-                Devices.ThirdPerson.Update();
-                Devices.SchematicTablet.Update();
-                Devices.KeySeatCompat.Update();
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Paint.PaintNet.Update", () => Paint.PaintNet.Update());
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Paint.PaintHud.Update", () => Paint.PaintHud.Update());
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Paint.PaintZoop.Update", () => Paint.PaintZoop.Update());
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Devices.ThirdPerson.Update", () => Devices.ThirdPerson.Update());
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Devices.SchematicTablet.Update", () => Devices.SchematicTablet.Update());
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Devices.KeySeatCompat.Update", () => Devices.KeySeatCompat.Update());
             }
         }
 
         public static void LateUpdate()
         {
             if (Active)
-                Cameras.CameraTablet.LateUpdate();
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("Cameras.CameraTablet.LateUpdate", () => Cameras.CameraTablet.LateUpdate());
         }
 
         public static void OnGUI()
         {
             if (!Active)
                 return;
-            Cameras.CameraTablet.Draw();
-            Common.UsableParts.Draw();
-            Devices.TeleportMenu.Draw();
-            Devices.RadioMenu.Draw();
-            Devices.ToolRackMenu.Draw();
-            Power.FieldDoorMenu.Draw();
-            Power.FieldDoorManagerMenu.Draw();
-            Devices.CabinMenu.Draw();
-            Devices.TeleporterMenu.Draw();
-            Devices.TraderMenu.Draw();
-            Devices.NpcMenu.Draw();
-            Devices.Teleporter.DrawHint();
-            Devices.PhotoFrameMenu.Draw();
-            Construction.SignMenu.Draw();
-            Devices.PhotoMode.Draw();
-            Devices.PhotoCamera.Draw();
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Cameras.CameraTablet.Draw", () => Cameras.CameraTablet.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("TFNet.DrawVersionWarning", () => Common.TFNet.DrawVersionWarning());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Common.UsableParts.Draw", () => Common.UsableParts.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.TeleportMenu.Draw", () => Devices.TeleportMenu.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.RadioMenu.Draw", () => Devices.RadioMenu.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.ToolRackMenu.Draw", () => Devices.ToolRackMenu.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Power.FieldDoorMenu.Draw", () => Power.FieldDoorMenu.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Power.FieldDoorManagerMenu.Draw", () => Power.FieldDoorManagerMenu.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.CabinMenu.Draw", () => Devices.CabinMenu.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.TeleporterMenu.Draw", () => Devices.TeleporterMenu.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.TraderMenu.Draw", () => Devices.TraderMenu.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.NpcMenu.Draw", () => Devices.NpcMenu.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.Teleporter.DrawHint", () => Devices.Teleporter.DrawHint());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.PhotoFrameMenu.Draw", () => Devices.PhotoFrameMenu.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Construction.SignMenu.Draw", () => Construction.SignMenu.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.PhotoMode.Draw", () => Devices.PhotoMode.Draw());
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.PhotoCamera.Draw", () => Devices.PhotoCamera.Draw());
             if (ToolsActive)
             {
-                Paint.PaintHud.Draw();
-                Paint.PaintZoop.Draw();
-                Devices.SchematicsMenu.Draw();
-                Devices.SchematicTablet.Draw();
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Paint.PaintHud.Draw", () => Paint.PaintHud.Draw());
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Paint.PaintZoop.Draw", () => Paint.PaintZoop.Draw());
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.SchematicsMenu.Draw", () => Devices.SchematicsMenu.Draw());
+                StellarDriveDemoTFAdvanced.Common.ErrorLog.RunGui("Devices.SchematicTablet.Draw", () => Devices.SchematicTablet.Draw());
             }
         }
     }

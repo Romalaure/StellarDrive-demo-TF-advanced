@@ -420,7 +420,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         public static void SaveVersion(string worldDirectory)
         {
             if (!string.IsNullOrEmpty(worldDirectory) && Directory.Exists(worldDirectory))
-                File.WriteAllText(Path.Combine(worldDirectory, VersionFile), StationVersion.ToString(CultureInfo.InvariantCulture));
+                StellarDriveDemoTFAdvanced.Common.SafeFile.WriteAllText(Path.Combine(worldDirectory, VersionFile), StationVersion.ToString(CultureInfo.InvariantCulture));
         }
 
         private static string WorldDirectory()

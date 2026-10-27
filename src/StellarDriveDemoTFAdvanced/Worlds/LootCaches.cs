@@ -144,7 +144,7 @@ namespace StellarDriveDemoTFAdvanced.Worlds
         {
             if (string.IsNullOrEmpty(worldDirectory) || Known.Count == 0)
                 return;
-            File.WriteAllLines(Path.Combine(worldDirectory, SitesFile), Known.OrderBy(k => k));
+            StellarDriveDemoTFAdvanced.Common.SafeFile.WriteAllLines(Path.Combine(worldDirectory, SitesFile), Known.OrderBy(k => k));
         }
 
         /// <summary>Host: a building's collider was just made near a player.</summary>

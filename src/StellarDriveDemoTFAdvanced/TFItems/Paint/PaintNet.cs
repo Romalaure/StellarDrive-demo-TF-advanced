@@ -174,10 +174,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
             {
                 try
                 {
-                    _network.ServerManager.UnregisterBroadcast<PaintRequest>(OnPaintRequest);
-                    _network.ServerManager.UnregisterBroadcast<SyncRequest>(OnSyncRequest);
-                    _network.ServerManager.UnregisterBroadcast<GiveToolRequest>(OnGiveToolRequest);
-                    _network.ClientManager.UnregisterBroadcast<PaintUpdate>(OnPaintUpdate);
+                    _network.ServerManager.UnregisterBroadcast<PaintRequest>(GuardedPaintRequest);
+                    _network.ServerManager.UnregisterBroadcast<SyncRequest>(GuardedSyncRequest);
+                    _network.ServerManager.UnregisterBroadcast<GiveToolRequest>(GuardedGiveToolRequest);
+                    _network.ClientManager.UnregisterBroadcast<PaintUpdate>(GuardedPaintUpdate);
                 }
                 catch (Exception)
                 {
@@ -191,10 +191,10 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
             if (network == null)
                 return;
 
-            network.ServerManager.RegisterBroadcast<PaintRequest>(OnPaintRequest, true);
-            network.ServerManager.RegisterBroadcast<SyncRequest>(OnSyncRequest, true);
-            network.ServerManager.RegisterBroadcast<GiveToolRequest>(OnGiveToolRequest, true);
-            network.ClientManager.RegisterBroadcast<PaintUpdate>(OnPaintUpdate);
+            network.ServerManager.RegisterBroadcast<PaintRequest>(GuardedPaintRequest, true);
+            network.ServerManager.RegisterBroadcast<SyncRequest>(GuardedSyncRequest, true);
+            network.ServerManager.RegisterBroadcast<GiveToolRequest>(GuardedGiveToolRequest, true);
+            network.ClientManager.RegisterBroadcast<PaintUpdate>(GuardedPaintUpdate);
         }
 
         // On the host, handle our own requests directly instead of looping through the transport
@@ -217,6 +217,19 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
                 network.ClientManager.Broadcast(message);
             }
         }
+
+        // An error stays here instead of reaching the game's networking
+        private static void GuardedPaintRequest(NetworkConnection sender, PaintRequest request, Channel channel) =>
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("paint request", () => OnPaintRequest(sender, request, channel));
+
+        private static void GuardedSyncRequest(NetworkConnection sender, SyncRequest request, Channel channel) =>
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("paint sync", () => OnSyncRequest(sender, request, channel));
+
+        private static void GuardedGiveToolRequest(NetworkConnection sender, GiveToolRequest request, Channel channel) =>
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("paint tool request", () => OnGiveToolRequest(sender, request, channel));
+
+        private static void GuardedPaintUpdate(PaintUpdate update, Channel channel) =>
+            StellarDriveDemoTFAdvanced.Common.ErrorLog.Run("paint update", () => OnPaintUpdate(update, channel));
 
         private static void OnGiveToolRequest(NetworkConnection sender, GiveToolRequest request, Channel channel)
         {

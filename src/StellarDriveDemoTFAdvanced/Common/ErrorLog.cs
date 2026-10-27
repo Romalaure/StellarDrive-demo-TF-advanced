@@ -11,6 +11,39 @@ namespace StellarDriveDemoTFAdvanced.Common
     {
         private static readonly Dictionary<string, int> Seen = new Dictionary<string, int>();
 
+        /// <summary>Runs one part of the mod's update: if it fails, the parts after it still run.</summary>
+        public static void Run(string scope, Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception e)
+            {
+                Report(scope, e);
+            }
+        }
+
+        /// <summary>Draws one window: a window failing half drawn would leave its scale, color or greyed state to the next ones.</summary>
+        public static void RunGui(string scope, Action draw)
+        {
+            try
+            {
+                draw();
+            }
+            catch (UnityEngine.ExitGUIException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                UnityEngine.GUI.matrix = UnityEngine.Matrix4x4.identity;
+                UnityEngine.GUI.color = UnityEngine.Color.white;
+                UnityEngine.GUI.enabled = true;
+                Report(scope, e);
+            }
+        }
+
         public static void Report(string scope, Exception e)
         {
             string key = scope + "|" + e.GetType().Name + "|" + e.Message;

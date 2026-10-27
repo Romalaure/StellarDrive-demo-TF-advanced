@@ -342,7 +342,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                 return;
             var lines = new List<string> { "reputation " + Reputation };
             lines.AddRange(Done.Select(d => "done " + d));
-            System.IO.File.WriteAllLines(System.IO.Path.Combine(worldDirectory, FileName), lines);
+            StellarDriveDemoTFAdvanced.Common.SafeFile.WriteAllLines(System.IO.Path.Combine(worldDirectory, FileName), lines);
         }
     }
 

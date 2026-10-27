@@ -22,38 +22,38 @@ namespace StellarDriveDemoTFAdvanced
         public override void OnInitializeMelon()
         {
             Log = LoggerInstance;
-            Settings.Load();
-            Items.ModItems.Create();
-            Propulsion.EngineCatalog.LoadSettings();
-            Power.PowerCatalog.LoadSettings();
-            ApplyPatches();
-            Worlds.WorldDevSteps.Install();
-            Worlds.PlanetVisit.Install();
-            Worlds.StationVisit.Install();
-            ShipComputer.DashboardDevRender.Install();
-            Worlds.TreeDevRender.Install();
-            Worlds.StarMapProbe.Install();
-            Items.ItemProbe.Install();
-            Common.FpsProbe.Install();
-            Common.InteractProbe.Install();
-            Power.MachineTest.Install();
-            Power.MiningLaserTest.Install();
-            Power.NuclearTest.Install();
-            Combat.PirateTest.Install();
-            TFItems.TFItemsMod.Initialize();
-            Parts.Showcase.Install();
-            Parts.BuildMenuDev.Install();
-            Construction.SnapTest.Install();
-            Construction.HullSnapProbe.Install();
-            Construction.JoinTest.Install();
-            Wiki.WikiDev.Install();
-            Parts.PrefabDump.Install();
-            Power.PortalTest.Install();
-            Construction.DockingTest.Install();
-            Power.FieldDoorTest.Install();
-            Common.SaveHook.Install();
-            Propulsion.LandingGearTest.Install();
-            Log.Msg("ready");
+            ErrorLog.Run("Settings.Load", () => Settings.Load());
+            ErrorLog.Run("Items.ModItems.Create", () => Items.ModItems.Create());
+            ErrorLog.Run("Propulsion.EngineCatalog.LoadSettings", () => Propulsion.EngineCatalog.LoadSettings());
+            ErrorLog.Run("Power.PowerCatalog.LoadSettings", () => Power.PowerCatalog.LoadSettings());
+            ErrorLog.Run("ApplyPatches", () => ApplyPatches());
+            ErrorLog.Run("Worlds.WorldDevSteps.Install", () => Worlds.WorldDevSteps.Install());
+            ErrorLog.Run("Worlds.PlanetVisit.Install", () => Worlds.PlanetVisit.Install());
+            ErrorLog.Run("Worlds.StationVisit.Install", () => Worlds.StationVisit.Install());
+            ErrorLog.Run("ShipComputer.DashboardDevRender.Install", () => ShipComputer.DashboardDevRender.Install());
+            ErrorLog.Run("Worlds.TreeDevRender.Install", () => Worlds.TreeDevRender.Install());
+            ErrorLog.Run("Worlds.StarMapProbe.Install", () => Worlds.StarMapProbe.Install());
+            ErrorLog.Run("Items.ItemProbe.Install", () => Items.ItemProbe.Install());
+            ErrorLog.Run("Common.FpsProbe.Install", () => Common.FpsProbe.Install());
+            ErrorLog.Run("Common.InteractProbe.Install", () => Common.InteractProbe.Install());
+            ErrorLog.Run("Power.MachineTest.Install", () => Power.MachineTest.Install());
+            ErrorLog.Run("Power.MiningLaserTest.Install", () => Power.MiningLaserTest.Install());
+            ErrorLog.Run("Power.NuclearTest.Install", () => Power.NuclearTest.Install());
+            ErrorLog.Run("Combat.PirateTest.Install", () => Combat.PirateTest.Install());
+            ErrorLog.Run("TFItems.TFItemsMod.Initialize", () => TFItems.TFItemsMod.Initialize());
+            ErrorLog.Run("Parts.Showcase.Install", () => Parts.Showcase.Install());
+            ErrorLog.Run("Parts.BuildMenuDev.Install", () => Parts.BuildMenuDev.Install());
+            ErrorLog.Run("Construction.SnapTest.Install", () => Construction.SnapTest.Install());
+            ErrorLog.Run("Construction.HullSnapProbe.Install", () => Construction.HullSnapProbe.Install());
+            ErrorLog.Run("Construction.JoinTest.Install", () => Construction.JoinTest.Install());
+            ErrorLog.Run("Wiki.WikiDev.Install", () => Wiki.WikiDev.Install());
+            ErrorLog.Run("Parts.PrefabDump.Install", () => Parts.PrefabDump.Install());
+            ErrorLog.Run("Power.PortalTest.Install", () => Power.PortalTest.Install());
+            ErrorLog.Run("Construction.DockingTest.Install", () => Construction.DockingTest.Install());
+            ErrorLog.Run("Power.FieldDoorTest.Install", () => Power.FieldDoorTest.Install());
+            ErrorLog.Run("Common.SaveHook.Install", () => Common.SaveHook.Install());
+            ErrorLog.Run("Propulsion.LandingGearTest.Install", () => Propulsion.LandingGearTest.Install());
+            ErrorLog.Run("Log.Msg", () => Log.Msg("ready"));
         }
 
         // One patch class at a time: if a game update breaks one, the others (and the game) keep working
@@ -91,19 +91,13 @@ namespace StellarDriveDemoTFAdvanced
 
         public override void OnLateInitializeMelon()
         {
-            try
-            {
-                Parts.UpgradeTableGuard.Install(HarmonyInstance);
-                Power.ArsenalShield.Install(HarmonyInstance);
-                Construction.ReinforcedHull.InstallArsenal(HarmonyInstance);
-                Combat.Pirates.Install(HarmonyInstance);
-                Common.OtherModsFixes.Install(HarmonyInstance);
-            Common.DevProfiler.Install(HarmonyInstance);
-            }
-            catch (Exception e)
-            {
-                Log.Warning("Upgrade Table guard not applied: " + e.GetBaseException().Message);
-            }
+            HarmonyLib.Harmony harmony = HarmonyInstance;
+            ErrorLog.Run("Upgrade Table guard", () => Parts.UpgradeTableGuard.Install(harmony));
+            ErrorLog.Run("Arsenal shield", () => Power.ArsenalShield.Install(harmony));
+            ErrorLog.Run("Arsenal reinforced hull", () => Construction.ReinforcedHull.InstallArsenal(harmony));
+            ErrorLog.Run("pirates", () => Combat.Pirates.Install(harmony));
+            ErrorLog.Run("other mods' fixes", () => Common.OtherModsFixes.Install(harmony));
+            ErrorLog.Run("profiler", () => Common.DevProfiler.Install(harmony));
             // Every part of this mod is a clone of a game part made by SDModKit
             if (AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "SDModKit"))
                 RegisterParts();
@@ -155,28 +149,28 @@ namespace StellarDriveDemoTFAdvanced
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
-            HangWatch.Mark("scene loaded " + sceneName);
-            HangWatch.OnScene();
-            GameServices.Invalidate();
-            TelemetryHub.Clear();
-            Power.PowerGrid.Forget();
-            Worlds.BlackHole.Forget();
-            Worlds.ModPlanetState.Forget();
-            Worlds.BlackHoleVisuals.Destroy();
+            ErrorLog.Run("HangWatch.Mark", () => HangWatch.Mark("scene loaded " + sceneName));
+            ErrorLog.Run("HangWatch.OnScene", () => HangWatch.OnScene());
+            ErrorLog.Run("GameServices.Invalidate", () => GameServices.Invalidate());
+            ErrorLog.Run("TelemetryHub.Clear", () => TelemetryHub.Clear());
+            ErrorLog.Run("Power.PowerGrid.Forget", () => Power.PowerGrid.Forget());
+            ErrorLog.Run("Worlds.BlackHole.Forget", () => Worlds.BlackHole.Forget());
+            ErrorLog.Run("Worlds.ModPlanetState.Forget", () => Worlds.ModPlanetState.Forget());
+            ErrorLog.Run("Worlds.BlackHoleVisuals.Destroy", () => Worlds.BlackHoleVisuals.Destroy());
             _inGame = sceneName == "MainGame";
-            Worlds.AbandonedStations.OnSceneLoaded(_inGame);
-            Worlds.LootCaches.OnSceneLoaded(_inGame);
+            ErrorLog.Run("Worlds.AbandonedStations.OnSceneLoaded", () => Worlds.AbandonedStations.OnSceneLoaded(_inGame));
+            ErrorLog.Run("Worlds.LootCaches.OnSceneLoaded", () => Worlds.LootCaches.OnSceneLoaded(_inGame));
             if (_inGame && TFItems.TFItemsMod.Active)
-                TFItems.Devices.TraderLedger.Load(Worlds.LootCaches.WorldDirectory());
-            Combat.Pirates.OnSceneLoaded(_inGame);
-            Combat.Radar.OnSceneLoaded();
-            Combat.LootPing.OnSceneLoaded();
-            TFItems.TFItemsMod.OnSceneLoaded();
-            DevHarness.OnSceneLoaded(sceneName);
+                ErrorLog.Run("TFItems.Devices.TraderLedger.Load", () => TFItems.Devices.TraderLedger.Load(Worlds.LootCaches.WorldDirectory()));
+            ErrorLog.Run("Combat.Pirates.OnSceneLoaded", () => Combat.Pirates.OnSceneLoaded(_inGame));
+            ErrorLog.Run("Combat.Radar.OnSceneLoaded", () => Combat.Radar.OnSceneLoaded());
+            ErrorLog.Run("Combat.LootPing.OnSceneLoaded", () => Combat.LootPing.OnSceneLoaded());
+            ErrorLog.Run("TFItems.TFItemsMod.OnSceneLoaded", () => TFItems.TFItemsMod.OnSceneLoaded());
+            ErrorLog.Run("DevHarness.OnSceneLoaded", () => DevHarness.OnSceneLoaded(sceneName));
             if (_partsRegistered)
             {
-                EnsureResearch();
-                ScheduleSelfTest();
+                ErrorLog.Run("EnsureResearch", () => EnsureResearch());
+                ErrorLog.Run("ScheduleSelfTest", () => ScheduleSelfTest());
             }
         }
 
@@ -184,52 +178,52 @@ namespace StellarDriveDemoTFAdvanced
 
         public override void OnUpdate()
         {
-            HangWatch.Tick();
-            DevProfiler.Frame();
-            DevHarness.Update();
-            FramePacing.Update();
-            Worlds.FastFlight.Update();
+            ErrorLog.Run("HangWatch.Tick", () => HangWatch.Tick());
+            ErrorLog.Run("DevProfiler.Frame", () => DevProfiler.Frame());
+            ErrorLog.Run("DevHarness.Update", () => DevHarness.Update());
+            ErrorLog.Run("FramePacing.Update", () => FramePacing.Update());
+            ErrorLog.Run("Worlds.FastFlight.Update", () => Worlds.FastFlight.Update());
             if (_inGame)
-                StabilityProbe.Update();
+                ErrorLog.Run("StabilityProbe.Update", () => StabilityProbe.Update());
             if (_inGame && Worlds.BlackHole.EnsureAnchor())
-                Worlds.BlackHole.ServerUpdate();
+                ErrorLog.Run("Worlds.BlackHole.ServerUpdate", () => Worlds.BlackHole.ServerUpdate());
             if (_inGame)
-                Worlds.AbandonedStations.Update();
+                ErrorLog.Run("Worlds.AbandonedStations.Update", () => Worlds.AbandonedStations.Update());
             if (_inGame && GameServices.IsServer)
-                Worlds.LootChests.Update();
+                ErrorLog.Run("Worlds.LootChests.Update", () => Worlds.LootChests.Update());
             if (_inGame && TFItems.TFItemsMod.Active)
-                Construction.BuildTilt.Update();
+                ErrorLog.Run("Construction.BuildTilt.Update", () => Construction.BuildTilt.Update());
             if (_inGame && TFItems.TFItemsMod.Active)
-                Construction.FurnitureUses.Update();
+                ErrorLog.Run("Construction.FurnitureUses.Update", () => Construction.FurnitureUses.Update());
             if (_inGame)
-                Worlds.LootCaches.Update();
+                ErrorLog.Run("Worlds.LootCaches.Update", () => Worlds.LootCaches.Update());
             if (_inGame && GameServices.IsServer)
-                UpdatePortals();
+                ErrorLog.Run("UpdatePortals", () => UpdatePortals());
             if (_inGame)
-                Combat.Pirates.Update();
+                ErrorLog.Run("Combat.Pirates.Update", () => Combat.Pirates.Update());
             if (_inGame)
-                Combat.LootPing.Update();
+                ErrorLog.Run("Combat.LootPing.Update", () => Combat.LootPing.Update());
             if (_inGame)
-                Worlds.Weather.Update();
+                ErrorLog.Run("Worlds.Weather.Update", () => Worlds.Weather.Update());
             if (_inGame)
-                Worlds.Aurora.Update();
+                ErrorLog.Run("Worlds.Aurora.Update", () => Worlds.Aurora.Update());
             if (_inGame && _partsRegistered)
-                UpdateRadars();
+                ErrorLog.Run("UpdateRadars", () => UpdateRadars());
             if (_partsRegistered)
-                Common.SaveHook.Update();
-            TFItems.TFItemsMod.Update();
+                ErrorLog.Run("Common.SaveHook.Update", () => Common.SaveHook.Update());
+            ErrorLog.Run("TFItems.TFItemsMod.Update", () => TFItems.TFItemsMod.Update());
             if (_partsRegistered && Settings.SelfTest.Value)
-                RunSelfTest();
+                ErrorLog.Run("RunSelfTest", () => RunSelfTest());
             if (_partsRegistered && _inGame)
-                TickResearch();
+                ErrorLog.Run("TickResearch", () => TickResearch());
         }
 
         public override void OnLateUpdate()
         {
             if (_inGame)
-                Worlds.BlackHoleVisuals.LateUpdate();
+                ErrorLog.Run("Worlds.BlackHoleVisuals.LateUpdate", () => Worlds.BlackHoleVisuals.LateUpdate());
             if (_partsRegistered)
-                TFItems.TFItemsMod.LateUpdate();
+                ErrorLog.Run("TFItems.TFItemsMod.LateUpdate", () => TFItems.TFItemsMod.LateUpdate());
         }
 
         private static bool _partsRegistered;
@@ -239,19 +233,19 @@ namespace StellarDriveDemoTFAdvanced
             // Photo mode: nothing of the mod on screen but its own help
             if (_partsRegistered && TFItems.TFItemsMod.Active && (TFItems.Devices.PhotoMode.Active || TFItems.Devices.PhotoMode.Capturing))
             {
-                TFItems.Devices.PhotoMode.Draw();
+                ErrorLog.RunGui("TFItems.Devices.PhotoMode.Draw", () => TFItems.Devices.PhotoMode.Draw());
                 return;
             }
             if (_inGame)
-                Combat.Radar.OnGUI();
+                ErrorLog.RunGui("Combat.Radar.OnGUI", () => Combat.Radar.OnGUI());
             if (_inGame && TFItems.TFItemsMod.Active)
-                Construction.BuildTilt.Draw();
+                ErrorLog.RunGui("Construction.BuildTilt.Draw", () => Construction.BuildTilt.Draw());
             if (_inGame)
-                Combat.LootPing.OnGUI();
+                ErrorLog.RunGui("Combat.LootPing.OnGUI", () => Combat.LootPing.OnGUI());
             if (_inGame)
-                Worlds.Weather.DrawFlash();
+                ErrorLog.RunGui("Worlds.Weather.DrawFlash", () => Worlds.Weather.DrawFlash());
             if (_partsRegistered)
-                TFItems.TFItemsMod.OnGUI();
+                ErrorLog.RunGui("TFItems.TFItemsMod.OnGUI", () => TFItems.TFItemsMod.OnGUI());
         }
 
         private static void UpdateRadars()
