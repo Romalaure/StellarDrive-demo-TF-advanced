@@ -2,7 +2,7 @@
     "id": "StellarDriveDemoTFAdvanced",
     "name": "StellarDrive Demo TF Advanced",
     "author": "Romalaure",
-    "version": "0.44.0",
+    "version": "0.45.0",
     "description": "Big content mod: new worlds, stations, building parts and machines. English, French, Spanish (setting Language).\n\n• Worlds: 7 planets around Otrera + the Erebus galaxy (portal), black holes, asteroid fields, abandoned stations, ruins, villages, wrecks, weather\n• Resources: titanium, quartz, cryonite, meteorite, uranium, nuclear power, dark matter\n• Building: space stations, trading post with merchant, wood/glass/iron parts, furniture, stairs, doors\n• Machines: ship computer screens, advanced engines, force fields, battery, portal, research branch\n• Pirates (with Arsenal): raids, radars, stealth generator\n• In-game wiki: Guide (G). LowPerformance setting for modest PCs\n\nREQUIRED: MelonLoader 0.7.3 + SDModKit\nRECOMMENDED: Arsenal (no pirates without it)\nTF mod, if used: 0.15+. Every player needs the same version.",
     "thumbnail": "thumbnail.png",
     "needs": [

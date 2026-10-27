@@ -278,6 +278,13 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 **Optimisations (v0.17)** : plus de recherche de services ni de liste de caméras à chaque image (trous noirs, galaxies, portail, sièges, sas), gravité des trous noirs calculée une fois par pas physique et par espace, bulle de champ de force redessinée seulement quand elle est visible (et moins souvent de loin), table de cartographie et missiles des bases sans parcours de toute la scène, couple des moteurs vectoriels sauté pour les vaisseaux qui n'en ont pas, lectures d'Arsenal mises en cache (compatibles avec plusieurs versions d'Arsenal).
 
+## Radio synchronisée, file d'attente, placement libre, fiabilité (v0.45)
+
+- **Radio** : tous les joueurs entendent le même passage du morceau (l'hôte donne le départ) ; **titre** des vidéos YouTube ; **file d'attente** de 30 morceaux (« + File », « + » sur une musique du jeu, clic pour y aller, « x » pour retirer) ; **Précédent / Suivant** et modes **répéter le morceau, répéter la liste, aléatoire** ; **barre de progression** cliquable pour avancer ou reculer ; **volume de la radio pour tous** à côté de son propre volume ; les barres de l'égaliseur suivent le **vrai son**.
+- **Placement** : les pièces TF se posent sur la grille du jeu (25 cm, comme ses meubles et lumières) ; **Alt gauche** maintenu les place librement, au centimètre (réglage `BuildFreeKey`).
+- **Corrections** : les préréglages du pinceau sont de nouveau visibles (la fenêtre défile) ; le bouton **Lire** de la radio reste cliquable avec un long lien (comme les noms de schématique et de capsule).
+- **Fiabilité** : une erreur dans une partie du mod n'arrête plus les autres ; sauvegardes du mod écrites sans risque de fichier à moitié écrit ; un fichier illisible est gardé de côté (`.corrupt-date`) au lieu d'être vidé ; en multijoueur, un message prévient quand un joueur n'a pas la même version que l'hôte.
+
 ## Escaliers, meubles, hublots, portes automatiques, rayon tracteur (v0.44)
 
 - **TF Construction refaite dans Blender** (bois veiné, acier satiné, verre de la coque) ; touche **B** pour incliner la pièce (debout, couchée, sur le côté, à l'envers) ; sur la coque, les pièces s'alignent sur les cases et les rambardes, cloisons et fenêtres se posent sur leurs bords comme les murs du jeu.

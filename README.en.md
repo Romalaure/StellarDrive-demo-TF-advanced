@@ -46,6 +46,13 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 | ![Pirates](docs/images/pirates.jpg)<br>Pirates (Arsenal) | ![Modules de station](docs/images/station.jpg)<br>Station modules | ![Carte stellaire](docs/images/starmap.jpg)<br>Star map |
 | ![Poste de pilotage](docs/images/cockpit.jpg)<br>Control seat | ![Objets et arbres](docs/images/items.jpg)<br>Items, ores, trees | ![Ordinateur de bord](docs/images/computer.jpg)<br>Ship computer |
 
+## Synced radio, queue, free placement, reliability (v0.45)
+
+- **Radio**: every player hears the same part of the track (the host starts it); YouTube video **titles**; a **queue** of 30 tracks ("+ Queue", "+" on a game track, click to jump, "x" to remove); **Previous / Next** and **repeat track, repeat list, shuffle**; a clickable **progress bar** to move in the track; **radio volume for everyone** next to your own volume; the equalizer bars follow the **real sound**.
+- **Placement**: TF parts sit on the game's grid (25 cm, like its furniture and lights); hold **Left Alt** to place them freely, to the centimeter (setting `BuildFreeKey`).
+- **Fixes**: the brush presets show again (the window scrolls); the radio's **Play** button stays reachable with a long link (as do the schematic and capsule names).
+- **Reliability**: an error in one part of the mod no longer stops the others; the mod's saves can no longer be left half written; an unreadable file is kept aside (`.corrupt-date`) instead of being emptied; in multiplayer, a message warns when a player's version differs from the host's.
+
 ## Stairs, furniture, portholes, automatic doors, tractor beam (v0.44)
 
 - **TF Construction remade in Blender** (wood grain, satin steel, the hull's glass); **B** key to tilt the part (upright, lying, on its side, upside down); on the hull, parts line up with the cells and railings, partitions and windows stand on their edges like the game's walls.
