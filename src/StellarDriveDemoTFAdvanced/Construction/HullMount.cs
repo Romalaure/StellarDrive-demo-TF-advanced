@@ -33,7 +33,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             if (!(__result is FloatingPartPlacement placed) || FloatingSnap.Placing == null)
                 return;
             ushort id = FloatingSnap.Placing.id;
-            if (FloatingSnap.Placing.name.StartsWith("TFA_"))
+            if (FloatingSnap.Placing.name.StartsWith("TFA_") && !DiagonalDoors.IsDoor(id))
                 FreeSeen = Time.unscaledTime;
             if (TFItems.Lights.LampCatalog.IsLamp(id) && id != TFItems.Lights.LampCatalog.FloorPanelId)
             {

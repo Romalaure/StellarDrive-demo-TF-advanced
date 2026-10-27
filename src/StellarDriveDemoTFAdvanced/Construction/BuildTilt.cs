@@ -1,3 +1,5 @@
+using Ships.Interface.Model;
+using Ships.Interface.Model.Placement;
 using UnityEngine;
 using StellarDriveDemoTFAdvanced.TFItems.Common;
 using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
@@ -8,8 +10,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
     /// How a construction part being placed is turned beyond what the game allows (its up out of
     /// the face aimed at, turned about it): the tilt key (B) cycles upright, tipped forward, on its
     /// side and upside down, so a plank wall can stand on a hull wall, a post lie along a floor, a
-    /// window close a sloped opening. Reset when another part is chosen. An automatic door switches
-    /// between diagonal and straight with the mouse wheel instead, along with the game's rotation.
+    /// window close a sloped opening. Reset when another part is chosen. An automatic door turns
+    /// 45° per wheel notch instead: straight on the axes, diagonal between them.
     /// </summary>
     internal static class BuildTilt
     {
@@ -21,8 +23,19 @@ namespace StellarDriveDemoTFAdvanced.Construction
         private static GUIStyle _hint;
         private static bool _door;
 
+        // The automatic door's turn, in 45° steps
+        private static int _doorStep;
+
         /// <summary>The automatic door being placed goes straight (else diagonal).</summary>
-        public static bool DoorStraight { get; private set; }
+        public static bool DoorStraight => (_doorStep & 1) == 0;
+
+        /// <summary>The automatic door's forward on a floor of this up: a diagonal door's model is turned back 45° from it.</summary>
+        public static PartOrientation DoorForward(Vector3 up)
+        {
+            float yaw = _doorStep * 45f + (DoorStraight ? 0f : 45f);
+            Vector3 start = FloatingSnap.Nearest(Vector3.forward, up).GetVector3();
+            return FloatingSnap.Nearest(Quaternion.AngleAxis(yaw, up) * start, up);
+        }
 
         /// <summary>The tilt of the part being placed (asked while its preview is placed).</summary>
         public static Quaternion For(ushort partId)
@@ -68,13 +81,13 @@ namespace StellarDriveDemoTFAdvanced.Construction
         [HarmonyLib.HarmonyPatch(typeof(Tools.Build.BuildToolLocalClient), nameof(Tools.Build.BuildToolLocalClient.ExecuteScrollAction))]
         private static class DoorWheel
         {
-            // Each notch switches the layout and the game turns the door every second one: the wheel goes through all 8
-            private static bool Prefix()
+            // The game turns a part on a floor 45° then rounds it to an axis, so every other notch did nothing
+            private static bool Prefix(float scroll)
             {
                 if (!_door || !Placing)
                     return true;
-                DoorStraight = !DoorStraight;
-                return DoorStraight;
+                _doorStep = (_doorStep + (scroll > 0f ? 1 : 7)) & 7;
+                return false;
             }
         }
 
@@ -85,7 +98,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         public static void Draw()
         {
-            bool tilt = Placing && (_door || Key.Key != UnityEngine.InputSystem.Key.None);
+            bool tilt = Placing && !_door && Key.Key != UnityEngine.InputSystem.Key.None;
             bool free = Time.unscaledTime - HullMount.FreeSeen < 0.5f && HullMount.FreeLabel != "?";
             if (!tilt && !free || ModMenu.IsOpen)
                 return;
@@ -98,7 +111,6 @@ namespace StellarDriveDemoTFAdvanced.Construction
             var rect = new Rect(width / 2f - 280f, height - 200f, 560f, 30f);
             TFItems.Devices.DeviceUi.Panel(rect);
             string text = !tilt ? ""
-                : _door ? Loc.Pick("[Molette]  Porte : ", "[Wheel]  Door: ", "[Rueda]  Puerta: ") + (DoorStraight ? Loc.Pick("droite", "straight", "recta") : Loc.Pick("en diagonale", "diagonal", "en diagonal"))
                 : $"[{Key.Label}]  " + Loc.Pick("Orientation : ", "Orientation: ", "Orientación: ") + Name(_index);
             if (free)
                 text += (tilt ? "    " : "") + $"[{HullMount.FreeLabel}]  " + Loc.Pick("placement libre", "free placement", "colocación libre");

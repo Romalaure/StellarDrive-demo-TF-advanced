@@ -48,12 +48,12 @@ Three build tabs: **TF Avancé**, **TF Construction**, **TF Station**.
 
 ## Fixes (v0.45.1)
 
-- **Automatic doors**: straight or diagonal is chosen with the **mouse wheel**, along with the game's rotation (the wheel goes through all 8 layouts); the "[B] Door: straight" message no longer stays on screen.
+- **Automatic doors**: the **mouse wheel** turns them 45° a notch (straight on the axes, diagonal in between), with no skipped notch; no more message on screen.
 - **Brush**: the buttons on the right of the panel are reachable again.
 - **Furniture**: drawn with the game's part shader (same lighting and shading), so it blends into the ship; wood keeps its grain.
 - **Tractor beam**: your ship is pulled toward the target as hard as it is pulled toward you (a shuttle no longer tows a station without moving); a ship with a player aboard can no longer be caught.
 - **Holo table**: the galaxy is bigger.
-- **Stair railings**: aim at a placed railing and the next one chains on from its end, like the stairs.
+- **Stair railings**: aim at the end of a placed railing and the next one chains on, up or down, like the stairs.
 
 ## Synced radio, queue, free placement, reliability (v0.45)
 

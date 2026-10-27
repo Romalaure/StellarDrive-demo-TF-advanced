@@ -280,12 +280,12 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 ## Correctifs (v0.45.1)
 
-- **Portes automatiques** : droite ou en diagonale se choisit à la **molette**, avec la rotation du jeu (la molette passe par les 8 positions) ; le message « [B] Porte : droite » ne reste plus affiché en permanence.
+- **Portes automatiques** : la **molette** les tourne de 45° à chaque cran (droites sur les axes, en diagonale entre les deux), sans cran raté ; plus aucun message à l'écran.
 - **Pinceau** : les boutons de droite du panneau sont de nouveau accessibles.
 - **Meubles** : dessinés avec le shader des pièces du jeu (même éclairage et même ombrage), pour qu'ils se fondent dans le vaisseau ; le bois garde son grain.
 - **Rayon tracteur** : ton vaisseau est tiré vers la cible aussi fort qu'elle vers toi (une navette ne remorque plus une station sans bouger) ; un vaisseau avec un joueur à bord ne peut plus être accroché.
 - **Table holographique** : la galaxie est plus grande.
-- **Rampes d'escalier** : vise une rampe posée, la suivante se met à la chaîne au bout, comme les escaliers.
+- **Rampes d'escalier** : vise le bout d'une rampe posée, la suivante se met à la chaîne vers le haut ou vers le bas, comme les escaliers.
 
 ## Radio synchronisée, file d'attente, placement libre, fiabilité (v0.45)
 

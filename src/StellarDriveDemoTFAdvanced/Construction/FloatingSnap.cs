@@ -79,8 +79,10 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     return placement;
                 float half = Placing != null && Placing.id == DiagonalDoors.LargeId ? 0.5f : 0f;
                 Vector3 c = free.Coord;
-                var squared = new FloatingPartPlacement(new Vector3(Mathf.Round(c.x - half) + half, c.y, Mathf.Round(c.z - half) + half), free.ForwardOrientation, free.UpOrientation);
-                return shipGrid.IsFloatingPlacementFree(squared, props.Bounds) ? squared : placement;
+                PartOrientation forward = BuildTilt.DoorForward(free.UpOrientation.GetVector3());
+                var squared = new FloatingPartPlacement(new Vector3(Mathf.Round(c.x - half) + half, c.y, Mathf.Round(c.z - half) + half), forward, free.UpOrientation);
+                var turned = new FloatingPartPlacement(c, forward, free.UpOrientation);
+                return shipGrid.IsFloatingPlacementFree(squared, props.Bounds) ? squared : shipGrid.IsFloatingPlacementFree(turned, props.Bounds) ? turned : (IPartPlacement)null;
             }
         }
 
@@ -185,7 +187,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     return null;
                 bool hasTarget = TryTarget(ship, out Vector3 targetPos, out Quaternion targetRot, out ushort targetId);
                 ushort placingId = Placing != null ? Placing.id : (ushort)0;
-                if (Placing != null && Placing.name.StartsWith("TFA_"))
+                if (Placing != null && Placing.name.StartsWith("TFA_") && !DiagonalDoors.IsDoor(placingId))
                     HullMount.FreeSeen = Time.unscaledTime;
                 SnappingStyle style = Placing != null ? Placing.snappingStyle : SnappingStyle.PreciseOnAny;
                 bool modules = StationModules.ById.ContainsKey(placingId) && StationModules.ById.ContainsKey(targetId);
@@ -203,10 +205,13 @@ namespace StellarDriveDemoTFAdvanced.Construction
                         return chained;
                 }
 
-                // A railing aimed at a railing goes on from its top end, like the flights it follows
-                if (hasTarget && MaterialParts.RailRun(placingId) is float nextRun && MaterialParts.RailRun(targetId) is float belowRun)
+                // A railing aimed at a railing goes on from the end aimed at, up or down, like the flights it follows
+                if (hasTarget && MaterialParts.RailRun(placingId) is float nextRun && MaterialParts.RailRun(targetId) is float aimedRun)
                 {
-                    Vector3 at = targetPos + targetRot * new Vector3(0f, MaterialParts.FlightRise(belowRun) + BuildGap, belowRun * 0.5f + nextRun * 0.5f + BuildGap);
+                    bool upward = Vector3.Dot(props.Hit.Pos - targetPos, targetRot * Vector3.forward) >= 0f;
+                    float rise = upward ? MaterialParts.FlightRise(aimedRun) + BuildGap : -MaterialParts.FlightRise(nextRun) - BuildGap;
+                    float span = aimedRun * 0.5f + nextRun * 0.5f + BuildGap;
+                    Vector3 at = targetPos + targetRot * new Vector3(0f, rise, upward ? span : -span);
                     var chained = new FloatingPartPlacement(at, Nearest(targetRot * Vector3.forward), Nearest(targetRot * Vector3.up));
                     LastTried = $"{at:F2} railing on railing";
                     if (ship.IsFloatingPlacementFree(chained, props.Bounds))
@@ -257,6 +262,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     up = face;
                     forward = Nearest(Quaternion.FromToRotation(props.PartUp, n) * props.PartForward, n);
                 }
+                if (DiagonalDoors.IsDoor(placingId))
+                    forward = BuildTilt.DoorForward(up.GetVector3());
                 Vector3 upVector = up.GetVector3();
                 Quaternion rotation = Quaternion.LookRotation(forward.GetVector3(), upVector);
                 // A construction part turned further with the tilt key
