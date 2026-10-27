@@ -340,10 +340,7 @@ namespace StellarDriveDemoTFAdvanced.Construction
             else if (FurnitureUses.Spins(spec.Id))
                 visuals.gameObject.AddComponent<SpinningParts>();
             if (BlenderModel(spec, visuals, layer))
-            {
-                ContactShadow(spec, visuals, layer);
                 return;
-            }
             var model = new Model();
             spec.Build(model);
             Material hull = HullMaterial();
@@ -373,8 +370,6 @@ namespace StellarDriveDemoTFAdvanced.Construction
             holder.transform.SetPositionAndRotation(prefab.transform.position, prefab.transform.rotation);
             if (!BlenderModel(spec, holder.transform, holder.layer))
                 AdvancedMod.Log.Warning($"construction {spec.Id}: no Blender model");
-            else
-                ContactShadow(spec, holder.transform, holder.layer);
         }
 
         /// <summary>A part's Blender model from construction.obj (pieces C&lt;id&gt;_&lt;look&gt;), for parts made elsewhere (the tractor beam).</summary>
@@ -401,6 +396,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 if (material == null)
                     continue;
                 bool glass = look == "Glass" || look == "Water";
+                if (GameLooks.ContainsKey(look))
+                    OnGameSkin(piece.Value);
                 // The hull's glass reads its highlight from UV1 (the shapes made here set "none" too)
                 if (glass && piece.Value.uv2.Length == 0)
                     piece.Value.SetUVs(1, Enumerable.Repeat(new Vector2(0.125f, 0.5f), piece.Value.vertexCount).ToList());
@@ -423,57 +420,6 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 any = true;
             }
             return any;
-        }
-
-        private static Mesh _shadowQuad;
-        private static Material _shadowMaterial;
-
-        // A soft dark patch on the floor under a piece of furniture: the game's shadows alone leave it floating
-        private static void ContactShadow(Spec spec, Transform visuals, int layer)
-        {
-            if (spec.Set < 3 || spec.Set == 9 || spec.Stairs != 0 || spec.Size.y < 0.15f)
-                return;
-            if (_shadowMaterial == null)
-            {
-                Material blended = TransparentMaterials.Blended("TFA_ContactShadow", new Color(0f, 0f, 0f, 0.55f));
-                if (blended == null)
-                    return;
-                _shadowMaterial = new Material(blended) { name = "TFA_ContactShadowSoft" };
-                _shadowMaterial.SetTexture("_BaseMap", ShadowTexture());
-                _shadowQuad = new Mesh { name = "TFA_ContactShadow" };
-                _shadowQuad.vertices = new[] { new Vector3(-0.5f, 0f, -0.5f), new Vector3(-0.5f, 0f, 0.5f), new Vector3(0.5f, 0f, 0.5f), new Vector3(0.5f, 0f, -0.5f) };
-                _shadowQuad.uv = new[] { new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(1f, 0f) };
-                _shadowQuad.triangles = new[] { 0, 1, 2, 0, 2, 3 };
-                _shadowQuad.RecalculateNormals();
-                _shadowQuad.RecalculateBounds();
-            }
-            var go = new GameObject("TF_NoPaint_ContactShadow") { layer = layer };
-            go.transform.SetParent(visuals, false);
-            go.transform.localPosition = new Vector3(0f, 0.008f, 0f);
-            go.transform.localScale = new Vector3(spec.Size.x + 0.3f, 1f, spec.Size.z + 0.3f);
-            go.AddComponent<MeshFilter>().sharedMesh = _shadowQuad;
-            var renderer = go.AddComponent<MeshRenderer>();
-            renderer.sharedMaterial = _shadowMaterial;
-            renderer.shadowCastingMode = ShadowCastingMode.Off;
-            renderer.receiveShadows = false;
-        }
-
-        // Dark under the piece, fading out over the 15 cm around it
-        private static Texture2D ShadowTexture()
-        {
-            const int n = 64;
-            var texture = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, name = "TFA_ContactShadow" };
-            var pixels = new Color32[n * n];
-            for (int y = 0; y < n; y++)
-                for (int x = 0; x < n; x++)
-                {
-                    float u = Mathf.Abs((x + 0.5f) / n * 2f - 1f), v = Mathf.Abs((y + 0.5f) / n * 2f - 1f);
-                    float a = (1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.55f, 1f, u))) * (1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.55f, 1f, v)));
-                    pixels[y * n + x] = new Color32(255, 255, 255, (byte)(a * 255f));
-                }
-            texture.SetPixels32(pixels);
-            texture.Apply(false, true);
-            return texture;
         }
 
         private static bool Glows(string look) => look == "Neon" || look == "ScreenLit" || look == "Lamp" || look == "Green" || look == "Red" || look == "Mark" || look == "ScreenData" || look == "Mirror";
@@ -528,8 +474,35 @@ namespace StellarDriveDemoTFAdvanced.Construction
                         material.SetTexture(map, null);
                 material.DisableKeyword("_NORMALMAP");
             }
+            if (material != null && GameSkin.Ready && Array.IndexOf(GameShaded, look) >= 0)
+            {
+                // The game's part shader, lit and shaded like the parts around it, in this look's color
+                var game = new Material(GameSkin.Material) { name = "TFA_CGame" + look };
+                game.SetColor("_Color", material.GetColor("_BaseColor"));
+                if (game.HasProperty("_Metalness"))
+                    game.SetFloat("_Metalness", material.GetFloat("_Metallic"));
+                if (game.HasProperty("_Roughness"))
+                    game.SetFloat("_Roughness", 1f - material.GetFloat("_Smoothness"));
+                GameLooks[look] = game;
+                material = game;
+            }
             Looks[look] = material;
             return material;
+        }
+
+        // The looks drawn with the game's part shader; wood keeps its grain, lit and see-through ones their own shaders
+        private static readonly string[] GameShaded = { "Steel", "SteelDark", "Chrome", "Fabric", "FabricDark", "Leaf", "Pot", "Soil", "Rug", "RugTrim", "BookA", "BookB", "BookC", "Sheet", "White", "Black", "Orange", "Yellow" };
+        private static readonly System.Collections.Generic.Dictionary<string, Material> GameLooks = new System.Collections.Generic.Dictionary<string, Material>();
+
+        // Every vertex on the inside of the atlas's plain panel (one flat grey, no drawn edge) and on the ship palette
+        private static void OnGameSkin(Mesh mesh)
+        {
+            Rect panel = GameSkin.PlainPanel;
+            int count = mesh.vertexCount;
+            mesh.SetUVs(0, Enumerable.Repeat(panel.center, count).ToList());
+            mesh.SetUVs(1, Enumerable.Repeat(GameSkin.Palette, count).ToList());
+            // as built by MeshBuilder, which the game's parts shader is known to draw right
+            mesh.SetColors(Enumerable.Repeat(Color.white, count).ToList());
         }
 
         private static void Add(Transform parent, int layer, string name, MeshBuilder builder, Material material, ShadowCastingMode shadows = ShadowCastingMode.On)

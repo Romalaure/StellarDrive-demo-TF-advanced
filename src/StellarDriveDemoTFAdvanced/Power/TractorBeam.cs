@@ -23,6 +23,10 @@ using StellarDriveDemoTFAdvanced.Parts;
 using StellarDriveDemoTFAdvanced.TFItems.Common;
 using UnityEngine;
 using UnityEngine.Rendering;
+using WorldTracking.Interface.Model.Spaces;
+using WorldTracking.Interface.Model.Spaces.Common;
+using WorldTracking.Services;
+using WorldTracking.Spaces;
 using Loc = StellarDriveDemoTFAdvanced.Common.Loc;
 
 namespace StellarDriveDemoTFAdvanced.Power
@@ -33,7 +37,9 @@ namespace StellarDriveDemoTFAdvanced.Power
     /// pilot seat) and powered, it locks onto the nearest ship in its beam (another ship, a wreck,
     /// a pirate) within <see cref="Range"/> and pulls it in to <see cref="HoldDistance"/> in front
     /// of the dish, then holds it there: the target's speed is matched to the emitter's and its
-    /// spin damped, with a force capped by <see cref="MaxForce"/> (a heavy ship comes slowly).
+    /// spin damped, with a force capped by <see cref="MaxForce"/> (a heavy ship comes slowly). The
+    /// emitter's ship is pulled back as hard: a light ship holding a heavy one goes to it. A ship
+    /// with a player aboard cannot be caught.
     /// Command socket: with a cable, it only works while the signal is above 0. The host runs it;
     /// the ConstantState value is (target × 10 + status) × 2 + switched on.
     /// </summary>
@@ -173,12 +179,31 @@ namespace StellarDriveDemoTFAdvanced.Power
         private static readonly List<Entry> Beams = new List<Entry>();
         /// <summary>Target root ship → the beams holding it (read by the physics step).</summary>
         internal static readonly Dictionary<uint, List<Entry>> Pulls = new Dictionary<uint, List<Entry>>();
+        /// <summary>Emitter root ship → the pull back on it this physics step (N), and that step's time.</summary>
+        internal static readonly Dictionary<uint, (Vector3 Force, float At)> Reactions = new Dictionary<uint, (Vector3, float)>();
+        private static readonly HashSet<uint> Occupied = new HashSet<uint>();
 
         public static void Forget()
         {
             Runtimes.Clear();
             Beams.Clear();
             Pulls.Clear();
+            Reactions.Clear();
+        }
+
+        // Root ships with a player aboard: the beam leaves them alone
+        private static void FindOccupied(ShipsServerTracker ships)
+        {
+            Occupied.Clear();
+            var players = ServiceLocator.GetService<Players.Services.PlayersServerTracker>();
+            SpacesServer spaces = ServiceLocator.GetService<SpacesServer>();
+            if (players == null || spaces == null)
+                return;
+            foreach (var player in players.ActivePlayers)
+            {
+                if (spaces.TryGetSpace(player.SpaceId, out ISpace space) && space is ShipRelativeSpace aboard && ships.TryGetTrackedRootShip(aboard.ShipId, out TrackedShipServer root))
+                    Occupied.Add(root.Id);
+            }
         }
 
         public static void BeforeTransfers(PowerServerTracker power, ShipsServerTracker ships, ConnectionsServerTracker connections, float deltaTime)
@@ -211,6 +236,8 @@ namespace StellarDriveDemoTFAdvanced.Power
         public static void AfterTransfers(ShipsServerTracker ships)
         {
             Pulls.Clear();
+            if (Beams.Count > 0)
+                FindOccupied(ships);
             foreach (Entry entry in Beams)
             {
                 Runtime rt = entry.Runtime;
@@ -274,7 +301,7 @@ namespace StellarDriveDemoTFAdvanced.Power
             {
                 distance = 0f;
                 // shortcut: same space only (near ships share one), a ship in another space is out of reach
-                if (ship == null || own.Contains(ship.Id) || ship.SpaceId != entry.Ship.SpaceId)
+                if (ship == null || own.Contains(ship.Id) || Occupied.Contains(ship.Id) || ship.SpaceId != entry.Ship.SpaceId)
                     return false;
                 Vector3 to = Center(ship) - origin;
                 distance = to.magnitude;
@@ -320,9 +347,27 @@ namespace StellarDriveDemoTFAdvanced.Power
                 // A critically damped spring toward the hold point, relative to the emitter's motion
                 Vector3 accel = (goal - center) * 0.5f + (emitterVelocity - body.velocity) * 1.4f;
                 float cap = Mathf.Min(MaxForce / Mathf.Max(1f, body.mass), MaxAcceleration) * entry.Runtime.Supply;
-                body.AddForce(Vector3.ClampMagnitude(accel, cap), ForceMode.Acceleration);
+                Vector3 applied = Vector3.ClampMagnitude(accel, cap);
+                body.AddForce(applied, ForceMode.Acceleration);
                 body.AddTorque(Vector3.ClampMagnitude(-body.angularVelocity * 1.5f, cap * 0.2f), ForceMode.Acceleration);
+                // shortcut: pushed at its center of mass (no turn from where the dish sits), enough to stop free tows
+                uint emitter = root != null ? root.Id : entry.Ship.Id;
+                Vector3 back = -applied * body.mass;
+                if (Reactions.TryGetValue(emitter, out var pending) && pending.At == Time.fixedTime)
+                    back += pending.Force;
+                Reactions[emitter] = (back, Time.fixedTime);
             }
+        }
+
+        /// <summary>The pull back on an emitter's ship, from the step just run (host physics).</summary>
+        internal static void PullBack(uint rootId, Rigidbody body)
+        {
+            if (!Reactions.TryGetValue(rootId, out var reaction))
+                return;
+            Reactions.Remove(rootId);
+            // One step late at most; an older one (the ship was not simulated) is dropped
+            if (body != null && !body.isKinematic && Time.fixedTime - reaction.At <= Time.fixedDeltaTime * 1.5f)
+                body.AddForce(reaction.Force, ForceMode.Force);
         }
     }
 
@@ -336,7 +381,11 @@ namespace StellarDriveDemoTFAdvanced.Power
         {
             try
             {
-                if (____ship == null || ____shipRigidbody == null || TractorBeam.Pulls.Count == 0 || !TractorBeam.Pulls.ContainsKey(____ship.Id))
+                if (____ship == null || ____shipRigidbody == null)
+                    return;
+                if (TractorBeam.Reactions.Count > 0)
+                    TractorBeam.PullBack(____ship.Id, Body(____shipRigidbody));
+                if (TractorBeam.Pulls.Count == 0 || !TractorBeam.Pulls.ContainsKey(____ship.Id))
                     return;
                 if (_ships == null)
                     _ships = ServiceLocator.GetService<ShipsServerTracker>();

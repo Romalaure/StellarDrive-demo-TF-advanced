@@ -282,7 +282,8 @@ Trois **radars** (1 000, 5 000 et 20 000 km, de 400 à 3 200 W) affichent sur un
 
 - **Portes automatiques** : droite ou en diagonale se choisit à la **molette**, avec la rotation du jeu (la molette passe par les 8 positions) ; le message « [B] Porte : droite » ne reste plus affiché en permanence.
 - **Pinceau** : les boutons de droite du panneau sont de nouveau accessibles.
-- **Meubles** : une ombre douce au sol sous chaque meuble, pour qu'il se fonde dans la pièce.
+- **Meubles** : dessinés avec le shader des pièces du jeu (même éclairage et même ombrage), pour qu'ils se fondent dans le vaisseau ; le bois garde son grain.
+- **Rayon tracteur** : ton vaisseau est tiré vers la cible aussi fort qu'elle vers toi (une navette ne remorque plus une station sans bouger) ; un vaisseau avec un joueur à bord ne peut plus être accroché.
 - **Table holographique** : la galaxie est plus grande.
 - **Rampes d'escalier** : vise une rampe posée, la suivante se met à la chaîne au bout, comme les escaliers.
 
