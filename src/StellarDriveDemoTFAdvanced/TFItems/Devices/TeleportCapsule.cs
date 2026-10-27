@@ -263,7 +263,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
             GUILayout.BeginArea(area);
             GUILayout.Label(Loc.Pick("NOM DE CETTE CAPSULE", "NAME OF THIS CAPSULE", "NOMBRE DE ESTA CÁPSULA"), DeviceUi.Muted);
             GUILayout.BeginHorizontal();
-            _nameField = GUILayout.TextField(_nameField ?? "", TeleportCapsule.MaxNameLength, DeviceUi.Field, GUILayout.Height(34f), GUILayout.ExpandWidth(true));
+            _nameField = GUILayout.TextField(_nameField ?? "", TeleportCapsule.MaxNameLength, DeviceUi.Field, GUILayout.Height(34f), GUILayout.Width(area.width - 122f));
             if (GUILayout.Button(Loc.Pick("Renommer", "Rename", "Renombrar"), DeviceUi.Button, GUILayout.Width(110f), GUILayout.Height(34f)))
             {
                 _nameField = TeleportCapsule.CleanName(_nameField);

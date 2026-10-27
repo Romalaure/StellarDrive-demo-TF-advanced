@@ -21,6 +21,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
         public static MelonPreferences_Entry<string> PhotoKey { get; private set; }
         public static MelonPreferences_Entry<string> TractorKey { get; private set; }
         public static MelonPreferences_Entry<string> BuildTiltKey { get; private set; }
+        public static MelonPreferences_Entry<string> BuildFreeKey { get; private set; }
         public static MelonPreferences_Entry<float> ThirdPersonDistance { get; private set; }
         public static MelonPreferences_Entry<float> RadioVolume { get; private set; }
         public static MelonPreferences_Entry<string> RadioMuted { get; private set; }
@@ -60,6 +61,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
                 description: "Key (UnityEngine.InputSystem.Key name) that switches between first and third person while flying from the pilot seat.");
             BuildTiltKey = _category.CreateEntry("BuildTiltKey", "B",
                 description: "Key (UnityEngine.InputSystem.Key name) that turns the TF Construction part being placed: upright, tipped forward, on its side, upside down. Empty disables it.");
+            BuildFreeKey = _category.CreateEntry("BuildFreeKey", "LeftAlt",
+                description: "Key (UnityEngine.InputSystem.Key name) held while placing a TF part: it goes exactly where you aim (1 cm steps) instead of on the game's 25 cm grid. Empty disables it.");
             PhotoKey = _category.CreateEntry("PhotoKey", "F8",
                 description: "Key (UnityEngine.InputSystem.Key name) that enters and leaves photo mode (free camera, filters, photos into UserData/TFAdvanced/photos). Empty disables it.");
             TractorKey = _category.CreateEntry("TractorKey", "Y",

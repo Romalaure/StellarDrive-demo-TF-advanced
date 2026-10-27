@@ -45,6 +45,16 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Common
             }
         }
 
+        public bool IsHeld
+        {
+            get
+            {
+                Key key = Key;
+                Keyboard keyboard = Keyboard.current;
+                return key != Key.None && keyboard != null && keyboard[key].isPressed;
+            }
+        }
+
         public string Label => Key == Key.None ? "?" : Key.ToString().ToUpperInvariant();
     }
 }

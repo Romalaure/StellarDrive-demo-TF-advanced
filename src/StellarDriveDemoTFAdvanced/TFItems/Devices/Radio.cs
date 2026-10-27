@@ -518,7 +518,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
 
             GUILayout.Label(Loc.Pick("LIEN YOUTUBE", "YOUTUBE LINK", "ENLACE DE YOUTUBE"), DeviceUi.Muted);
             GUILayout.BeginHorizontal();
-            _link = GUILayout.TextField(_link ?? "", 300, DeviceUi.Field, GUILayout.Height(34f), GUILayout.ExpandWidth(true));
+            // Fixed width: a field sized to its text pushes the buttons out of the window on a long link
+            _link = GUILayout.TextField(_link ?? "", 300, DeviceUi.Field, GUILayout.Height(34f), GUILayout.Width(area.width - 166f));
             if (GUILayout.Button(Loc.Pick("Coller", "Paste", "Pegar"), DeviceUi.Button, GUILayout.Width(80f), GUILayout.Height(34f)))
                 _link = GUIUtility.systemCopyBuffer ?? "";
             if (GUILayout.Button(Loc.Pick("Lire", "Play", "Reproducir"), DeviceUi.Button, GUILayout.Width(70f), GUILayout.Height(34f)))

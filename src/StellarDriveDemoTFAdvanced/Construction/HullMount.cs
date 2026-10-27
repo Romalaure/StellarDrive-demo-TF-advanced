@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using Ships.Interface.Model;
+using StellarDriveDemoTFAdvanced.TFItems.Common;
 using Ships.Interface.Model.Placement;
 using Ships.Interface.Services;
 using Tools.Build.Model;
@@ -32,6 +33,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
             if (!(__result is FloatingPartPlacement placed) || FloatingSnap.Placing == null)
                 return;
             ushort id = FloatingSnap.Placing.id;
+            if (FloatingSnap.Placing.name.StartsWith("TFA_"))
+                FreeSeen = Time.unscaledTime;
             if (TFItems.Lights.LampCatalog.IsLamp(id) && id != TFItems.Lights.LampCatalog.FloorPanelId)
             {
                 ToTheEdge(props, shipGrid, ref __result, placed);
@@ -43,22 +46,61 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 return;
             }
             Vector3 n = placed.UpOrientation.GetVector3();
-            if (!Standing.Contains(id) || Mathf.Abs(n.y) > 0.1f || Mathf.Abs(n.x) > 0.1f && Mathf.Abs(n.z) > 0.1f)
-                return;
-            Vector3 facing = FrontIsBack(id) ? -n : n;
-            Quaternion rotation = Quaternion.LookRotation(facing, Vector3.up);
+            bool wall = Mathf.Abs(n.y) <= 0.1f && (Mathf.Abs(n.x) <= 0.1f || Mathf.Abs(n.z) <= 0.1f);
+            if (Standing.Contains(id) && wall)
+            {
+                Vector3 facing = FrontIsBack(id) ? -n : n;
+                Quaternion rotation = Quaternion.LookRotation(facing, Vector3.up);
+                Bounds bounds = props.Bounds;
+                Vector3 center = rotation * bounds.center;
+                float along = Vector3.Dot(props.Hit.Pos, n) + Gap - (Vector3.Dot(center, n) - FloatingSnap.Extent(bounds, rotation, n));
+                Vector3 coord = props.Hit.Pos - center;
+                coord += n * (along - Vector3.Dot(coord, n));
+                var upright = new FloatingPartPlacement(coord, FrontIsBack(id) ? placed.UpOrientation.GetInverse() : placed.UpOrientation, PartOrientation.Up);
+                if (shipGrid.IsFloatingPlacementFree(upright, bounds))
+                    __result = placed = upright;
+            }
+            if (FloatingSnap.Placing.name.StartsWith("TFA_") && !StationModules.ById.ContainsKey(id) && !DiagonalDoors.IsDoor(id))
+                OnGrid(props, shipGrid, ref __result, placed);
+        }
+
+        private static readonly KeySetting FreeKey = new KeySetting(() => Settings.BuildFreeKey);
+
+        /// <summary>The free placement key is held: parts go where the player aims, to the centimeter.</summary>
+        internal static bool Free => FreeKey.IsHeld;
+        internal static string FreeLabel => FreeKey.Label;
+        /// <summary>When a TF part was last placed on the grid, for the key hint.</summary>
+        internal static float FreeSeen = -10f;
+
+        /// <summary>The game's grid for precise parts (25 cm, shifted 12.5 cm along a side under 1 m), or 1 cm in free placement.</summary>
+        internal static float Grid(float at, float size) =>
+            Free ? Mathf.Round(at * 100f) / 100f
+            : size < 1f ? Mathf.Round(at * 4f - 0.5f) / 4f + 0.125f
+            : Mathf.Round(at * 4f) / 4f;
+
+        // The game grids a part's origin, which is off the middle on many of this mod's models
+        private static void OnGrid(HitSnapDetectionProperties props, IShipPartPlacements shipGrid, ref IPartPlacement result, FloatingPartPlacement placed)
+        {
+            Vector3 n = placed.UpOrientation.GetVector3();
+            Quaternion rotation = placed.Rotation;
             Bounds bounds = props.Bounds;
-            Vector3 center = rotation * bounds.center;
-            float along = Vector3.Dot(props.Hit.Pos, n) + Gap - (Vector3.Dot(center, n) - FloatingSnap.Extent(bounds, rotation, n));
-            Vector3 coord = props.Hit.Pos - center;
-            coord += n * (along - Vector3.Dot(coord, n));
-            var upright = new FloatingPartPlacement(coord, FrontIsBack(id) ? placed.UpOrientation.GetInverse() : placed.UpOrientation, PartOrientation.Up);
-            if (shipGrid.IsFloatingPlacementFree(upright, bounds))
-                __result = upright;
+            Vector3 offset = rotation * bounds.center;
+            Vector3 coord = placed.Coord;
+            foreach (Vector3 axis in new[] { Vector3.right, Vector3.up, Vector3.forward })
+            {
+                if (Mathf.Abs(Vector3.Dot(axis, n)) > 0.5f)
+                    continue;
+                float middle = Vector3.Dot(coord + offset, axis);
+                float at = Free ? Vector3.Dot(props.Hit.Pos, axis) : middle;
+                coord += axis * (Grid(at, 2f * FloatingSnap.Extent(bounds, rotation, axis)) - middle);
+            }
+            var gridded = new FloatingPartPlacement(coord, placed.ForwardOrientation, placed.UpOrientation);
+            if (shipGrid.IsFloatingPlacementFree(gridded, bounds))
+                result = gridded;
         }
 
         /// <summary>
-        /// A lamp on the hull goes where the player aims on a 5 cm grid, up to the edge of the cell
+        /// A lamp on the hull goes where the player aims on the game's grid, up to the edge of the cell
         /// it is in but not past it (the game kept it well inside; past the edge it would stand where
         /// a wall goes and keep the wall from being placed). Longer than a cell, it only takes the grid.
         /// </summary>
@@ -75,8 +117,8 @@ namespace StellarDriveDemoTFAdvanced.Construction
                     continue;
                 float half = FloatingSnap.Extent(bounds, rotation, axis);
                 float aim = Vector3.Dot(props.Hit.Pos, axis);
-                float center = Mathf.Round(aim * 20f) / 20f;
-                if (half < 0.5f)
+                float center = Grid(aim, 2f * half);
+                if (half < 0.5f && !Free)
                 {
                     float cell = Mathf.Round(aim);
                     center = Mathf.Clamp(center, cell - 0.5f + half + 0.003f, cell + 0.5f - half - 0.003f);
@@ -120,12 +162,12 @@ namespace StellarDriveDemoTFAdvanced.Construction
                 bool whole = meters >= 1 && Mathf.Abs(size - meters) < 0.1f;
                 // A thin part (railing, partition, window) stands on a cell's edge like the hull's walls,
                 // so two of them at a right angle meet at the cell's corner
-                float target = whole
-                    ? meters % 2 == 1 ? Mathf.Round(at) : Mathf.Floor(at) + 0.5f
+                float target = Free ? Grid(at, size)
+                    : whole ? meters % 2 == 1 ? Mathf.Round(at) : Mathf.Floor(at) + 0.5f
                     : size < 0.15f ? Mathf.Round(at - 0.5f) + 0.5f
-                    : Mathf.Round(at * 4f) / 4f;
+                    : Grid(at, size);
                 // Up the ship: the hull's floors stand 4 cm over the cells' edges, the part on top of them
-                if (axis == Vector3.up && whole)
+                if (axis == Vector3.up && whole && !Free)
                     target += FloorTop;
                 coord += axis * (target - at);
             }

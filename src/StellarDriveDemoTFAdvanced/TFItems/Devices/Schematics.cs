@@ -721,7 +721,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Devices
                     ? Loc.Pick($"Vaisseau n°{nearestClient.Id} : {nearestClient.StatefulParts.Count()} pièces (+ les vaisseaux attachés)", $"Ship #{nearestClient.Id}: {nearestClient.StatefulParts.Count()} parts (+ the ships attached)", $"Nave n.º {nearestClient.Id}: {nearestClient.StatefulParts.Count()} piezas (+ las naves acopladas)")
                     : Loc.Pick("Aucun vaisseau à proximité.", "No ship nearby.", "Ninguna nave cerca."), DeviceUi.Text);
             GUILayout.BeginHorizontal();
-            _name = GUILayout.TextField(_name ?? "", TeleportCapsule.MaxNameLength, DeviceUi.Field, GUILayout.Height(34f), GUILayout.ExpandWidth(true));
+            _name = GUILayout.TextField(_name ?? "", TeleportCapsule.MaxNameLength, DeviceUi.Field, GUILayout.Height(34f), GUILayout.Width(area.width - 112f));
             GUI.enabled = nearest != null || nearestClient != null;
             if (GUILayout.Button(Loc.Pick("Copier", "Copy", "Copiar"), DeviceUi.Button, GUILayout.Width(100f), GUILayout.Height(34f)))
             {

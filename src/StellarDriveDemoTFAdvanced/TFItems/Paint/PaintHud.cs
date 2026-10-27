@@ -55,7 +55,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
         private static string _camoPreviewKey;
         private static GUIStyle _panelStyle, _cardStyle, _chipStyle, _chipActiveStyle, _swatchFrame;
         private static GUIStyle _title, _section, _label, _muted, _big, _field, _toggle;
-        private static Vector2 _presetScroll;
+        private static Vector2 _panelScroll;
         private static string _hexInput = "";
         private static string _presetName = "";
         private static bool _finishDirty;
@@ -148,6 +148,8 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
             GUILayout.EndHorizontal();
             GUILayout.Space(8f);
 
+            // The sections are taller than a 1080p screen: they scroll, so the presets stay reachable
+            _panelScroll = GUILayout.BeginScrollView(_panelScroll, GUIStyle.none, GUI.skin.verticalScrollbar);
             DrawMode();
             GUILayout.Space(8f);
             if (Camouflage.Enabled)
@@ -164,6 +166,7 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
             DrawMaterial();
             DrawFinish();
             DrawPresets(selection);
+            GUILayout.EndScrollView();
 
             GUILayout.EndArea();
         }
@@ -450,7 +453,6 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
             GUILayout.EndHorizontal();
             GUILayout.Space(6f);
 
-            _presetScroll = GUILayout.BeginScrollView(_presetScroll, GUIStyle.none, GUI.skin.verticalScrollbar, GUILayout.ExpandHeight(true));
             PaintPreset toRemove = null;
             var presets = PaintBrush.Presets;
             for (int i = 0; i < presets.Count; i += 2)
@@ -466,7 +468,6 @@ namespace StellarDriveDemoTFAdvanced.TFItems.Paint
                 GUILayout.EndHorizontal();
                 GUILayout.Space(6f);
             }
-            GUILayout.EndScrollView();
             if (toRemove != null)
                 PaintBrush.RemovePreset(toRemove);
         }

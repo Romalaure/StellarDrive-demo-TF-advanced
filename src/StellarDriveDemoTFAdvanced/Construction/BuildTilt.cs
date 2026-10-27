@@ -71,7 +71,9 @@ namespace StellarDriveDemoTFAdvanced.Construction
 
         public static void Draw()
         {
-            if (!Placing || ModMenu.IsOpen || Key.Key == UnityEngine.InputSystem.Key.None)
+            bool tilt = Placing && Key.Key != UnityEngine.InputSystem.Key.None;
+            bool free = Time.unscaledTime - HullMount.FreeSeen < 0.5f && HullMount.FreeLabel != "?";
+            if (!tilt && !free || ModMenu.IsOpen)
                 return;
             if (_hint == null)
                 _hint = new GUIStyle(TFItems.Devices.DeviceUi.Text) { fontSize = 15, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter, wordWrap = false };
@@ -79,12 +81,14 @@ namespace StellarDriveDemoTFAdvanced.Construction
             Matrix4x4 previous = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
             float width = Screen.width / scale, height = Screen.height / scale;
-            var rect = new Rect(width / 2f - 200f, height - 200f, 400f, 30f);
+            var rect = new Rect(width / 2f - 280f, height - 200f, 560f, 30f);
             TFItems.Devices.DeviceUi.Panel(rect);
-            string text = _door
-                ? Loc.Pick("Porte : ", "Door: ", "Puerta: ") + (DoorStraight ? Loc.Pick("droite", "straight", "recta") : Loc.Pick("en diagonale", "diagonal", "en diagonal"))
-                : Loc.Pick("Orientation : ", "Orientation: ", "Orientación: ") + Name(_index);
-            GUI.Label(rect, $"[{Key.Label}]  " + text, _hint);
+            string text = !tilt ? ""
+                : _door ? $"[{Key.Label}]  " + Loc.Pick("Porte : ", "Door: ", "Puerta: ") + (DoorStraight ? Loc.Pick("droite", "straight", "recta") : Loc.Pick("en diagonale", "diagonal", "en diagonal"))
+                : $"[{Key.Label}]  " + Loc.Pick("Orientation : ", "Orientation: ", "Orientación: ") + Name(_index);
+            if (free)
+                text += (tilt ? "    " : "") + $"[{HullMount.FreeLabel}]  " + Loc.Pick("placement libre", "free placement", "colocación libre");
+            GUI.Label(rect, text, _hint);
             GUI.matrix = previous;
         }
     }
